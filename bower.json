@@ -3,8 +3,7 @@
 	"main": "dist/**/*",
 	"ignore": [ "dist/node-only" ],
 	"dependencies": {
-		"esast": "andy-hanson/esast",
-		"tupl": "andy-hanson/tupl"
+		"esast": "andy-hanson/esast"
 	},
 	"moduleType": "amd",
 	"license": "WTFPL",

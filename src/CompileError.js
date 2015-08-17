@@ -1,5 +1,3 @@
-import Loc from 'esast/dist/Loc'
-import tupl from 'tupl/dist/tupl'
 import { type } from './private/util'
 
 export default function CompileError(warning) {
@@ -13,8 +11,14 @@ export default function CompileError(warning) {
 }
 CompileError.prototype = Object.create(Error.prototype)
 
+export class Warning {
+	constructor(loc /* Loc */, message /* String */) {
+		this.loc = loc
+		this.message = message
+	}
+}
+
 export const
-	Warning = tupl('Warning', Object, 'doc', [ 'loc', Loc, 'message', String ]),
 	code = str => `{{${str}}}`,
 	formatCode = function*(str, formatter) {
 		const rgx = /{{(.*?)}}/g

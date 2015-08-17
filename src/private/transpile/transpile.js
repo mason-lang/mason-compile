@@ -8,19 +8,19 @@ import { ArrayExpression, ArrowFunctionExpression, BinaryExpression, BlockStatem
 import { idCached, loc, member, propertyIdOrLiteralCached, toStatement } from 'esast/dist/util'
 import { assignmentExpressionPlain, callExpressionThunk, functionExpressionThunk, memberExpression,
 	property, yieldExpressionDelegate, yieldExpressionNoDelegate } from 'esast/dist/specialize'
-import * as MsAstTypes from '../../MsAst'
+import manglePath from '../manglePath'
+import * as MsAstTypes from '../MsAst'
 import { AssignSingle, Call, Fun, L_And, L_Or, LD_Lazy, LD_Mutable, MethodImpl, MS_Mutate, MS_New,
 	MS_NewMutable, Pattern, Splat, SD_Debugger, SV_Contains, SV_False, SV_Null, SV_Sub, SV_Super,
-	SV_ThisModuleDirectory, SV_True, SV_Undefined, SwitchDoPart } from '../../MsAst'
-import manglePath from '../manglePath'
+	SV_ThisModuleDirectory, SV_True, SV_Undefined, SwitchDoPart } from '../MsAst'
 import { assert, cat, flatMap, flatOpMap, ifElse, isEmpty,
 	implementMany, isPositive, opIf, opMap, tail, unshift } from '../util'
 import { AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj,
 	EmptyTemplateElement, ExportsDefault, ExportsGet, IdArguments, IdBuilt, IdDefine, IdExports,
-	IdExtract, IdFunctionApplyCall, IdLexicalThis, LitEmptyArray, LitEmptyString, LitNull,
-	LitStrExports, LitStrThrow, LitZero, ReturnBuilt, ReturnExports, ReturnRes,
-	SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch, UseStrict } from './ast-constants'
-import { IdMs, lazyWrap, msAdd, msAddMany, msArr, msAssert, msAssertNot, msAssoc,
+	IdExtract, IdLexicalThis, LitEmptyString, LitNull, LitStrExports, LitStrThrow, LitZero,
+	ReturnBuilt, ReturnExports, ReturnRes, SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch,
+	UseStrict } from './ast-constants'
+import { IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertNot, msAssoc,
 	msCheckContains, msError, msExtract, msGet, msGetDefaultExport, msGetModule, msLazy, msLazyGet,
 	msLazyGetModule, msNewMutableProperty, msNewProperty, msSet, msSetName, msSetLazy,	msSome,
 	msSymbol, MsNone } from './ms-call'
@@ -117,7 +117,7 @@ implementMany(MsAstTypes, 'transpile', {
 		if (opOut === undefined) opOut = null
 		context.warnIf(opDeclareRes !== null || opOut !== null, this.loc,
 			'Out condition ignored because of oh-no!')
-		return BlockStatement(cat(lead, tLines(this.lines), t0(this._throw)))
+		return BlockStatement(cat(lead, tLines(this.lines), t0(this.throw)))
 	},
 
 	BlockWithReturn(lead, opDeclareRes, opOut) {
@@ -178,7 +178,7 @@ implementMany(MsAstTypes, 'transpile', {
 			opMap(this.opConstructor, constructorDefinition),
 			this.methods.map(methodDefinition(false)))
 		const opName = opMap(this.opName, idCached)
-		const classExpr = ClassExpression(opName, opMap(this.superClass, t0), ClassBody(methods))
+		const classExpr = ClassExpression(opName, opMap(this.opSuperClass, t0), ClassBody(methods))
 
 		return ifElse(this.opDo, _ => t1(_, classExpr), () => classExpr)
 	},

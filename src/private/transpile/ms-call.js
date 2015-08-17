@@ -11,7 +11,6 @@ export const
 	lazyWrap = value => msLazy(thunk(value)),
 	msAdd = ms('add'),
 	msAddMany = ms('addMany'),
-	msArr = ms('arr'),
 	msAssert = ms('assert'),
 	msAssertNot = ms('assertNot'),
 	msAssoc = ms('assoc'),

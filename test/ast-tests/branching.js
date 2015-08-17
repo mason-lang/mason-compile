@@ -1,5 +1,5 @@
 import { BlockWithReturn, CaseDo, CaseDoPart, CaseVal, CaseValPart, ConditionalDo, ConditionalVal,
-	Fun, Pattern, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart } from '../../dist/MsAst'
+	Fun, Pattern, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart } from '../../dist/private/MsAst'
 import { aAccess, assignAZero, assignFocusZero, bDeclare, bAccess, blockDbg, blockOne, blockTwo,
 	blockPass, focusAccess, focusDeclare, loc, one, zero } from './util/ast-util'
 import { test } from './util/test-asts'
@@ -9,7 +9,7 @@ describe('conditionals', () => {
 		`
 			if! 0
 				debugger!`,
-		ConditionalDo(loc, zero, blockDbg, false),
+		new ConditionalDo(loc, zero, blockDbg, false),
 		`
 			if(0){
 				debugger
@@ -18,7 +18,7 @@ describe('conditionals', () => {
 		`
 			unless! 0
 				debugger!`,
-		ConditionalDo(loc, zero, blockDbg, true),
+		new ConditionalDo(loc, zero, blockDbg, true),
 		`
 			if(! 0){
 				debugger
@@ -28,7 +28,7 @@ describe('conditionals', () => {
 		`
 			if 0
 				1`,
-		ConditionalVal(loc, zero, blockOne, false),
+		new ConditionalVal(loc, zero, blockOne, false),
 		`
 			0?_ms.some((()=>{
 				return 1
@@ -41,7 +41,7 @@ describe('case', () => {
 			case!
 				0
 					debugger!`,
-		CaseDo(loc, null, [ CaseDoPart(loc, zero, blockDbg) ], null),
+		new CaseDo(loc, null, [ new CaseDoPart(loc, zero, blockDbg) ], null),
 		`
 			if(0){
 				debugger
@@ -51,9 +51,9 @@ describe('case', () => {
 			case! 0
 				_
 					pass`,
-		CaseDo(loc,
+		new CaseDo(loc,
 			assignFocusZero,
-			[ CaseDoPart(loc, focusAccess, blockPass) ],
+			[ new CaseDoPart(loc, focusAccess, blockPass) ],
 			null),
 		`
 			{
@@ -67,8 +67,8 @@ describe('case', () => {
 					debugger!
 				else
 					pass`,
-		CaseDo(loc, null,
-			[ CaseDoPart(loc, zero, blockDbg) ],
+		new CaseDo(loc, null,
+			[ new CaseDoPart(loc, zero, blockDbg) ],
 			blockPass),
 		`
 			if(0){
@@ -82,8 +82,8 @@ describe('case', () => {
 					1
 				else
 					2`,
-		CaseVal(loc, null,
-			[ CaseValPart(loc, zero, blockOne) ],
+		new CaseVal(loc, null,
+			[ new CaseValPart(loc, zero, blockOne) ],
 			blockTwo),
 		`
 			(()=>{
@@ -103,11 +103,11 @@ describe('case', () => {
 					1`,
 		[
 			assignAZero,
-			CaseVal(loc, assignFocusZero,
+			new CaseVal(loc, assignFocusZero,
 				[
-					CaseValPart(loc,
-						Pattern(loc, aAccess, [ bDeclare ], focusAccess),
-						BlockWithReturn(loc, [ ], bAccess))
+					new CaseValPart(loc,
+						new Pattern(loc, aAccess, [ bDeclare ], focusAccess),
+						new BlockWithReturn(loc, [ ], bAccess))
 				],
 				blockOne)
 		],
@@ -130,16 +130,16 @@ describe('case', () => {
 			|case
 				_
 					1`,
-		Fun(
+		new Fun(
 			loc,
 			null,
 			false,
 			[ focusDeclare ],
 			null,
-			BlockWithReturn(loc, [ ],
-				CaseVal(loc, null,
+			new BlockWithReturn(loc, [ ],
+				new CaseVal(loc, null,
 					[
-						CaseValPart(loc, focusAccess, blockOne)
+						new CaseValPart(loc, focusAccess, blockOne)
 					]))),
 		`
 			_=>{
@@ -157,8 +157,8 @@ describe('switch', () => {
 			switch! 0
 				1
 					pass`,
-		SwitchDo(loc, zero,
-			[ SwitchDoPart(loc, one, blockPass) ],
+		new SwitchDo(loc, zero,
+			[ new SwitchDoPart(loc, one, blockPass) ],
 			null),
 		`
 			switch(0){
@@ -175,8 +175,8 @@ describe('switch', () => {
 					a
 				else
 					1`,
-		SwitchVal(loc, zero,
-			[ SwitchValPart(loc, one, BlockWithReturn(loc, [ assignAZero ], aAccess)) ],
+		new SwitchVal(loc, zero,
+			[ new SwitchValPart(loc, one, new BlockWithReturn(loc, [ assignAZero ], aAccess)) ],
 			blockOne),
 		`
 			(()=>{

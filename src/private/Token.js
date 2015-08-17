@@ -1,9 +1,7 @@
-import Loc from 'esast/dist/Loc'
-import tupl from 'tupl/dist/tupl'
 import { code } from '../CompileError'
-import { NumberLiteral } from '../MsAst'
+import { NumberLiteral } from './MsAst'
 import { SV_False, SV_Null, SV_Super, SV_ThisModuleDirectory, SV_True, SV_Undefined
-	} from '../MsAst'
+	} from './MsAst'
 import { implementMany } from './util'
 
 /*
@@ -12,25 +10,48 @@ That's right: in Mason, the tokens form a tree containing both plain tokens and 
 This means that the parser avoids doing much of the work that parsers normally have to do;
 it doesn't have to handle a "left parenthesis", only a Group(tokens, G_Parenthesis).
 */
-const tokenType = (name, namesTypes) =>
-	tupl(name, Object, null, [ 'loc', Loc ].concat(namesTypes))
 
-export const
-	// `.name`, `..name`, etc.
-	// Currently nDots > 1 is only used by `use` blocks.
-	DotName = tokenType('DotName', [ 'nDots', Number, 'name', String ]),
-	// kind is a G_***.
-	Group = tokenType('Group', [ 'subTokens', [Object], 'kind', Number ]),
-	/*
-	A key"word" is any set of characters with a particular meaning.
-	This can even include ones like `. ` (defines an object property, as in `key. value`).
-	Kind is a KW_***. See the full list below.
-	*/
-	Keyword = tokenType('Keyword', [ 'kind', Number ]),
-	// A name is guaranteed to *not* be a keyword.
-	// It's also not a DotName.
-	Name = tokenType('Name', [ 'name', String ])
-	// NumberLiteral is also both a token and an MsAst.
+// `.name`, `..name`, etc.
+// Currently nDots > 1 is only used by `use` blocks.
+export class DotName {
+	constructor(loc, nDots /* Number */, name /* String */) {
+		this.loc = loc
+		this.nDots = nDots
+		this.name = name
+	}
+}
+
+// kind is a G_***.
+export class Group {
+	constructor(loc, subTokens /* Array[Token] */, kind /* Number */) {
+		this.loc = loc
+		this.subTokens = subTokens
+		this.kind = kind
+	}
+}
+
+/*
+A key"word" is any set of characters with a particular meaning.
+This can even include ones like `. ` (defines an object property, as in `key. value`).
+Kind is a KW_***. See the full list below.
+*/
+export class Keyword {
+	constructor(loc, kind /* Number */) {
+		this.loc = loc
+		this.kind = kind
+	}
+}
+
+// A name is guaranteed to *not* be a keyword.
+// It's also not a DotName.
+export class Name {
+	constructor(loc, name /* String */) {
+		this.loc = loc
+		this.name = name
+	}
+}
+
+// NumberLiteral is also both a token and an MsAst.
 
 implementMany({ DotName, Group, Keyword, Name, NumberLiteral }, 'toString', {
 	DotName() { return `${'.'.repeat(this.nDots)}${this.name}` },

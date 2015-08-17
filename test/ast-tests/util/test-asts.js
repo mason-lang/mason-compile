@@ -1,4 +1,4 @@
-import { BlockDo, BlockWithReturn, Val } from '../../../dist/MsAst'
+import { BlockDo, BlockWithReturn, Val } from '../../../dist/private/MsAst'
 import CompileContext from '../../../dist/private/CompileContext'
 import CompileOptions from '../../../dist/private/CompileOptions'
 import lex from '../../../dist/private/lex'
@@ -16,8 +16,8 @@ export const test = (ms, ast, js, opts) => {
 	const isMultiLineTest = ast instanceof Array
 	ast = isMultiLineTest ?
 		(last(ast) instanceof Val ?
-			BlockWithReturn(loc, rtail(ast), last(ast)) :
-			BlockDo(loc, ast)) :
+			new BlockWithReturn(loc, rtail(ast), last(ast)) :
+			new BlockDo(loc, ast)) :
 		ast
 	ms = dedent(ms)
 	js = dedent(js)
@@ -33,8 +33,8 @@ export const test = (ms, ast, js, opts) => {
 
 		// This mirrors getting `ast`. Convert lines to block.
 		const parsedAst = ifElse(moduleAst.opDefaultExport,
-			_ => isEmpty(lines) ? _ : BlockWithReturn(loc, lines, _),
-			() => lines.length === 1 ? lines[0] : BlockDo(loc, lines))
+			_ => isEmpty(lines) ? _ : new BlockWithReturn(loc, lines, _),
+			() => lines.length === 1 ? lines[0] : new BlockDo(loc, lines))
 
 		if (!equalAsts(ast, parsedAst))
 			throw new Error(`Different AST.\nExpected: ${ast}\nParsed: ${parsedAst}`)

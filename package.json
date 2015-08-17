@@ -5,14 +5,9 @@
 	"files": [ "dist", "src" ],
 	"dependencies": {
 		"amdefine": "1.0.0",
-		"chalk": "1.1.0",
-		"esast": "andy-hanson/esast",
-		"q-io": "2.0.6",
-		"tupl": "andy-hanson/tupl"
+		"esast": "andy-hanson/esast"
 	},
 	"devDependencies": {
-		"fly-babel": "*",
-
 		"benchmark": "1.0.0",
 			"microtime": "2.0.0",
 		"gulp": "3.9.0",
@@ -24,13 +19,9 @@
 		"gulp-sourcemaps": "1.5.2",
 		"gulp-watch": "4.3.4",
 		"numeral": "1.5.3",
-		"requirejs": "2.1.20",
 		"source-map-support": "0.3.2"
 	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/andy-hanson/mason-compile"
-	},
+	"repository": "andy-hanson/mason-compile",
 	"engines": {
 		"iojs": "^3.0.0"
 	},
@@ -61,7 +52,6 @@
 			"curly": [ 1, "multi" ],
 			"default-case": 1,
 			"generator-star-spacing": [ 1, "after" ],
-			"indent": [ 1, "tab", { "SwitchCase": 1 } ],
 			"max-len": [ 1, 100, 4 ],
 			"new-cap": 0,
 			"no-constant-condition": 0,
@@ -69,7 +59,6 @@
 			"no-extend-native": 0,
 			"no-fallthrough": 0,
 			"no-floating-decimal": 1,
-			"no-inline-comments": 1,
 			"no-labels": 0,
 			"no-loop-func": 0,
 			"no-mixed-requires": 0,
@@ -88,7 +77,6 @@
 			"quote-props": [ 1, "as-needed" ],
 			"quotes": [ 1, "single" ],
 			"semi": 0,
-			"space-after-keywords": [ 1, "always" ],
 			"space-before-blocks": [ 1, "always" ],
 			"space-before-function-paren": [ 1, "never" ],
 			"spaced-comment": 1,

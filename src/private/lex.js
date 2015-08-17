@@ -1,6 +1,6 @@
 import Loc, { Pos, StartLine, StartPos, StartColumn, singleCharLoc } from 'esast/dist/Loc'
 import { code } from '../CompileError'
-import { NumberLiteral } from '../MsAst'
+import { NumberLiteral } from './MsAst'
 import { NonNameCharacters } from './language'
 import { DotName, Group, G_Block, G_Bracket, G_Line, G_Parenthesis, G_Space, G_Quote,
 	isKeyword, Keyword, KW_AssignMutable, KW_Ellipsis, KW_Focus, KW_Fun, KW_FunDo, KW_FunGen,
@@ -34,7 +34,7 @@ export default (context, sourceString) => {
 			groupStack.push(curGroup)
 			// Contents will be added to by `o`.
 			// curGroup.loc.end will be written to when closing it.
-			curGroup = Group(Loc(openPos, null), [ ], groupKind)
+			curGroup = new Group(new Loc(openPos, null), [ ], groupKind)
 		},
 
 		// A group ending may close mutliple groups.
@@ -269,7 +269,7 @@ export default (context, sourceString) => {
 			startPos = () => Pos(line, startColumn),
 			loc = () => Loc(startPos(), pos()),
 			keyword = kind =>
-				addToCurrentGroup(Keyword(loc(), kind)),
+				addToCurrentGroup(new Keyword(loc(), kind)),
 			funKeyword = kind => {
 				keyword(kind)
 				space(loc())
@@ -285,7 +285,7 @@ export default (context, sourceString) => {
 				const number = Number(numberString)
 				context.check(!Number.isNaN(number), pos, () =>
 					`Invalid number literal ${code(numberString)}`)
-				addToCurrentGroup(NumberLiteral(loc(), number))
+				addToCurrentGroup(new NumberLiteral(loc(), number))
 			}
 
 		const handleName = () => {
@@ -300,7 +300,7 @@ export default (context, sourceString) => {
 					skipRestOfLine()
 				keyword(keywordKind)
 			} else
-				addToCurrentGroup(Name(loc(), name))
+				addToCurrentGroup(new Name(loc(), name))
 		}
 
 		while (true) {
@@ -471,7 +471,7 @@ export default (context, sourceString) => {
 						if (nDots === 3 && next === Space || next === Newline)
 							keyword(KW_Ellipsis)
 						else
-							addToCurrentGroup(DotName(loc(), nDots, takeWhile(isNameCharacter)))
+							addToCurrentGroup(new DotName(loc(), nDots, takeWhile(isNameCharacter)))
 					}
 					break
 				}
@@ -586,7 +586,7 @@ export default (context, sourceString) => {
 		}
 	}
 
-	curGroup = Group(Loc(StartPos, null), [ ], G_Block)
+	curGroup = new Group(new Loc(StartPos, null), [ ], G_Block)
 	openLine(StartPos)
 
 	lexPlain(false)

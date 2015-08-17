@@ -34,12 +34,14 @@ export default class CompileOptions {
 			define(_, defaults[_])
 
 		this._inFile = opts.inFile
+
 		if (this._inFile === undefined) {
 			if (this._includeSourceMap)
 				throw new Error('Either supply `inFile` option or make `includeSourceMap` false.')
 			if (this._includeModuleName)
 				throw new Error('Either supply `inFile` option or make `includeModuleName` false.')
-		}
+		} else
+			type(this._inFile, String)
 	}
 
 	moduleName() {

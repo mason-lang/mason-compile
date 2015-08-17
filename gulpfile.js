@@ -8,7 +8,6 @@ const
 	gulp = require('gulp'),
 	mocha = require('gulp-mocha'),
 	plumber = require('gulp-plumber'),
-	requirejs = require('requirejs'),
 	sourcemaps = require('gulp-sourcemaps'),
 	watch = require('gulp-watch')
 
@@ -47,7 +46,6 @@ gulp.task('run-tests', runTests)
 // Helpers
 
 const
-	//rename some stuff...
 	src = 'src/**/*.js',
 	test = 'test/**/*.js'
 

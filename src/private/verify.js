@@ -1,8 +1,8 @@
 import { code } from '../CompileError'
-import * as MsAstTypes from '../MsAst'
+import * as MsAstTypes from './MsAst'
 import { Assign, AssignDestructure, AssignSingle, BlockVal, Call, Debug, Do, ForVal,
 	LocalDeclareBuilt, LocalDeclareFocus, LocalDeclareRes, ObjEntry, Pattern, Yield, YieldTo
-	} from '../MsAst'
+	} from './MsAst'
 import { assert, cat, eachReverse, head, ifElse, implementMany,
 	isEmpty, iteratorToArray, opEach } from './util'
 import VerifyResults, { LocalInfo } from './VerifyResults'
@@ -226,7 +226,7 @@ implementMany(MsAstTypes, 'verify', {
 
 	BlockValThrow() {
 		const newLocals = verifyLines(this.lines)
-		plusLocals(newLocals, () => this._throw.verify())
+		plusLocals(newLocals, () => this.throw.verify())
 	},
 
 	BlockWithReturn() {
@@ -276,7 +276,7 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	Class() {
-		verifyOpEach(this.superClass)
+		verifyOpEach(this.opSuperClass)
 		verifyOpEach(this.opDo)
 		for (const _ of this.statics)
 			_.verify()

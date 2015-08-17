@@ -1,6 +1,6 @@
 import { AssignSingle, BagSimple, BlockDo, Call, LD_Const, LocalDeclare, Member, New, ObjPair,
 	ObjSimple, Quote, QuoteTemplate, SpecialVal, Splat, SV_False, SV_Null, SV_ThisModuleDirectory,
-	SV_True, SV_Undefined, With } from '../../dist/MsAst'
+	SV_True, SV_Undefined, With } from '../../dist/private/MsAst'
 import { aAccess, aDeclare, assignAZero, blockPass, focusAccess, focusDeclare, loc, one, two, zero
 	} from './util/ast-util'
 import { test } from './util/test-asts'
@@ -8,14 +8,14 @@ import { test } from './util/test-asts'
 describe('expressions', () => {
 	test(
 		'[ 0 1 ]',
-		BagSimple(loc, [ zero, one ]),
+		new BagSimple(loc, [ zero, one ]),
 		'[0,1]')
 
 	test(
 		'(a. 0 b. 1)',
-		ObjSimple(loc, [
-			ObjPair(loc, 'a', zero),
-			ObjPair(loc, 'b', one)
+		new ObjSimple(loc, [
+			new ObjPair(loc, 'a', zero),
+			new ObjPair(loc, 'b', one)
 		]),
 		`
 			{
@@ -30,18 +30,18 @@ describe('expressions', () => {
 
 	test(
 		'0.x',
-		Member(loc, zero, 'x'),
+		new Member(loc, zero, 'x'),
 		'0..x')
 
 	describe('Call', () => {
 		test(
 			'0 1',
-			Call(loc, zero, [ one ]),
+			new Call(loc, zero, [ one ]),
 			'0(1)')
 
 		test(
 			'0()',
-			Call(loc, zero, [ ]),
+			new Call(loc, zero, [ ]),
 			'0()')
 
 		test(
@@ -50,7 +50,7 @@ describe('expressions', () => {
 				a ...a`,
 			[
 				assignAZero,
-				Call(loc, aAccess, [ Splat(loc, aAccess) ])
+				new Call(loc, aAccess, [ new Splat(loc, aAccess) ])
 			],
 			`
 				const a=0;
@@ -68,7 +68,7 @@ describe('expressions', () => {
 
 		test(
 			'new 0',
-			New(loc, zero, [ ]),
+			new New(loc, zero, [ ]),
 			'new (0)()')
 	})
 
@@ -82,7 +82,7 @@ describe('expressions', () => {
 			[
 				assignAZero,
 				// TODO: assignFocusZero (but that uses LocalDeclareFocus, not a plain LocalDeclare)
-				AssignSingle(loc, LocalDeclare(loc, '_', null, LD_Const), zero),
+				new AssignSingle(loc, new LocalDeclare(loc, '_', null, LD_Const), zero),
 				Call.contains(loc, aAccess, focusAccess)
 			],
 			`
@@ -90,17 +90,17 @@ describe('expressions', () => {
 				const _=0;
 				return _ms.contains(a,_)`)
 
-		test('false', SpecialVal(loc, SV_False), 'false')
-		test('null', SpecialVal(loc, SV_Null), 'null')
-		test('this-module-directory', SpecialVal(loc, SV_ThisModuleDirectory), '__dirname')
-		test('true', SpecialVal(loc, SV_True), 'true')
-		test('undefined', SpecialVal(loc, SV_Undefined), 'void 0')
+		test('false', new SpecialVal(loc, SV_False), 'false')
+		test('null', new SpecialVal(loc, SV_Null), 'null')
+		test('this-module-directory', new SpecialVal(loc, SV_ThisModuleDirectory), '__dirname')
+		test('true', new SpecialVal(loc, SV_True), 'true')
+		test('undefined', new SpecialVal(loc, SV_Undefined), 'void 0')
 	})
 
 	describe('Quote', () => {
 		test(
 			'"a"',
-			Quote(loc, [ 'a' ]),
+			new Quote(loc, [ 'a' ]),
 			'`a`')
 
 		test(
@@ -109,22 +109,22 @@ describe('expressions', () => {
 					a
 						b
 					c`,
-			Quote(loc, [ 'a\n\tb\nc' ]),
+			new Quote(loc, [ 'a\n\tb\nc' ]),
 			'`a\\n\\tb\\nc`')
 
 		test(
 			'"a\\{\\n"',
-			Quote(loc, [ 'a\{\n' ]),
+			new Quote(loc, [ 'a\{\n' ]),
 			'`a\\{\\n`')
 
 		test(
 			'"a{0}b"',
-			Quote(loc, [ 'a', zero, 'b' ]),
+			new Quote(loc, [ 'a', zero, 'b' ]),
 			'`a${0}b`')
 
 		test(
 			'0"a{0}b"',
-			QuoteTemplate(loc, zero, Quote(loc, [ 'a', zero, 'b' ])),
+			new QuoteTemplate(loc, zero, new Quote(loc, [ 'a', zero, 'b' ])),
 			'0`a${0}b`')
 	})
 
@@ -134,7 +134,7 @@ describe('expressions', () => {
 			`
 				with 0
 					pass`,
-			With(loc, focusDeclare, zero, blockPass),
+			new With(loc, focusDeclare, zero, blockPass),
 			`
 				(_=>{
 					return _
@@ -143,7 +143,7 @@ describe('expressions', () => {
 			`
 				with 0 as a
 					pass`,
-			With(loc, aDeclare, zero, blockPass),
+			new With(loc, aDeclare, zero, blockPass),
 			`
 				(a=>{
 					return a
@@ -153,8 +153,8 @@ describe('expressions', () => {
 			`
 				with 0
 					_ _`,
-			With(loc, focusDeclare, zero,
-				BlockDo(loc, [ Call(loc, focusAccess, [ focusAccess ]) ])),
+			new With(loc, focusDeclare, zero,
+				new BlockDo(loc, [ new Call(loc, focusAccess, [ focusAccess ]) ])),
 			`
 				(_=>{
 					_(_);

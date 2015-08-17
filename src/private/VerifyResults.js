@@ -1,5 +1,3 @@
-import tupl from 'tupl/dist//tupl'
-import { LocalAccess } from '../MsAst'
 import { isEmpty } from './util'
 
 export default class VerifyResults {
@@ -33,9 +31,17 @@ export default class VerifyResults {
 	}
 }
 
-export const LocalInfo = tupl('VrLocalInfo', Object, 'TODO:doc',
-	[ 'isInDebug', Boolean, 'debugAccesses', [LocalAccess], 'nonDebugAccesses', [LocalAccess] ],
-	{ },
-	{
-		empty: isInDebug => LocalInfo(isInDebug, [ ], [ ])
-	})
+export class LocalInfo {
+	static empty(isInDebug) {
+		return new LocalInfo(isInDebug, [ ], [ ])
+	}
+
+	constructor(
+		isInDebug /* Boolean */,
+		debugAccesses /* LocalAccess */,
+		nonDebugAccesses /* Array[LocalAccess] */) {
+		this.isInDebug = isInDebug
+		this.debugAccesses = debugAccesses
+		this.nonDebugAccesses = nonDebugAccesses
+	}
+}

@@ -37,5 +37,5 @@ const
 		message = unlazy(message)
 		if (loc instanceof Pos)
 			loc = singleCharLoc(loc)
-		return Warning(loc, message)
+		return new Warning(loc, message)
 	}

@@ -1,37 +1,37 @@
 import Loc, { StartPos } from 'esast/dist/Loc'
 import { AssignSingle, BlockDo, BlockWithReturn, Fun, LocalDeclare, LocalAccess, LocalDeclareFocus,
-	NumberLiteral, SD_Debugger, SpecialDo } from '../../../dist/MsAst'
+	NumberLiteral, SD_Debugger, SpecialDo } from '../../../dist/private/MsAst'
 
 export const
-	loc = Loc(StartPos, StartPos),
+	loc = new Loc(StartPos, StartPos),
 	aDeclare = LocalDeclare.plain(loc, 'a'),
 	bDeclare = LocalDeclare.plain(loc, 'b'),
-	aAccess = LocalAccess(loc, 'a'),
-	bAccess = LocalAccess(loc, 'b'),
-	focusAccess = LocalAccess(loc, '_'),
-	focusDeclare = LocalDeclareFocus(loc),
+	aAccess = new LocalAccess(loc, 'a'),
+	bAccess = new LocalAccess(loc, 'b'),
+	focusAccess = new LocalAccess(loc, '_'),
+	focusDeclare = new LocalDeclareFocus(loc),
 
 	// Used where a value is expected.
-	zero = NumberLiteral(loc, 0),
-	one = NumberLiteral(loc, 1),
-	two = NumberLiteral(loc, 2),
+	zero = new NumberLiteral(loc, 0),
+	one = new NumberLiteral(loc, 1),
+	two = new NumberLiteral(loc, 2),
 
-	assignAZero = AssignSingle(loc, aDeclare, zero),
-	assignFocusZero = AssignSingle(loc, focusDeclare, zero),
+	assignAZero = new AssignSingle(loc, aDeclare, zero),
+	assignFocusZero = new AssignSingle(loc, focusDeclare, zero),
 
-	blockDbg = BlockDo(loc, [ SpecialDo(loc, SD_Debugger) ]),
-	blockOne = BlockWithReturn(loc, [ ], one),
-	blockTwo = BlockWithReturn(loc, [ ], two),
-	blockPass = BlockDo(loc, [ ]),
+	blockDbg = new BlockDo(loc, [ new SpecialDo(loc, SD_Debugger) ]),
+	blockOne = new BlockWithReturn(loc, [ ], one),
+	blockTwo = new BlockWithReturn(loc, [ ], two),
+	blockPass = new BlockDo(loc, [ ]),
 
 	funDo = lines =>
-		Fun(
+		new Fun(
 			loc,
 			null,
 			false,
 			[ ],
 			null,
-			BlockDo(loc, lines),
+			new BlockDo(loc, lines),
 			null,
 			null,
 			null,
