@@ -236,7 +236,10 @@ export default class MsAst {
 	}
 
 	export class ExceptVal extends Val {
-		constructor(loc, _try /* BlockVal */, _catch /* Opt[Catch] */, _finally /* Opt[BlockDo] */) {
+		constructor(loc,
+			_try, // BlockVal
+			_catch, // Opt[Catch]
+			_finally) { // Opt[BlockDo]
 			super(loc)
 			this._try = _try
 			this._catch = _catch

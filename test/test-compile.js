@@ -3,7 +3,6 @@ import { Node } from 'esast/dist/ast'
 import fs from 'fs'
 import numeral from 'numeral'
 import compile from '../dist/compile'
-import CompileError from '../dist/CompileError'
 import MsAst from '../dist/private/MsAst'
 import CompileContext from '../dist/private/CompileContext'
 import CompileOptions from '../dist/private/CompileOptions'
@@ -12,8 +11,6 @@ import parse from '../dist/private/parse/parse'
 import render from '../dist/private/render'
 import transpile from '../dist/private/transpile/transpile'
 import verify from '../dist/private/verify'
-import formatCompileErrorForConsole from
-	'../dist/node-only/formatCompileErrorForConsole'
 
 export const
 	test = () => doTest(false),
@@ -31,39 +28,33 @@ const doTest = isPerfTest => {
 	}
 	const context = new CompileContext(new CompileOptions(opts))
 
-	try {
-		const rootToken = lex(context, source)
-		// console.log(`==>\n${rootToken}`)
-		const msAst = parse(context, rootToken)
-		// console.log(`==>\n${msAst}`)
-		const verifyResults = verify(context, msAst)
-		// console.log(`+++\n${verifyResults.___}`)
-		const esAst = transpile(context, msAst, verifyResults)
-		// console.log(`==>\n${esAst}`)
-		const { code } = render(context, esAst)
+	const rootToken = lex(context, source)
+	// console.log(`==>\n${rootToken}`)
+	const msAst = parse(context, rootToken)
+	// console.log(`==>\n${msAst}`)
+	const verifyResults = verify(context, msAst)
+	// console.log(`+++\n${verifyResults.___}`)
+	const esAst = transpile(context, msAst, verifyResults)
+	// console.log(`==>\n${esAst}`)
+	const { code } = render(context, esAst)
 
-		for (const _ of context.warnings)
-			console.log(_)
+	for (const _ of context.warnings)
+		console.log(_)
 
-		if (isPerfTest)
-			benchmark({
-				lex() { lex(context, source) },
-				parse() { parse(context, rootToken) },
-				verify() { verify(context, msAst) },
-				transpile() { transpile(context, msAst, verifyResults) },
-				render() { render(context, esAst) },
-				all() { compile(source, opts) }
-			})
-		else {
-			console.log(`Expression tree size: ${treeSize(msAst, _ => _ instanceof MsAst).size}.`)
-			console.log(`ES AST size: ${treeSize(esAst, _ => _ instanceof Node).size}.`)
-			console.log(`Output size: ${code.length} characters.`)
-			console.log(`==>\n${code}`)
-		}
-	} catch (error) {
-		if (error instanceof CompileError)
-			console.log(formatCompileErrorForConsole(error))
-		throw error
+	if (isPerfTest)
+		benchmark({
+			lex() { lex(context, source) },
+			parse() { parse(context, rootToken) },
+			verify() { verify(context, msAst) },
+			transpile() { transpile(context, msAst, verifyResults) },
+			render() { render(context, esAst) },
+			all() { compile(source, opts) }
+		})
+	else {
+		console.log(`Expression tree size: ${treeSize(msAst, _ => _ instanceof MsAst).size}.`)
+		console.log(`ES AST size: ${treeSize(esAst, _ => _ instanceof Node).size}.`)
+		console.log(`Output size: ${code.length} characters.`)
+		console.log(`==>\n${code}`)
 	}
 }
 

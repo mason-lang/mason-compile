@@ -124,7 +124,7 @@ export default (context, sourceString) => {
 	Characters are of type Number and not just Strings of length one.
 	*/
 	const
-		pos = () => Pos(line, column),
+		pos = () => new Pos(line, column),
 
 		peek = () => sourceString.charCodeAt(index),
 		peekNext = () => sourceString.charCodeAt(index + 1),
@@ -266,8 +266,8 @@ export default (context, sourceString) => {
 		// This is where we started lexing the current token.
 		let startColumn
 		const
-			startPos = () => Pos(line, startColumn),
-			loc = () => Loc(startPos(), pos()),
+			startPos = () => new Pos(line, startColumn),
+			loc = () => new Loc(startPos(), pos()),
 			keyword = kind =>
 				addToCurrentGroup(new Keyword(loc(), kind)),
 			funKeyword = kind => {

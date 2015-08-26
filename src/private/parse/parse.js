@@ -315,7 +315,7 @@ const
 						splits[i + 1].before :
 						splits[i + 1].before.rtail()
 					const value = parseExprPlain(tokensValue)
-					const loc = Loc(name.loc.start, tokensValue.loc.end)
+					const loc = new Loc(name.loc.start, tokensValue.loc.end)
 					pairs.push(new ObjPair(loc, name.name, value))
 				}
 				assert(last(splits).at === undefined)

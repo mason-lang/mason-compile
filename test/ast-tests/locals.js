@@ -31,10 +31,7 @@ describe('locals', () => {
 		test(
 			'~a = 0',
 			new AssignSingle(loc, LocalDeclare.untyped(loc, 'a', LD_Lazy), zero),
-			`
-					const a=_ms.lazy(()=>{
-						return 0
-					})`)
+			'const a=_ms.lazy(()=>0)')
 	})
 
 	test(

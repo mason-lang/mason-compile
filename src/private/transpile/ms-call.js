@@ -3,11 +3,11 @@ import { member, thunk } from 'esast/dist/util'
 
 const ms = name => {
 	const m = member(IdMs, name)
-	// TODO:ES6 (...args) => CallExpression(m, args)
-	return function() { return CallExpression(m, Array.prototype.slice.call(arguments)) }
+	// TODO:ES6 (...args) => new CallExpression(m, args)
+	return function() { return new CallExpression(m, Array.prototype.slice.call(arguments)) }
 }
 export const
-	IdMs = Identifier('_ms'),
+	IdMs = new Identifier('_ms'),
 	lazyWrap = value => msLazy(thunk(value)),
 	msAdd = ms('add'),
 	msAddMany = ms('addMany'),

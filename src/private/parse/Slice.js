@@ -101,19 +101,19 @@ export default class Slice {
 	}
 
 	_chop(newStart, newEnd) {
-		const loc = Loc(this.tokens[newStart].loc.start, this.tokens[newEnd - 1].loc.end)
+		const loc = new Loc(this.tokens[newStart].loc.start, this.tokens[newEnd - 1].loc.end)
 		return new Slice(this.tokens, newStart, newEnd, loc)
 	}
 	_chopStart(newStart) {
 		const loc = newStart === this.end ?
 			this.loc :
-			Loc(this.tokens[newStart].loc.start, this.loc.end)
+			new Loc(this.tokens[newStart].loc.start, this.loc.end)
 		return new Slice(this.tokens, newStart, this.end, loc)
 	}
 	_chopEnd(newEnd) {
 		const loc = newEnd === this.start ?
 			this.loc :
-			Loc(this.loc.start, this.tokens[newEnd - 1].loc.end)
+			new Loc(this.loc.start, this.tokens[newEnd - 1].loc.end)
 		return new Slice(this.tokens, this.start, newEnd, loc)
 	}
 }
