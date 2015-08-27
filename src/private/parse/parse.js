@@ -4,23 +4,23 @@ import { JsGlobals } from '../language'
 import { Assert, AssignDestructure, AssignSingle, BagEntry, BagEntryMany, BagSimple, BlockBag,
 	BlockDo, BlockMap, BlockObj, BlockValThrow, BlockWithReturn, BlockWrap, Break, BreakWithVal,
 	Call, CaseDo, CaseDoPart, CaseVal, CaseValPart, Catch, Class, ClassDo, ConditionalDo,
-	ConditionalVal, Continue, Debug, Iteratee, NumberLiteral, ExceptDo, ExceptVal, ForBag, ForDo,
-	ForVal, Fun, GlobalAccess, L_And, L_Or, Lazy, LD_Const, LD_Lazy, LD_Mutable, LocalAccess,
-	LocalDeclare, LocalDeclareFocus, LocalDeclareName, LocalDeclareRes, LocalDeclareThis,
-	LocalMutate, Logic, MapEntry, Member, MemberSet, MethodImpl, Module, MS_Mutate, MS_New,
-	MS_NewMutable, New, Not, ObjEntry, ObjPair, ObjSimple, Pattern, Quote, QuoteTemplate,
-	SD_Debugger, SpecialDo, SpecialVal, SV_Null, Splat, SwitchDo, SwitchDoPart, SwitchVal,
-	SwitchValPart, Throw, Val, Use, UseDo, With, Yield, YieldTo } from '../MsAst'
+	ConditionalVal, Debug, Iteratee, NumberLiteral, ExceptDo, ExceptVal, ForBag, ForDo, ForVal,
+	Fun, GlobalAccess, L_And, L_Or, Lazy, LD_Const, LD_Lazy, LD_Mutable, LocalAccess, LocalDeclare,
+	LocalDeclareFocus, LocalDeclareName, LocalDeclareRes, LocalDeclareThis, LocalMutate, Logic,
+	MapEntry, Member, MemberSet, MethodImpl, Module, MS_Mutate, MS_New, MS_NewMutable, New, Not,
+	ObjEntry, ObjPair, ObjSimple, Pattern, Quote, QuoteTemplate, SD_Debugger, SpecialDo,
+	SpecialVal, SV_Null, Splat, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart, Throw, Val, Use,
+	UseDo, With, Yield, YieldTo } from '../MsAst'
 import { DotName, Group, G_Block, G_Bracket, G_Parenthesis, G_Space, G_Quote, isGroup, isKeyword,
 	Keyword, KW_And, KW_As, KW_Assert, KW_AssertNot, KW_Assign, KW_AssignMutable, KW_Break,
 	KW_BreakWithVal, KW_CaseVal, KW_CaseDo, KW_Class, KW_CatchDo, KW_CatchVal, KW_Construct,
-	KW_Continue, KW_Debug, KW_Debugger, KW_Do, KW_Ellipsis, KW_Else, KW_ExceptDo, KW_ExceptVal,
-	KW_Finally, KW_ForBag, KW_ForDo, KW_ForVal, KW_Focus, KW_Fun, KW_FunDo, KW_FunGen, KW_FunGenDo,
-	KW_FunThis, KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo, KW_Get, KW_IfDo, KW_IfVal, KW_In,
-	KW_Lazy, KW_LocalMutate, KW_MapEntry, KW_New, KW_Not, KW_ObjAssign, KW_Or, KW_Pass, KW_Out,
-	KW_Region, KW_Set, KW_Static, KW_SwitchDo, KW_SwitchVal, KW_Throw, KW_TryDo, KW_TryVal,
-	KW_Type, KW_UnlessDo, KW_UnlessVal, KW_Use, KW_UseDebug, KW_UseDo, KW_UseLazy, KW_With,
-	KW_Yield, KW_YieldTo, Name, keywordName, opKeywordKindToSpecialValueKind } from '../Token'
+	KW_Debug, KW_Debugger, KW_Do, KW_Ellipsis, KW_Else, KW_ExceptDo, KW_ExceptVal, KW_Finally,
+	KW_ForBag, KW_ForDo, KW_ForVal, KW_Focus, KW_Fun, KW_FunDo, KW_FunGen, KW_FunGenDo, KW_FunThis,
+	KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo, KW_Get, KW_IfDo, KW_IfVal, KW_In, KW_Lazy,
+	KW_LocalMutate, KW_MapEntry, KW_New, KW_Not, KW_ObjAssign, KW_Or, KW_Pass, KW_Out, KW_Region,
+	KW_Set, KW_Static, KW_SwitchDo, KW_SwitchVal, KW_Throw, KW_TryDo, KW_TryVal, KW_Type,
+	KW_UnlessDo, KW_UnlessVal, KW_Use, KW_UseDebug, KW_UseDo, KW_UseLazy, KW_With, KW_Yield,
+	KW_YieldTo, Name, keywordName, opKeywordKindToSpecialValueKind } from '../Token'
 import { assert, head, ifElse, flatMap, isEmpty, last,
 	opIf, opMap, push, repeat, rtail, tail, unshift } from '../util'
 import Slice from './Slice'
@@ -548,9 +548,6 @@ const
 					return new BreakWithVal(tokens.loc, parseExpr(rest))
 				case KW_CaseDo:
 					return parseCase(false, false, rest)
-				case KW_Continue:
-					noRest()
-					return new Continue(tokens.loc)
 				case KW_Debug:
 					return new Debug(tokens.loc,
 						isGroup(G_Block, tokens.second()) ?

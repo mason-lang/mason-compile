@@ -1,12 +1,11 @@
 import { ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryExpression,
 	BlockStatement, BreakStatement, CallExpression, CatchClause, ClassBody, ClassExpression,
-	ConditionalExpression, ContinueStatement, DebuggerStatement, ExpressionStatement,
-	ForOfStatement, FunctionExpression, Identifier, IfStatement, Literal, LogicalExpression,
-	MemberExpression, MethodDefinition, NewExpression, ObjectExpression, Program, Property,
-	ReturnStatement, SpreadElement, SwitchCase, SwitchStatement, TaggedTemplateExpression,
-	TemplateElement, TemplateLiteral, ThisExpression, ThrowStatement, TryStatement,
-	VariableDeclaration, UnaryExpression, VariableDeclarator, YieldExpression
-} from 'esast/dist/ast'
+	ConditionalExpression, DebuggerStatement, ExpressionStatement, ForOfStatement,
+	FunctionExpression, Identifier, IfStatement, Literal, LogicalExpression, MemberExpression,
+	MethodDefinition, NewExpression, ObjectExpression, Program, Property, ReturnStatement,
+	SpreadElement, SwitchCase, SwitchStatement, TaggedTemplateExpression, TemplateElement,
+	TemplateLiteral, ThisExpression, ThrowStatement, TryStatement, VariableDeclaration,
+	UnaryExpression, VariableDeclarator, YieldExpression } from 'esast/dist/ast'
 import { functionExpressionThunk, idCached, loc, member, propertyIdOrLiteralCached, toStatement
 	} from 'esast/dist/util'
 import manglePath from '../manglePath'
@@ -212,8 +211,6 @@ implementMany(MsAstTypes, 'transpile', {
 	Catch() {
 		return new CatchClause(t0(this.caught), t0(this.block))
 	},
-
-	Continue() { return new ContinueStatement() },
 
 	Debug() { return context.opts.includeChecks() ? tLines(this.lines) : [ ] },
 

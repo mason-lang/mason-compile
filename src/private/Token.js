@@ -181,7 +181,6 @@ export const
 	KW_CatchVal = kw('catch'),
 	KW_Class = kw('class'),
 	KW_Construct = kw('construct!'),
-	KW_Continue = kw('continue!'),
 	KW_Debug = kw('debug'),
 	KW_Debugger = kw('debugger!'),
 	KW_Do = kw('do!'),

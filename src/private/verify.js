@@ -298,8 +298,6 @@ implementMany(MsAstTypes, 'verify', {
 		withIIFE(() => this.result.verify())
 	},
 
-	Continue() { verifyInLoop(this) },
-
 	// Only reach here for in/out condition.
 	Debug() { verifyLines([ this ]) },
 

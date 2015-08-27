@@ -12,8 +12,11 @@ import { assert, isEmpty, last } from './util'
 This produces the Token tree (see Token.js).
 */
 export default (context, sourceString) => {
-	// Lexing algorithm requires trailing newline to close any blocks.
-	// Use a null-terminated string because it's faster than checking whether index === length.
+	/*
+	Lexing algorithm requires trailing newline to close any blocks.
+	Use a 0-terminated string because it's faster than checking whether index === length.
+	(When string reaches end `charCodeAt` will return `NaN`, which can't be switched on.)
+	*/
 	sourceString = sourceString + '\n\0'
 
 	// --------------------------------------------------------------------------------------------
@@ -130,8 +133,7 @@ export default (context, sourceString) => {
 		peekNext = () => sourceString.charCodeAt(index + 1),
 
 		// May eat a Newline.
-		// If that happens, line and column will temporarily be wrong,
-		// but we handle it in that special case (rather than checking for Newline every time).
+		// Caller *must* check for that case and increment line!
 		eat = () => {
 			const char = sourceString.charCodeAt(index)
 			index = index + 1
@@ -139,6 +141,15 @@ export default (context, sourceString) => {
 			return char
 		},
 		skip = eat,
+
+		eatSafe = () => {
+			const ch = eat()
+			if (ch === Newline) {
+				line = line + 1
+				column = StartColumn
+			}
+			return ch
+		},
 
 		// charToEat must not be Newline.
 		tryEat = charToEat => {
@@ -419,10 +430,10 @@ export default (context, sourceString) => {
 					if (tryEat(Hash)) {
 						// Multi-line comment
 						mustEat(Hash, '##')
+						const eatHash = () => eatSafe() === Hash
 						while (true)
-							if (eat() === Hash && eat() === Hash && eat() === Hash) {
-								const nl = tryEat(Newline)
-								context.check(nl, loc, () =>
+							if (eatHash() && eatHash() && eatHash()) {
+								context.check(peek() === Newline, loc, () =>
 									`#Closing {code('###')} must be followed by newline.`)
 								break
 							}

@@ -13,8 +13,7 @@ const
 
 const
 	runTests = () => {
-		gulp.src('compiled-test/**/*.js', {read: false})
-		.pipe(mocha())
+		gulp.src('compiled-test/**/*.js', {read: false}).pipe(mocha())
 	}
 
 gulp.task('default', [ 'watch' ])
@@ -22,11 +21,11 @@ gulp.task('all', [ 'compile', 'compile-tests', 'lint' ], runTests)
 
 // Compile
 
-gulp.task('compile', () => pipeCompile(gulp.src(src)))
-gulp.task('watch', () => pipeCompile(srcWatch(src)))
+gulp.task('compile', () => pipeCompile(gulp.src(src), 'dist'))
+gulp.task('watch', () => pipeCompile(srcWatch(src), 'dist'))
 
-gulp.task('compile-tests', () => pipeCompileTests(gulp.src(test)))
-gulp.task('watch-compile-tests', () => pipeCompileTests(srcWatch(test)))
+gulp.task('compile-tests', () => pipeCompile(gulp.src(test), 'compiled-test'))
+gulp.task('watch-compile-tests', () => pipeCompile(srcWatch(test), 'compiled-test'))
 
 // Lint
 
@@ -54,25 +53,14 @@ const
 
 	srcWatch = glob => gulp.src(glob).pipe(watchVerbose(glob)).pipe(plumber()),
 
-	//TODO: SHARE CODE
-	pipeCompile = stream =>
+	pipeCompile = (stream, dest) =>
 		stream
 		.pipe(sourcemaps.init())
-		.pipe(babel(babelOpts))
+		.pipe(babel({
+			modules: 'amd',
+			whitelist: [ 'es6.destructuring', 'es6.modules', 'strict' ]
+		}))
 		.pipe(header(
 			'if (typeof define !== \'function\') var define = require(\'amdefine\')(module);'))
 		.pipe(sourcemaps.write({ debug: true, sourceRoot: '/src' }))
-		.pipe(gulp.dest('dist')),
-
-	pipeCompileTests = stream =>
-		stream.pipe(sourcemaps.init())
-		.pipe(babel(babelOpts))
-		.pipe(header(
-			'if (typeof define !== \'function\') var define = require(\'amdefine\')(module);'))
-		.pipe(sourcemaps.write({ debug: true, sourceRoot: '/test' }))
-		.pipe(gulp.dest('compiled-test')),
-
-	babelOpts = {
-		modules: 'amd',
-		whitelist: [ 'es6.destructuring', 'es6.modules', 'strict' ]
-	}
+		.pipe(gulp.dest(dest))

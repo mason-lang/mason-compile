@@ -666,8 +666,6 @@ export default class MsAst {
 		}
 	}
 
-	export class Continue extends Do { }
-
 // Misc Vals
 	export class BlockWrap extends Val {
 		constructor(loc, block /* BlockVal */) {
