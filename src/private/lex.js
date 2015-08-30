@@ -35,7 +35,7 @@ export default (context, sourceString) => {
 		// When the sub-group finishes we will pop the stack and resume writing to its parent.
 		openGroup = (openPos, groupKind) => {
 			groupStack.push(curGroup)
-			// Contents will be added to by `o`.
+			// Contents will be added to by `addToCurrentGroup`.
 			// curGroup.loc.end will be written to when closing it.
 			curGroup = new Group(new Loc(openPos, null), [ ], groupKind)
 		},
@@ -131,6 +131,7 @@ export default (context, sourceString) => {
 
 		peek = () => sourceString.charCodeAt(index),
 		peekNext = () => sourceString.charCodeAt(index + 1),
+		peekPrev = () => sourceString.charCodeAt(index - 1),
 
 		// May eat a Newline.
 		// Caller *must* check for that case and increment line!
@@ -141,6 +142,10 @@ export default (context, sourceString) => {
 			return char
 		},
 		skip = eat,
+		backUp = () => {
+			index = index - 1
+			column = column - 1
+		},
 
 		eatSafe = () => {
 			const ch = eat()
@@ -187,25 +192,25 @@ export default (context, sourceString) => {
 		// For takeWhile, takeWhileWithPrev, and skipWhileEquals,
 		// characterPredicate must *not* accept Newline.
 		// Otherwise there may be an infinite loop!
-		takeWhile = characterPredicate => {
-			const startIndex = index
-			_skipWhile(characterPredicate)
+		takeWhile = characterPredicate =>
+			takeWhileWithStart(index, characterPredicate),
+
+		takeWhileWithPrev = characterPredicate =>
+			takeWhileWithStart(index - 1, characterPredicate),
+
+		//TODO:KILL
+		takeWhileWithStart = (startIndex, characterPredicate) => {
+			skipWhile(characterPredicate)
 			return sourceString.slice(startIndex, index)
 		},
 
-		takeWhileWithPrev = characterPredicate => {
-			const startIndex = index
-			_skipWhile(characterPredicate)
-			return sourceString.slice(startIndex - 1, index)
-		},
-
 		skipWhileEquals = char =>
-			_skipWhile(_ => _ === char),
+			skipWhile(_ => _ === char),
 
 		skipRestOfLine = () =>
-			_skipWhile(_ => _ !== Newline),
+			skipWhile(_ => _ !== Newline),
 
-		_skipWhile = characterPredicate => {
+		skipWhile = characterPredicate => {
 			const startIndex = index
 			while (characterPredicate(peek()))
 				index = index + 1
@@ -286,33 +291,63 @@ export default (context, sourceString) => {
 				space(loc())
 			},
 			eatAndAddNumber = () => {
-				// TODO: A real number literal lexer, not just JavaScript's...
-				const numberString = takeWhileWithPrev(isNumberCharacter)
-				// Don't include `.` at end.
-				if (last(numberString) === '.') {
-					index = index - 1
-					column = column - 1
+				const startIndex = index - 1
+
+				tryEat(Hyphen)
+				if (peekPrev() === N0) {
+					const p = peek()
+					switch (p) {
+						case LetterB: case LetterO: case LetterX:
+							skip()
+							const isDigitSpecial =
+								p === LetterB ?
+								isDigitBinary :
+								p === LetterO ?
+								isDigitOctal :
+								isDigitHex
+							skipWhile(isDigitSpecial)
+							break
+						case Dot:
+							if (isDigit(peekNext())) {
+								skip()
+								skipWhile(isDigit)
+							}
+							break
+						default:
+					}
+				} else {
+					skipWhile(isDigit)
+					if (tryEat(Dot))
+						skipWhile(isDigit)
 				}
-				const number = Number(numberString)
-				context.check(!Number.isNaN(number), pos, () =>
-					`Invalid number literal ${code(numberString)}`)
-				addToCurrentGroup(new NumberLiteral(loc(), number))
+
+				const str = sourceString.slice(startIndex, index)
+				addToCurrentGroup(new NumberLiteral(loc(), str))
 			}
 
-		const handleName = () => {
-			// All other characters should be handled in a case above.
-			const name = takeWhileWithPrev(isNameCharacter)
-			const keywordKind = opKeywordKindFromName(name)
-			if (keywordKind !== undefined) {
-				context.check(keywordKind !== -1, pos, () =>
-					`Reserved name ${code(name)}`)
-				if (keywordKind === KW_Region)
-					// TODO: Eat and put it in Region expression
-					skipRestOfLine()
-				keyword(keywordKind)
-			} else
-				addToCurrentGroup(new Name(loc(), name))
-		}
+		const
+			handleName = () => {
+				// All other characters should be handled in a case above.
+				const name = takeWhileWithPrev(isNameCharacter)
+				if (name.endsWith('_')) {
+					if (name.length > 1)
+						_handleName(name.slice(0, name.length - 1))
+					keyword(KW_Focus)
+				} else
+					_handleName(name)
+			},
+			_handleName = name => {
+				const keywordKind = opKeywordKindFromName(name)
+				if (keywordKind !== undefined) {
+					context.check(keywordKind !== -1, pos, () =>
+						`Reserved name ${code(name)}`)
+					if (keywordKind === KW_Region)
+						// TODO: Eat and put it in Region expression
+						skipRestOfLine()
+					keyword(keywordKind)
+				} else
+					addToCurrentGroup(new Name(loc(), name))
+			}
 
 		while (true) {
 			startColumn = column
@@ -413,7 +448,7 @@ export default (context, sourceString) => {
 
 				case Hyphen:
 					if (isDigit(peek()))
-						// eatNumber() looks at prev character, so hyphen included.
+						// eatAndAddNumber() looks at prev character, so hyphen included.
 						eatAndAddNumber()
 					else
 						handleName()
@@ -437,13 +472,9 @@ export default (context, sourceString) => {
 									`#Closing {code('###')} must be followed by newline.`)
 								break
 							}
-					} else {
+					} else
 						// Single-line comment
-						if (!(tryEat(Space) || tryEat(Tab)))
-							context.fail(loc, () =>
-								`${code('#')} must be followed by space or tab.`)
 						skipRestOfLine()
-					}
 					break
 
 				case Dot: {
@@ -481,8 +512,16 @@ export default (context, sourceString) => {
 						const next = peek()
 						if (nDots === 3 && next === Space || next === Newline)
 							keyword(KW_Ellipsis)
-						else
-							addToCurrentGroup(new DotName(loc(), nDots, takeWhile(isNameCharacter)))
+						else {
+							let name = takeWhile(isNameCharacter)
+							const add = () => addToCurrentGroup(new DotName(loc(), nDots, name))
+							if (name.endsWith('_')) {
+								name = name.slice(0, name.length - 1)
+								add()
+								keyword(KW_Focus)
+							} else
+								add()
+						}
 					}
 					break
 				}
@@ -495,10 +534,6 @@ export default (context, sourceString) => {
 						keyword(KW_LocalMutate)
 					else
 						keyword(KW_Type)
-					break
-
-				case Underscore:
-					keyword(KW_Focus)
 					break
 
 				case Ampersand: case Backslash: case Backtick: case Caret:
@@ -626,8 +661,11 @@ const
 	Equal = cc('='),
 	Hash = cc('#'),
 	Hyphen = cc('-'),
+	LetterB = cc('b'),
 	LetterN = cc('n'),
+	LetterO = cc('o'),
 	LetterT = cc('t'),
+	LetterX = cc('x'),
 	N0 = cc('0'),
 	N1 = cc('1'),
 	N2 = cc('2'),
@@ -648,7 +686,6 @@ const
 	Space = cc(' '),
 	Tab = cc('\t'),
 	Tilde = cc('~'),
-	Underscore = cc('_'),
 	Zero = cc('\0')
 
 const
@@ -661,5 +698,7 @@ const
 		return Function('ch', src)
 	},
 	isDigit = _charPred('0123456789'),
-	isNameCharacter = _charPred(NonNameCharacters, true),
-	isNumberCharacter = _charPred('0123456789.e')
+	isDigitBinary = _charPred('01'),
+	isDigitOctal = _charPred('01234567'),
+	isDigitHex = _charPred('0123456789abcdef'),
+	isNameCharacter = _charPred(NonNameCharacters, true)

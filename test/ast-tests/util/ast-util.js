@@ -12,9 +12,9 @@ export const
 	focusDeclare = new LocalDeclareFocus(loc),
 
 	// Used where a value is expected.
-	zero = new NumberLiteral(loc, 0),
-	one = new NumberLiteral(loc, 1),
-	two = new NumberLiteral(loc, 2),
+	zero = new NumberLiteral(loc, '0'),
+	one = new NumberLiteral(loc, '1'),
+	two = new NumberLiteral(loc, '2'),
 
 	assignAZero = new AssignSingle(loc, aDeclare, zero),
 	assignFocusZero = new AssignSingle(loc, focusDeclare, zero),

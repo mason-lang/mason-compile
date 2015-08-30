@@ -41,4 +41,4 @@ export const JsGlobals = new Set([
 // Anything not explicitly reserved is a valid name character.
 // A `~` may appear in a name, but not at the beginning.
 const ReservedCharacters = '`#%^&\\;,'
-export const NonNameCharacters = '()[]{}.:|_ \n\t"' + ReservedCharacters
+export const NonNameCharacters = '()[]{}.:| \n\t"' + ReservedCharacters

@@ -191,7 +191,7 @@ export const
 	KW_ExceptVal = kw('except'),
 	KW_False = kw('false'),
 	KW_Finally = kw('finally!'),
-	KW_Focus = kwNotName('_'),
+	KW_Focus = kw('_'),
 	KW_ForBag = kw('@for'),
 	KW_ForDo = kw('for!'),
 	KW_ForVal = kw('for'),

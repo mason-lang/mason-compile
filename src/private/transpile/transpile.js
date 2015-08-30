@@ -271,8 +271,9 @@ implementMany(MsAstTypes, 'transpile', {
 	NumberLiteral() {
 		// Negative numbers are not part of ES spec.
 		// http://www.ecma-international.org/ecma-262/5.1/#sec-7.8.3
-		const lit = new Literal(Math.abs(this.value))
-		return isPositive(this.value) ? lit : new UnaryExpression('-', lit)
+		const value = Number(this.value)
+		const lit = new Literal(Math.abs(value))
+		return isPositive(value) ? lit : new UnaryExpression('-', lit)
 	},
 
 	GlobalAccess() { return new Identifier(this.name) },

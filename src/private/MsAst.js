@@ -714,8 +714,9 @@ export default class MsAst {
 		}
 	}
 
+	// Store the value as a String so we can distinguish `0xf` from `15`.
 	export class NumberLiteral extends Val {
-		constructor(loc, value /* Number */) {
+		constructor(loc, value /* String */) {
 			super(loc)
 			this.value = value
 		}
