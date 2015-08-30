@@ -281,8 +281,8 @@ implementMany(MsAstTypes, 'verify', {
 		for (const _ of this.statics)
 			_.verify()
 		verifyOpEach(this.opConstructor)
-		for (const method of this.methods)
-			method.verify()
+		for (const _ of this.methods)
+			_.verify()
 	},
 
 	ClassDo() {
@@ -310,13 +310,16 @@ implementMany(MsAstTypes, 'verify', {
 
 	ForVal() { verifyFor(this) },
 
-	Fun() {
+	// isForMethodImpl is set if this is a MethodImpl's implementation.
+	Fun(isForMethodImpl) {
 		withBlockLocals(() => {
 			context.check(this.opDeclareRes === null || this.block instanceof BlockVal, this.loc,
 				'Function with return condition must return something.')
 			withInGenerator(this.isGenerator, () =>
 				withInLoop(false, () => {
 					const allArgs = cat(this.opDeclareThis, this.args, this.opRestArg)
+					if (isForMethodImpl)
+						okToNotUse.add(this.opDeclareThis)
 					verifyAndPlusLocals(allArgs, () => {
 						verifyOpEach(this.opIn)
 						this.block.verify()
@@ -368,8 +371,9 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	MethodImpl() {
-		this.symbol.verify()
-		this.fun.verify()
+		if (typeof this.symbol !== 'string')
+			this.symbol.verify()
+		this.fun.verify(true)
 	},
 
 	Module() {

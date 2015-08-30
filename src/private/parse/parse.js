@@ -7,10 +7,10 @@ import { Assert, AssignDestructure, AssignSingle, BagEntry, BagEntryMany, BagSim
 	ConditionalVal, Debug, Iteratee, NumberLiteral, ExceptDo, ExceptVal, ForBag, ForDo, ForVal,
 	Fun, GlobalAccess, L_And, L_Or, Lazy, LD_Const, LD_Lazy, LD_Mutable, LocalAccess, LocalDeclare,
 	LocalDeclareFocus, LocalDeclareName, LocalDeclareRes, LocalDeclareThis, LocalMutate, Logic,
-	MapEntry, Member, MemberSet, MethodImpl, Module, MS_Mutate, MS_New, MS_NewMutable, New, Not,
-	ObjEntry, ObjPair, ObjSimple, Pattern, Quote, QuoteTemplate, SD_Debugger, SpecialDo,
-	SpecialVal, SV_Null, Splat, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart, Throw, Val, Use,
-	UseDo, With, Yield, YieldTo } from '../MsAst'
+	MapEntry, Member, MemberSet, MethodImpl, MI_Get, MI_Plain, MI_Set, Module, MS_Mutate, MS_New,
+	MS_NewMutable, New, Not, ObjEntry, ObjPair, ObjSimple, Pattern, Quote, QuoteTemplate,
+	SD_Debugger, SpecialDo, SpecialVal, SV_Null, Splat, SwitchDo, SwitchDoPart, SwitchVal,
+	SwitchValPart, Throw, Val, Use, UseDo, With, Yield, YieldTo } from '../MsAst'
 import { DotName, Group, G_Block, G_Bracket, G_Parenthesis, G_Space, G_Quote, isGroup, isKeyword,
 	Keyword, KW_And, KW_As, KW_Assert, KW_AssertNot, KW_Assign, KW_AssignMutable, KW_Break,
 	KW_BreakWithVal, KW_CaseVal, KW_CaseDo, KW_Class, KW_CatchDo, KW_CatchVal, KW_Construct,
@@ -1101,26 +1101,27 @@ const
 	_parseMethod = tokens => {
 		const head = tokens.head()
 
-		if (isKeyword(KW_Get, head) || isKeyword(KW_Set, head))
-			context.fail(head.loc, 'TODO: get/set!')
+		let kind = MI_Plain
+		if (isKeyword(KW_Get, head) || isKeyword(KW_Set, head)) {
+			kind = head.kind === KW_Get ? MI_Get : MI_Set
+			tokens = tokens.tail()
+		}
 
 		const baa = tokens.opSplitOnceWhere(_isFunKeyword)
 		context.check(baa !== null, tokens.loc, 'Expected a function keyword somewhere.')
-
 		const { before, at, after } = baa
 
-		const kind = _methodFunKind(at)
-		const fun = parseFun(kind, after)
+		const fun = parseFun(_methodFunKind(at), after)
 		assert(fun.opName === null)
 
 		let symbol = parseExpr(before)
+		// If symbol is just a literal string, store it as a string, which is handled specially.
 		if (symbol instanceof Quote &&
 			symbol.parts.length === 1 &&
-			typeof symbol.parts[0] === 'string') {
-			fun.opName = symbol.parts[0]
-			return fun
-		} else
-			return new MethodImpl(tokens.loc, symbol, fun)
+			typeof symbol.parts[0] === 'string')
+			symbol = symbol.parts[0]
+
+		return new MethodImpl(tokens.loc, kind, symbol, fun)
 	},
 	_methodFunKind = funKindToken => {
 		switch (funKindToken.kind) {

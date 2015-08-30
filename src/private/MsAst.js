@@ -446,7 +446,7 @@ export default class MsAst {
 			opDo, // Opt[ClassDo],
 			statics, // Array[Fun]
 			opConstructor, // Opt[Fun]
-			methods, // Union[Fun MethodImpl]
+			methods, // MethodImpl
 			opName) { // Opt[String]
 			super(loc)
 			// TODO:ES6 Optional args
@@ -461,9 +461,14 @@ export default class MsAst {
 		}
 	}
 
+	export const
+		MI_Plain = 0,
+		MI_Get = 1,
+		MI_Set = 2
 	export class MethodImpl extends MsAst {
-		constructor(loc, symbol /* Union[String Val] */, fun /* Fun */) {
+		constructor(loc, kind /* Number */, symbol /* Union[String Val] */, fun /* Fun */) {
 			super(loc)
+			this.kind = kind
 			this.symbol = symbol
 			this.fun = fun
 		}

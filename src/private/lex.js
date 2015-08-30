@@ -142,10 +142,6 @@ export default (context, sourceString) => {
 			return char
 		},
 		skip = eat,
-		backUp = () => {
-			index = index - 1
-			column = column - 1
-		},
 
 		eatSafe = () => {
 			const ch = eat()
@@ -193,13 +189,10 @@ export default (context, sourceString) => {
 		// characterPredicate must *not* accept Newline.
 		// Otherwise there may be an infinite loop!
 		takeWhile = characterPredicate =>
-			takeWhileWithStart(index, characterPredicate),
-
+			_takeWhileWithStart(index, characterPredicate),
 		takeWhileWithPrev = characterPredicate =>
-			takeWhileWithStart(index - 1, characterPredicate),
-
-		//TODO:KILL
-		takeWhileWithStart = (startIndex, characterPredicate) => {
+			_takeWhileWithStart(index - 1, characterPredicate),
+		_takeWhileWithStart = (startIndex, characterPredicate) => {
 			skipWhile(characterPredicate)
 			return sourceString.slice(startIndex, index)
 		},

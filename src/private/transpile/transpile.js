@@ -10,9 +10,9 @@ import { functionExpressionThunk, idCached, loc, member, propertyIdOrLiteralCach
 	} from 'esast/dist/util'
 import manglePath from '../manglePath'
 import * as MsAstTypes from '../MsAst'
-import { AssignSingle, Call, Fun, L_And, L_Or, LD_Lazy, LD_Mutable, MethodImpl, MS_Mutate, MS_New,
-	MS_NewMutable, Pattern, Splat, SD_Debugger, SV_Contains, SV_False, SV_Null, SV_Sub, SV_Super,
-	SV_ThisModuleDirectory, SV_True, SV_Undefined, SwitchDoPart } from '../MsAst'
+import { AssignSingle, Call, L_And, L_Or, LD_Lazy, LD_Mutable, MI_Get, MI_Plain, MI_Set, MS_Mutate,
+	MS_New, MS_NewMutable, Pattern, Splat, SD_Debugger, SV_Contains, SV_False, SV_Null, SV_Sub,
+	SV_Super, SV_ThisModuleDirectory, SV_True, SV_Undefined, SwitchDoPart } from '../MsAst'
 import { assert, cat, flatMap, flatOpMap, ifElse, isEmpty,
 	implementMany, isPositive, opIf, opMap, tail, unshift } from '../util'
 import { AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj,
@@ -174,9 +174,9 @@ implementMany(MsAstTypes, 'transpile', {
 
 	Class() {
 		const methods = cat(
-			this.statics.map(methodDefinition(true)),
+			this.statics.map(_ => t1(_, true)),
 			opMap(this.opConstructor, constructorDefinition),
-			this.methods.map(methodDefinition(false)))
+			this.methods.map(_ => t1(_, false)))
 		const opName = opMap(this.opName, idCached)
 		const classExpr = new ClassExpression(
 			opName,
@@ -267,6 +267,36 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	Lazy() { return lazyWrap(t0(this.value)) },
+
+	MethodImpl(isStatic) {
+		assert(this.fun.opName === null)
+		const value = t0(this.fun)
+		assert(value.id == null)
+
+		let kind
+		switch (this.kind) {
+			case MI_Plain:
+				kind = 'method'
+				break
+			case MI_Get:
+				kind = 'get'
+				break
+			case MI_Set:
+				kind = 'set'
+				break
+			default: throw new Error()
+		}
+
+		let key, computed
+		if (typeof this.symbol === 'string') {
+			key = propertyIdOrLiteralCached(this.symbol)
+			computed = false
+		} else {
+			key = msSymbol(t0(this.symbol))
+			computed = true
+		}
+		return new MethodDefinition(key, value, kind, isStatic, computed)
+	},
 
 	NumberLiteral() {
 		// Negative numbers are not part of ES spec.
@@ -501,27 +531,6 @@ const
 			new Identifier('constructor'), t0(fun), 'constructor', false, false)
 		isInConstructor = false
 		return res
-	},
-	methodDefinition = isStatic => method => {
-		if (method instanceof Fun) {
-			assert(method.opName !== null)
-			const key = propertyIdOrLiteralCached(method.opName)
-			const value = t0(method)
-			value.id = null
-			const computed = false
-			return new MethodDefinition(key, value, 'method', isStatic, computed)
-		} else {
-			assert(method instanceof MethodImpl)
-			const fun = method.fun
-			assert(fun.opName === null)
-			const key = msSymbol(t0(method.symbol))
-			const value = t0(fun)
-			// This is handled by `key`.
-			value.id = null
-			// TODO: get/set!
-			const computed = true
-			return new MethodDefinition(key, value, 'method', isStatic, computed)
-		}
 	},
 
 	transpileBlock = (returned, lines, lead, opDeclareRes, opOut) => {
