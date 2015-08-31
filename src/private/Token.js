@@ -206,6 +206,7 @@ export const
 	KW_Get = kw('get'),
 	KW_IfVal = kw('if'),
 	KW_IfDo = kw('if!'),
+	KW_Ignore = kw('ignore'),
 	KW_In = kw('in'),
 	KW_Lazy = kwNotName('~'),
 	KW_MapEntry = kw('->'),

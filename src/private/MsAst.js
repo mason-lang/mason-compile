@@ -788,3 +788,10 @@ export default class MsAst {
 			this.kind = kind
 		}
 	}
+
+	export class Ignore extends Do {
+		constructor(loc, ignored /* Array[String] */) {
+			super(loc)
+			this.ignored = ignored
+		}
+	}

@@ -56,8 +56,8 @@ export const
 
 	iteratorToArray = iter => {
 		const out = []
-		for (let em of iter)
-			out.push(em)
+		for (let _ of iter)
+			out.push(_)
 		return out
 	},
 

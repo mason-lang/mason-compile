@@ -266,6 +266,8 @@ implementMany(MsAstTypes, 'transpile', {
 			new FunctionExpression(id, args, body, this.isGenerator)
 	},
 
+	Ignore() { return [ ] },
+
 	Lazy() { return lazyWrap(t0(this.value)) },
 
 	MethodImpl(isStatic) {

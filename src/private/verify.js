@@ -333,6 +333,11 @@ implementMany(MsAstTypes, 'verify', {
 
 	GlobalAccess() { },
 
+	Ignore() {
+		for (const _ of this.ignored)
+			accessLocal(this, _)
+	},
+
 	Lazy() { withBlockLocals(() => this.value.verify()) },
 
 	LocalAccess() { accessLocal(this, this.name) },
