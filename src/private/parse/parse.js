@@ -292,9 +292,15 @@ const parseSwitch = (isVal, tokens) => {
 const
 	_parseSwitchLine = isVal => line => {
 		const [ before, block ] = beforeAndBlock(line)
-		const value = parseExpr(before)
+
+		let values
+		if (isKeyword(KW_Or, before.head()))
+			values = before.tail().map(parseSingle)
+		else
+			values = [ parseExpr(before) ]
+
 		const result = (isVal ? parseBlockVal : parseBlockDo)(block)
-		return new (isVal ? SwitchValPart : SwitchDoPart)(line.loc, value, result)
+		return new (isVal ? SwitchValPart : SwitchDoPart)(line.loc, values, result)
 	}
 
 const

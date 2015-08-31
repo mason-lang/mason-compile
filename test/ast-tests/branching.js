@@ -158,7 +158,7 @@ describe('switch', () => {
 				1
 					pass`,
 		new SwitchDo(loc, zero,
-			[ new SwitchDoPart(loc, one, blockPass) ],
+			[ new SwitchDoPart(loc, [ one ], blockPass) ],
 			null),
 		`
 			switch(0){
@@ -176,7 +176,7 @@ describe('switch', () => {
 				else
 					1`,
 		new SwitchVal(loc, zero,
-			[ new SwitchValPart(loc, one, new BlockWithReturn(loc, [ assignAZero ], aAccess)) ],
+			[ new SwitchValPart(loc, [ one ], new BlockWithReturn(loc, [ assignAZero ], aAccess)) ],
 			blockOne),
 		`
 			(()=>{
@@ -188,4 +188,20 @@ describe('switch', () => {
 					default:return 1
 				}
 			})()`)
+	test(
+		`
+			switch! 0
+				or 0 1
+					pass`,
+		new SwitchDo(loc, zero,
+			[ new SwitchDoPart(loc, [ zero, one ], blockPass) ],
+			null),
+		`
+			switch(0){
+				case 0:
+				case 1:{
+					break
+				}
+				default:throw new (Error)("No branch of \`switch\` matches.")
+			}`)
 })

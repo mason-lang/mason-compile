@@ -483,7 +483,6 @@ function casePart(alternate) {
 
 function switchPart() {
 	const opOut = opIf(this instanceof SwitchDoPart, () => new BreakStatement)
-	const block = t3(this.result, null, null, opOut)
 	/*
 	We could just pass block.body for the switch lines, but instead
 	enclose the body of the switch case in curly braces to ensure a new scope.
@@ -500,7 +499,14 @@ function switchPart() {
 			}
 		}
 	*/
-	return new SwitchCase(t0(this.value), [ block ])
+	const block = t3(this.result, null, null, opOut)
+	// If switch has multiple values, build up a statement like: `case 1: case 2: { doBlock() }`
+	const x = [ ]
+	for (let i = 0; i < this.values.length - 1; i = i + 1)
+		// These cases fallthrough to the one at the end.
+		x.push(new SwitchCase(t0(this.values[i]), [ ]))
+	x.push(new SwitchCase(t0(this.values[this.values.length - 1]), [ block ]))
+	return x
 }
 
 // Functions specific to certain expressions.
@@ -558,12 +564,10 @@ const
 			opMap(except._finally, t0)),
 
 	transpileSwitch = _ => {
-		const parts = _.parts.map(t0)
-
+		const parts = flatMap(_.parts, t0)
 		parts.push(ifElse(_.opElse,
 			_ => new SwitchCase(undefined, t0(_).body),
 			() => SwitchCaseNoMatch))
-
 		return new SwitchStatement(t0(_.switched), parts)
 	}
 

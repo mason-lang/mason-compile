@@ -508,7 +508,8 @@ function verifyCasePart() {
 }
 
 function verifySwitchPart() {
-	this.value.verify()
+	for (const _ of this.values)
+		_.verify()
 	this.result.verify()
 }
 

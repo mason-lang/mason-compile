@@ -10,7 +10,7 @@ export default class MsAst {
 				_ === undefined ?
 				'undefined' :
 				_ instanceof Array ?
-				`[\n\t${_.map(_ => indent(show(_))).join(',\n\t')}\n]` :
+				`[\n\t${_.map(_ => indent(_.toString())).join(',\n\t')}\n]` :
 				typeof _ === 'string' ?
 				JSON.stringify(_) :
 				_.toString()
@@ -606,17 +606,17 @@ export default class MsAst {
 	}
 
 	export class SwitchDoPart extends MsAst {
-		constructor(loc, value /* Val */, result /* BlockDo */) {
+		constructor(loc, values /* Array[Val] */, result /* BlockDo */) {
 			super(loc)
-			this.value = value
+			this.values = values
 			this.result = result
 		}
 	}
 
 	export class SwitchValPart extends MsAst {
-		constructor(loc, value /* Val */, result /* BlockVal */) {
+		constructor(loc, values /* Array[Val] */, result /* BlockVal */) {
 			super(loc)
-			this.value = value
+			this.values = values
 			this.result = result
 		}
 	}
