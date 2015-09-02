@@ -1,6 +1,6 @@
 import { code } from '../CompileError'
 import { NumberLiteral } from './MsAst'
-import { SV_False, SV_Null, SV_Super, SV_ThisModuleDirectory, SV_True, SV_Undefined
+import { SV_False, SV_Name, SV_Null, SV_Super, SV_ThisModuleDirectory, SV_True, SV_Undefined
 	} from './MsAst'
 import { implementMany } from './util'
 
@@ -121,8 +121,7 @@ const
 	}
 
 const reserved_words = [
-	// Current reserved words
-	'await',
+	// JavaScript reserved words
 	'enum',
 	'implements',
 	'interface',
@@ -133,6 +132,7 @@ const reserved_words = [
 
 	// JavaScript keywords
 	'arguments',
+	'await',
 	'const',
 	'delete',
 	'eval',
@@ -147,6 +147,9 @@ const reserved_words = [
 	// Keywords Mason might use
 	'abstract',
 	'data',
+	'del',
+	'del?',
+	'del!',
 	'final',
 	'gen',
 	'gen!',
@@ -210,6 +213,7 @@ export const
 	KW_In = kw('in'),
 	KW_Lazy = kwNotName('~'),
 	KW_MapEntry = kw('->'),
+	KW_Name = kw('name'),
 	KW_New = kw('new'),
 	KW_Not = kw('not'),
 	KW_Null = kw('null'),
@@ -223,7 +227,6 @@ export const
 	KW_Static = kw('static'),
 	KW_SwitchDo = kw('switch!'),
 	KW_SwitchVal = kw('switch'),
-	KW_ThisModuleDirectory = kw('this-module-directory'),
 	KW_Throw = kw('throw!'),
 	KW_True = kw('true'),
 	KW_TryDo = kw('try!'),
@@ -248,9 +251,9 @@ export const
 	opKeywordKindToSpecialValueKind = kw => {
 		switch (kw) {
 			case KW_False: return SV_False
+			case KW_Name: return SV_Name
 			case KW_Null: return SV_Null
 			case KW_Super: return SV_Super
-			case KW_ThisModuleDirectory: return SV_ThisModuleDirectory
 			case KW_True: return SV_True
 			case KW_Undefined: return SV_Undefined
 			default: return null

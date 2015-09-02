@@ -11,6 +11,9 @@ export default class VerifyResults {
 		// TODO:ES6 Can use do `export { a, b, ... }` at the end, so shouldn't need this.
 		// Includes both Assigns and AssignDestructures.
 		this.exportAssigns = new Set()
+		// Maps Class/Fun to name if one is appropriate.
+		// Maps *every* SV_Name to the nearest name.
+		this.names = new Map()
 	}
 
 	isDebugLocal(localDeclare) {
@@ -28,6 +31,15 @@ export default class VerifyResults {
 
 	localDeclareForAccess(localAccess) {
 		return this.localAccessToDeclare.get(localAccess)
+	}
+
+	name(expr) {
+		return this.names.get(expr)
+	}
+
+	opName(expr) {
+		const x = this.names.get(expr)
+		return x === undefined ? null : x
 	}
 }
 

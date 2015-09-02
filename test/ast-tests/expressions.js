@@ -92,7 +92,6 @@ describe('expressions', () => {
 
 		test('false', new SpecialVal(loc, SV_False), 'false')
 		test('null', new SpecialVal(loc, SV_Null), 'null')
-		test('this-module-directory', new SpecialVal(loc, SV_ThisModuleDirectory), '__dirname')
 		test('true', new SpecialVal(loc, SV_True), 'true')
 		test('undefined', new SpecialVal(loc, SV_Undefined), 'void 0')
 	})

@@ -27,7 +27,9 @@ export default class CompileOptions {
 			forceNonLazyModule: false,
 			useStrict: true,
 			checks: true,
-			'warn-as-error': false
+			'warn-as-error': false,
+			useBoot: true,
+			mslPath: 'msl'
 		}
 
 		for (const _ in defaults)
@@ -61,6 +63,9 @@ export default class CompileOptions {
 	includeUseStrict() { return this._useStrict }
 
 	lazyModule() { return !this._forceNonLazyModule }
+
+	useBoot() { return this._useBoot }
+	bootPath() { return `${this._mslPath}/private/boot` }
 }
 
 const

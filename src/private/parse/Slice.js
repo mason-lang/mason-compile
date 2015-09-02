@@ -85,12 +85,14 @@ export default class Slice {
 
 	map(f) {
 		const out = []
-		this.each(_ => out.push(f(_)))
+		for (let i = this.start; i < this.end; i = i + 1)
+			out.push(f(this.tokens[i]))
 		return out
 	}
 	mapSlices(f) {
 		const out = []
-		this.each(_ => out.push(f(Slice.group(_))))
+		for (let i = this.start; i < this.end; i = i + 1)
+			out.push(f(Slice.group(this.tokens[i])))
 		return out
 	}
 

@@ -1,6 +1,6 @@
 import { code } from '../CompileError'
 import * as MsAstTypes from './MsAst'
-import { Assign, AssignDestructure, AssignSingle, BlockVal, Call, Debug, Do, ForVal,
+import { Assign, AssignDestructure, AssignSingle, BlockVal, Call, Class, Debug, Do, ForVal, Fun,
 	LocalDeclareBuilt, LocalDeclareFocus, LocalDeclareRes, ObjEntry, Pattern, Yield, YieldTo
 	} from './MsAst'
 import { assert, cat, eachReverse, head, ifElse, implementMany,
@@ -54,7 +54,9 @@ let
 	isInDebug,
 	// Whether we are currently able to yield.
 	isInGenerator,
-	results
+	results,
+	// Name of the closest AssignSingle
+	name
 
 const
 	verifyOpEach = op => {
@@ -92,8 +94,13 @@ const
 		localDeclare.verify()
 	},
 
-	registerLocal = localDeclare =>
+	registerLocal = localDeclare => {
 		results.localDeclareToInfo.set(localDeclare, LocalInfo.empty(isInDebug))
+	},
+
+	setName = expr => {
+		results.names.set(expr, name)
+	}
 
 // These functions change verifier state and efficiently return to the old state when finished.
 const
@@ -116,6 +123,18 @@ const
 		opLoop = newLoop
 		action()
 		opLoop = oldLoop
+	},
+
+	withName = (newName, action) => {
+		const oldName = name
+		name = newName
+		action()
+		name = oldName
+	},
+
+	// Can't break out of loop inside of IIFE.
+	withIIFE = action => {
+		withInLoop(false, action)
 	},
 
 	plusLocal = (addedLocal, action) => {
@@ -165,11 +184,6 @@ const
 		pendingBlockLocals = [ ]
 		plusLocals(oldPendingBlockLocals, action)
 		pendingBlockLocals = oldPendingBlockLocals
-	},
-
-	// Can't break out of loop inside of IIFE.
-	withIIFE = action => {
-		withInLoop(false, action)
 	}
 
 const verifyLocalUse = () =>
@@ -196,15 +210,24 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	AssignSingle() {
-		const doV = () => {
-			// Assignee registered by verifyLines.
-			this.assignee.verify()
-			this.value.verify()
-		}
-		if (this.assignee.isLazy())
-			withBlockLocals(doV)
-		else
-			doV()
+		withName(this.assignee.name, () => {
+			const doV = () => {
+				/*
+				Fun and Class only get name if they are immediately after the assignment.
+				so in `x = $after-time 1000 |` the function is not named.
+				*/
+				if (this.value instanceof Class || this.value instanceof Fun)
+					setName(this.value)
+
+				// Assignee registered by verifyLines.
+				this.assignee.verify()
+				this.value.verify()
+			}
+			if (this.assignee.isLazy())
+				withBlockLocals(doV)
+			else
+				doV()
+		})
 	},
 
 	AssignDestructure() {
@@ -283,6 +306,7 @@ implementMany(MsAstTypes, 'verify', {
 		verifyOpEach(this.opConstructor)
 		for (const _ of this.methods)
 			_.verify()
+		// name set by AssignSingle
 	},
 
 	ClassDo() {
@@ -329,6 +353,7 @@ implementMany(MsAstTypes, 'verify', {
 					})
 				}))
 		})
+		// name set by AssignSingle
 	},
 
 	GlobalAccess() { },
@@ -389,19 +414,22 @@ implementMany(MsAstTypes, 'verify', {
 			for (const _ of this.debugUses)
 				_.verify()
 		})
-		const newLocals = verifyLines(this.lines)
-		for (const _ of this.exports)
-			accessLocalForReturn(_, this)
-		opEach(this.opDefaultExport, _ => plusLocals(newLocals, () => _.verify()))
 
-		const exports = new Set(this.exports)
-		const markExportLines = line => {
-			if (line instanceof Assign && line.allAssignees().some(_ => exports.has(_)))
-				results.exportAssigns.add(line)
-			else if (line instanceof Debug)
-				line.lines.forEach(markExportLines)
-		}
-		this.lines.forEach(markExportLines)
+		withName(context.opts.moduleName(), () => {
+			const newLocals = verifyLines(this.lines)
+			for (const _ of this.exports)
+				accessLocalForReturn(_, this)
+			opEach(this.opDefaultExport, _ => plusLocals(newLocals, () => _.verify()))
+
+			const exports = new Set(this.exports)
+			const markExportLines = line => {
+				if (line instanceof Assign && line.allAssignees().some(_ => exports.has(_)))
+					results.exportAssigns.add(line)
+				else if (line instanceof Debug)
+					line.lines.forEach(markExportLines)
+			}
+			this.lines.forEach(markExportLines)
+		})
 	},
 
 	New() {
@@ -410,11 +438,17 @@ implementMany(MsAstTypes, 'verify', {
 			_.verify()
 	},
 
-	ObjEntry() {
+	ObjEntryAssign() {
 		accessLocal(this, 'built')
 		this.assign.verify()
 		for (const _ of this.assign.allAssignees())
 			accessLocal(this, _.name)
+	},
+
+	ObjEntryComputed() {
+		accessLocal(this, 'built')
+		this.key.verify()
+		this.value.verify()
 	},
 
 	ObjSimple() {
@@ -440,7 +474,9 @@ implementMany(MsAstTypes, 'verify', {
 
 	SpecialDo() { },
 
-	SpecialVal() { },
+	SpecialVal() {
+		setName(this)
+	},
 
 	Splat() { this.splatted.verify() },
 

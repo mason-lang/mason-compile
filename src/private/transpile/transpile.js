@@ -11,8 +11,8 @@ import { functionExpressionThunk, idCached, loc, member, propertyIdOrLiteralCach
 import manglePath from '../manglePath'
 import * as MsAstTypes from '../MsAst'
 import { AssignSingle, Call, L_And, L_Or, LD_Lazy, LD_Mutable, MI_Get, MI_Plain, MI_Set, MS_Mutate,
-	MS_New, MS_NewMutable, Pattern, Splat, SD_Debugger, SV_Contains, SV_False, SV_Null, SV_Sub,
-	SV_Super, SV_ThisModuleDirectory, SV_True, SV_Undefined, SwitchDoPart } from '../MsAst'
+	MS_New, MS_NewMutable, Pattern, Splat, SD_Debugger, SV_Contains, SV_False, SV_Name, SV_Null,
+	SV_Sub, SV_Super, SV_True, SV_Undefined, SwitchDoPart } from '../MsAst'
 import { assert, cat, flatMap, flatOpMap, ifElse, isEmpty,
 	implementMany, isPositive, opIf, opMap, tail, unshift } from '../util'
 import { AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj,
@@ -177,7 +177,7 @@ implementMany(MsAstTypes, 'transpile', {
 			this.statics.map(_ => t1(_, true)),
 			opMap(this.opConstructor, constructorDefinition),
 			this.methods.map(_ => t1(_, false)))
-		const opName = opMap(this.opName, idCached)
+		const opName = opMap(verifyResults.opName(this), idCached)
 		const classExpr = new ClassExpression(
 			opName,
 			opMap(this.opSuperClass, t0), new ClassBody(methods))
@@ -254,7 +254,7 @@ implementMany(MsAstTypes, 'transpile', {
 		const body = t3(this.block, lead, this.opDeclareRes, _out)
 		const args = this.args.map(t0)
 		isInGenerator = oldInGenerator
-		const id = opMap(this.opName, idCached)
+		const id = opMap(verifyResults.opName(this), idCached)
 
 		const canUseArrowFunction =
 			id === null &&
@@ -271,7 +271,6 @@ implementMany(MsAstTypes, 'transpile', {
 	Lazy() { return lazyWrap(t0(this.value)) },
 
 	MethodImpl(isStatic) {
-		assert(this.fun.opName === null)
 		const value = t0(this.fun)
 		assert(value.id == null)
 
@@ -365,7 +364,7 @@ implementMany(MsAstTypes, 'transpile', {
 
 	Not() { return new UnaryExpression('!', t0(this.arg)) },
 
-	ObjEntry() {
+	ObjEntryAssign() {
 		return (this.assign instanceof AssignSingle && !this.assign.assignee.isLazy()) ?
 			t1(this.assign, val =>
 				new AssignmentExpression('=', member(IdBuilt, this.assign.assignee.name), val)) :
@@ -373,6 +372,12 @@ implementMany(MsAstTypes, 'transpile', {
 				t0(this.assign),
 				this.assign.allAssignees().map(_ =>
 					msSetLazy(IdBuilt, new Literal(_.name), idForDeclareCached(_))))
+	},
+
+	ObjEntryComputed() {
+		return new AssignmentExpression('=',
+			new MemberExpression(IdBuilt, t0(this.key)),
+			t0(this.value))
 	},
 
 	ObjSimple() {
@@ -424,10 +429,10 @@ implementMany(MsAstTypes, 'transpile', {
 		switch (this.kind) {
 			case SV_Contains: return member(IdMs, 'contains')
 			case SV_False: return new Literal(false)
+			case SV_Name: return new Literal(verifyResults.name(this))
 			case SV_Null: return new Literal(null)
 			case SV_Sub: return member(IdMs, 'sub')
 			case SV_Super: return new Identifier('super')
-			case SV_ThisModuleDirectory: return new Identifier('__dirname')
 			case SV_True: return new Literal(true)
 			case SV_Undefined: return new UnaryExpression('void', LitZero)
 			default: throw new Error(this.kind)
@@ -571,29 +576,45 @@ const
 		return new SwitchStatement(t0(_.switched), parts)
 	}
 
+const IdBoot = new Identifier('_boot')
+
 // Module helpers
 const
 	amdWrapModule = (doUses, otherUses, body) => {
+		const useBoot = context.opts.useBoot()
+
 		const allUses = doUses.concat(otherUses)
-		const usePaths = new ArrayExpression(cat(
+		const allUsePaths = allUses.map(_ => manglePath(_.path))
+
+		const arrUsePaths = new ArrayExpression(cat(
+			opIf(useBoot, () => new Literal(context.opts.bootPath())),
 			LitStrExports,
-			allUses.map(_ => new Literal(manglePath(_.path)))))
+			allUsePaths.map(_ => new Literal(_))))
+
 		const useIdentifiers = allUses.map((_, i) => idCached(`${pathBaseName(_.path)}_${i}`))
-		const useArgs = cat(IdExports, useIdentifiers)
+
+		const useArgs = cat(opIf(useBoot, () => IdBoot), IdExports, useIdentifiers)
+
+		const doBoot = opIf(useBoot, () => new ExpressionStatement(msGetModule(IdBoot)))
+
 		const useDos = doUses.map((use, i) =>
 			loc(new ExpressionStatement(msGetModule(useIdentifiers[i])), use.loc))
+
 		const opUseDeclare = opIf(!isEmpty(otherUses),
 			() => new VariableDeclaration('const', flatMap(otherUses, (use, i) =>
 				useDeclarators(use, useIdentifiers[i + doUses.length]))))
-		const fullBody = new BlockStatement(cat(useDos, opUseDeclare, body, ReturnExports))
+
+		const fullBody = new BlockStatement(cat(doBoot, useDos, opUseDeclare, body, ReturnExports))
+
 		const lazyBody =
 			context.opts.lazyModule() ?
 				new BlockStatement([ new ExpressionStatement(
 					new AssignmentExpression('=', ExportsGet,
 						msLazy(functionExpressionThunk(fullBody)))) ]) :
 				fullBody
+
 		return new CallExpression(IdDefine,
-			[ usePaths, new ArrowFunctionExpression(useArgs, lazyBody) ])
+			[ arrUsePaths, new ArrowFunctionExpression(useArgs, lazyBody) ])
 	},
 
 	pathBaseName = path =>

@@ -302,7 +302,7 @@ export default class MsAst {
 
 		constructor(loc,
 			built, // LocalDeclareBuilt
-			lines, // Array[LineContent]
+			lines, // Array[Union[LineContent ObjEntry]]
 			opObjed, // Opt[Val]
 			opName) { // Opt[String]
 			super(loc)
@@ -312,14 +312,26 @@ export default class MsAst {
 			this.opName = opName
 		}
 	}
-	// TODO: BlockObj.Entry
-	export class ObjEntry extends Do {
+	export class ObjEntry extends Do { }
+
+	export class ObjEntryAssign extends ObjEntry {
 		constructor(loc, assign /* Assign */) {
 			super(loc)
 			this.assign = assign
 		}
 	}
 
+	export class ObjEntryComputed extends ObjEntry {
+		static name(loc, value) {
+			return new ObjEntryComputed(loc, Quote.forString(loc, 'name'), value)
+		}
+
+		constructor(loc, key /* Val */, value /* Val */) {
+			super(loc)
+			this.key = key
+			this.value = value
+		}
+	}
 
 	export class BlockBag extends BlockVal {
 		static of(loc, lines) {
@@ -396,8 +408,7 @@ export default class MsAst {
 			block, // Block
 			opIn, // Opt[Debug]
 			opDeclareRes, // Opt[LocalDeclareRes]
-			opOut, // Opt[Debug]
-			opName) { // Opt[String]
+			opOut) { // Opt[Debug]
 			super(loc)
 			// TODO:ES6 Optional args
 			if (opIn === undefined)
@@ -406,8 +417,6 @@ export default class MsAst {
 				opDeclareRes = null
 			if (opOut === undefined)
 				opOut = null
-			if (opName === undefined)
-				opName = null
 
 			this.opDeclareThis = opDeclareThis
 			this.isGenerator = isGenerator
@@ -417,7 +426,6 @@ export default class MsAst {
 			this.opIn = opIn
 			this.opDeclareRes = opDeclareRes
 			this.opOut = opOut
-			this.opName = opName
 		}
 	}
 
@@ -446,18 +454,13 @@ export default class MsAst {
 			opDo, // Opt[ClassDo],
 			statics, // Array[Fun]
 			opConstructor, // Opt[Fun]
-			methods, // MethodImpl
-			opName) { // Opt[String]
+			methods) { // MethodImpl
 			super(loc)
-			// TODO:ES6 Optional args
-			if (opName === undefined)
-				opName = null
 			this.opSuperClass = opSuperClass
 			this.opDo = opDo
 			this.statics = statics
 			this.opConstructor = opConstructor
 			this.methods = methods
-			this.opName = opName
 		}
 	}
 
@@ -779,9 +782,9 @@ export default class MsAst {
 		SV_Null = 2,
 		SV_Sub = 3,
 		SV_Super = 4,
-		SV_ThisModuleDirectory = 5,
-		SV_True = 6,
-		SV_Undefined = 7
+		SV_True = 5,
+		SV_Undefined = 6,
+		SV_Name = 7
 	export class SpecialVal extends Val {
 		constructor(loc, kind /* Number */) {
 			super(loc)

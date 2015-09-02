@@ -8,17 +8,18 @@ import { Assert, AssignDestructure, AssignSingle, BagEntry, BagEntryMany, BagSim
 	ForVal, Fun, GlobalAccess, L_And, L_Or, Lazy, LD_Const, LD_Lazy, LD_Mutable, LocalAccess,
 	LocalDeclare, LocalDeclareFocus, LocalDeclareName, LocalDeclareRes, LocalDeclareThis,
 	LocalMutate, Logic, MapEntry, Member, MemberSet, MethodImpl, MI_Get, MI_Plain, MI_Set, Module,
-	MS_Mutate, MS_New, MS_NewMutable, New, Not, ObjEntry, ObjPair, ObjSimple, Pattern, Quote,
-	QuoteTemplate, SD_Debugger, SpecialDo, SpecialVal, SV_Null, Splat, SwitchDo, SwitchDoPart,
-	SwitchVal, SwitchValPart, Throw, Val, Use, UseDo, With, Yield, YieldTo } from '../MsAst'
+	MS_Mutate, MS_New, MS_NewMutable, New, Not, ObjEntry, ObjEntryAssign, ObjEntryComputed,
+	ObjPair, ObjSimple, Pattern, Quote, QuoteTemplate, SD_Debugger, SpecialDo, SpecialVal, SV_Name,
+	SV_Null, Splat, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart, Throw, Val, Use, UseDo, With,
+	Yield, YieldTo } from '../MsAst'
 import { DotName, Group, G_Block, G_Bracket, G_Parenthesis, G_Space, G_Quote, isGroup, isKeyword,
 	Keyword, KW_And, KW_As, KW_Assert, KW_AssertNot, KW_Assign, KW_AssignMutable, KW_Break,
 	KW_BreakWithVal, KW_CaseVal, KW_CaseDo, KW_Class, KW_CatchDo, KW_CatchVal, KW_Construct,
 	KW_Debug, KW_Debugger, KW_Do, KW_Ellipsis, KW_Else, KW_ExceptDo, KW_ExceptVal, KW_Finally,
 	KW_ForBag, KW_ForDo, KW_ForVal, KW_Focus, KW_Fun, KW_FunDo, KW_FunGen, KW_FunGenDo, KW_FunThis,
 	KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo, KW_Get, KW_IfDo, KW_IfVal, KW_Ignore, KW_In,
-	KW_Lazy, KW_LocalMutate, KW_MapEntry, KW_New, KW_Not, KW_ObjAssign, KW_Or, KW_Pass, KW_Out,
-	KW_Region, KW_Set, KW_Static, KW_SwitchDo, KW_SwitchVal, KW_Throw, KW_TryDo, KW_TryVal,
+	KW_Lazy, KW_LocalMutate, KW_MapEntry, KW_Name, KW_New, KW_Not, KW_ObjAssign, KW_Or, KW_Pass,
+	KW_Out, KW_Region, KW_Set, KW_Static, KW_SwitchDo, KW_SwitchVal, KW_Throw, KW_TryDo, KW_TryVal,
 	KW_Type, KW_UnlessDo, KW_UnlessVal, KW_Use, KW_UseDebug, KW_UseDo, KW_UseLazy, KW_With,
 	KW_Yield, KW_YieldTo, Name, keywordName, opKeywordKindToSpecialValueKind } from '../Token'
 import { assert, head, ifElse, flatMap, isEmpty, last,
@@ -156,7 +157,7 @@ const
 				//		a. b
 				// in a module context, it will be an error. (The module creates no `built` local.)
 				const getLineExports = line => {
-					if (line instanceof ObjEntry) {
+					if (line instanceof ObjEntryAssign) {
 						for (const _ of line.assign.allAssignees())
 							if (_.name === moduleName) {
 								context.check(opDefaultExport === null, _.loc, () =>
@@ -588,6 +589,13 @@ const
 					return parseSwitch(false, rest)
 				case KW_Throw:
 					return new Throw(tokens.loc, opIf(!rest.isEmpty(), () => parseExpr(rest)))
+				case KW_Name:
+					if (isKeyword(KW_ObjAssign, rest.head())) {
+						const r = rest.tail()
+						const val = r.isEmpty() ? new SpecialVal(tokens.loc, SV_Name) : parseExpr(r)
+						return ObjEntryComputed.name(tokens.loc, val)
+					}
+					// else fallthrough
 				default:
 					// fall through
 			}
@@ -619,7 +627,7 @@ const
 
 	_parseAssignLike = (before, at, after, loc) => {
 		if (at.kind === KW_MapEntry)
-			return _parseMapEntry(before, after, loc)
+			return new MapEntry(loc, parseExpr(before), parseExpr(after))
 
 		// TODO: This code is kind of ugly.
 		if (before.size() === 1) {
@@ -683,7 +691,7 @@ const
 					_.kind = LD_Mutable
 				}
 
-			const wrap = _ => isObjAssign ? new ObjEntry(loc, _) : _
+			const wrap = _ => isObjAssign ? new ObjEntryAssign(loc, _) : _
 
 			if (locals.length === 1) {
 				const assignee = locals[0]
@@ -704,8 +712,6 @@ const
 		const value = valueTokens.isEmpty() && kind === KW_ObjAssign ?
 			new SpecialVal(valueTokens.loc, SV_Null) :
 			parseExpr(valueTokens)
-		if (opName !== null)
-			_tryAddName(value, opName)
 		switch (kind) {
 			case KW_Yield:
 				return new Yield(value.loc, value)
@@ -714,35 +720,7 @@ const
 			default:
 				return value
 		}
-	},
-
-	// We give it a name if:
-	// It's a function
-	// It's an Obj block
-	// It's an Obj block at the end of a call (as in `name = Obj-Type ...`)
-	_tryAddName = (_, name) => {
-		if (_ instanceof Fun || _ instanceof Class)
-			_.opName = name
-		else if ((_ instanceof Call || _ instanceof New) && !isEmpty(_.args))
-			_tryAddObjName(last(_.args), name)
-		else
-			_tryAddObjName(_, name)
-	},
-
-	_tryAddObjName = (_, name) => {
-		if (_ instanceof BlockWrap && _.block instanceof BlockObj)
-			if (_.block.opObjed !== null && _.block.opObjed instanceof Fun)
-				_.block.opObjed.opName = name
-			else if (!_nameObjAssignSomewhere(_.block.lines))
-				_.block.opName = name
-	},
-	_nameObjAssignSomewhere = lines =>
-		lines.some(line =>
-			line instanceof ObjEntry && line.assign.allAssignees().some(_ =>
-				_.name === 'name')),
-
-	_parseMapEntry = (before, after, loc) =>
-		new MapEntry(loc, parseExpr(before), parseExpr(after))
+	}
 
 const
 	parseLocalDeclaresJustNames = tokens =>
@@ -805,12 +783,17 @@ const parseSingle = token => {
 	})() :
 	token instanceof NumberLiteral ?
 	token :
-	token instanceof Keyword ?
-		token.kind === KW_Focus ?
-			LocalAccess.focus(loc) :
-			ifElse(opKeywordKindToSpecialValueKind(token.kind),
-				_ => new SpecialVal(loc, _),
-				() => unexpected(token)) :
+	token instanceof Keyword ? (() => {
+		switch (token.kind) {
+			case KW_Focus:
+				return LocalAccess.focus(loc)
+			default:
+				return ifElse(opKeywordKindToSpecialValueKind(token.kind),
+					_ => new SpecialVal(loc, _),
+					() => unexpected(token))
+
+		}
+	})() :
 	token instanceof DotName ?
 		token.nDots === 1 ? new Member(token.loc, LocalAccess.this(token.loc), token.name) :
 		token.nDots === 3 ? new Splat(loc, new LocalAccess(loc, token.name)) :
@@ -1120,7 +1103,6 @@ const
 		const { before, at, after } = baa
 
 		const fun = parseFun(_methodFunKind(at), after)
-		assert(fun.opName === null)
 
 		let symbol = parseExpr(before)
 		// If symbol is just a literal string, store it as a string, which is handled specially.
