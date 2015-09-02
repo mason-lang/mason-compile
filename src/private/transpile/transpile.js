@@ -397,7 +397,7 @@ implementMany(MsAstTypes, 'transpile', {
 
 			for (let part of this.parts)
 				if (typeof part === 'string')
-					quasis.push(TemplateElement.forString(part))
+					quasis.push(TemplateElement.forRawString(part))
 				else {
 					// "{1}{1}" needs an empty quasi in the middle (and on the ends)
 					if (quasis.length === expressions.length)

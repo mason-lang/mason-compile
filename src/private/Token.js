@@ -1,7 +1,6 @@
 import { code } from '../CompileError'
 import { NumberLiteral } from './MsAst'
-import { SV_False, SV_Name, SV_Null, SV_Super, SV_ThisModuleDirectory, SV_True, SV_Undefined
-	} from './MsAst'
+import { SV_False, SV_Name, SV_Null, SV_Super, SV_True, SV_Undefined } from './MsAst'
 import { implementMany } from './util'
 
 /*

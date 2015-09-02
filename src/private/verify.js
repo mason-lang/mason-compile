@@ -419,7 +419,11 @@ implementMany(MsAstTypes, 'verify', {
 			const newLocals = verifyLines(this.lines)
 			for (const _ of this.exports)
 				accessLocalForReturn(_, this)
-			opEach(this.opDefaultExport, _ => plusLocals(newLocals, () => _.verify()))
+			opEach(this.opDefaultExport, _ => {
+				if (_ instanceof Class || _ instanceof Fun)
+					setName(_)
+				plusLocals(newLocals, () => { _.verify() })
+			})
 
 			const exports = new Set(this.exports)
 			const markExportLines = line => {

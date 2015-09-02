@@ -744,6 +744,8 @@ export default class MsAst {
 		}
 
 		// parts are Strings interleaved with Vals.
+		// part Strings are raw values, meaning "\n" is two characters.
+		// Since "\{" is special to Mason, that's only one character.
 		constructor(loc, parts /* Array[Union[String Val]] */) {
 			super(loc)
 			this.parts = parts

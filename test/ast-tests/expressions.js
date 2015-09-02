@@ -1,6 +1,6 @@
 import { AssignSingle, BagSimple, BlockDo, Call, LD_Const, LocalDeclare, Member, New, ObjPair,
-	ObjSimple, Quote, QuoteTemplate, SpecialVal, Splat, SV_False, SV_Null, SV_ThisModuleDirectory,
-	SV_True, SV_Undefined, With } from '../../dist/private/MsAst'
+	ObjSimple, Quote, QuoteTemplate, SpecialVal, Splat, SV_False, SV_Null, SV_True, SV_Undefined,
+	With } from '../../dist/private/MsAst'
 import { aAccess, aDeclare, assignAZero, blockPass, focusAccess, focusDeclare, loc, one, two, zero
 	} from './util/ast-util'
 import { test } from './util/test-asts'
@@ -109,11 +109,11 @@ describe('expressions', () => {
 						b
 					c`,
 			new Quote(loc, [ 'a\n\tb\nc' ]),
-			'`a\\n\\tb\\nc`')
+			'`a\n\tb\nc`')
 
 		test(
 			'"a\\{\\n"',
-			new Quote(loc, [ 'a\{\n' ]),
+			new Quote(loc, [ 'a\\{\\n' ]),
 			'`a\\{\\n`')
 
 		test(

@@ -347,7 +347,7 @@ export default (context, sourceString) => {
 			const characterEaten = eat()
 			// Generally, the type of a token is determined by the first character.
 			switch (characterEaten) {
-				case Zero:
+				case NullChar:
 					return
 				case CloseBrace:
 					context.check(isInQuote, loc, () =>
@@ -551,6 +551,7 @@ export default (context, sourceString) => {
 		}
 
 		// Current string literal part of quote we are reading.
+		// This is a raw value.
 		let read = ''
 
 		const maybeOutputRead = () => {
@@ -568,9 +569,14 @@ export default (context, sourceString) => {
 			const char = eat()
 			switch (char) {
 				case Backslash: {
-					read = read + quoteEscape(eat())
+					const next = eat()
+					read = read + `\\${String.fromCharCode(next)}`
 					break
 				}
+				// Since these compile to template literals, have to remember to escape.
+				case Backtick:
+					read = read + '\\`'
+					break
 				case OpenBrace: {
 					maybeOutputRead()
 					const l = locSingle()
@@ -579,6 +585,7 @@ export default (context, sourceString) => {
 					closeGroups(l.end, G_Parenthesis)
 					break
 				}
+				// Don't need `case NullChar:` because that's always preceded by a newline.
 				case Newline: {
 					const originalPos = pos()
 					// Go back to before we ate it.
@@ -614,17 +621,6 @@ export default (context, sourceString) => {
 		closeGroups(pos(), G_Quote)
 	}
 
-	const quoteEscape = ch => {
-		switch (ch) {
-			case OpenBrace: return '{'
-			case LetterN: return '\n'
-			case LetterT: return '\t'
-			case Quote: return '"'
-			case Backslash: return '\\'
-			default: context.fail(pos, `No need to escape ${showChar(ch)}`)
-		}
-	}
-
 	curGroup = new Group(new Loc(StartPos, null), [ ], G_Block)
 	openLine(StartPos)
 
@@ -655,9 +651,7 @@ const
 	Hash = cc('#'),
 	Hyphen = cc('-'),
 	LetterB = cc('b'),
-	LetterN = cc('n'),
 	LetterO = cc('o'),
-	LetterT = cc('t'),
 	LetterX = cc('x'),
 	N0 = cc('0'),
 	N1 = cc('1'),
@@ -670,6 +664,7 @@ const
 	N8 = cc('8'),
 	N9 = cc('9'),
 	Newline = cc('\n'),
+	NullChar = cc('\0'),
 	OpenBrace = cc('{'),
 	OpenBracket = cc('['),
 	OpenParenthesis = cc('('),
@@ -678,8 +673,7 @@ const
 	Semicolon = cc(';'),
 	Space = cc(' '),
 	Tab = cc('\t'),
-	Tilde = cc('~'),
-	Zero = cc('\0')
+	Tilde = cc('~')
 
 const
 	showChar = char => code(String.fromCharCode(char)),
