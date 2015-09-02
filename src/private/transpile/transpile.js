@@ -10,9 +10,9 @@ import { functionExpressionThunk, idCached, loc, member, propertyIdOrLiteralCach
 	} from 'esast/dist/util'
 import manglePath from '../manglePath'
 import * as MsAstTypes from '../MsAst'
-import { AssignSingle, Call, L_And, L_Or, LD_Lazy, LD_Mutable, MI_Get, MI_Plain, MI_Set, MS_Mutate,
-	MS_New, MS_NewMutable, Pattern, Splat, SD_Debugger, SV_Contains, SV_False, SV_Name, SV_Null,
-	SV_Sub, SV_Super, SV_True, SV_Undefined, SwitchDoPart } from '../MsAst'
+import { AssignSingle, Call, L_And, L_Or, LD_Lazy, LD_Mutable, Member, MI_Get, MI_Plain, MI_Set,
+	MS_Mutate, MS_New, MS_NewMutable, Pattern, Splat, SD_Debugger, SV_Contains, SV_False, SV_Name,
+	SV_Null, SV_Sub, SV_Super, SV_True, SV_Undefined, SwitchDoPart } from '../MsAst'
 import { assert, cat, flatMap, flatOpMap, ifElse, isEmpty,
 	implementMany, isPositive, opIf, opMap, tail, unshift } from '../util'
 import { AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj,
@@ -20,10 +20,10 @@ import { AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, Decla
 	IdExtract, IdLexicalThis, LitEmptyString, LitNull, LitStrExports, LitStrThrow, LitZero,
 	ReturnBuilt, ReturnExports, ReturnRes, SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch,
 	UseStrict } from './ast-constants'
-import { IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertNot, msAssoc,
-	msCheckContains, msError, msExtract, msGet, msGetDefaultExport, msGetModule, msLazy, msLazyGet,
-	msLazyGetModule, msNewMutableProperty, msNewProperty, msSet, msSetName, msSetLazy,	msSome,
-	msSymbol, MsNone } from './ms-call'
+import { IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot,
+	msAssertNotMember, msAssoc, msCheckContains, msError, msExtract, msGet, msGetDefaultExport,
+	msGetModule, msLazy, msLazyGet, msLazyGetModule, msNewMutableProperty, msNewProperty, msSet,
+	msSetName, msSetLazy,	msSome, msSymbol, MsNone } from './ms-call'
 import { accessLocalDeclare, declare, forStatementInfinite, idForDeclareCached,
 	opTypeCheckForLocalDeclare } from './util'
 
@@ -71,8 +71,15 @@ implementMany(MsAstTypes, 'transpile', {
 			() => {
 				if (this.condition instanceof Call) {
 					const call = this.condition
-					const ass = this.negate ? msAssertNot : msAssert
-					return ass(t0(call.called), ...call.args.map(t0))
+					const called = call.called
+					const args = call.args.map(t0)
+					if (called instanceof Member) {
+						const ass = this.negate ? msAssertNotMember : msAssertMember
+						return ass(t0(called.object), new Literal(called.name), ...args)
+					} else {
+						const ass = this.negate ? msAssertNot : msAssert
+						return ass(t0(called), ...args)
+					}
 				} else
 					return new IfStatement(failCond(), ThrowAssertFail)
 			})
