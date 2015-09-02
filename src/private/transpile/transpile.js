@@ -318,7 +318,7 @@ implementMany(MsAstTypes, 'transpile', {
 
 	LocalAccess() {
 		return this.name === 'this' ?
-			(isInConstructor ? new ThisExpression() : IdLexicalThis) :
+			isInConstructor ? new ThisExpression() : IdLexicalThis :
 			accessLocalDeclare(verifyResults.localDeclareForAccess(this))
 	},
 
@@ -372,7 +372,7 @@ implementMany(MsAstTypes, 'transpile', {
 	Not() { return new UnaryExpression('!', t0(this.arg)) },
 
 	ObjEntryAssign() {
-		return (this.assign instanceof AssignSingle && !this.assign.assignee.isLazy()) ?
+		return this.assign instanceof AssignSingle && !this.assign.assignee.isLazy() ?
 			t1(this.assign, val =>
 				new AssignmentExpression('=', member(IdBuilt, this.assign.assignee.name), val)) :
 			cat(
@@ -660,7 +660,7 @@ const
 			return makeDeclarator(assignee, get, isLazy, isExport)
 		})
 		// Getting lazy module is done by ms.lazyGetModule.
-		const val = (isLazy && !isModule) ? lazyWrap(value) : value
+		const val = isLazy && !isModule ? lazyWrap(value) : value
 		return unshift(new VariableDeclarator(idDestructured, val), declarators)
 	},
 
@@ -684,7 +684,7 @@ const
 	},
 
 	maybeWrapInCheckContains = (ast, opType, name) =>
-		(context.opts.includeChecks() && opType !== null) ?
+		context.opts.includeChecks() && opType !== null ?
 			msCheckContains(t0(opType), ast, new Literal(name)) :
 			ast,
 

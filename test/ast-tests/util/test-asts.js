@@ -15,14 +15,14 @@ export const test = (ms, ast, js, opts) => {
 
 	const isMultiLineTest = ast instanceof Array
 	ast = isMultiLineTest ?
-		(last(ast) instanceof Val ?
+		last(ast) instanceof Val ?
 			new BlockWithReturn(loc, rtail(ast), last(ast)) :
-			new BlockDo(loc, ast)) :
+			new BlockDo(loc, ast) :
 		ast
 	ms = dedent(ms)
 	js = dedent(js)
 	const warnings = opts.warnings || [ ]
-	const name = opts.name || ('`' + ms.replace(/\n/g, '; ').replace(/\t/g, '') + '`')
+	const name = opts.name || `\`${ms.replace(/\n\t+/g, '; ')}\``
 
 	it(name, () => {
 		const context = new CompileContext(options)

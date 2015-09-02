@@ -185,7 +185,7 @@ const
 // parseBlock privates
 const
 	_tryTakeLastVal = lines =>
-		(!isEmpty(lines) && last(lines) instanceof Val) ?
+		!isEmpty(lines) && last(lines) instanceof Val ?
 			[ rtail(lines), last(lines) ] :
 			[ lines, null ],
 
@@ -1140,7 +1140,7 @@ const
 	}
 
 const parseQuote = tokens =>
-	new Quote(tokens.loc, tokens.map(_ => (typeof _ === 'string') ? _ : parseSingle(_)))
+	new Quote(tokens.loc, tokens.map(_ => typeof _ === 'string' ? _ : parseSingle(_)))
 
 const parseWith = tokens => {
 	const [ before, block ] = beforeAndBlock(tokens)
