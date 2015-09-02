@@ -16,7 +16,7 @@ describe('locals', () => {
 		],
 		`
 			const ze_45ro=0;
-			throw _ms.error(ze_45ro)`,
+			throw ze_45ro`,
 		{ name: 'LocalAccess' })
 
 	describe('AssignSingle', () => {
@@ -47,7 +47,7 @@ describe('locals', () => {
 		funDo([ new Debug(loc, [ new Throw(loc) ]) ]),
 		`
 			()=>{
-				throw _ms.error("An error occurred.")
+				throw new (Error)("An error occurred.")
 			}`)
 
 	test(

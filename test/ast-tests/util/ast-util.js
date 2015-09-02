@@ -1,6 +1,6 @@
 import Loc, { StartPos } from 'esast/dist/Loc'
 import { AssignSingle, BlockDo, BlockWithReturn, Fun, LocalDeclare, LocalAccess, LocalDeclareFocus,
-	NumberLiteral, SD_Debugger, SpecialDo } from '../../../dist/private/MsAst'
+	NumberLiteral, Quote, SD_Debugger, SpecialDo } from '../../../dist/private/MsAst'
 
 export const
 	loc = new Loc(StartPos, StartPos),
@@ -15,6 +15,8 @@ export const
 	zero = new NumberLiteral(loc, '0'),
 	one = new NumberLiteral(loc, '1'),
 	two = new NumberLiteral(loc, '2'),
+
+	strA = Quote.forString(loc, 'a'),
 
 	assignAZero = new AssignSingle(loc, aDeclare, zero),
 	assignFocusZero = new AssignSingle(loc, focusDeclare, zero),

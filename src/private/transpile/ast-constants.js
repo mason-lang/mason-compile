@@ -5,6 +5,7 @@ import { member } from 'esast/dist/util'
 import { _IdError, throwErrorFromString } from './util'
 
 export const
+	GlobalError = new Identifier('Error'),
 	IdArguments = new Identifier('arguments'),
 	IdBuilt = new Identifier('built'),
 	IdDefine = new Identifier('define'),

@@ -1,5 +1,5 @@
 import { Assert, Throw } from '../../dist/private/MsAst'
-import { loc, one, zero } from './util/ast-util'
+import { loc, one, strA, zero } from './util/ast-util'
 import { test } from './util/test-asts'
 
 describe('except', () => {
@@ -19,20 +19,24 @@ describe('assert', () => {
 	test(
 		'assert! 0 throw! 1',
 		new Assert(loc, false, zero, one),
-		'if(! 0)throw _ms.error(1)')
+		'if(! 0)throw 1')
 	test(
 		'forbid! 0 throw! 1',
 		new Assert(loc, true, zero, one),
-		'if(0)throw _ms.error(1)')
+		'if(0)throw 1')
 })
 
 describe('throw', () => {
 	test(
 		'throw!',
 		new Throw(loc),
-		'throw _ms.error("An error occurred.")')
+		'throw new (Error)("An error occurred.")')
+	test(
+		'throw! "a"',
+		new Throw(loc, strA),
+		'throw new (Error)(`a`)')
 	test(
 		'throw! 0',
 		new Throw(loc, zero),
-		'throw _ms.error(0)')
+		'throw 0')
 })

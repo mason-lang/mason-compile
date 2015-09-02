@@ -12,18 +12,18 @@ import manglePath from '../manglePath'
 import * as MsAstTypes from '../MsAst'
 import { AssignSingle, Call, L_And, L_Or, LD_Lazy, LD_Mutable, Member, MI_Get, MI_Plain, MI_Set,
 	MS_Mutate, MS_New, MS_NewMutable, Pattern, Splat, SD_Debugger, SV_Contains, SV_False, SV_Name,
-	SV_Null, SV_Sub, SV_Super, SV_True, SV_Undefined, SwitchDoPart } from '../MsAst'
+	SV_Null, SV_Sub, SV_Super, SV_True, SV_Undefined, SwitchDoPart, Quote } from '../MsAst'
 import { assert, cat, flatMap, flatOpMap, ifElse, isEmpty,
 	implementMany, isPositive, opIf, opMap, tail, unshift } from '../util'
 import { AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj,
-	ExportsDefault, ExportsGet, IdArguments, IdBuilt, IdDefine, IdExports,
-	IdExtract, IdLexicalThis, LitEmptyString, LitNull, LitStrExports, LitStrThrow, LitZero,
+	ExportsDefault, ExportsGet, IdArguments, IdBuilt, IdDefine, IdExports, IdExtract,
+	IdLexicalThis, GlobalError, LitEmptyString, LitNull, LitStrExports, LitStrThrow, LitZero,
 	ReturnBuilt, ReturnExports, ReturnRes, SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch,
 	UseStrict } from './ast-constants'
 import { IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot,
-	msAssertNotMember, msAssoc, msCheckContains, msError, msExtract, msGet, msGetDefaultExport,
-	msGetModule, msLazy, msLazyGet, msLazyGetModule, msNewMutableProperty, msNewProperty, msSet,
-	msSetName, msSetLazy,	msSome, msSymbol, MsNone } from './ms-call'
+	msAssertNotMember, msAssoc, msCheckContains, msExtract, msGet, msGetDefaultExport, msGetModule,
+	msLazy, msLazyGet, msLazyGetModule, msNewMutableProperty, msNewProperty, msSet, msSetName,
+	msSetLazy, msSome, msSymbol, MsNone } from './ms-call'
 import { accessLocalDeclare, declare, forStatementInfinite, idForDeclareCached,
 	opTypeCheckForLocalDeclare } from './util'
 
@@ -67,7 +67,7 @@ implementMany(MsAstTypes, 'transpile', {
 		}
 
 		return ifElse(this.opThrown,
-			thrown => new IfStatement(failCond(),new  ThrowStatement(msError(t0(thrown)))),
+			_ => new IfStatement(failCond(), doThrow(_)),
 			() => {
 				if (this.condition instanceof Call) {
 					const call = this.condition
@@ -457,8 +457,8 @@ implementMany(MsAstTypes, 'transpile', {
 
 	Throw() {
 		return ifElse(this.opThrown,
-			_ => new ThrowStatement(msError(t0(_))),
-			() => new ThrowStatement(msError(LitStrThrow)))
+			_ => doThrow(_),
+			() => new ThrowStatement(new NewExpression(GlobalError, [ LitStrThrow ])))
 	},
 
 	With() {
@@ -552,6 +552,11 @@ const
 		isInConstructor = false
 		return res
 	},
+
+	doThrow = thrown =>
+		new ThrowStatement(thrown instanceof Quote ?
+			new NewExpression(GlobalError, [ t0(thrown) ]) :
+			t0(thrown)),
 
 	transpileBlock = (returned, lines, lead, opDeclareRes, opOut) => {
 		// TODO:ES6 Optional arguments
