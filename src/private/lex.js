@@ -1,7 +1,6 @@
 import Loc, { Pos, StartLine, StartPos, StartColumn, singleCharLoc } from 'esast/dist/Loc'
 import { code } from '../CompileError'
 import { NumberLiteral } from './MsAst'
-import { NonNameCharacters } from './language'
 import { DotName, Group, G_Block, G_Bracket, G_Line, G_Parenthesis, G_Space, G_Quote,
 	isKeyword, Keyword, KW_AssignMutable, KW_Ellipsis, KW_Focus, KW_Fun, KW_FunDo, KW_FunGen,
 	KW_FunGenDo, KW_FunThis, KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo, KW_Lazy, KW_LocalMutate,
@@ -688,4 +687,7 @@ const
 	isDigitBinary = _charPred('01'),
 	isDigitOctal = _charPred('01234567'),
 	isDigitHex = _charPred('0123456789abcdef'),
-	isNameCharacter = _charPred(NonNameCharacters, true)
+
+	// Anything not explicitly reserved is a valid name character.
+	reservedCharacters = '`#%^&\\;,',
+	isNameCharacter = _charPred('()[]{}.:| \n\t"' + reservedCharacters, true)

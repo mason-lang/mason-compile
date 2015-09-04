@@ -78,28 +78,28 @@ export default class Slice {
 		return opIf(!isEmpty(out), () => push(out, { before: this._chopStart(iLast) }))
 	}
 
-	each(f) {
+	* [Symbol.iterator]() {
 		for (let i = this.start; i < this.end; i = i + 1)
-			f(this.tokens[i])
+			yield this.tokens[i]
+	}
+
+	* slices() {
+		for (const _ of this)
+			yield Slice.group(_)
 	}
 
 	map(f) {
 		const out = []
-		for (let i = this.start; i < this.end; i = i + 1)
-			out.push(f(this.tokens[i]))
-		return out
-	}
-	mapSlices(f) {
-		const out = []
-		for (let i = this.start; i < this.end; i = i + 1)
-			out.push(f(Slice.group(this.tokens[i])))
+		for (const _ of this)
+			out.push(f(_))
 		return out
 	}
 
-	reduce(reducer, start) {
-		let acc = start
-		this.each(_ => acc = reducer(acc, _))
-		return acc
+	mapSlices(f) {
+		const out = []
+		for (const _ of this.slices())
+			out.push(f(_))
+		return out
 	}
 
 	_chop(newStart, newEnd) {

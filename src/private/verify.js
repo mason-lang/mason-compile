@@ -3,8 +3,7 @@ import * as MsAstTypes from './MsAst'
 import { Assign, AssignDestructure, AssignSingle, BlockVal, Call, Class, Debug, Do, ForVal, Fun,
 	LocalDeclareBuilt, LocalDeclareFocus, LocalDeclareRes, ObjEntry, Pattern, Yield, YieldTo
 	} from './MsAst'
-import { assert, cat, eachReverse, head, ifElse, implementMany,
-	isEmpty, iteratorToArray, opEach } from './util'
+import { assert, cat, eachReverse, head, ifElse, implementMany, isEmpty, opEach } from './util'
 import VerifyResults, { LocalInfo } from './VerifyResults'
 
 /*
@@ -79,7 +78,10 @@ const
 
 	accessLocal = (access, name) => {
 		const declare = getLocalDeclare(name, access.loc)
-		results.localAccessToDeclare.set(access, declare)
+		setLocalDeclareAccessed(declare, access)
+	},
+
+	setLocalDeclareAccessed = (declare, access) => {
 		_addLocalAccess(results.localDeclareToInfo.get(declare), access, isInDebug)
 	},
 
@@ -356,8 +358,6 @@ implementMany(MsAstTypes, 'verify', {
 		// name set by AssignSingle
 	},
 
-	GlobalAccess() { },
-
 	Ignore() {
 		for (const _ of this.ignored)
 			accessLocal(this, _)
@@ -365,7 +365,24 @@ implementMany(MsAstTypes, 'verify', {
 
 	Lazy() { withBlockLocals(() => this.value.verify()) },
 
-	LocalAccess() { accessLocal(this, this.name) },
+	LocalAccess() {
+		const declare = locals.get(this.name)
+		if (declare === undefined) {
+			const builtinPath = context.opts.builtinNameToPath.get(this.name)
+			if (builtinPath === undefined)
+				failMissingLocal(this.loc, this.name)
+			else {
+				const names = results.builtinPathToNames.get(builtinPath)
+				if (names === undefined)
+					results.builtinPathToNames.set(builtinPath, new Set([ this.name ]))
+				else
+					names.add(this.name)
+			}
+		} else {
+			results.localAccessToDeclare.set(this, declare)
+			setLocalDeclareAccessed(declare, this)
+		}
+	},
 
 	// Adding LocalDeclares to the available locals is done by Fun or lineNewLocals.
 	LocalDeclare() { verifyOpEach(this.opType) },
@@ -410,6 +427,7 @@ implementMany(MsAstTypes, 'verify', {
 		// No need to verify this.doUses.
 		for (const _ of this.uses)
 			_.verify()
+		verifyOpEach(this.opUseGlobal)
 		withInDebug(() => {
 			for (const _ of this.debugUses)
 				_.verify()
@@ -493,19 +511,8 @@ implementMany(MsAstTypes, 'verify', {
 		verifyOpEach(this.opThrown)
 	},
 
-	Use() {
-		// Since Uses are always in the outermost scope, don't have to worry about shadowing.
-		// So we mutate `locals` directly.
-		const addUseLocal = _ => {
-			const prev = locals.get(_.name)
-			context.check(prev === undefined, _.loc, () =>
-				`${code(_.name)} already imported at ${prev.loc}`)
-			verifyLocalDeclare(_)
-			setLocal(_)
-		}
-		this.used.forEach(addUseLocal)
-		opEach(this.opUseDefault, addUseLocal)
-	},
+	Use: verifyUse,
+	UseGlobal: verifyUse,
 
 	With() {
 		this.value.verify()
@@ -559,6 +566,21 @@ function verifyExcept() {
 	verifyOpEach(this._finally)
 }
 
+function verifyUse() {
+	// Since Uses are always in the outermost scope, don't have to worry about shadowing.
+	// So we mutate `locals` directly.
+	const addUseLocal = _ => {
+		const prev = locals.get(_.name)
+		context.check(prev === undefined, _.loc, () =>
+			`${code(_.name)} already imported at ${prev.loc}`)
+		verifyLocalDeclare(_)
+		setLocal(_)
+	}
+	for (const _ of this.used)
+		addUseLocal(_)
+	opEach(this.opUseDefault, addUseLocal)
+}
+
 // Helpers specific to certain MsAst types:
 const
 	verifyFor = forLoop => {
@@ -600,11 +622,16 @@ const
 const
 	getLocalDeclare = (name, accessLoc) => {
 		const declare = locals.get(name)
-		context.check(declare !== undefined, accessLoc, () => {
-			const showLocals = code(iteratorToArray(locals.keys()).join(' '))
+		if (declare === undefined)
+			failMissingLocal(accessLoc, name)
+		return declare
+	},
+
+	failMissingLocal = (loc, name) => {
+		context.fail(loc, () => {
+			const showLocals = code(Array(...locals.keys()).join(' '))
 			return `No such local ${code(name)}.\nLocals are:\n${showLocals}.`
 		})
-		return declare
 	},
 
 	lineNewLocals = line =>

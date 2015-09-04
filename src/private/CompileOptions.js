@@ -29,9 +29,8 @@ export default class CompileOptions {
 			checks: true,
 			'warn-as-error': false,
 			useBoot: true,
-			mslPath: 'msl'
+			mslPath: 'msl',
 		}
-
 		for (const _ in defaults)
 			define(_, defaults[_])
 
@@ -44,6 +43,9 @@ export default class CompileOptions {
 				throw new Error('Either supply `inFile` option or make `includeModuleName` false.')
 		} else
 			type(this._inFile, String)
+
+		const builtins = opts.builtins || defaultBuiltins(this._mslPath)
+		this.builtinNameToPath = generateBuiltinsMap(builtins)
 	}
 
 	moduleName() {
@@ -75,4 +77,44 @@ const
 		last(path.split('.')),
 	noExt = path =>
 		// - 1 for the '.'
-		path.substring(0, path.length - 1 - extname(path).length)
+		path.substring(0, path.length - 1 - extname(path).length),
+	defaultBuiltins = mslPath => {
+		const builtins = {
+			global: [ 'Array', 'Boolean', 'Error', 'Function', 'Math', 'Number', 'Object',
+				'RegExp', 'String', 'Symbol' ],
+			'msl.@.?': [ 'un-?' ],
+			'msl.@.@': [ '_', '-!', 'all?', 'empty', 'empty?', 'empty!', 'iterator' ],
+			'msl.@.Map.Map': [ '_', 'assoc!', '?get' ],
+			'msl.@.Range': [ '_' ],
+			'msl.@.Seq.Seq': [ '_', '+>!' ],
+			'msl.@.Seq.Stream': [ '_' ],
+			'msl.@.Set.Set': [ '_' ],
+			'msl.compare': [ '=?', '<?', '<=?', '>?', '>=?' ],
+			'msl.Generator': [ 'gen-next!' ],
+			'msl.math.methods': [ '+', '-', '*', '/' ],
+			'msl.Type.Kind': [ '_', 'kind!', 'self-kind!' ],
+			'msl.Type.Method': [ '_', 'impl!', 'impl-for', 'self-impl!' ],
+			'msl.Type.Type': [ '=>' ]
+		}
+		if (mslPath !== 'msl')
+			for (let key in builtins) {
+				const x = builtins[key]
+				delete builtins[key]
+				builtins[key.replace(/msl/g, opts.mslPath)] = x
+			}
+		return builtins
+	},
+	generateBuiltinsMap = builtins => {
+		const m = new Map()
+		for (const path in builtins) {
+			const realPath = path.replace(/\./g, '/')
+			for (let used of builtins[path]) {
+				if (used === '_')
+					used = last(path.split('.'))
+				if (m.has(used))
+					throw new Error(`Builtin ${used} defined more than once.`)
+				m.set(used, realPath)
+			}
+		}
+		return m
+	}

@@ -54,13 +54,6 @@ export const
 	// -0 is negative
 	isPositive = n => n >= 0 && 1 / n !== -Infinity,
 
-	iteratorToArray = iter => {
-		const out = []
-		for (let _ of iter)
-			out.push(_)
-		return out
-	},
-
 	last = arr => {
 		assert(!isEmpty(arr))
 		return arr[arr.length - 1]

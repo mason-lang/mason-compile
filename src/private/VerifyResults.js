@@ -14,6 +14,11 @@ export default class VerifyResults {
 		// Maps Class/Fun to name if one is appropriate.
 		// Maps *every* SV_Name to the nearest name.
 		this.names = new Map()
+		// String -> Set.
+		// For each path, the names of each builtin used.
+		// Like the inverse of context.opts.builtinNameToPath,
+		// but only includes names actually used.
+		this.builtinPathToNames = new Map()
 	}
 
 	isDebugLocal(localDeclare) {

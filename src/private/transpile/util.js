@@ -9,10 +9,10 @@ import { t0 } from './transpile'
 export const _IdError = new Identifier('Error')
 
 export const
-	accessLocalDeclare = localDeclare =>
-		localDeclare.isLazy() ?
-			msUnlazy(idForDeclareCached(localDeclare)) :
-			new Identifier(idForDeclareCached(localDeclare).name),
+	accessLocalDeclare = localDeclare => {
+		const id = idForDeclareCached(localDeclare)
+		return localDeclare.isLazy() ? msUnlazy(id) : new Identifier(id.name)
+	},
 
 	declare = (localDeclare, val) =>
 		new VariableDeclaration('const',

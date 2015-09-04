@@ -11,10 +11,11 @@ import { functionExpressionThunk, idCached, loc, member, propertyIdOrLiteralCach
 import manglePath from '../manglePath'
 import * as MsAstTypes from '../MsAst'
 import { AssignSingle, Call, L_And, L_Or, LD_Lazy, LD_Mutable, Member, MI_Get, MI_Plain, MI_Set,
-	MS_Mutate, MS_New, MS_NewMutable, Pattern, Splat, SD_Debugger, SV_Contains, SV_False, SV_Name,
-	SV_Null, SV_Sub, SV_Super, SV_True, SV_Undefined, SwitchDoPart, Quote } from '../MsAst'
+	MS_Mutate, MS_New, MS_NewMutable, LocalDeclare, Pattern, Splat, SD_Debugger, SV_Contains,
+	SV_False, SV_Name, SV_Null, SV_Sub, SV_Super, SV_True, SV_Undefined, SwitchDoPart, Quote, Use
+	} from '../MsAst'
 import { assert, cat, flatMap, flatOpMap, ifElse, isEmpty,
-	implementMany, isPositive, opIf, opMap, tail, unshift } from '../util'
+	implementMany, isPositive, last, opIf, opMap, tail, unshift } from '../util'
 import { AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj,
 	ExportsDefault, ExportsGet, IdArguments, IdBuilt, IdDefine, IdExports, IdExtract,
 	IdLexicalThis, GlobalError, LitEmptyString, LitNull, LitStrExports, LitStrThrow, LitZero,
@@ -28,12 +29,14 @@ import { accessLocalDeclare, declare, forStatementInfinite, idForDeclareCached,
 	opTypeCheckForLocalDeclare } from './util'
 
 let context, verifyResults, isInGenerator, isInConstructor
+let nextDestructuredId
 
 export default (_context, moduleExpression, _verifyResults) => {
 	context = _context
 	verifyResults = _verifyResults
 	isInGenerator = false
 	isInConstructor = false
+	nextDestructuredId = 0
 	const res = t0(moduleExpression)
 	// Release for garbage collection.
 	context = verifyResults = undefined
@@ -314,12 +317,14 @@ implementMany(MsAstTypes, 'transpile', {
 		return isPositive(value) ? lit : new UnaryExpression('-', lit)
 	},
 
-	GlobalAccess() { return new Identifier(this.name) },
-
 	LocalAccess() {
-		return this.name === 'this' ?
-			isInConstructor ? new ThisExpression() : IdLexicalThis :
-			accessLocalDeclare(verifyResults.localDeclareForAccess(this))
+		if (this.name === 'this')
+			return isInConstructor ? new ThisExpression() : IdLexicalThis
+		else {
+			const ld = verifyResults.localDeclareForAccess(this)
+			// If ld missing, this is a builtin, and builtins are never lazy
+			return ld === undefined ? idCached(this.name) : accessLocalDeclare(ld)
+		}
 	},
 
 	LocalDeclare() { return new Identifier(idForDeclareCached(this).name) },
@@ -357,10 +362,31 @@ implementMany(MsAstTypes, 'transpile', {
 		const body = cat(
 			tLines(this.lines),
 			opMap(this.opDefaultExport, _ => new AssignmentExpression('=', ExportsDefault, t0(_))))
+
+		const otherUses = this.uses.concat(this.debugUses)
+
+		verifyResults.builtinPathToNames.forEach((used, path) => {
+			if (path !== 'global') {
+				const usedDeclares = [ ]
+				let opUseDefault = null
+				let defaultName = last(path.split('/'))
+				for (const name of used) {
+					const declare = LocalDeclare.plain(this.loc, name)
+					if (name === defaultName)
+						opUseDefault = declare
+					else
+						usedDeclares.push(declare)
+				}
+				otherUses.push(new Use(this.loc, path, usedDeclares, opUseDefault))
+			}
+		})
+
+		const amd = amdWrapModule(this.doUses, otherUses, body)
+
 		return new Program(cat(
 			opIf(context.opts.includeUseStrict(), () => UseStrict),
 			opIf(context.opts.includeAmdefine(), () => AmdefineHeader),
-			toStatement(amdWrapModule(this.doUses, this.uses.concat(this.debugUses), body))))
+			toStatement(amd)))
 	},
 
 	New() {
@@ -603,20 +629,29 @@ const
 			LitStrExports,
 			allUsePaths.map(_ => new Literal(_))))
 
-		const useIdentifiers = allUses.map((_, i) => idCached(`${pathBaseName(_.path)}_${i}`))
+		const useToIdentifier = new Map()
+		const useIdentifiers = [ ]
+		for (let i = 0; i < allUses.length; i = i + 1) {
+			const _ = allUses[i]
+			const id = idCached(`${pathBaseName(_.path)}_${i}`)
+			useIdentifiers.push(id)
+			useToIdentifier.set(_, id)
+		}
 
 		const useArgs = cat(opIf(useBoot, () => IdBoot), IdExports, useIdentifiers)
 
 		const doBoot = opIf(useBoot, () => new ExpressionStatement(msGetModule(IdBoot)))
 
-		const useDos = doUses.map((use, i) =>
-			loc(new ExpressionStatement(msGetModule(useIdentifiers[i])), use.loc))
+		const useDos = doUses.map(use =>
+			loc(new ExpressionStatement(msGetModule(useToIdentifier.get(use))), use.loc))
 
-		const opUseDeclare = opIf(!isEmpty(otherUses),
-			() => new VariableDeclaration('const', flatMap(otherUses, (use, i) =>
-				useDeclarators(use, useIdentifiers[i + doUses.length]))))
+		// Extracts used values from the modules.
+		const opDeclareUsedLocals = opIf(!isEmpty(otherUses),
+			() => new VariableDeclaration('const',
+				flatMap(otherUses, use => useDeclarators(use, useToIdentifier.get(use)))))
 
-		const fullBody = new BlockStatement(cat(doBoot, useDos, opUseDeclare, body, ReturnExports))
+		const fullBody = new BlockStatement(cat(
+			doBoot, useDos, opDeclareUsedLocals, body, ReturnExports))
 
 		const lazyBody =
 			context.opts.lazyModule() ?
@@ -652,7 +687,8 @@ const
 // General utils. Not in util.js because these close over context.
 const
 	makeDestructureDeclarators = (assignees, isLazy, value, isModule, isExport) => {
-		const destructuredName = `_$${assignees[0].loc.start.line}`
+		const destructuredName = `_$${nextDestructuredId}`
+		nextDestructuredId = nextDestructuredId + 1
 		const idDestructured = new Identifier(destructuredName)
 		const declarators = assignees.map(assignee => {
 			// TODO: Don't compile it if it's never accessed

@@ -39,6 +39,7 @@ export default class MsAst {
 		constructor(loc,
 			doUses, // Array[UseDo]
 			uses, // Array[Use]
+			opUseGlobal, // Nullable[UseGlobal]
 			debugUses, // Array[Use]
 			lines, // Array[Do]
 			exports, // Array[LocalDeclare]
@@ -46,6 +47,7 @@ export default class MsAst {
 			super(loc)
 			this.doUses = doUses
 			this.uses = uses
+			this.opUseGlobal = opUseGlobal
 			this.debugUses = debugUses
 			this.lines = lines
 			this.exports = exports
@@ -67,6 +69,14 @@ export default class MsAst {
 			opUseDefault) { // Opt[LocalDeclare]
 			super(loc)
 			this.path = path
+			this.used = used
+			this.opUseDefault = opUseDefault
+		}
+	}
+
+	export class UseGlobal extends MsAst {
+		constructor(loc, used /* Array[LocalDeclare] */, opUseDefault /* Opt[LocalDeclare] */) {
+			super(loc)
 			this.used = used
 			this.opUseDefault = opUseDefault
 		}
@@ -138,13 +148,6 @@ export default class MsAst {
 		}
 
 		constructor(loc, name /* String */) {
-			super(loc)
-			this.name = name
-		}
-	}
-
-	export class GlobalAccess extends Val {
-		constructor(loc, name /* JsGlobals */) {
 			super(loc)
 			this.name = name
 		}

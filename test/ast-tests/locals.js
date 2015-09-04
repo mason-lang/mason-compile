@@ -37,7 +37,7 @@ describe('locals', () => {
 	test(
 		'a b = 0',
 		new AssignDestructure(loc, [ aDeclare, bDeclare ], zero),
-		'const _$1=0,a=_$1.a,b=_$1.b')
+		'const _$0=0,a=_$0.a,b=_$0.b')
 
 	test(
 		// Must test inside of a Fun because `debug` can only transpile in a block context.

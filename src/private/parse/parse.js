@@ -1,16 +1,15 @@
 import Loc from 'esast/dist/Loc'
 import { code } from '../../CompileError'
-import { JsGlobals } from '../language'
 import { Assert, AssignDestructure, AssignSingle, BagEntry, BagEntryMany, BagSimple, BlockBag,
 	BlockDo, BlockMap, BlockObj, BlockValThrow, BlockWithReturn, BlockWrap, Break, BreakWithVal,
 	Call, CaseDo, CaseDoPart, CaseVal, CaseValPart, Catch, Class, ClassDo, ConditionalDo,
 	ConditionalVal, Debug, Ignore, Iteratee, NumberLiteral, ExceptDo, ExceptVal, ForBag, ForDo,
-	ForVal, Fun, GlobalAccess, L_And, L_Or, Lazy, LD_Const, LD_Lazy, LD_Mutable, LocalAccess,
-	LocalDeclare, LocalDeclareFocus, LocalDeclareName, LocalDeclareRes, LocalDeclareThis,
-	LocalMutate, Logic, MapEntry, Member, MemberSet, MethodImpl, MI_Get, MI_Plain, MI_Set, Module,
-	MS_Mutate, MS_New, MS_NewMutable, New, Not, ObjEntry, ObjEntryAssign, ObjEntryComputed,
-	ObjPair, ObjSimple, Pattern, Quote, QuoteTemplate, SD_Debugger, SpecialDo, SpecialVal, SV_Name,
-	SV_Null, Splat, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart, Throw, Val, Use, UseDo, With,
+	ForVal, Fun, L_And, L_Or, Lazy, LD_Const, LD_Lazy, LD_Mutable, LocalAccess, LocalDeclare,
+	LocalDeclareFocus, LocalDeclareName, LocalDeclareRes, LocalDeclareThis, LocalMutate, Logic,
+	MapEntry, Member, MemberSet, MethodImpl, MI_Get, MI_Plain, MI_Set, Module, MS_Mutate, MS_New,
+	MS_NewMutable, New, Not, ObjEntry, ObjEntryAssign, ObjEntryComputed, ObjPair, ObjSimple,
+	Pattern, Quote, QuoteTemplate, SD_Debugger, SpecialDo, SpecialVal, SV_Name, SV_Null, Splat,
+	SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart, Throw, Val, Use, UseDo, UseGlobal, With,
 	Yield, YieldTo } from '../MsAst'
 import { DotName, Group, G_Block, G_Bracket, G_Parenthesis, G_Space, G_Quote, isGroup, isKeyword,
 	Keyword, KW_And, KW_As, KW_Assert, KW_AssertNot, KW_Assign, KW_AssignMutable, KW_Break,
@@ -59,10 +58,11 @@ const
 
 const parseModule = tokens => {
 	// Use statements must appear in order.
-	const [ doUses, rest0 ] = tryParseUses(KW_UseDo, tokens)
-	const [ plainUses, rest1 ] = tryParseUses(KW_Use, rest0)
-	const [ lazyUses, rest2 ] = tryParseUses(KW_UseLazy, rest1)
-	const [ debugUses, rest3 ] = tryParseUses(KW_UseDebug, rest2)
+	const { uses: doUses, rest: rest0 } = tryParseUses(KW_UseDo, tokens)
+	const { uses: plainUses, opUseGlobal, rest: rest1 } = tryParseUses(KW_Use, rest0)
+	const { uses: lazyUses, rest: rest2 } = tryParseUses(KW_UseLazy, rest1)
+	const { uses: debugUses, rest: rest3 } = tryParseUses(KW_UseDebug, rest2)
+
 	const { lines, exports, opDefaultExport } = parseModuleBlock(rest3)
 
 	if (context.opts.includeModuleName() && !exports.some(_ => _.name === 'name')) {
@@ -72,7 +72,8 @@ const parseModule = tokens => {
 		exports.push(name)
 	}
 	const uses = plainUses.concat(lazyUses)
-	return new Module(tokens.loc, doUses, uses, debugUses, lines, exports, opDefaultExport)
+	return new Module(tokens.loc,
+		doUses, uses, opUseGlobal, debugUses, lines, exports, opDefaultExport)
 }
 
 // parseBlock
@@ -198,7 +199,8 @@ const
 			else
 				lines.push(line)
 		}
-		lineTokens.each(_ => addLine(parseLine(Slice.group(_))))
+		for (const _ of lineTokens)
+			addLine(parseLine(Slice.group(_)))
 		return lines
 	},
 
@@ -367,7 +369,7 @@ const
 		})
 		return ifElse(opSplit,
 			({ before, at, after }) => {
-				const last = (() => {
+				const getLast = () => {
 					switch (at.kind) {
 						case KW_And: case KW_Or:
 							return new Logic(at.loc, at.kind === KW_And ? L_And : L_Or,
@@ -410,8 +412,8 @@ const
 							return new YieldTo(at.loc, parseExprPlain(after))
 						default: throw new Error(at.kind)
 					}
-				})()
-				return push(before.map(parseSingle), last)
+				}
+				return push(before.map(parseSingle), getLast())
 			},
 			() => tokens.map(parseSingle))
 	}
@@ -754,17 +756,15 @@ const
 			return '_'
 		else {
 			context.check(t instanceof Name, t.loc, () => `Expected a local name, not ${t}`)
-			context.check(!JsGlobals.has(t.name), t.loc, () =>
-				`Can not shadow global ${code(t.name)}`)
 			return t.name
 		}
 	}
 
 const parseSingle = token => {
 	const { loc } = token
-	return token instanceof Name ?
-	_access(token.name, loc) :
-	token instanceof Group ? (() => {
+	if (token instanceof Name)
+		return new LocalAccess(loc, token.name)
+	else if (token instanceof Group) {
 		const slice = Slice.group(token)
 		switch (token.kind) {
 			case G_Space:
@@ -780,10 +780,9 @@ const parseSingle = token => {
 			default:
 				throw new Error(token.kind)
 		}
-	})() :
-	token instanceof NumberLiteral ?
-	token :
-	token instanceof Keyword ? (() => {
+	} else if (token instanceof NumberLiteral)
+		return token
+	else if (token instanceof Keyword)
 		switch (token.kind) {
 			case KW_Focus:
 				return LocalAccess.focus(loc)
@@ -793,17 +792,18 @@ const parseSingle = token => {
 					() => unexpected(token))
 
 		}
-	})() :
-	token instanceof DotName ?
-		token.nDots === 1 ? new Member(token.loc, LocalAccess.this(token.loc), token.name) :
-		token.nDots === 3 ? new Splat(loc, new LocalAccess(loc, token.name)) :
-		unexpected(token) :
-	unexpected(token)
+	else if (token instanceof DotName)
+		switch (token.nDots) {
+			case 1:
+				return new Member(token.loc, LocalAccess.this(token.loc), token.name)
+			case 3:
+				return new Splat(loc, new LocalAccess(loc, token.name))
+			default:
+				unexpected(token)
+		}
+	else
+		unexpected(token)
 }
-
-// parseSingle privates
-const _access = (name, loc) =>
-	JsGlobals.has(name) ? new GlobalAccess(loc, name) : new LocalAccess(loc, name)
 
 const parseSpaced = tokens => {
 	const h = tokens.head(), rest = tokens.tail()
@@ -855,37 +855,47 @@ const parseSpaced = tokens => {
 	}
 }
 
-const tryParseUses = (k, tokens) => {
+const tryParseUses = (useKeywordKind, tokens) => {
 	if (!tokens.isEmpty()) {
 		const line0 = tokens.headSlice()
-		if (isKeyword(k, line0.head()))
-			return [ _parseUses(k, line0.tail()), tokens.tail() ]
+		if (isKeyword(useKeywordKind, line0.head())) {
+			const { uses, opUseGlobal } = _parseUses(useKeywordKind, line0.tail())
+			if (new Set([ KW_UseDo, KW_UseLazy, KW_UseDebug ]).has(useKeywordKind))
+				context.check(opUseGlobal === null, line0.loc, 'Can\'t use global here.')
+			return { uses, opUseGlobal, rest: tokens.tail() }
+		}
 	}
-	return [ [ ], tokens ]
+	return { uses: [ ], opUseGlobal: null, rest: tokens }
 }
 
 // tryParseUse privates
 const
 	_parseUses = (useKeywordKind, tokens) => {
-		const [ before, lines ] = beforeAndBlock(tokens)
-		checkEmpty(before, () =>
-			`Did not expect anything after ${code(useKeywordKind)} other than a block`)
-		return lines.mapSlices(line => {
+		const lines = justBlock(useKeywordKind, tokens)
+		let opUseGlobal = null
+
+		const uses = [ ]
+
+		for (const line of lines.slices()) {
 			const { path, name } = _parseRequire(line.head())
 			if (useKeywordKind === KW_UseDo) {
 				if (line.size() > 1)
 					unexpected(line.second())
-				return new UseDo(line.loc, path)
-			} else {
-				const isLazy = useKeywordKind === KW_UseLazy ||
-					useKeywordKind === KW_UseDebug
-				const { used, opUseDefault } =
-					_parseThingsUsed(name, isLazy, line.tail())
-				return new Use(line.loc, path, used, opUseDefault)
-			}
-		})
-	},
+				uses.push(new UseDo(line.loc, path))
+			} else
+				if (path === 'global') {
+					context.check(opUseGlobal === null, line.loc, 'Can\'t use global twice')
+					const { used, opUseDefault } = _parseThingsUsed(name, false, line.tail())
+					opUseGlobal = new UseGlobal(line.loc, used, opUseDefault)
+				} else {
+					const isLazy = useKeywordKind === KW_UseLazy || useKeywordKind === KW_UseDebug
+					const { used, opUseDefault } = _parseThingsUsed(name, isLazy, line.tail())
+					uses.push(new Use(line.loc, path, used, opUseDefault))
+				}
+		}
 
+		return { uses, opUseGlobal }
+	},
 	_parseThingsUsed = (name, isLazy, tokens) => {
 		const useDefault = () => LocalDeclare.untyped(tokens.loc, name, isLazy ? LD_Lazy : LD_Const)
 		if (tokens.isEmpty())
@@ -905,7 +915,6 @@ const
 			return { used, opUseDefault }
 		}
 	},
-
 	_parseRequire = t => {
 		if (t instanceof Name)
 			return { path: t.name, name: t.name }
@@ -913,11 +922,10 @@ const
 			return { path: push(_partsFromDotName(t), t.name).join('/'), name: t.name }
 		else {
 			context.check(isGroup(G_Space, t), t.loc, 'Not a valid module name.')
-			return _parseLocalRequire(Slice.group(t))
+			return _parseSpacedRequire(Slice.group(t))
 		}
 	},
-
-	_parseLocalRequire = tokens => {
+	_parseSpacedRequire = tokens => {
 		const first = tokens.head()
 		let parts
 		if (first instanceof DotName)
@@ -927,14 +935,13 @@ const
 			parts = [ ]
 		}
 		parts.push(first.name)
-		tokens.tail().each(token => {
+		for (const token of tokens.tail()) {
 			context.check(token instanceof DotName && token.nDots === 1, token.loc,
 				'Not a valid part of module path.')
 			parts.push(token.name)
-		})
+		}
 		return { path: parts.join('/'), name: tokens.last().name }
 	},
-
 	_partsFromDotName = dotName =>
 		dotName.nDots === 1 ? [ '.' ] : repeat('..', dotName.nDots - 1)
 
