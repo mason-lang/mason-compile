@@ -51,9 +51,9 @@ const doTest = isPerfTest => {
 			all() { compile(source, opts) }
 		})
 	else {
-		console.log(`Expression tree size: ${treeSize(msAst, _ => _ instanceof MsAst).size}.`)
-		console.log(`ES AST size: ${treeSize(esAst, _ => _ instanceof Node).size}.`)
-		console.log(`Output size: ${code.length} characters.`)
+		// console.log(`Expression tree size: ${treeSize(msAst, _ => _ instanceof MsAst).size}.`)
+		// console.log(`ES AST size: ${treeSize(esAst, _ => _ instanceof Node).size}.`)
+		// console.log(`Output size: ${code.length} characters.`)
 		console.log(`==>\n${code}`)
 	}
 }

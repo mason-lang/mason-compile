@@ -143,8 +143,9 @@ const reserved_words = [
 	'void',
 	'while',
 
-	// Keywords Mason might use
+	// mason reserved words
 	'abstract',
+	'await!',
 	'data',
 	'del',
 	'del?',

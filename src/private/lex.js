@@ -505,6 +505,7 @@ export default (context, sourceString) => {
 						if (nDots === 3 && next === Space || next === Newline)
 							keyword(KW_Ellipsis)
 						else {
+							context.check(!isDigit(next), loc(), 'Can not have digit here.')
 							let name = takeWhile(isNameCharacter)
 							const add = () => addToCurrentGroup(new DotName(loc(), nDots, name))
 							if (name.endsWith('_')) {
@@ -689,5 +690,5 @@ const
 	isDigitHex = _charPred('0123456789abcdef'),
 
 	// Anything not explicitly reserved is a valid name character.
-	reservedCharacters = '`#%^&\\;,',
+	reservedCharacters = "`%^&\\';,",
 	isNameCharacter = _charPred('()[]{}.:| \n\t"' + reservedCharacters, true)

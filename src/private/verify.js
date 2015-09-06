@@ -385,7 +385,11 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	// Adding LocalDeclares to the available locals is done by Fun or lineNewLocals.
-	LocalDeclare() { verifyOpEach(this.opType) },
+	LocalDeclare() {
+		const builtinPath = context.opts.builtinNameToPath.get(this.name)
+		context.warnIf(builtinPath !== undefined, this.loc, () => `Local ${code(this.name)} overrides builtin from ${code(builtinPath)}.`)
+		verifyOpEach(this.opType)
+	},
 
 	LocalMutate() {
 		const declare = getLocalDeclare(this.name, this.loc)

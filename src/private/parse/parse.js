@@ -632,6 +632,7 @@ const
 			return new MapEntry(loc, parseExpr(before), parseExpr(after))
 
 		// TODO: This code is kind of ugly.
+		// It parses `x.y = z` and the like.
 		if (before.size() === 1) {
 			const token = before.head()
 			if (token instanceof DotName)
