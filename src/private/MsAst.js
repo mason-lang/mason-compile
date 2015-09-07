@@ -455,9 +455,9 @@ export default class MsAst {
 		constructor(loc,
 			opSuperClass, // Opt[Val]
 			opDo, // Opt[ClassDo],
-			statics, // Array[Fun]
+			statics, // Array[MethodImplLike]
 			opConstructor, // Opt[Fun]
-			methods) { // MethodImpl
+			methods) { // Array[MethodImplLike]
 			super(loc)
 			this.opSuperClass = opSuperClass
 			this.opDo = opDo
@@ -467,16 +467,31 @@ export default class MsAst {
 		}
 	}
 
-	export const
-		MI_Plain = 0,
-		MI_Get = 1,
-		MI_Set = 2
-	export class MethodImpl extends MsAst {
-		constructor(loc, kind /* Number */, symbol /* Union[String Val] */, fun /* Fun */) {
+	export class MethodImplLike extends MsAst {
+		constructor(loc, symbol /* Union[String Val] */) {
 			super(loc)
-			this.kind = kind
 			this.symbol = symbol
+		}
+	}
+	export class MethodImpl extends MethodImplLike {
+		constructor(loc, symbol, fun /* Fun */) {
+			super(loc, symbol)
 			this.fun = fun
+		}
+	}
+	export class MethodGetter extends MethodImplLike {
+		constructor(loc, symbol, block /* BlockVal */) {
+			super(loc, symbol)
+			this.block = block
+			this.declareThis = new LocalDeclareThis(loc)
+		}
+	}
+	export class MethodSetter extends MethodImplLike {
+		constructor(loc, symbol, block /* BlockDo */) {
+			super(loc, symbol)
+			this.block = block
+			this.declareThis = new LocalDeclareThis(loc)
+			this.declareFocus = new LocalDeclareFocus(loc)
 		}
 	}
 

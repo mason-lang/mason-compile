@@ -387,7 +387,8 @@ implementMany(MsAstTypes, 'verify', {
 	// Adding LocalDeclares to the available locals is done by Fun or lineNewLocals.
 	LocalDeclare() {
 		const builtinPath = context.opts.builtinNameToPath.get(this.name)
-		context.warnIf(builtinPath !== undefined, this.loc, () => `Local ${code(this.name)} overrides builtin from ${code(builtinPath)}.`)
+		context.warnIf(builtinPath !== undefined, this.loc, () =>
+			`Local ${code(this.name)} overrides builtin from ${code(builtinPath)}.`)
 		verifyOpEach(this.opType)
 	},
 
@@ -421,10 +422,22 @@ implementMany(MsAstTypes, 'verify', {
 		this.value.verify()
 	},
 
+	MethodGetter() {
+		if (typeof this.symbol !== 'string')
+			this.symbol.verify()
+		okToNotUse.add(this.declareThis)
+		verifyAndPlusLocals([ this.declareThis ], () => { this.block.verify() })
+	},
 	MethodImpl() {
 		if (typeof this.symbol !== 'string')
 			this.symbol.verify()
 		this.fun.verify(true)
+	},
+	MethodSetter() {
+		if (typeof this.symbol !== 'string')
+			this.symbol.verify()
+		okToNotUse.add(this.declareThis)
+		verifyAndPlusLocals([ this.declareThis, this.declareFocus ], () => { this.block.verify() })
 	},
 
 	Module() {

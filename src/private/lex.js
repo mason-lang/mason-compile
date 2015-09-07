@@ -690,5 +690,5 @@ const
 	isDigitHex = _charPred('0123456789abcdef'),
 
 	// Anything not explicitly reserved is a valid name character.
-	reservedCharacters = "`%^&\\';,",
+	reservedCharacters = '`%^&\\\';,',
 	isNameCharacter = _charPred('()[]{}.:| \n\t"' + reservedCharacters, true)

@@ -1,6 +1,6 @@
 import { ArrayExpression, BinaryExpression, CallExpression, ExpressionStatement, Identifier,
 	IfStatement, Literal, NewExpression, ObjectExpression, ReturnStatement, SwitchCase,
-	UnaryExpression, VariableDeclaration, VariableDeclarator } from 'esast/dist/ast'
+	ThisExpression, UnaryExpression, VariableDeclaration, VariableDeclarator } from 'esast/dist/ast'
 import { member } from 'esast/dist/util'
 import { _IdError, throwErrorFromString } from './util'
 
@@ -12,6 +12,7 @@ export const
 	IdError = _IdError,
 	IdExports = new Identifier('exports'),
 	IdExtract = new Identifier('_$'),
+	IdFocus = new Identifier('_'),
 	// TODO:ES6 Shouldn't need, just use arrow functions.
 	IdLexicalThis = new Identifier('_this'),
 	LitEmptyArray = new ArrayExpression([]),
@@ -48,5 +49,7 @@ export const
 			new NewExpression(member(new Identifier('global'), 'Map'), [ ])) ]),
 	DeclareBuiltObj = new VariableDeclaration('const', [
 		new VariableDeclarator(IdBuilt, new ObjectExpression([ ])) ]),
+	DeclareLexicalThis = new VariableDeclaration('const',
+		[ new VariableDeclarator(IdLexicalThis, new ThisExpression()) ]),
 	ExportsDefault = member(IdExports, 'default'),
 	ExportsGet = member(IdExports, '_get')

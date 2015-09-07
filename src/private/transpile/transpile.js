@@ -10,17 +10,16 @@ import { functionExpressionThunk, idCached, loc, member, propertyIdOrLiteralCach
 	} from 'esast/dist/util'
 import manglePath from '../manglePath'
 import * as MsAstTypes from '../MsAst'
-import { AssignSingle, Call, L_And, L_Or, LD_Lazy, LD_Mutable, Member, MI_Get, MI_Plain, MI_Set,
-	MS_Mutate, MS_New, MS_NewMutable, LocalDeclare, Pattern, Splat, SD_Debugger, SV_Contains,
-	SV_False, SV_Name, SV_Null, SV_Sub, SV_Super, SV_True, SV_Undefined, SwitchDoPart, Quote, Use
-	} from '../MsAst'
+import { AssignSingle, Call, L_And, L_Or, LD_Lazy, LD_Mutable, Member, MS_Mutate, MS_New,
+	MS_NewMutable, LocalDeclare, Pattern, Splat, SD_Debugger, SV_Contains, SV_False, SV_Name,
+	SV_Null, SV_Sub, SV_Super, SV_True, SV_Undefined, SwitchDoPart, Quote, Use } from '../MsAst'
 import { assert, cat, flatMap, flatOpMap, ifElse, isEmpty,
 	implementMany, isPositive, last, opIf, opMap, tail, unshift } from '../util'
 import { AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj,
-	ExportsDefault, ExportsGet, IdArguments, IdBuilt, IdDefine, IdExports, IdExtract,
-	IdLexicalThis, GlobalError, LitEmptyString, LitNull, LitStrExports, LitStrThrow, LitZero,
-	ReturnBuilt, ReturnExports, ReturnRes, SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch,
-	UseStrict } from './ast-constants'
+	DeclareLexicalThis, ExportsDefault, ExportsGet, IdArguments, IdBuilt, IdDefine, IdExports,
+	IdExtract, IdFocus, IdLexicalThis, GlobalError, LitEmptyString, LitNull, LitStrExports,
+	LitStrThrow, LitZero, ReturnBuilt, ReturnExports, ReturnRes, SwitchCaseNoMatch,
+	ThrowAssertFail, ThrowNoCaseMatch, UseStrict } from './ast-constants'
 import { IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot,
 	msAssertNotMember, msAssoc, msCheckContains, msExtract, msGet, msGetDefaultExport, msGetModule,
 	msLazy, msLazyGet, msLazyGetModule, msNewMutableProperty, msNewProperty, msSet, msSetName,
@@ -254,9 +253,8 @@ implementMany(MsAstTypes, 'transpile', {
 
 		const _in = opMap(this.opIn, t0)
 
-		const opDeclareThis = opIf(!isInConstructor, () => opMap(this.opDeclareThis, () =>
-			new VariableDeclaration('const',
-				[ new VariableDeclarator(IdLexicalThis, new ThisExpression()) ])))
+		const opDeclareThis =
+			opIf(!isInConstructor && this.opDeclareThis != null, () => DeclareLexicalThis)
 
 		const lead = cat(opDeclareThis, opDeclareRest, argChecks, _in)
 
@@ -283,30 +281,21 @@ implementMany(MsAstTypes, 'transpile', {
 	MethodImpl(isStatic) {
 		const value = t0(this.fun)
 		assert(value.id == null)
+		// Since the Fun should have opDeclareThis, it will never be an ArrowFunctionExpression.
+		assert(value instanceof FunctionExpression)
 
-		let kind
-		switch (this.kind) {
-			case MI_Plain:
-				kind = 'method'
-				break
-			case MI_Get:
-				kind = 'get'
-				break
-			case MI_Set:
-				kind = 'set'
-				break
-			default: throw new Error()
-		}
-
-		let key, computed
-		if (typeof this.symbol === 'string') {
-			key = propertyIdOrLiteralCached(this.symbol)
-			computed = false
-		} else {
-			key = msSymbol(t0(this.symbol))
-			computed = true
-		}
-		return new MethodDefinition(key, value, kind, isStatic, computed)
+		const { key, computed } = methodKeyComputed(this.symbol)
+		return new MethodDefinition(key, value, 'method', isStatic, computed)
+	},
+	MethodGetter(isStatic) {
+		const value = new FunctionExpression(null, [ ], t1(this.block, DeclareLexicalThis))
+		const { key, computed } = methodKeyComputed(this.symbol)
+		return new MethodDefinition(key, value, 'get', isStatic, computed)
+	},
+	MethodSetter(isStatic) {
+		const value = new FunctionExpression(null, [ IdFocus ], t1(this.block, DeclareLexicalThis))
+		const { key, computed } = methodKeyComputed(this.symbol)
+		return new MethodDefinition(key, value, 'set', isStatic, computed)
 	},
 
 	NumberLiteral() {
@@ -583,6 +572,15 @@ const
 		new ThrowStatement(thrown instanceof Quote ?
 			new NewExpression(GlobalError, [ t0(thrown) ]) :
 			t0(thrown)),
+
+	methodKeyComputed = symbol => {
+		if (typeof symbol === 'string')
+			return { key: propertyIdOrLiteralCached(symbol), computed: false }
+		else {
+			const key = symbol instanceof Quote ? t0(symbol) : msSymbol(t0(symbol))
+			return { key, computed: true }
+		}
+	},
 
 	transpileBlock = (returned, lines, lead, opDeclareRes, opOut) => {
 		// TODO:ES6 Optional arguments
