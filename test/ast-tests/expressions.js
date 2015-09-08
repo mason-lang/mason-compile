@@ -7,7 +7,7 @@ import { test } from './util/test-asts'
 
 describe('expressions', () => {
 	test(
-		'[ 0 1 ]',
+		'[0 1]',
 		new BagSimple(loc, [ zero, one ]),
 		'[0,1]')
 

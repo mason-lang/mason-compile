@@ -24,39 +24,46 @@ const doTest = isPerfTest => {
 		includeSourceMap: true,
 		includeModuleName: false,
 		forceNonLazyModule: true,
-		useStrict: false
+		useStrict: false,
+		builtins: { global: [ 'Array', 'Function', 'Symbol' ] }
 	}
 	const context = new CompileContext(new CompileOptions(opts))
 
-	const rootToken = lex(context, source)
-	// console.log(`==>\n${rootToken}`)
-	const msAst = parse(context, rootToken)
-	// console.log(`==>\n${msAst}`)
-	const verifyResults = verify(context, msAst)
-	// console.log(`+++\n${verifyResults.___}`)
-	const esAst = transpile(context, msAst, verifyResults)
-	// console.log(`==>\n${esAst}`)
-	const { code } = render(context, esAst)
+	try {
+		const rootToken = lex(context, source)
+		// console.log(`==>\n${rootToken}`)
+		const msAst = parse(context, rootToken)
+		// console.log(`==>\n${msAst}`)
+		const verifyResults = verify(context, msAst)
+		// console.log(`+++\n${verifyResults.___}`)
+		const esAst = transpile(context, msAst, verifyResults)
+		// console.log(`==>\n${esAst}`)
+		const { code } = render(context, esAst)
 
-	for (const _ of context.warnings)
-		console.log(_)
+		for (const _ of context.warnings)
+			console.log(_)
 
-	if (isPerfTest)
-		benchmark({
-			lex() { lex(context, source) },
-			parse() { parse(context, rootToken) },
-			verify() { verify(context, msAst) },
-			transpile() { transpile(context, msAst, verifyResults) },
-			render() { render(context, esAst) },
-			all() { compile(source, opts) }
-		})
-	else {
-		if (false) {
-			console.log(`Expression tree size: ${treeSize(msAst, _ => _ instanceof MsAst).size}.`)
-			console.log(`ES AST size: ${treeSize(esAst, _ => _ instanceof Node).size}.`)
-			console.log(`Output size: ${code.length} characters.`)
+		if (isPerfTest)
+			benchmark({
+				lex() { lex(context, source) },
+				parse() { parse(context, rootToken) },
+				verify() { verify(context, msAst) },
+				transpile() { transpile(context, msAst, verifyResults) },
+				render() { render(context, esAst) },
+				all() { compile(source, opts) }
+			})
+		else {
+			if (false) {
+				console.log(`Expression tree size: ${treeSize(msAst, MsAst).size}.`)
+				console.log(`ES AST size: ${treeSize(esAst, Node).size}.`)
+				console.log(`Output size: ${code.length} characters.`)
+			}
+			console.log(`==>\n${code}`)
 		}
-		console.log(`==>\n${code}`)
+	} catch (err) {
+		if (err.warning)
+			console.log(err.warning.loc)
+		console.log(err.stack)
 	}
 }
 
@@ -77,12 +84,12 @@ const
 		suite.run()
 	},
 
-	treeSize = (tree, cond) => {
+	treeSize = (tree, treeType) => {
 		const visited = new Set()
 		let nLeaves = 0
 		const visit = node => {
 			if (node != null && !visited.has(node))
-				if (cond(node)) {
+				if (node instanceof treeType) {
 					visited.add(node)
 					for (const name in node) {
 						const child = node[name]

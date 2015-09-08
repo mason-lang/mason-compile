@@ -27,8 +27,13 @@ export default (context, sourceString) => {
 	const groupStack = [ ]
 	let curGroup
 	const
-		addToCurrentGroup = token =>
-			curGroup.subTokens.push(token),
+		addToCurrentGroup = token => {
+			curGroup.subTokens.push(token)
+		},
+
+		dropGroup = () => {
+			curGroup = groupStack.pop()
+		},
 
 		// Pause writing to curGroup in favor of writing to a sub-group.
 		// When the sub-group finishes we will pop the stack and resume writing to its parent.
@@ -39,27 +44,21 @@ export default (context, sourceString) => {
 			curGroup = new Group(new Loc(openPos, null), [ ], groupKind)
 		},
 
-		// A group ending may close mutliple groups.
-		// For example, in `log! (+ 1 1`, the G_Line will also close a G_Parenthesis.
-		closeGroups = (closePos, closeKind) => {
-			// curGroup is different each time we go through the loop
-			// because _closeSingleGroup brings us to an enclosing group.
-			while (curGroup.kind !== closeKind) {
-				const curKind = curGroup.kind
-				// A line can close a parenthesis, but a parenthesis can't close a line!
-				context.check(
-					curKind === G_Parenthesis || curKind === G_Bracket || curKind === G_Space,
-					closePos, () =>
-					`Trying to close ${showGroupKind(closeKind)}, ` +
-					`but last opened was ${showGroupKind(curKind)}`)
-				_closeSingleGroup(closePos, curGroup.kind)
-			}
-			_closeSingleGroup(closePos, closeKind)
+		maybeCloseGroup = (closePos, closeKind) => {
+			if (curGroup.kind === closeKind)
+				_closeGroup(closePos, closeKind)
 		},
 
-		_closeSingleGroup = (closePos, closeKind) => {
+		closeGroup = (closePos, closeKind) => {
+			context.check(closeKind === curGroup.kind, closePos, () =>
+				`Trying to close ${showGroupKind(closeKind)}, ` +
+				`but last opened ${showGroupKind(curGroup.kind)}`)
+			_closeGroup(closePos, closeKind)
+		},
+
+		_closeGroup = (closePos, closeKind) => {
 			let justClosed = curGroup
-			curGroup = groupStack.pop()
+			dropGroup()
 			justClosed.loc.end = closePos
 			switch (closeKind) {
 				case G_Space: {
@@ -67,6 +66,8 @@ export default (context, sourceString) => {
 					if (size !== 0)
 						// Spaced should always have at least two elements.
 						addToCurrentGroup(size === 1 ? justClosed.subTokens[0] : justClosed)
+					else
+						context.warn(justClosed.loc, 'Unnecessary space.')
 					break
 				}
 				case G_Line:
@@ -84,14 +85,42 @@ export default (context, sourceString) => {
 			}
 		},
 
+		closeSpaceOKIfEmpty = pos => {
+			assert(curGroup.kind === G_Space)
+			if (curGroup.subTokens.length === 0)
+				dropGroup()
+			else
+				_closeGroup(pos, G_Space)
+		},
+
 		openParenthesis = loc => {
 			openGroup(loc.start, G_Parenthesis)
 			openGroup(loc.end, G_Space)
 		},
 
+		closeParenthesis = loc => {
+			closeSpaceOKIfEmpty(loc.start)
+			closeGroup(loc.end, G_Parenthesis)
+		},
+
 		openBracket = loc => {
 			openGroup(loc.start, G_Bracket)
 			openGroup(loc.end, G_Space)
+		},
+
+		closeBracket = loc => {
+			closeSpaceOKIfEmpty(loc.start)
+			closeGroup(loc.end, G_Bracket)
+		},
+
+		closeGroupsForDedent = pos => {
+			closeLine(pos)
+			closeGroup(pos, G_Block)
+			// It's OK to be missing a closing parenthesis if there's a block. E.g.:
+			// a (b
+			//	c # no closing paren here
+			while (curGroup.kind === G_Parenthesis || curGroup.kind === G_Space)
+				_closeGroup(pos, curGroup.kind)
 		},
 
 		// When starting a new line, a spaced group is created implicitly.
@@ -101,13 +130,14 @@ export default (context, sourceString) => {
 		},
 
 		closeLine = pos => {
-			closeGroups(pos, G_Space)
-			closeGroups(pos, G_Line)
+			if (curGroup.kind === G_Space)
+				closeSpaceOKIfEmpty()
+			closeGroup(pos, G_Line)
 		},
 
 		// When encountering a space, it both closes and opens a spaced group.
 		space = loc => {
-			closeGroups(loc.start, G_Space)
+			maybeCloseGroup(loc.start, G_Space)
 			openGroup(loc.end, G_Space)
 		}
 
@@ -280,6 +310,7 @@ export default (context, sourceString) => {
 				addToCurrentGroup(new Keyword(loc(), kind)),
 			funKeyword = kind => {
 				keyword(kind)
+				// First arg in its own spaced group
 				space(loc())
 			},
 			eatAndAddNumber = () => {
@@ -365,20 +396,14 @@ export default (context, sourceString) => {
 					openBracket(loc())
 					break
 				case CloseParenthesis:
-					closeGroups(pos(), G_Parenthesis)
+					closeParenthesis(loc())
 					break
 				case CloseBracket:
-					closeGroups(pos(), G_Bracket)
+					closeBracket(loc())
 					break
-
-				case Space: {
-					const next = peek()
-					context.warnIf(next === Space, loc, 'Multiple spaces in a row.')
-					context.warnIf(next === Newline, loc, 'Line ends in a space.')
+				case Space:
 					space(loc())
 					break
-				}
-
 				case Newline: {
 					context.check(!isInQuote, loc, 'Quote interpolation cannot contain newline')
 
@@ -387,24 +412,27 @@ export default (context, sourceString) => {
 					const oldIndent = indent
 					indent = skipWhileEquals(Tab)
 					context.check(peek() !== Space, pos, 'Line begins in a space')
-					if (indent <= oldIndent) {
-						const l = loc()
-						for (let i = indent; i < oldIndent; i = i + 1) {
-							closeLine(l.start)
-							closeGroups(l.end, G_Block)
-						}
-						closeLine(l.start)
-						openLine(l.end)
-					} else {
+					context.warnIf(peekPrev() === Space, 'Line ends in a space.')
+					if (indent > oldIndent) {
 						context.check(indent === oldIndent + 1, loc,
 							'Line is indented more than once')
+						const l = loc()
 						// Block at end of line goes in its own spaced group.
 						// However, `~` preceding a block goes in a group with it.
 						if (isEmpty(curGroup.subTokens) ||
-							!isKeyword(KW_Lazy, last(curGroup.subTokens)))
-							space(loc())
-						openGroup(loc().start, G_Block)
-						openLine(loc().end)
+							!isKeyword(KW_Lazy, last(curGroup.subTokens))) {
+							if (curGroup.kind === G_Space)
+								closeSpaceOKIfEmpty(l.start)
+							openGroup(l.end, G_Space)
+						}
+						openGroup(l.start, G_Block)
+						openLine(l.end)
+					} else {
+						const l = loc()
+						for (let i = indent; i < oldIndent; i = i + 1)
+							closeGroupsForDedent(l.start)
+						closeLine(l.start)
+						openLine(l.end)
 					}
 					break
 				}
@@ -431,9 +459,7 @@ export default (context, sourceString) => {
 						keyword(KW_Lazy)
 					break
 				case Bar:
-					keyword(KW_Fun)
-					// First arg in its own spaced group
-					space(loc())
+					funKeyword(KW_Fun)
 					break
 
 				// NUMBER
@@ -475,10 +501,8 @@ export default (context, sourceString) => {
 						// ObjLit assign in its own spaced group.
 						// We can't just create a new Group here because we want to
 						// ensure it's not part of the preceding or following spaced group.
-						closeGroups(startPos(), G_Space)
+						closeSpaceOKIfEmpty(startPos())
 						keyword(KW_ObjAssign)
-						// This exists solely so that the Space or Newline handler can close it...
-						openGroup(pos(), G_Space)
 					} else if (next === Bar) {
 						skip()
 						keyword(KW_FunThis)
@@ -582,7 +606,7 @@ export default (context, sourceString) => {
 					const l = locSingle()
 					openParenthesis(l)
 					lexPlain(true)
-					closeGroups(l.end, G_Parenthesis)
+					closeParenthesis(l)
 					break
 				}
 				// Don't need `case NullChar:` because that's always preceded by a newline.
@@ -618,7 +642,7 @@ export default (context, sourceString) => {
 		}
 
 		maybeOutputRead()
-		closeGroups(pos(), G_Quote)
+		closeGroup(pos(), G_Quote)
 	}
 
 	curGroup = new Group(new Loc(StartPos, null), [ ], G_Block)

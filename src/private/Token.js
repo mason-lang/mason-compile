@@ -69,6 +69,7 @@ const
 		nextGroupKind = nextGroupKind + 1
 		return kind
 	}
+
 export const
 	G_Parenthesis = g('( )'),
 	G_Bracket = g('[ ]'),
