@@ -12,12 +12,12 @@ import manglePath from '../manglePath'
 import * as MsAstTypes from '../MsAst'
 import { AssignSingle, Call, L_And, L_Or, LD_Lazy, LD_Mutable, Member, MS_Mutate, MS_New,
 	MS_NewMutable, LocalDeclare, Pattern, Splat, SD_Debugger, SV_Contains, SV_False, SV_Name,
-	SV_Null, SV_Sub, SV_Super, SV_True, SV_Undefined, SwitchDoPart, Quote, Use } from '../MsAst'
-import { assert, cat, flatMap, flatOpMap, ifElse, isEmpty,
-	implementMany, isPositive, last, opIf, opMap, tail, unshift } from '../util'
+	SV_Null, SV_Sub, SV_True, SV_Undefined, SwitchDoPart, Quote, Use } from '../MsAst'
+import { assert, cat, flatMap, flatOpMap, ifElse, isEmpty, implementMany, isPositive, last, opIf,
+	opMap, tail } from '../util'
 import { AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj,
 	DeclareLexicalThis, ExportsDefault, ExportsGet, IdArguments, IdBuilt, IdDefine, IdExports,
-	IdExtract, IdFocus, IdLexicalThis, GlobalError, LitEmptyString, LitNull, LitStrExports,
+	IdExtract, IdFocus, IdLexicalThis, IdSuper, GlobalError, LitEmptyString, LitNull, LitStrExports,
 	LitStrThrow, LitZero, ReturnBuilt, ReturnExports, ReturnRes, SwitchCaseNoMatch,
 	ThrowAssertFail, ThrowNoCaseMatch, UseStrict } from './ast-constants'
 import { IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot,
@@ -454,7 +454,6 @@ implementMany(MsAstTypes, 'transpile', {
 			case SV_Name: return new Literal(verifyResults.name(this))
 			case SV_Null: return new Literal(null)
 			case SV_Sub: return member(IdMs, 'sub')
-			case SV_Super: return new Identifier('super')
 			case SV_True: return new Literal(true)
 			case SV_Undefined: return new UnaryExpression('void', LitZero)
 			default: throw new Error(this.kind)
@@ -463,6 +462,12 @@ implementMany(MsAstTypes, 'transpile', {
 
 	Splat() {
 		return new SpreadElement(t0(this.splatted))
+	},
+
+	SuperCall: superCall,
+	SuperCallDo: superCall,
+	SuperMember() {
+		return member(IdSuper, this.name)
 	},
 
 	SwitchDo() { return transpileSwitch(this) },
@@ -506,6 +511,16 @@ function casePart(alternate) {
 	} else
 		// alternate written to by `caseBody`.
 		return new IfStatement(t0(this.test), t0(this.result), alternate)
+}
+
+function superCall() {
+	const method = verifyResults.superCallToMethod.get(this)
+	const methodExpr = method === 'constructor' ?
+		IdSuper :
+		typeof method.symbol === 'string' ?
+		member(IdSuper, method.symbol) :
+		new MemberExpression(IdSuper, t0(method.symbol))
+	return new CallExpression(methodExpr, this.args.map(t0))
 }
 
 function switchPart() {
@@ -695,7 +710,7 @@ const
 		})
 		// Getting lazy module is done by ms.lazyGetModule.
 		const val = isLazy && !isModule ? lazyWrap(value) : value
-		return unshift(new VariableDeclarator(idDestructured, val), declarators)
+		return cat(new VariableDeclarator(idDestructured, val), declarators)
 	},
 
 	makeDeclarator = (assignee, value, valueIsAlreadyLazy, isExport) => {

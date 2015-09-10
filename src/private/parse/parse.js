@@ -9,8 +9,8 @@ import { Assert, AssignDestructure, AssignSingle, BagEntry, BagEntryMany, BagSim
 	MapEntry, Member, MemberSet, MethodGetter, MethodImpl, MethodSetter, Module, MS_Mutate, MS_New,
 	MS_NewMutable, New, Not, ObjEntry, ObjEntryAssign, ObjEntryComputed, ObjPair, ObjSimple,
 	Pattern, Quote, QuoteTemplate, SD_Debugger, SpecialDo, SpecialVal, SV_Name, SV_Null, Splat,
-	SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart, Throw, Val, Use, UseDo, UseGlobal, With,
-	Yield, YieldTo } from '../MsAst'
+	SuperCall, SuperCallDo, SuperMember, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart, Throw,
+	Val, Use, UseDo, UseGlobal, With, Yield, YieldTo } from '../MsAst'
 import { DotName, Group, G_Block, G_Bracket, G_Parenthesis, G_Space, G_Quote, isGroup, isKeyword,
 	Keyword, KW_And, KW_As, KW_Assert, KW_AssertNot, KW_Assign, KW_AssignMutable, KW_Break,
 	KW_BreakWithVal, KW_CaseVal, KW_CaseDo, KW_Class, KW_CatchDo, KW_CatchVal, KW_Construct,
@@ -18,11 +18,11 @@ import { DotName, Group, G_Block, G_Bracket, G_Parenthesis, G_Space, G_Quote, is
 	KW_ForBag, KW_ForDo, KW_ForVal, KW_Focus, KW_Fun, KW_FunDo, KW_FunGen, KW_FunGenDo, KW_FunThis,
 	KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo, KW_Get, KW_IfDo, KW_IfVal, KW_Ignore, KW_In,
 	KW_Lazy, KW_LocalMutate, KW_MapEntry, KW_Name, KW_New, KW_Not, KW_ObjAssign, KW_Or, KW_Pass,
-	KW_Out, KW_Region, KW_Set, KW_Static, KW_SwitchDo, KW_SwitchVal, KW_Throw, KW_TryDo, KW_TryVal,
-	KW_Type, KW_UnlessDo, KW_UnlessVal, KW_Use, KW_UseDebug, KW_UseDo, KW_UseLazy, KW_With,
-	KW_Yield, KW_YieldTo, Name, keywordName, opKeywordKindToSpecialValueKind } from '../Token'
-import { assert, head, ifElse, flatMap, isEmpty, last,
-	opIf, opMap, push, repeat, rtail, tail, unshift } from '../util'
+	KW_Out, KW_Region, KW_Set, KW_Static, KW_SuperDo, KW_SuperVal, KW_SwitchDo, KW_SwitchVal,
+	KW_Throw, KW_TryDo, KW_TryVal, KW_Type, KW_UnlessDo, KW_UnlessVal, KW_Use, KW_UseDebug,
+	KW_UseDo, KW_UseLazy, KW_With, KW_Yield, KW_YieldTo, Name, keywordName,
+	opKeywordKindToSpecialValueKind } from '../Token'
+import { cat, head, ifElse, isEmpty, last, opIf, opMap, repeat, rtail, tail } from '../util'
 import Slice from './Slice'
 
 // Since there are so many parsing functions,
@@ -42,7 +42,6 @@ For those we must iterate through tokens and split.
 */
 export default (_context, rootToken) => {
 	context = _context
-	assert(isGroup(G_Block, rootToken))
 	const msAst = parseModule(Slice.group(rootToken))
 	// Release for garbage collections.
 	context = undefined
@@ -102,10 +101,15 @@ const
 	// Gets lines in a region or Debug.
 	parseLinesFromBlock = tokens => {
 		const h = tokens.head()
-		context.check(tokens.size() > 1, h.loc, () => `Expected indented block after ${h}`)
+		context.check(tokens.size() > 1 && tokens.size() === 2 && isGroup(G_Block, tokens.second()),
+			h.loc, () =>
+			`Expected indented block after ${h}, and nothing else.`)
 		const block = tokens.second()
-		assert(tokens.size() === 2 && isGroup(G_Block, block))
-		return flatMap(block.subTokens, line => parseLineOrLines(Slice.group(line)))
+
+		const lines = [ ]
+		for (const line of block.slices())
+			lines.push(...parseLineOrLines(line))
+		return lines
 	},
 
 	parseBlockDo = tokens => {
@@ -327,13 +331,12 @@ const
 					const loc = new Loc(name.loc.start, tokensValue.loc.end)
 					pairs.push(new ObjPair(loc, name.name, value))
 				}
-				assert(last(splits).at === undefined)
 				const val = new ObjSimple(tokens.loc, pairs)
 				if (tokensCaller.isEmpty())
 					return val
 				else {
 					const parts = parseExprParts(tokensCaller)
-					return new Call(tokens.loc, head(parts), push(tail(parts), val))
+					return new Call(tokens.loc, head(parts), cat(tail(parts), val))
 				}
 			},
 			() => parseExprPlain(tokens)
@@ -359,8 +362,9 @@ const
 					case KW_And: case KW_CaseVal: case KW_Class: case KW_ExceptVal: case KW_ForBag:
 					case KW_ForVal: case KW_Fun: case KW_FunDo: case KW_FunGen: case KW_FunGenDo:
 					case KW_FunThis: case KW_FunThisDo: case KW_FunThisGen: case KW_FunThisGenDo:
-					case KW_IfVal: case KW_New: case KW_Not: case KW_Or: case KW_SwitchVal:
-					case KW_UnlessVal: case KW_With: case KW_Yield: case KW_YieldTo:
+					case KW_IfVal: case KW_New: case KW_Not: case KW_Or: case KW_SuperVal:
+					case KW_SwitchVal: case KW_UnlessVal: case KW_With: case KW_Yield:
+					case KW_YieldTo:
 						return true
 					default:
 						return false
@@ -401,6 +405,8 @@ const
 						}
 						case KW_Not:
 							return new Not(at.loc, parseExprPlain(after))
+						case KW_SuperVal:
+							return new SuperCall(at.loc, parseExprParts(after))
 						case KW_SwitchVal:
 							return parseSwitch(true, after)
 						case KW_With:
@@ -413,7 +419,7 @@ const
 						default: throw new Error(at.kind)
 					}
 				}
-				return push(before.map(parseSingle), getLast())
+				return cat(before.map(parseSingle), getLast())
 			},
 			() => tokens.map(parseSingle))
 	}
@@ -587,6 +593,8 @@ const
 					return [ ]
 				case KW_Region:
 					return parseLinesFromBlock(tokens)
+				case KW_SuperDo:
+					return new SuperCallDo(tokens.loc, parseExprParts(rest))
 				case KW_SwitchDo:
 					return parseSwitch(false, rest)
 				case KW_Throw:
@@ -812,48 +820,62 @@ const parseSpaced = tokens => {
 		return Call.contains(h.loc, parseSpaced(rest), LocalAccess.focus(h.loc))
 	else if (isKeyword(KW_Lazy, h))
 		return new Lazy(h.loc, parseSpaced(rest))
-	else {
-		let acc = parseSingle(h)
-		for (let i = rest.start; i < rest.end; i = i + 1) {
-			const token = rest.tokens[i]
-			const loc = token.loc
-			if (token instanceof DotName) {
-				context.check(token.nDots === 1, token.loc, 'Too many dots!')
-				acc = new Member(token.loc, acc, token.name)
-				continue
-			}
-			if (token instanceof Keyword)
-				switch (token.kind) {
-					case KW_Focus:
-						acc = new Call(token.loc, acc, [ LocalAccess.focus(loc) ])
-						continue
-					case KW_Type: {
-						const type = parseSpaced(tokens._chopStart(i + 1))
-						return Call.contains(token.loc, type, acc)
-					}
-					default:
-				}
-			if (token instanceof Group) {
-				const slice = Slice.group(token)
-				switch (token.kind) {
-					case G_Bracket:
-						acc = Call.sub(loc, unshift(acc, parseExprParts(slice)))
-						continue
-					case G_Parenthesis:
-						checkEmpty(slice, () =>
-							`Use ${code('(a b)')}, not ${code('a(b)')}`)
-						acc = new Call(loc, acc, [])
-						continue
-					case G_Quote:
-						acc = new QuoteTemplate(loc, acc, parseQuote(slice))
-						continue
-					default:
-				}
-			}
-			context.fail(tokens.loc, `Expected member or sub, not ${token}`)
+	else if (isKeyword(KW_SuperVal, h)) {
+		// TODO: handle sub here as well
+		const h2 = rest.head()
+		if (h2 instanceof DotName) {
+			context.check(h2.nDots === 1, token.loc, 'Too many dots!')
+			const x = new SuperMember(h2.loc, token.name)
+			return _parseSpacedFold(x, rest.tail())
+		} else if (isGroup(G_Parenthesis, h2) && Slice.group(h2).isEmpty()) {
+			const x = new SuperCall(h2.loc, [])
+			return _parseSpacedFold(x, rest.tail())
+		} else
+			context.fail(`Expected ${code('.')} or ${code('()')} after ${code('super')}`)
+	} else
+		return _parseSpacedFold(parseSingle(h), rest)
+}
+const _parseSpacedFold = (start, rest) => {
+	let acc = start
+	for (let i = rest.start; i < rest.end; i = i + 1) {
+		const token = rest.tokens[i]
+		const loc = token.loc
+		if (token instanceof DotName) {
+			context.check(token.nDots === 1, token.loc, 'Too many dots!')
+			acc = new Member(token.loc, acc, token.name)
+			continue
 		}
-		return acc
+		if (token instanceof Keyword)
+			switch (token.kind) {
+				case KW_Focus:
+					acc = new Call(token.loc, acc, [ LocalAccess.focus(loc) ])
+					continue
+				case KW_Type: {
+					const type = parseSpaced(rest._chopStart(i + 1))
+					return Call.contains(token.loc, type, acc)
+				}
+				default:
+			}
+		if (token instanceof Group) {
+			const slice = Slice.group(token)
+			switch (token.kind) {
+				case G_Bracket:
+					acc = Call.sub(loc, cat(acc, parseExprParts(slice)))
+					continue
+				case G_Parenthesis:
+					checkEmpty(slice, () =>
+						`Use ${code('(a b)')}, not ${code('a(b)')}`)
+					acc = new Call(loc, acc, [])
+					continue
+				case G_Quote:
+					acc = new QuoteTemplate(loc, acc, parseQuote(slice))
+					continue
+				default:
+			}
+		}
+		context.fail(tokens.loc, `Expected member or sub, not ${token}`)
 	}
+	return acc
 }
 
 const tryParseUses = (useKeywordKind, tokens) => {
@@ -920,7 +942,7 @@ const
 		if (t instanceof Name)
 			return { path: t.name, name: t.name }
 		else if (t instanceof DotName)
-			return { path: push(_partsFromDotName(t), t.name).join('/'), name: t.name }
+			return { path: cat(_partsFromDotName(t), t.name).join('/'), name: t.name }
 		else {
 			context.check(isGroup(G_Space, t), t.loc, 'Not a valid module name.')
 			return _parseSpacedRequire(Slice.group(t))

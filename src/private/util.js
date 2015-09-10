@@ -16,11 +16,6 @@ export const
 		return out
 	},
 
-	eachReverse = (array, action) => {
-		for (let i = array.length - 1; i >= 0; i = i - 1)
-			action(array[i])
-	},
-
 	flatMap = (mapped, mapper) => {
 		const out = []
 		for (let i = 0; i < mapped.length; i = i + 1)
@@ -31,8 +26,11 @@ export const
 	// flatMap where opMapper returns optionals instead of arrays.
 	flatOpMap = (arr, opMapper) => {
 		const out = [ ]
-		for (const em of arr)
-			opEach(opMapper(em), _ => out.push(_))
+		for (const em of arr) {
+			const _ = opMapper(em)
+			if (_ !== null)
+				out.push(_)
+		}
 		return out
 	},
 
@@ -67,17 +65,17 @@ export const
 
 	opMap = opEach,
 
-	push = (mutArr, em) => {
-		mutArr.push(em)
-		return mutArr
-	},
-
 	repeat = (em, n) => {
 		assert(n >= 0)
 		const out = []
 		for (let i = n; i > 0; i = i - 1)
 			out.push(em)
 		return out
+	},
+
+	reverseIter = function*(array) {
+		for (let i = array.length - 1; i >= 0; i = i - 1)
+			yield array[i]
 	},
 
 	rtail = arr => {
@@ -93,9 +91,4 @@ export const
 	type = (instance, itsType) => {
 		if (!(Object(instance) instanceof itsType))
 			throw new Error(`${instance} is not a ${itsType.name}`)
-	},
-
-	unshift = (em, mutArr) => {
-		mutArr.unshift(em)
-		return mutArr
 	}

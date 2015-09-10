@@ -1,5 +1,5 @@
 import Loc from 'esast/dist/Loc'
-import { isEmpty, opIf, push } from '../util'
+import { isEmpty } from '../util'
 
 /*
 Represents a section of tokens that the parser is currently working on.
@@ -75,7 +75,13 @@ export default class Slice {
 				out.push({ before: this._chop(iLast, i), at: this.tokens[i] })
 				iLast = i + 1
 			}
-		return opIf(!isEmpty(out), () => push(out, { before: this._chopStart(iLast) }))
+
+		if (isEmpty(out))
+			return null
+		else {
+			out.push({ before: this._chopStart(iLast) })
+			return out
+		}
 	}
 
 	* [Symbol.iterator]() {

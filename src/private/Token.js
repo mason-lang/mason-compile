@@ -1,6 +1,6 @@
 import { code } from '../CompileError'
 import { NumberLiteral } from './MsAst'
-import { SV_False, SV_Name, SV_Null, SV_Super, SV_True, SV_Undefined } from './MsAst'
+import { SV_False, SV_Name, SV_Null, SV_True, SV_Undefined } from './MsAst'
 import { implementMany } from './util'
 
 /*
@@ -224,7 +224,8 @@ export const
 	KW_Pass = kw('pass'),
 	KW_Region = kw('region'),
 	KW_Set = kw('set!'),
-	KW_Super = kw('super'),
+	KW_SuperDo = kw('super!'),
+	KW_SuperVal = kw('super'),
 	KW_Static = kw('static'),
 	KW_SwitchDo = kw('switch!'),
 	KW_SwitchVal = kw('switch'),
@@ -254,7 +255,6 @@ export const
 			case KW_False: return SV_False
 			case KW_Name: return SV_Name
 			case KW_Null: return SV_Null
-			case KW_Super: return SV_Super
 			case KW_True: return SV_True
 			case KW_Undefined: return SV_Undefined
 			default: return null

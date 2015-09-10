@@ -3,7 +3,7 @@ import * as MsAstTypes from './MsAst'
 import { Assign, AssignDestructure, AssignSingle, BlockVal, Call, Class, Debug, Do, ForVal, Fun,
 	LocalDeclareBuilt, LocalDeclareFocus, LocalDeclareRes, ObjEntry, Pattern, Yield, YieldTo
 	} from './MsAst'
-import { assert, cat, eachReverse, head, ifElse, implementMany, isEmpty, opEach } from './util'
+import { assert, cat, head, ifElse, implementMany, isEmpty, opEach, reverseIter } from './util'
 import VerifyResults, { LocalInfo } from './VerifyResults'
 
 /*
@@ -16,6 +16,7 @@ export default (_context, msAst) => {
 	isInDebug = isInGenerator = false
 	okToNotUse = new Set()
 	opLoop = null
+	method = null
 	results = new VerifyResults()
 
 	msAst.verify()
@@ -23,7 +24,7 @@ export default (_context, msAst) => {
 
 	const res = results
 	// Release for garbage collection.
-	context = locals = okToNotUse = opLoop = pendingBlockLocals = results = undefined
+	context = locals = okToNotUse = opLoop = pendingBlockLocals = method = results = null
 	return res
 }
 
@@ -53,6 +54,8 @@ let
 	isInDebug,
 	// Whether we are currently able to yield.
 	isInGenerator,
+	// Current method we are in, or 'constructor', or null.
+	method,
 	results,
 	// Name of the closest AssignSingle
 	name
@@ -120,11 +123,18 @@ const
 		isInGenerator = oldIsInGenerator
 	},
 
-	withInLoop = (newLoop, action) => {
+	withLoop = (newLoop, action) => {
 		const oldLoop = opLoop
 		opLoop = newLoop
 		action()
 		opLoop = oldLoop
+	},
+
+	withMethod = (newMethod, action) => {
+		const oldMethod = method
+		method = newMethod
+		action()
+		method = oldMethod
 	},
 
 	withName = (newName, action) => {
@@ -136,7 +146,7 @@ const
 
 	// Can't break out of loop inside of IIFE.
 	withIIFE = action => {
-		withInLoop(false, action)
+		withLoop(false, action)
 	},
 
 	plusLocal = (addedLocal, action) => {
@@ -305,7 +315,10 @@ implementMany(MsAstTypes, 'verify', {
 		verifyOpEach(this.opDo)
 		for (const _ of this.statics)
 			_.verify()
-		verifyOpEach(this.opConstructor)
+		if (this.opConstructor !== null) {
+			okToNotUse.add(this.opConstructor.opDeclareThis)
+			withMethod('constructor', () => this.opConstructor.verify(true))
+		}
 		for (const _ of this.methods)
 			_.verify()
 		// name set by AssignSingle
@@ -336,16 +349,13 @@ implementMany(MsAstTypes, 'verify', {
 
 	ForVal() { verifyFor(this) },
 
-	// isForMethodImpl is set if this is a MethodImpl's implementation.
-	Fun(isForMethodImpl) {
+	Fun() {
 		withBlockLocals(() => {
 			context.check(this.opDeclareRes === null || this.block instanceof BlockVal, this.loc,
 				'Function with return condition must return something.')
 			withInGenerator(this.isGenerator, () =>
-				withInLoop(false, () => {
+				withLoop(null, () => {
 					const allArgs = cat(this.opDeclareThis, this.args, this.opRestArg)
-					if (isForMethodImpl)
-						okToNotUse.add(this.opDeclareThis)
 					verifyAndPlusLocals(allArgs, () => {
 						verifyOpEach(this.opIn)
 						this.block.verify()
@@ -422,22 +432,24 @@ implementMany(MsAstTypes, 'verify', {
 		this.value.verify()
 	},
 
-	MethodGetter() {
-		if (typeof this.symbol !== 'string')
-			this.symbol.verify()
-		okToNotUse.add(this.declareThis)
-		verifyAndPlusLocals([ this.declareThis ], () => { this.block.verify() })
-	},
 	MethodImpl() {
-		if (typeof this.symbol !== 'string')
-			this.symbol.verify()
-		this.fun.verify(true)
+		verifyMethod(this, () => {
+			okToNotUse.add(this.fun.opDeclareThis)
+			this.fun.verify()
+		})
+	},
+	MethodGetter() {
+		verifyMethod(this, () => {
+			okToNotUse.add(this.declareThis)
+			verifyAndPlusLocals([ this.declareThis ], () => { this.block.verify() })
+		})
 	},
 	MethodSetter() {
-		if (typeof this.symbol !== 'string')
-			this.symbol.verify()
-		okToNotUse.add(this.declareThis)
-		verifyAndPlusLocals([ this.declareThis, this.declareFocus ], () => { this.block.verify() })
+		verifyMethod(this, () => {
+			verifyAndPlusLocals([ this.declareThis, this.declareFocus ], () => {
+				this.block.verify()
+			})
+		})
 	},
 
 	Module() {
@@ -519,6 +531,12 @@ implementMany(MsAstTypes, 'verify', {
 
 	Splat() { this.splatted.verify() },
 
+	SuperCall: verifySuperCall,
+	SuperCallDo: verifySuperCall,
+	SuperMember() {
+		context.check(method !== null, this.loc, 'Must be in method.')
+	},
+
 	SwitchDo() { verifySwitch(this) },
 	SwitchDoPart: verifySwitchPart,
 	SwitchVal() { withIIFE(() => verifySwitch(this)) },
@@ -583,6 +601,13 @@ function verifyExcept() {
 	verifyOpEach(this._finally)
 }
 
+function verifySuperCall() {
+	context.check(method !== null, this.loc, 'Must be in a method.')
+	results.superCallToMethod.set(this, method)
+	for (const _ of this.args)
+		_.verify()
+}
+
 function verifyUse() {
 	// Since Uses are always in the outermost scope, don't have to worry about shadowing.
 	// So we mutate `locals` directly.
@@ -601,7 +626,7 @@ function verifyUse() {
 // Helpers specific to certain MsAst types:
 const
 	verifyFor = forLoop => {
-		const verifyBlock = () => withInLoop(forLoop, () => forLoop.block.verify())
+		const verifyBlock = () => withLoop(forLoop, () => forLoop.block.verify())
 		ifElse(forLoop.opIteratee,
 			({ element, bag }) => {
 				bag.verify()
@@ -626,6 +651,12 @@ const
 				verifyAndPlusLocal(_.assignee, doIt)
 			},
 			doIt)
+	},
+
+	verifyMethod = (_, doVerify) => {
+		if (typeof _.symbol !== 'string')
+			_.symbol.verify()
+		withMethod(_, doVerify)
 	},
 
 	verifySwitch = _ => {
@@ -674,15 +705,19 @@ const
 
 		const getLineLocals = line => {
 			if (line instanceof Debug)
-				withInDebug(() => eachReverse(line.lines, getLineLocals))
+				withInDebug(() => {
+					for (const _ of reverseIter(line.lines))
+						getLineLocals(_)
+				})
 			else
-				eachReverse(lineNewLocals(line), _ => {
+				for (const _ of reverseIter(lineNewLocals(line))) {
 					// Register the local now. Can't wait until the assign is verified.
 					registerLocal(_)
 					newLocals.push(_)
-				})
+				}
 		}
-		eachReverse(lines, getLineLocals)
+		for (const _ of reverseIter(lines))
+			getLineLocals(_)
 		pendingBlockLocals.push(...newLocals)
 
 		/*

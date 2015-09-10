@@ -212,7 +212,7 @@ export default class MsAst {
 	export class Throw extends Do {
 		constructor(loc, opThrown /* Opt[Val] */) {
 			super(loc)
-			// TODO: ES6 optional arguments
+			// TODO:ES6 optional arguments
 			if (opThrown === undefined)
 				opThrown = null
 			this.opThrown = opThrown
@@ -295,7 +295,7 @@ export default class MsAst {
 	// TODO: BlockBag, BlockMap, BlockObj => BlockBuild(kind, ...)
 	export class BlockObj extends BlockVal {
 		static of(loc, lines, opObjed, opName) {
-			// TODO: ES6 optional arguments
+			// TODO:ES6 optional arguments
 			if (opObjed === undefined)
 				opObjed = null
 			if (opName === undefined)
@@ -500,6 +500,26 @@ export default class MsAst {
 			super(loc)
 			this.declareFocus = declareFocus
 			this.block = block
+		}
+	}
+
+	export class SuperCall extends Val {
+		constructor(loc, args /* Array[Union[Val Splat]] */) {
+			super(loc)
+			this.args = args
+		}
+	}
+	export class SuperCallDo extends Do {
+		constructor(loc, args /* Array[Union[Val Splat]] */) {
+			super(loc)
+			this.args = args
+		}
+	}
+
+	export class SuperMember extends Val {
+		constructor(loc, name /* String */) {
+			super(loc)
+			this.name = name
 		}
 	}
 
@@ -801,10 +821,9 @@ export default class MsAst {
 		SV_False = 1,
 		SV_Null = 2,
 		SV_Sub = 3,
-		SV_Super = 4,
-		SV_True = 5,
-		SV_Undefined = 6,
-		SV_Name = 7
+		SV_True = 4,
+		SV_Undefined = 5,
+		SV_Name = 6
 	export class SpecialVal extends Val {
 		constructor(loc, kind /* Number */) {
 			super(loc)

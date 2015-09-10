@@ -101,7 +101,7 @@ const
 			for (let key in builtins) {
 				const x = builtins[key]
 				delete builtins[key]
-				builtins[key.replace(/msl/g, opts.mslPath)] = x
+				builtins[key.replace(/msl/g, mslPath)] = x
 			}
 		return builtins
 	},

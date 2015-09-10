@@ -19,6 +19,8 @@ export default class VerifyResults {
 		// Like the inverse of context.opts.builtinNameToPath,
 		// but only includes names actually used.
 		this.builtinPathToNames = new Map()
+		// Values are either MethodImpl or the string 'constructor'
+		this.superCallToMethod = new Map()
 	}
 
 	isDebugLocal(localDeclare) {

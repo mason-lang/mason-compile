@@ -15,6 +15,7 @@ export const
 	IdFocus = new Identifier('_'),
 	// TODO:ES6 Shouldn't need, just use arrow functions.
 	IdLexicalThis = new Identifier('_this'),
+	IdSuper = new Identifier('super'),
 	LitEmptyArray = new ArrayExpression([]),
 	LitEmptyString = new Literal(''),
 	LitNull = new Literal(null),
