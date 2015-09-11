@@ -183,6 +183,7 @@ export const
 	KW_CaseVal = kw('case'),
 	KW_CatchDo = kw('catch!'),
 	KW_CatchVal = kw('catch'),
+	KW_Cond = kw('cond'),
 	KW_Class = kw('class'),
 	KW_Construct = kw('construct!'),
 	KW_Debug = kw('debug'),

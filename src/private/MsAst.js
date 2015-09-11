@@ -401,6 +401,15 @@ export default class MsAst {
 		}
 	}
 
+	export class Cond extends Val {
+		constructor(loc, test /* Val */, ifTrue /* Val */, ifFalse /* Val */) {
+			super(loc)
+			this.test = test
+			this.ifTrue = ifTrue
+			this.ifFalse = ifFalse
+		}
+	}
+
 // Fun
 	export class Fun extends Val {
 		constructor(loc,

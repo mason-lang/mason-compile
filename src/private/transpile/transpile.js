@@ -202,6 +202,10 @@ implementMany(MsAstTypes, 'transpile', {
 		return blockWrap(block)
 	},
 
+	Cond() {
+		return new ConditionalExpression(t0(this.test), t0(this.ifTrue), t0(this.ifFalse))
+	},
+
 	ConditionalDo() {
 		const test = t0(this.test)
 		return new IfStatement(

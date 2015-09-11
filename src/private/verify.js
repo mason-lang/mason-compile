@@ -326,6 +326,12 @@ implementMany(MsAstTypes, 'verify', {
 		verifyAndPlusLocal(this.declareFocus, () => this.block.verify())
 	},
 
+	Cond() {
+		this.test.verify()
+		this.ifTrue.verify()
+		this.ifFalse.verify()
+	},
+
 	ConditionalDo() {
 		this.test.verify()
 		this.result.verify()

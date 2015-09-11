@@ -2,7 +2,7 @@ import Loc from 'esast/dist/Loc'
 import { code } from '../../CompileError'
 import { Assert, AssignDestructure, AssignSingle, BagEntry, BagEntryMany, BagSimple, BlockBag,
 	BlockDo, BlockMap, BlockObj, BlockValThrow, BlockWithReturn, BlockWrap, Break, BreakWithVal,
-	Call, CaseDo, CaseDoPart, CaseVal, CaseValPart, Catch, Class, ClassDo, ConditionalDo,
+	Call, CaseDo, CaseDoPart, CaseVal, CaseValPart, Catch, Class, ClassDo, Cond, ConditionalDo,
 	Constructor, ConditionalVal, Debug, Ignore, Iteratee, NumberLiteral, ExceptDo, ExceptVal,
 	ForBag, ForDo, ForVal, Fun, L_And, L_Or, Lazy, LD_Const, LD_Lazy, LD_Mutable, LocalAccess,
 	LocalDeclare, LocalDeclareFocus, LocalDeclareName, LocalDeclareRes, LocalDeclareThis,
@@ -13,14 +13,14 @@ import { Assert, AssignDestructure, AssignSingle, BagEntry, BagEntryMany, BagSim
 	SwitchValPart, Throw, Val, Use, UseDo, UseGlobal, With, Yield, YieldTo } from '../MsAst'
 import { DotName, Group, G_Block, G_Bracket, G_Parenthesis, G_Space, G_Quote, isGroup, isKeyword,
 	Keyword, KW_And, KW_As, KW_Assert, KW_AssertNot, KW_Assign, KW_AssignMutable, KW_Break,
-	KW_BreakWithVal, KW_CaseVal, KW_CaseDo, KW_Class, KW_CatchDo, KW_CatchVal, KW_Construct,
-	KW_Debug, KW_Debugger, KW_Do, KW_Ellipsis, KW_Else, KW_ExceptDo, KW_ExceptVal, KW_Finally,
-	KW_ForBag, KW_ForDo, KW_ForVal, KW_Focus, KW_Fun, KW_FunDo, KW_FunGen, KW_FunGenDo, KW_FunThis,
-	KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo, KW_Get, KW_IfDo, KW_IfVal, KW_Ignore, KW_In,
-	KW_Lazy, KW_LocalMutate, KW_MapEntry, KW_Name, KW_New, KW_Not, KW_ObjAssign, KW_Or, KW_Pass,
-	KW_Out, KW_Region, KW_Set, KW_Static, KW_SuperDo, KW_SuperVal, KW_SwitchDo, KW_SwitchVal,
-	KW_Throw, KW_TryDo, KW_TryVal, KW_Type, KW_UnlessDo, KW_UnlessVal, KW_Use, KW_UseDebug,
-	KW_UseDo, KW_UseLazy, KW_With, KW_Yield, KW_YieldTo, Name, keywordName,
+	KW_BreakWithVal, KW_CaseVal, KW_CaseDo, KW_Cond, KW_CatchDo, KW_CatchVal, KW_Class,
+	KW_Construct, KW_Debug, KW_Debugger, KW_Do, KW_Ellipsis, KW_Else, KW_ExceptDo, KW_ExceptVal,
+	KW_Finally, KW_ForBag, KW_ForDo, KW_ForVal, KW_Focus, KW_Fun, KW_FunDo, KW_FunGen, KW_FunGenDo,
+	KW_FunThis, KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo, KW_Get, KW_IfDo, KW_IfVal, KW_Ignore,
+	KW_In, KW_Lazy, KW_LocalMutate, KW_MapEntry, KW_Name, KW_New, KW_Not, KW_ObjAssign, KW_Or,
+	KW_Pass, KW_Out, KW_Region, KW_Set, KW_Static, KW_SuperDo, KW_SuperVal, KW_SwitchDo,
+	KW_SwitchVal, KW_Throw, KW_TryDo, KW_TryVal, KW_Type, KW_UnlessDo, KW_UnlessVal, KW_Use,
+	KW_UseDebug, KW_UseDo, KW_UseLazy, KW_With, KW_Yield, KW_YieldTo, Name, keywordName,
 	opKeywordKindToSpecialValueKind } from '../Token'
 import { cat, head, ifElse, isEmpty, last, opIf, opMap, repeat, rtail, tail } from '../util'
 import Slice from './Slice'
@@ -359,12 +359,12 @@ const
 		const opSplit = tokens.opSplitOnceWhere(token => {
 			if (token instanceof Keyword)
 				switch (token.kind) {
-					case KW_And: case KW_CaseVal: case KW_Class: case KW_ExceptVal: case KW_ForBag:
-					case KW_ForVal: case KW_Fun: case KW_FunDo: case KW_FunGen: case KW_FunGenDo:
-					case KW_FunThis: case KW_FunThisDo: case KW_FunThisGen: case KW_FunThisGenDo:
-					case KW_IfVal: case KW_New: case KW_Not: case KW_Or: case KW_SuperVal:
-					case KW_SwitchVal: case KW_UnlessVal: case KW_With: case KW_Yield:
-					case KW_YieldTo:
+					case KW_And: case KW_CaseVal: case KW_Class: case KW_Cond: case KW_ExceptVal:
+					case KW_ForBag: case KW_ForVal: case KW_Fun: case KW_FunDo: case KW_FunGen:
+					case KW_FunGenDo: case KW_FunThis: case KW_FunThisDo: case KW_FunThisGen:
+					case KW_FunThisGenDo: case KW_IfVal: case KW_New: case KW_Not: case KW_Or:
+					case KW_SuperVal: case KW_SwitchVal: case KW_UnlessVal: case KW_With:
+					case KW_Yield: case KW_YieldTo:
 						return true
 					default:
 						return false
@@ -382,6 +382,8 @@ const
 							return parseCase(true, false, after)
 						case KW_Class:
 							return parseClass(after)
+						case KW_Cond:
+							return parseCond(after)
 						case KW_ExceptVal:
 							return parseExcept(KW_ExceptVal, after)
 						case KW_ForBag:
@@ -1241,4 +1243,11 @@ const parseIgnore = tokens => {
 		}
 	})
 	return new Ignore(tokens.loc, ignored)
+}
+
+const parseCond = tokens => {
+	const parts = parseExprParts(tokens)
+	context.check(parts.length === 3, tokens.loc, () =>
+		`${code('cond')} takes exactly 3 arguments.`)
+	return new Cond(tokens.loc, parts[0], parts[1], parts[2])
 }
