@@ -10,15 +10,15 @@ import { functionExpressionThunk, idCached, loc, member, propertyIdOrLiteralCach
 	} from 'esast/dist/util'
 import manglePath from '../manglePath'
 import * as MsAstTypes from '../MsAst'
-import { AssignSingle, Call, L_And, L_Or, LD_Lazy, LD_Mutable, Member, MS_Mutate, MS_New,
-	MS_NewMutable, LocalDeclare, Pattern, Splat, SD_Debugger, SV_Contains, SV_False, SV_Name,
-	SV_Null, SV_Sub, SV_True, SV_Undefined, SwitchDoPart, Quote, Use } from '../MsAst'
+import { AssignSingle, Call, Constructor, L_And, L_Or, LD_Lazy, LD_Mutable, Member, MS_Mutate,
+	MS_New, MS_NewMutable, LocalDeclare, Pattern, Splat, SD_Debugger, SV_Contains, SV_False,
+	SV_Name, SV_Null, SV_Sub, SV_True, SV_Undefined, SwitchDoPart, Quote, Use } from '../MsAst'
 import { assert, cat, flatMap, flatOpMap, ifElse, isEmpty, implementMany, isPositive, last, opIf,
 	opMap, tail } from '../util'
 import { AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj,
-	DeclareLexicalThis, ExportsDefault, ExportsGet, IdArguments, IdBuilt, IdDefine, IdExports,
-	IdExtract, IdFocus, IdLexicalThis, IdSuper, GlobalError, LitEmptyString, LitNull, LitStrExports,
-	LitStrThrow, LitZero, ReturnBuilt, ReturnExports, ReturnRes, SwitchCaseNoMatch,
+	DeclareLexicalThis, ExportsDefault, ExportsGet, IdArguments, IdBuilt, IdConstructor, IdDefine,
+	IdExports, IdExtract, IdFocus, IdLexicalThis, IdSuper, GlobalError, LitEmptyString, LitNull,
+	LitStrExports, LitStrThrow, LitZero, ReturnBuilt, ReturnExports, ReturnRes, SwitchCaseNoMatch,
 	ThrowAssertFail, ThrowNoCaseMatch, UseStrict } from './ast-constants'
 import { IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot,
 	msAssertNotMember, msAssoc, msCheckContains, msExtract, msGet, msGetDefaultExport, msGetModule,
@@ -184,7 +184,7 @@ implementMany(MsAstTypes, 'transpile', {
 	Class() {
 		const methods = cat(
 			this.statics.map(_ => t1(_, true)),
-			opMap(this.opConstructor, constructorDefinition),
+			opMap(this.opConstructor, t0),
 			this.methods.map(_ => t1(_, false)))
 		const opName = opMap(verifyResults.opName(this), idCached)
 		const classExpr = new ClassExpression(
@@ -217,6 +217,20 @@ implementMany(MsAstTypes, 'transpile', {
 			new ConditionalExpression(test, result, MsNone)
 	},
 
+	Constructor() {
+		isInConstructor = true
+
+		// If there is a `super!`, `this` will not be defined until then, so must wait until then.
+		// Otherwise, do it at the beginning.
+		const body = verifyResults.constructorToSuper.has(this) ?
+			t0(this.fun) :
+			t1(this.fun, constructorSetMembers(this))
+
+		const res = new MethodDefinition(IdConstructor, body, 'constructor', false, false)
+		isInConstructor = false
+		return res
+	},
+
 	Catch() {
 		return new CatchClause(t0(this.caught), t0(this.block))
 	},
@@ -240,7 +254,11 @@ implementMany(MsAstTypes, 'transpile', {
 		return blockWrap(new BlockStatement([ forLoop(this.opIteratee, this.block) ]))
 	},
 
-	Fun() {
+	Fun(leadStatements) {
+		// TODO:ES6 Optional args
+		if (leadStatements === undefined)
+			leadStatements = null
+
 		const oldInGenerator = isInGenerator
 		isInGenerator = this.isGenerator
 
@@ -256,7 +274,7 @@ implementMany(MsAstTypes, 'transpile', {
 		const opDeclareThis =
 			opIf(!isInConstructor && this.opDeclareThis != null, () => DeclareLexicalThis)
 
-		const lead = cat(opDeclareThis, opDeclareRest, argChecks, _in)
+		const lead = cat(leadStatements, opDeclareThis, opDeclareRest, argChecks, _in)
 
 		const _out = opMap(this.opOut, t0)
 		const body = t3(this.block, lead, this.opDeclareRes, _out)
@@ -514,13 +532,19 @@ function casePart(alternate) {
 }
 
 function superCall() {
+	const args = this.args.map(t0)
 	const method = verifyResults.superCallToMethod.get(this)
-	const methodExpr = method === 'constructor' ?
-		IdSuper :
-		typeof method.symbol === 'string' ?
-		member(IdSuper, method.symbol) :
-		new MemberExpression(IdSuper, t0(method.symbol))
-	return new CallExpression(methodExpr, this.args.map(t0))
+
+	if (method instanceof Constructor) {
+		const call = new CallExpression(IdSuper, args)
+		const memberSets = constructorSetMembers(method)
+		return cat(call, memberSets)
+	} else {
+		const m = typeof method.symbol === 'string' ?
+			member(IdSuper, method.symbol) :
+			new MemberExpression(IdSuper, t0(method.symbol))
+		return new CallExpression(m, args)
+	}
 }
 
 function switchPart() {
@@ -566,6 +590,10 @@ const
 		return acc
 	},
 
+	constructorSetMembers = constructor =>
+		constructor.memberArgs.map(_ =>
+			msNewProperty(new ThisExpression(), new Literal(_.name), idForDeclareCached(_))),
+
 	forLoop = (opIteratee, block) =>
 		ifElse(opIteratee,
 			({ element, bag }) => {
@@ -574,14 +602,6 @@ const
 				return new ForOfStatement(declare, t0(bag), t0(block))
 			},
 			() => forStatementInfinite(t0(block))),
-
-	constructorDefinition = fun => {
-		isInConstructor = true
-		const res = new MethodDefinition(
-			new Identifier('constructor'), t0(fun), 'constructor', false, false)
-		isInConstructor = false
-		return res
-	},
 
 	doThrow = thrown =>
 		new ThrowStatement(thrown instanceof Quote ?

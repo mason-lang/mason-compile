@@ -21,6 +21,8 @@ export default class VerifyResults {
 		this.builtinPathToNames = new Map()
 		// Values are either MethodImpl or the string 'constructor'
 		this.superCallToMethod = new Map()
+		// Links a constructor to its super! call.
+		this.constructorToSuper = new Map()
 	}
 
 	isDebugLocal(localDeclare) {

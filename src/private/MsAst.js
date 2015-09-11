@@ -467,6 +467,14 @@ export default class MsAst {
 		}
 	}
 
+	export class Constructor extends MsAst {
+		constructor(loc, fun /* Fun*/, memberArgs /* Array[LocalDeclare] */) {
+			super(loc)
+			this.fun = fun
+			this.memberArgs = memberArgs
+		}
+	}
+
 	export class MethodImplLike extends MsAst {
 		constructor(loc, symbol /* Union[String Val] */) {
 			super(loc)

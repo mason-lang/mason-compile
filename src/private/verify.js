@@ -1,8 +1,8 @@
 import { code } from '../CompileError'
 import * as MsAstTypes from './MsAst'
-import { Assign, AssignDestructure, AssignSingle, BlockVal, Call, Class, Debug, Do, ForVal, Fun,
-	LocalDeclareBuilt, LocalDeclareFocus, LocalDeclareRes, ObjEntry, Pattern, Yield, YieldTo
-	} from './MsAst'
+import { Assign, AssignDestructure, AssignSingle, BlockVal, Call, Class, Constructor, Debug, Do,
+	ForVal, Fun, LocalDeclareBuilt, LocalDeclareFocus, LocalDeclareRes, ObjEntry, Pattern,
+	SuperCallDo, Yield, YieldTo } from './MsAst'
 import { assert, cat, head, ifElse, implementMany, isEmpty, opEach, reverseIter } from './util'
 import VerifyResults, { LocalInfo } from './VerifyResults'
 
@@ -54,7 +54,7 @@ let
 	isInDebug,
 	// Whether we are currently able to yield.
 	isInGenerator,
-	// Current method we are in, or 'constructor', or null.
+	// Current method we are in, or a Constructor, or null.
 	method,
 	results,
 	// Name of the closest AssignSingle
@@ -315,10 +315,8 @@ implementMany(MsAstTypes, 'verify', {
 		verifyOpEach(this.opDo)
 		for (const _ of this.statics)
 			_.verify()
-		if (this.opConstructor !== null) {
-			okToNotUse.add(this.opConstructor.opDeclareThis)
-			withMethod('constructor', () => this.opConstructor.verify(true))
-		}
+		if (this.opConstructor !== null)
+			this.opConstructor.verify(this.opSuperClass !== null)
 		for (const _ of this.methods)
 			_.verify()
 		// name set by AssignSingle
@@ -335,6 +333,23 @@ implementMany(MsAstTypes, 'verify', {
 	ConditionalVal() {
 		this.test.verify()
 		withIIFE(() => this.result.verify())
+	},
+
+	Constructor(classHasSuper) {
+		okToNotUse.add(this.fun.opDeclareThis)
+		withMethod(this, () => { this.fun.verify() })
+
+		const superCall = results.constructorToSuper.get(this)
+
+		if (classHasSuper)
+			context.check(superCall !== undefined, this.loc, () =>
+				`Constructor must contain ${code('super!')}`)
+		else
+			context.check(superCall === undefined, () => superCall.loc, () =>
+				`Class has no superclass, so ${code('super!')} is not allowed.`)
+
+		for (const _ of this.memberArgs)
+			setLocalDeclareAccessed(_, this)
 	},
 
 	// Only reach here for in/out condition.
@@ -604,6 +619,13 @@ function verifyExcept() {
 function verifySuperCall() {
 	context.check(method !== null, this.loc, 'Must be in a method.')
 	results.superCallToMethod.set(this, method)
+
+	if (method instanceof Constructor) {
+		context.check(this instanceof SuperCallDo, this.loc, () =>
+			`${code('super')} not supported in constructor; use ${code('super!')}`)
+		results.constructorToSuper.set(method, this)
+	}
+
 	for (const _ of this.args)
 		_.verify()
 }

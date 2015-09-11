@@ -25,7 +25,9 @@ const doTest = isPerfTest => {
 		includeModuleName: false,
 		forceNonLazyModule: true,
 		useStrict: false,
-		builtins: { global: [ 'Array', 'Function', 'Symbol' ] }
+		builtins: {
+			global: [ 'Array', 'Boolean', 'Error', 'Function', 'Number', 'Object', 'Symbol' ]
+		}
 	}
 	const context = new CompileContext(new CompileOptions(opts))
 

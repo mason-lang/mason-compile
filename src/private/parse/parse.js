@@ -3,14 +3,14 @@ import { code } from '../../CompileError'
 import { Assert, AssignDestructure, AssignSingle, BagEntry, BagEntryMany, BagSimple, BlockBag,
 	BlockDo, BlockMap, BlockObj, BlockValThrow, BlockWithReturn, BlockWrap, Break, BreakWithVal,
 	Call, CaseDo, CaseDoPart, CaseVal, CaseValPart, Catch, Class, ClassDo, ConditionalDo,
-	ConditionalVal, Debug, Ignore, Iteratee, NumberLiteral, ExceptDo, ExceptVal, ForBag, ForDo,
-	ForVal, Fun, L_And, L_Or, Lazy, LD_Const, LD_Lazy, LD_Mutable, LocalAccess, LocalDeclare,
-	LocalDeclareFocus, LocalDeclareName, LocalDeclareRes, LocalDeclareThis, LocalMutate, Logic,
-	MapEntry, Member, MemberSet, MethodGetter, MethodImpl, MethodSetter, Module, MS_Mutate, MS_New,
-	MS_NewMutable, New, Not, ObjEntry, ObjEntryAssign, ObjEntryComputed, ObjPair, ObjSimple,
-	Pattern, Quote, QuoteTemplate, SD_Debugger, SpecialDo, SpecialVal, SV_Name, SV_Null, Splat,
-	SuperCall, SuperCallDo, SuperMember, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart, Throw,
-	Val, Use, UseDo, UseGlobal, With, Yield, YieldTo } from '../MsAst'
+	Constructor, ConditionalVal, Debug, Ignore, Iteratee, NumberLiteral, ExceptDo, ExceptVal,
+	ForBag, ForDo, ForVal, Fun, L_And, L_Or, Lazy, LD_Const, LD_Lazy, LD_Mutable, LocalAccess,
+	LocalDeclare, LocalDeclareFocus, LocalDeclareName, LocalDeclareRes, LocalDeclareThis,
+	LocalMutate, Logic, MapEntry, Member, MemberSet, MethodGetter, MethodImpl, MethodSetter,
+	Module, MS_Mutate, MS_New, MS_NewMutable, New, Not, ObjEntry, ObjEntryAssign, ObjEntryComputed,
+	ObjPair, ObjSimple, Pattern, Quote, QuoteTemplate, SD_Debugger, SpecialDo, SpecialVal, SV_Name,
+	SV_Null, Splat, SuperCall, SuperCallDo, SuperMember, SwitchDo, SwitchDoPart, SwitchVal,
+	SwitchValPart, Throw, Val, Use, UseDo, UseGlobal, With, Yield, YieldTo } from '../MsAst'
 import { DotName, Group, G_Block, G_Bracket, G_Parenthesis, G_Space, G_Quote, isGroup, isKeyword,
 	Keyword, KW_And, KW_As, KW_Assert, KW_AssertNot, KW_Assign, KW_AssignMutable, KW_Break,
 	KW_BreakWithVal, KW_CaseVal, KW_CaseDo, KW_Class, KW_CatchDo, KW_CatchVal, KW_Construct,
@@ -107,7 +107,7 @@ const
 		const block = tokens.second()
 
 		const lines = [ ]
-		for (const line of block.slices())
+		for (const line of Slice.group(block).slices())
 			lines.push(...parseLineOrLines(line))
 		return lines
 	},
@@ -483,7 +483,14 @@ const
 		return { opReturnType: null, rest: tokens }
 	},
 
-	_funArgsAndBlock = (isDo, tokens) => {
+	/*
+	includeMemberArgs:
+		if true, output will include `memberArgs`.
+		This is a subset of `args` whose names are prefixed with `.`
+		e.g.: `construct! .x .y`
+		This is for constructors only.
+	*/
+	_funArgsAndBlock = (isDo, tokens, includeMemberArgs) => {
 		checkNonEmpty(tokens, 'Expected an indented block.')
 		const h = tokens.head()
 		// Might be `|case`
@@ -492,39 +499,45 @@ const
 			const args = [ new LocalDeclareFocus(h.loc) ]
 			return h.kind === KW_CaseVal ?
 				{
-					args, opRestArg: null, opIn: null, opOut: null,
+					args, opRestArg: null, memberArgs: [ ], opIn: null, opOut: null,
 					block: new BlockWithReturn(tokens.loc, [ ], eCase)
 				} :
 				{
-					args, opRestArg: null, opIn: null, opOut: null,
+					args, opRestArg: null, memberArgs: [ ], opIn: null, opOut: null,
 					block: new BlockDo(tokens.loc, [ eCase ])
 				}
 		} else {
 			const [ before, blockLines ] = beforeAndBlock(tokens)
-			const { args, opRestArg } = _parseFunLocals(before)
+			const { args, opRestArg, memberArgs } = _parseFunLocals(before, includeMemberArgs)
 			for (const arg of args)
 				if (!arg.isLazy())
 					arg.kind = LD_Mutable
 			const [ opIn, rest0 ] = _tryTakeInOrOut(KW_In, blockLines)
 			const [ opOut, rest1 ] = _tryTakeInOrOut(KW_Out, rest0)
 			const block = (isDo ? parseBlockDo : parseBlockVal)(rest1)
-			return { args, opRestArg, block, opIn, opOut }
+			return { args, opRestArg, memberArgs, block, opIn, opOut }
 		}
 	},
 
-	_parseFunLocals = tokens => {
+	_parseFunLocals = (tokens, includeMemberArgs) => {
 		if (tokens.isEmpty())
-			return { args: [], opRestArg: null }
+			return { args: [], memberArgs: [ ], opRestArg: null }
 		else {
+			let rest, opRestArg
 			const l = tokens.last()
-			if (l instanceof DotName) {
-				context.check(l.nDots === 3, l.loc, 'Splat argument must have exactly 3 dots')
-				return {
-					args: parseLocalDeclares(tokens.rtail()),
-					opRestArg: LocalDeclare.plain(l.loc, l.name)
-				}
+			if (l instanceof DotName && l.nDots === 3) {
+				rest = tokens.rtail()
+				opRestArg = LocalDeclare.plain(l.loc, l.name)
+			} else {
+				rest = tokens
+				opRestArg = null
 			}
-			else return { args: parseLocalDeclares(tokens), opRestArg: null }
+
+			if (includeMemberArgs) {
+				const { declares: args, memberArgs } = parseLocalDeclaresAndMemberArgs(rest)
+				return { args, memberArgs, opRestArg }
+			} else
+				return { args: parseLocalDeclares(rest), opRestArg }
 		}
 	},
 
@@ -737,14 +750,28 @@ const
 	parseLocalDeclaresJustNames = tokens =>
 		tokens.map(_ => LocalDeclare.plain(_.loc, _parseLocalName(_))),
 
-	parseLocalDeclares = tokens => tokens.map(parseLocalDeclare),
+	parseLocalDeclares = (tokens, includeMemberArgs) =>
+		includeMemberArgs ? parseLocalDeclaresAndMemberArgs(tokens) : tokens.map(parseLocalDeclare),
 
-	parseLocalDeclare = token => {
+	// _orMember: if true, will look for `.x` arguments and return { declare, isMember }.
+	parseLocalDeclare = (token, _orMember) => {
+		let isMember = false
+		let declare
+
+		const parseLocalName = token => {
+			if (_orMember) {
+				isMember = token instanceof DotName && token.nDots === 1
+				return isMember ? token.name : _parseLocalName(token)
+			} else
+				return _parseLocalName(token)
+		}
+
 		if (isGroup(G_Space, token)) {
 			const tokens = Slice.group(token)
 			const [ rest, isLazy ] =
 				isKeyword(KW_Lazy, tokens.head()) ? [ tokens.tail(), true ] : [ tokens, false ]
-			const name = _parseLocalName(rest.head())
+
+			const name = parseLocalName(rest.head())
 			const rest2 = rest.tail()
 			const opType = opIf(!rest2.isEmpty(), () => {
 				const colon = rest2.head()
@@ -753,9 +780,25 @@ const
 				checkNonEmpty(tokensType, () => `Expected something after ${colon}`)
 				return parseSpaced(tokensType)
 			})
-			return new LocalDeclare(token.loc, name, opType, isLazy ? LD_Lazy : LD_Const)
+			declare = new LocalDeclare(token.loc, name, opType, isLazy ? LD_Lazy : LD_Const)
 		} else
-			return LocalDeclare.plain(token.loc, _parseLocalName(token))
+			declare = LocalDeclare.plain(token.loc, parseLocalName(token))
+
+		if (_orMember)
+			return { declare, isMember }
+		else
+			return declare
+	},
+
+	parseLocalDeclaresAndMemberArgs = tokens => {
+		const declares = [ ], memberArgs = [ ]
+		for (const token of tokens) {
+			const { declare, isMember } = parseLocalDeclare(token, true)
+			declares.push(declare)
+			if (isMember)
+				memberArgs.push(declare)
+		}
+		return { declares, memberArgs }
 	}
 
 // parseLocalDeclare privates
@@ -1082,7 +1125,7 @@ const parseClass = tokens => {
 	const line1 = rest.headSlice()
 	if (isKeyword(KW_Do, line1.head())) {
 		const done = justBlockDo(KW_Do, line1.tail())
-		opDo = new ClassDo(line1.loc, new LocalDeclareFocus(line1.loc, done), done)
+		opDo = new ClassDo(line1.loc, new LocalDeclareFocus(line1.loc), done)
 		rest = block.tail()
 	}
 	if (!rest.isEmpty()) {
@@ -1106,13 +1149,15 @@ const parseClass = tokens => {
 
 const
 	_parseConstructor = tokens => {
-		const { args, opRestArg, block, opIn, opOut } = _funArgsAndBlock(true, tokens)
+		const { args, memberArgs, opRestArg, block, opIn, opOut } =
+			_funArgsAndBlock(true, tokens, true)
 		const isGenerator = false, opDeclareRes = null
-		return new Fun(tokens.loc,
+		const fun = new Fun(tokens.loc,
 			new LocalDeclareThis(tokens.loc),
 			isGenerator,
 			args, opRestArg,
 			block, opIn, opDeclareRes, opOut)
+		return new Constructor(tokens.loc, fun, memberArgs)
 	},
 	_parseStatics = tokens => {
 		const block = justBlock(KW_Static, tokens)
