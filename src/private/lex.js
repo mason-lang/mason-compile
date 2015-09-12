@@ -99,18 +99,8 @@ export default (context, sourceString) => {
 		},
 
 		closeParenthesis = loc => {
-			closeSpaceOKIfEmpty(loc.start)
+			_closeGroup(loc.start, G_Space)
 			closeGroup(loc.end, G_Parenthesis)
-		},
-
-		openBracket = loc => {
-			openGroup(loc.start, G_Bracket)
-			openGroup(loc.end, G_Space)
-		},
-
-		closeBracket = loc => {
-			closeSpaceOKIfEmpty(loc.start)
-			closeGroup(loc.end, G_Bracket)
 		},
 
 		closeGroupsForDedent = pos => {
@@ -390,16 +380,25 @@ export default (context, sourceString) => {
 				// GROUPS
 
 				case OpenParenthesis:
-					openParenthesis(loc())
+					if (tryEat(CloseParenthesis))
+						addToCurrentGroup(new Group(loc(), [ ], G_Parenthesis))
+					else
+						openParenthesis(loc())
 					break
 				case OpenBracket:
-					openBracket(loc())
+					if (tryEat(CloseBracket))
+						addToCurrentGroup(new Group(loc(), [ ], G_Bracket))
+					else {
+						openGroup(startPos(), G_Bracket)
+						openGroup(pos(), G_Space)
+					}
 					break
 				case CloseParenthesis:
 					closeParenthesis(loc())
 					break
 				case CloseBracket:
-					closeBracket(loc())
+					_closeGroup(startPos(), G_Space)
+					closeGroup(pos(), G_Bracket)
 					break
 				case Space:
 					space(loc())
