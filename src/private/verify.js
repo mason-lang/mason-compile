@@ -1,7 +1,7 @@
 import { code } from '../CompileError'
 import * as MsAstTypes from './MsAst'
-import { Assign, AssignDestructure, AssignSingle, BlockVal, Call, Class, Constructor, Debug, Do,
-	ForVal, Fun, LocalDeclareBuilt, LocalDeclareFocus, LocalDeclareRes, ObjEntry, Pattern,
+import { AssignDestructure, AssignSingle, BlockVal, Call, Class, Constructor, Debug, Do, ForVal,
+	Fun, LocalDeclareBuilt, LocalDeclareFocus, LocalDeclareRes, ModuleExport, ObjEntry, Pattern,
 	SuperCallDo, Yield, YieldTo } from './MsAst'
 import { assert, cat, head, ifElse, implementMany, isEmpty, opEach, reverseIter } from './util'
 import VerifyResults, { LocalInfo } from './VerifyResults'
@@ -74,7 +74,7 @@ const
 
 	// When a local is returned from a BlockObj or Module,
 	// the return 'access' is considered to be 'debug' if the local is.
-	accessLocalForReturn = (declare, access) => {
+	accessLocalForReturn = (access, declare) => {
 		const info = results.localDeclareToInfo.get(declare)
 		_addLocalAccess(info, access, info.isInDebug)
 	},
@@ -483,25 +483,13 @@ implementMany(MsAstTypes, 'verify', {
 				_.verify()
 		})
 
-		withName(context.opts.moduleName(), () => {
-			const newLocals = verifyLines(this.lines)
-			for (const _ of this.exports)
-				accessLocalForReturn(_, this)
-			opEach(this.opDefaultExport, _ => {
-				if (_ instanceof Class || _ instanceof Fun)
-					setName(_)
-				plusLocals(newLocals, () => { _.verify() })
-			})
+		withName(context.opts.moduleName(), () => { verifyLines(this.lines) })
+	},
 
-			const exports = new Set(this.exports)
-			const markExportLines = line => {
-				if (line instanceof Assign && line.allAssignees().some(_ => exports.has(_)))
-					results.exportAssigns.add(line)
-				else if (line instanceof Debug)
-					line.lines.forEach(markExportLines)
-			}
-			this.lines.forEach(markExportLines)
-		})
+	ModuleExport() {
+		this.assign.verify()
+		for (const _ of this.assign.allAssignees())
+			accessLocalForReturn(this, _)
 	},
 
 	New() {
@@ -514,7 +502,7 @@ implementMany(MsAstTypes, 'verify', {
 		accessLocal(this, 'built')
 		this.assign.verify()
 		for (const _ of this.assign.allAssignees())
-			accessLocal(this, _.name)
+			accessLocalForReturn(this, _)
 	},
 
 	ObjEntryComputed() {
@@ -716,6 +704,8 @@ const
 			line instanceof AssignDestructure ?
 			line.assignees :
 			line instanceof ObjEntry ?
+			lineNewLocals(line.assign) :
+			line instanceof ModuleExport ?
 			lineNewLocals(line.assign) :
 			[ ],
 

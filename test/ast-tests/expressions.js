@@ -153,7 +153,7 @@ describe('expressions', () => {
 				with 0
 					_ _`,
 			new With(loc, focusDeclare, zero,
-				new BlockDo(loc, [ new Call(loc, focusAccess, [ focusAccess ]) ])),
+				new BlockDo(loc, null, [ new Call(loc, focusAccess, [ focusAccess ]) ])),
 			`
 				(_=>{
 					_(_);

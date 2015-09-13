@@ -37,23 +37,30 @@ export default class MsAst {
 // Module
 	export class Module extends MsAst {
 		constructor(loc,
+			opComment, // Opt[String]
 			doUses, // Array[UseDo]
 			uses, // Array[Use]
 			opUseGlobal, // Nullable[UseGlobal]
 			debugUses, // Array[Use]
-			lines, // Array[Do]
-			exports, // Array[LocalDeclare]
-			opDefaultExport) { // Opt[Val]
+			lines) { // Array[Do]
 			super(loc)
+			this.opComment = opComment
 			this.doUses = doUses
 			this.uses = uses
 			this.opUseGlobal = opUseGlobal
 			this.debugUses = debugUses
 			this.lines = lines
-			this.exports = exports
-			this.opDefaultExport = opDefaultExport
 		}
 	}
+
+	export class ModuleExport extends Do {
+		constructor(loc, assign /* AssignSingle */) {
+			super(loc)
+			this.assign = assign
+		}
+	}
+	export class ModuleExportNamed extends ModuleExport { }
+	export class ModuleExportDefault extends ModuleExport { }
 
 	export class UseDo extends MsAst {
 		constructor(loc, path /* String */) {
@@ -267,26 +274,33 @@ export default class MsAst {
 	}
 
 // Block
-	export class BlockDo extends MsAst {
-		constructor(loc, lines /* Array[LineContent] */) {
+	export class Block extends MsAst {
+		constructor(loc, opComment /* Opt[String] */) {
 			super(loc)
+			this.opComment = opComment
+		}
+	}
+
+	export class BlockDo extends Block {
+		constructor(loc, opComment, lines /* Array[LineContent] */) {
+			super(loc, opComment)
 			this.lines = lines
 		}
 	}
 
-	export class BlockVal extends MsAst { }
+	export class BlockVal extends Block { }
 
 	export class BlockWithReturn extends BlockVal {
-		constructor(loc, lines /* Array[LineContent] */, returned /* Val */) {
-			super(loc)
+		constructor(loc, opComment, lines /* Array[LineContent] */, returned /* Val */) {
+			super(loc, opComment)
 			this.lines = lines
 			this.returned = returned
 		}
 	}
 
 	export class BlockValThrow extends BlockVal {
-		constructor(loc, lines /* Array[LineContent] */, _throw /* Throw */) {
-			super(loc)
+		constructor(loc, opComment, lines /* Array[LineContent] */, _throw /* Throw */) {
+			super(loc, opComment)
 			this.lines = lines
 			this.throw = _throw
 		}
@@ -294,28 +308,36 @@ export default class MsAst {
 
 	// TODO: BlockBag, BlockMap, BlockObj => BlockBuild(kind, ...)
 	export class BlockObj extends BlockVal {
-		static of(loc, lines, opObjed, opName) {
+		static of(loc, opComment, lines, opObjed, opName) {
 			// TODO:ES6 optional arguments
 			if (opObjed === undefined)
 				opObjed = null
 			if (opName === undefined)
 				opName = null
-			return new BlockObj(loc, new LocalDeclareBuilt(loc), lines, opObjed, opName)
+			return new BlockObj(loc, opComment, new LocalDeclareBuilt(loc), lines, opObjed, opName)
 		}
 
-		constructor(loc,
+		constructor(
+			loc,
+			opComment,
 			built, // LocalDeclareBuilt
 			lines, // Array[Union[LineContent ObjEntry]]
 			opObjed, // Opt[Val]
 			opName) { // Opt[String]
-			super(loc)
+			super(loc, opComment)
 			this.built = built
 			this.lines = lines
 			this.opObjed = opObjed
 			this.opName = opName
 		}
 	}
-	export class ObjEntry extends Do { }
+
+	export class ObjEntry extends Do {
+		constructor(loc) {
+			super(loc)
+			this.opComment = null
+		}
+	}
 
 	export class ObjEntryAssign extends ObjEntry {
 		constructor(loc, assign /* Assign */) {
@@ -337,12 +359,16 @@ export default class MsAst {
 	}
 
 	export class BlockBag extends BlockVal {
-		static of(loc, lines) {
-			return new BlockBag(loc, new LocalDeclareBuilt(loc), lines)
+		static of(loc, opComment, lines) {
+			return new BlockBag(loc, opComment, new LocalDeclareBuilt(loc), lines)
 		}
 
-		constructor(loc, built /* LocalDeclareBuilt */, lines /* Union[LineContent BagEntry] */) {
-			super(loc)
+		constructor(
+			loc,
+			opComment,
+			built, // LocalDeclareBuilt
+			lines) { // Union[LineContent BagEntry]
+			super(loc, opComment)
 			this.built = built
 			this.lines = lines
 		}
@@ -363,12 +389,16 @@ export default class MsAst {
 	}
 
 	export class BlockMap extends BlockVal {
-		static of(loc, lines) {
-			return new BlockMap(loc, new LocalDeclareBuilt(loc), lines)
+		static of(loc, opComment, lines) {
+			return new BlockMap(loc, opComment, new LocalDeclareBuilt(loc), lines)
 		}
 
-		constructor(loc, built /* LocalDeclareBuilt */, lines /* Union[LineContent MapEntry] */) {
-			super(loc)
+		constructor(
+			loc,
+			opComment,
+			built, // LocalDeclareBuilt
+			lines) { // Union[LineContent MapEntry]
+			super(loc, opComment)
 			this.built = built
 			this.lines = lines
 		}
@@ -420,7 +450,7 @@ export default class MsAst {
 			block, // Block
 			opIn, // Opt[Debug]
 			opDeclareRes, // Opt[LocalDeclareRes]
-			opOut) { // Opt[Debug]
+			opOut) { // Opt[Debug]) {
 			super(loc)
 			// TODO:ES6 Optional args
 			if (opIn === undefined)
@@ -463,12 +493,14 @@ export default class MsAst {
 	export class Class extends Val {
 		constructor(loc,
 			opSuperClass, // Opt[Val]
+			opComment,
 			opDo, // Opt[ClassDo],
 			statics, // Array[MethodImplLike]
 			opConstructor, // Opt[Fun]
 			methods) { // Array[MethodImplLike]
 			super(loc)
 			this.opSuperClass = opSuperClass
+			this.opComment = opComment
 			this.opDo = opDo
 			this.statics = statics
 			this.opConstructor = opConstructor
@@ -777,12 +809,16 @@ export default class MsAst {
 		}
 	}
 
+	// This is both a Token and MsAst.
 	// Store the value as a String so we can distinguish `0xf` from `15`.
 	export class NumberLiteral extends Val {
 		constructor(loc, value /* String */) {
 			super(loc)
 			this.value = value
 		}
+
+		// Tokens need toString.
+		toString() { return this.value.toString() }
 	}
 
 	export class Member extends Val {

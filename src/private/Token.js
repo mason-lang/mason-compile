@@ -1,7 +1,5 @@
 import { code } from '../CompileError'
-import { NumberLiteral } from './MsAst'
 import { SV_False, SV_Name, SV_Null, SV_True, SV_Undefined } from './MsAst'
-import { implementMany } from './util'
 
 /*
 Token tree, output of `lex/group`.
@@ -18,6 +16,8 @@ export class DotName {
 		this.nDots = nDots
 		this.name = name
 	}
+
+	toString() { return `${'.'.repeat(this.nDots)}${this.name}` }
 }
 
 // kind is a G_***.
@@ -27,6 +27,8 @@ export class Group {
 		this.subTokens = subTokens
 		this.kind = kind
 	}
+
+	toString() { return `${groupKindToName.get(this.kind)}` }
 }
 
 /*
@@ -39,6 +41,8 @@ export class Keyword {
 		this.loc = loc
 		this.kind = kind
 	}
+
+	toString() { return code(keywordKindToName.get(this.kind)) }
 }
 
 // A name is guaranteed to *not* be a keyword.
@@ -48,17 +52,18 @@ export class Name {
 		this.loc = loc
 		this.name = name
 	}
+
+	toString() { return this.name }
 }
 
-// NumberLiteral is also both a token and an MsAst.
+export class DocComment {
+	constructor(loc, text /* String */) {
+		this.loc = loc
+		this.text = text
+	}
 
-implementMany({ DotName, Group, Keyword, Name, NumberLiteral }, 'toString', {
-	DotName() { return `${'.'.repeat(this.nDots)}${this.name}` },
-	Group() { return `${groupKindToName.get(this.kind)}` },
-	Keyword() { return code(keywordKindToName.get(this.kind)) },
-	Name() { return this.name },
-	NumberLiteral() { return this.value.toString() }
-})
+	toString() { return 'doc comment' }
+}
 
 let nextGroupKind = 0
 const
@@ -147,7 +152,6 @@ const reserved_words = [
 	// mason reserved words
 	'abstract',
 	'await!',
-	'data',
 	'del',
 	'del?',
 	'del!',
@@ -231,6 +235,7 @@ export const
 	KW_SwitchDo = kw('switch!'),
 	KW_SwitchVal = kw('switch'),
 	KW_Throw = kw('throw!'),
+	KW_Todo = kw('todo'),
 	KW_True = kw('true'),
 	KW_TryDo = kw('try!'),
 	KW_TryVal = kw('try'),

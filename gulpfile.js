@@ -12,9 +12,7 @@ const
 	watch = require('gulp-watch')
 
 const
-	runTests = () => {
-		gulp.src('compiled-test/**/*.js', {read: false}).pipe(mocha())
-	}
+	runTests = () => gulp.src('compiled-test/**/*.js', {read: false}).pipe(mocha())
 
 gulp.task('default', [ 'watch' ])
 gulp.task('all', [ 'compile', 'compile-tests', 'lint' ], runTests)
@@ -34,10 +32,12 @@ gulp.task('lint', () =>
 
 // Test
 
-gulp.task('test-compile', [ 'compile-tests' ], () =>
-	require('./compiled-test/test-compile').test())
-gulp.task('perf-test-compile', [ 'compile-tests' ], () =>
-	require('./compiled-test/test-compile').perfTest())
+gulp.task('test-compile', [ 'compile-tests' ], () => {
+	require('./compiled-test/test-compile').test()
+})
+gulp.task('perf-test-compile', [ 'compile-tests' ], () => {
+	require('./compiled-test/test-compile').perfTest()
+})
 
 gulp.task('test', [ 'compile-tests' ], runTests)
 gulp.task('run-tests', runTests)

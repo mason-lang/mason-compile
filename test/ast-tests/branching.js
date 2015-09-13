@@ -30,9 +30,9 @@ describe('conditionals', () => {
 				1`,
 		new ConditionalVal(loc, zero, blockOne, false),
 		`
-			0?_ms.some((()=>{
+			(0?_ms.some((()=>{
 				return 1
-			})()):_ms.None`)
+			})()):_ms.None)`)
 })
 
 describe('case', () => {
@@ -107,7 +107,7 @@ describe('case', () => {
 				[
 					new CaseValPart(loc,
 						new Pattern(loc, aAccess, [ bDeclare ], focusAccess),
-						new BlockWithReturn(loc, [ ], bAccess))
+						new BlockWithReturn(loc, null, [ ], bAccess))
 				],
 				blockOne)
 		],
@@ -136,7 +136,7 @@ describe('case', () => {
 			false,
 			[ focusDeclare ],
 			null,
-			new BlockWithReturn(loc, [ ],
+			new BlockWithReturn(loc, null, [ ],
 				new CaseVal(loc, null,
 					[
 						new CaseValPart(loc, focusAccess, blockOne)
@@ -176,7 +176,9 @@ describe('switch', () => {
 				else
 					1`,
 		new SwitchVal(loc, zero,
-			[ new SwitchValPart(loc, [ one ], new BlockWithReturn(loc, [ assignAZero ], aAccess)) ],
+			[ new SwitchValPart(loc,
+				[ one ],
+				new BlockWithReturn(loc, null, [ assignAZero ], aAccess)) ],
 			blockOne),
 		`
 			(()=>{

@@ -21,10 +21,10 @@ export const
 	assignAZero = new AssignSingle(loc, aDeclare, zero),
 	assignFocusZero = new AssignSingle(loc, focusDeclare, zero),
 
-	blockDbg = new BlockDo(loc, [ new SpecialDo(loc, SD_Debugger) ]),
-	blockOne = new BlockWithReturn(loc, [ ], one),
-	blockTwo = new BlockWithReturn(loc, [ ], two),
-	blockPass = new BlockDo(loc, [ ]),
+	blockDbg = new BlockDo(loc, null, [ new SpecialDo(loc, SD_Debugger) ]),
+	blockOne = new BlockWithReturn(loc, null, [ ], one),
+	blockTwo = new BlockWithReturn(loc, null, [ ], two),
+	blockPass = new BlockDo(loc, null, [ ]),
 
 	funDo = lines =>
 		new Fun(
@@ -33,7 +33,7 @@ export const
 			false,
 			[ ],
 			null,
-			new BlockDo(loc, lines),
+			new BlockDo(loc, null, lines),
 			null,
 			null,
 			null,

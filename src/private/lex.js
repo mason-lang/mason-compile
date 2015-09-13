@@ -1,10 +1,11 @@
 import Loc, { Pos, StartLine, StartPos, StartColumn, singleCharLoc } from 'esast/dist/Loc'
 import { code } from '../CompileError'
 import { NumberLiteral } from './MsAst'
-import { DotName, Group, G_Block, G_Bracket, G_Line, G_Parenthesis, G_Space, G_Quote,
+import { DocComment, DotName, Group, G_Block, G_Bracket, G_Line, G_Parenthesis, G_Space, G_Quote,
 	isKeyword, Keyword, KW_AssignMutable, KW_Ellipsis, KW_Focus, KW_Fun, KW_FunDo, KW_FunGen,
 	KW_FunGenDo, KW_FunThis, KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo, KW_Lazy, KW_LocalMutate,
-	KW_ObjAssign, KW_Region, KW_Type, Name, opKeywordKindFromName, showGroupKind } from './Token'
+	KW_ObjAssign, KW_Region, KW_Todo, KW_Type, Name, opKeywordKindFromName, showGroupKind
+	} from './Token'
 import { assert, isEmpty, last } from './util'
 
 /*
@@ -16,7 +17,7 @@ export default (context, sourceString) => {
 	Use a 0-terminated string because it's faster than checking whether index === length.
 	(When string reaches end `charCodeAt` will return `NaN`, which can't be switched on.)
 	*/
-	sourceString = sourceString + '\n\0'
+	sourceString = `${sourceString}\n\0`
 
 	// --------------------------------------------------------------------------------------------
 	// GROUPING
@@ -108,7 +109,7 @@ export default (context, sourceString) => {
 			closeGroup(pos, G_Block)
 			// It's OK to be missing a closing parenthesis if there's a block. E.g.:
 			// a (b
-			//	c # no closing paren here
+			//	c | no closing paren here
 			while (curGroup.kind === G_Parenthesis || curGroup.kind === G_Space)
 				_closeGroup(pos, curGroup.kind)
 		},
@@ -162,15 +163,6 @@ export default (context, sourceString) => {
 		},
 		skip = eat,
 
-		eatSafe = () => {
-			const ch = eat()
-			if (ch === Newline) {
-				line = line + 1
-				column = StartColumn
-			}
-			return ch
-		},
-
 		// charToEat must not be Newline.
 		tryEat = charToEat => {
 			const canEat = peek() === charToEat
@@ -221,6 +213,9 @@ export default (context, sourceString) => {
 
 		skipRestOfLine = () =>
 			skipWhile(_ => _ !== Newline),
+
+		eatRestOfLine = () =>
+			takeWhile(_ => _ !== Newline),
 
 		skipWhile = characterPredicate => {
 			const startIndex = index
@@ -340,6 +335,9 @@ export default (context, sourceString) => {
 
 		const
 			handleName = () => {
+				context.check(isNameCharacter(peekPrev()), loc(), () =>
+					`Reserved character ${showChar(peekPrev())}`)
+
 				// All other characters should be handled in a case above.
 				const name = takeWhileWithPrev(isNameCharacter)
 				if (name.endsWith('_')) {
@@ -354,10 +352,14 @@ export default (context, sourceString) => {
 				if (keywordKind !== undefined) {
 					context.check(keywordKind !== -1, pos, () =>
 						`Reserved name ${code(name)}`)
-					if (keywordKind === KW_Region)
+					if (keywordKind === KW_Region) {
 						// TODO: Eat and put it in Region expression
 						skipRestOfLine()
-					keyword(keywordKind)
+						keyword(KW_Region)
+					} else if (keywordKind === KW_Todo)
+						skipRestOfLine()
+					else
+						keyword(keywordKind)
 				} else
 					addToCurrentGroup(new Name(loc(), name))
 			}
@@ -458,7 +460,18 @@ export default (context, sourceString) => {
 						keyword(KW_Lazy)
 					break
 				case Bar:
-					funKeyword(KW_Fun)
+					if (tryEat(Space) || tryEat(Tab)) {
+						const text = eatRestOfLine()
+						closeSpaceOKIfEmpty(startPos())
+						context.check(
+							curGroup.kind === G_Line && curGroup.subTokens.length === 0, loc, () =>
+							`Doc comment must go on its own line. (Did you mean ${code('||')}?)`)
+						addToCurrentGroup(new DocComment(loc(), text))
+					} else if (tryEat(Bar))
+						// non-doc comment
+						skipRestOfLine()
+					else
+						funKeyword(KW_Fun)
 					break
 
 				// NUMBER
@@ -477,22 +490,6 @@ export default (context, sourceString) => {
 
 
 				// OTHER
-
-				case Hash:
-					if (tryEat(Hash)) {
-						// Multi-line comment
-						mustEat(Hash, '##')
-						const eatHash = () => eatSafe() === Hash
-						while (true)
-							if (eatHash() && eatHash() && eatHash()) {
-								context.check(peek() === Newline, loc, () =>
-									`#Closing {code('###')} must be followed by newline.`)
-								break
-							}
-					} else
-						// Single-line comment
-						skipRestOfLine()
-					break
 
 				case Dot: {
 					const next = peek()
@@ -671,7 +668,6 @@ const
 	Comma = cc(','),
 	Dot = cc('.'),
 	Equal = cc('='),
-	Hash = cc('#'),
 	Hyphen = cc('-'),
 	LetterB = cc('b'),
 	LetterO = cc('o'),
@@ -713,5 +709,6 @@ const
 	isDigitHex = _charPred('0123456789abcdef'),
 
 	// Anything not explicitly reserved is a valid name character.
-	reservedCharacters = '`%^&\\\';,',
+	reservedCharacters = '`#%^&\\\';,',
 	isNameCharacter = _charPred('()[]{}.:| \n\t"' + reservedCharacters, true)
+

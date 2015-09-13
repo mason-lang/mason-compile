@@ -8,9 +8,6 @@ export default class VerifyResults {
 		// LocalDeclare -> VrLocalInfo.
 		// Debug locals will not be output if not in debug mode.
 		this.localDeclareToInfo = new Map()
-		// TODO:ES6 Can use do `export { a, b, ... }` at the end, so shouldn't need this.
-		// Includes both Assigns and AssignDestructures.
-		this.exportAssigns = new Set()
 		// Maps Class/Fun to name if one is appropriate.
 		// Maps *every* SV_Name to the nearest name.
 		this.names = new Map()
@@ -32,10 +29,6 @@ export default class VerifyResults {
 	isAccessed(localDeclare) {
 		const info = this.localDeclareToInfo.get(localDeclare)
 		return !(isEmpty(info.debugAccesses) && isEmpty(info.nonDebugAccesses))
-	}
-
-	isExportAssign(assign) {
-		return this.exportAssigns.has(assign)
 	}
 
 	localDeclareForAccess(localAccess) {

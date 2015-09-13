@@ -89,19 +89,18 @@ implementMany(MsAstTypes, 'transpile', {
 
 	AssignSingle(valWrap) {
 		const val = valWrap === undefined ? t0(this.value) : valWrap(t0(this.value))
-		const declare =
-			makeDeclarator(this.assignee, val, false, verifyResults.isExportAssign(this))
+		const declare = makeDeclarator(this.assignee, val, false)
 		return new VariableDeclaration(this.assignee.isMutable() ? 'let' : 'const', [ declare ])
 	},
 	// TODO:ES6 Just use native destructuring assign
 	AssignDestructure() {
-		return new VariableDeclaration(this.kind() === LD_Mutable ? 'let' : 'const',
+		return new VariableDeclaration(
+			this.kind() === LD_Mutable ? 'let' : 'const',
 			makeDestructureDeclarators(
 				this.assignees,
 				this.kind() === LD_Lazy,
 				t0(this.value),
-				false,
-				verifyResults.isExportAssign(this)))
+				false))
 	},
 
 	BagEntry() { return msAdd(IdBuilt, t0(this.value)) },
@@ -370,10 +369,7 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	Module() {
-		const body = cat(
-			tLines(this.lines),
-			opMap(this.opDefaultExport, _ => new AssignmentExpression('=', ExportsDefault, t0(_))))
-
+		const body = tLines(this.lines)
 		const otherUses = this.uses.concat(this.debugUses)
 
 		verifyResults.builtinPathToNames.forEach((used, path) => {
@@ -398,6 +394,15 @@ implementMany(MsAstTypes, 'transpile', {
 			opIf(context.opts.includeUseStrict(), () => UseStrict),
 			opIf(context.opts.includeAmdefine(), () => AmdefineHeader),
 			toStatement(amd)))
+	},
+
+	ModuleExportNamed() {
+		return t1(this.assign, val =>
+			new AssignmentExpression('=', member(IdExports, this.assign.assignee.name), val))
+	},
+
+	ModuleExportDefault() {
+		return t1(this.assign, val => new AssignmentExpression('=', ExportsDefault, val))
 	},
 
 	New() {
@@ -723,37 +728,29 @@ const
 
 // General utils. Not in util.js because these close over context.
 const
-	makeDestructureDeclarators = (assignees, isLazy, value, isModule, isExport) => {
+	makeDestructureDeclarators = (assignees, isLazy, value, isModule) => {
 		const destructuredName = `_$${nextDestructuredId}`
 		nextDestructuredId = nextDestructuredId + 1
 		const idDestructured = new Identifier(destructuredName)
 		const declarators = assignees.map(assignee => {
 			// TODO: Don't compile it if it's never accessed
 			const get = getMember(idDestructured, assignee.name, isLazy, isModule)
-			return makeDeclarator(assignee, get, isLazy, isExport)
+			return makeDeclarator(assignee, get, isLazy)
 		})
 		// Getting lazy module is done by ms.lazyGetModule.
 		const val = isLazy && !isModule ? lazyWrap(value) : value
 		return cat(new VariableDeclarator(idDestructured, val), declarators)
 	},
 
-	makeDeclarator = (assignee, value, valueIsAlreadyLazy, isExport) => {
-		const { loc, name, opType } = assignee
+	makeDeclarator = (assignee, value, valueIsAlreadyLazy) => {
+		const { name, opType } = assignee
 		const isLazy = assignee.isLazy()
 		// TODO: assert(assignee.opType === null)
 		// or TODO: Allow type check on lazy value?
 		value = isLazy ? value : maybeWrapInCheckContains(value, opType, name)
-		if (isExport) {
-			// TODO:ES6
-			context.check(!isLazy, loc, 'Lazy export not supported.')
-			return new VariableDeclarator(
-				idForDeclareCached(assignee),
-				new AssignmentExpression('=', member(IdExports, name), value))
-		} else {
-			const val = isLazy && !valueIsAlreadyLazy ? lazyWrap(value) : value
-			assert(isLazy || !valueIsAlreadyLazy)
-			return new VariableDeclarator(idForDeclareCached(assignee), val)
-		}
+		const val = isLazy && !valueIsAlreadyLazy ? lazyWrap(value) : value
+		assert(isLazy || !valueIsAlreadyLazy)
+		return new VariableDeclarator(idForDeclareCached(assignee), val)
 	},
 
 	maybeWrapInCheckContains = (ast, opType, name) =>

@@ -1,11 +1,11 @@
-import { BlockDo, BlockWithReturn, Val } from '../../../dist/private/MsAst'
+import { BlockDo, BlockWithReturn, ModuleExportDefault, Val } from '../../../dist/private/MsAst'
 import CompileContext from '../../../dist/private/CompileContext'
 import CompileOptions from '../../../dist/private/CompileOptions'
 import lex from '../../../dist/private/lex'
 import parse from '../../../dist/private/parse/parse'
 import render from '../../../dist/private/render'
 import transpile from '../../../dist/private/transpile/transpile'
-import { ifElse, isEmpty, last, rtail } from '../../../dist/private/util'
+import { last, rtail } from '../../../dist/private/util'
 import verify from '../../../dist/private/verify'
 import { loc } from './ast-util'
 
@@ -16,8 +16,8 @@ export const test = (ms, ast, js, opts) => {
 	const isMultiLineTest = ast instanceof Array
 	ast = isMultiLineTest ?
 		last(ast) instanceof Val ?
-			new BlockWithReturn(loc, rtail(ast), last(ast)) :
-			new BlockDo(loc, ast) :
+			new BlockWithReturn(loc, null, rtail(ast), last(ast)) :
+			new BlockDo(loc, null, ast) :
 		ast
 	ms = dedent(ms)
 	js = dedent(js)
@@ -29,12 +29,13 @@ export const test = (ms, ast, js, opts) => {
 
 		const moduleAst = parse(context, lex(context, ms))
 
-		const lines = moduleAst.lines
-
 		// This mirrors getting `ast`. Convert lines to block.
-		const parsedAst = ifElse(moduleAst.opDefaultExport,
-			_ => isEmpty(lines) ? _ : new BlockWithReturn(loc, lines, _),
-			() => lines.length === 1 ? lines[0] : new BlockDo(loc, lines))
+		const lines = moduleAst.lines
+		let parsedAst = lines.length === 1 ?
+			lines[0] instanceof ModuleExportDefault ? lines[0].assign.value : lines[0] :
+			last(lines) instanceof ModuleExportDefault ?
+			new BlockWithReturn(loc, null, rtail(lines), last(lines).assign.value) :
+			new BlockDo(loc, null, lines)
 
 		if (!equalAsts(ast, parsedAst))
 			throw new Error(`Different AST.\nExpected: ${ast}\nParsed: ${parsedAst}`)

@@ -1,6 +1,6 @@
 import { Suite } from 'benchmark'
 import { Node } from 'esast/dist/ast'
-import fs from 'fs'
+import { readFileSync } from 'fs'
 import numeral from 'numeral'
 import compile from '../dist/compile'
 import MsAst from '../dist/private/MsAst'
@@ -17,7 +17,7 @@ export const
 	perfTest = () => doTest(true)
 
 const doTest = isPerfTest => {
-	const source = fs.readFileSync('test/test-compile.ms', 'utf-8')
+	const source = readFileSync('test/test-compile.ms', 'utf-8')
 	const opts = {
 		inFile: './test-compile.ms',
 		includeAmdefine: false,

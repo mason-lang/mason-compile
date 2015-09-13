@@ -7,13 +7,14 @@ import { Assert, AssignDestructure, AssignSingle, BagEntry, BagEntryMany, BagSim
 	ForBag, ForDo, ForVal, Fun, L_And, L_Or, Lazy, LD_Const, LD_Lazy, LD_Mutable, LocalAccess,
 	LocalDeclare, LocalDeclareFocus, LocalDeclareName, LocalDeclareRes, LocalDeclareThis,
 	LocalMutate, Logic, MapEntry, Member, MemberSet, MethodGetter, MethodImpl, MethodSetter,
-	Module, MS_Mutate, MS_New, MS_NewMutable, New, Not, ObjEntry, ObjEntryAssign, ObjEntryComputed,
-	ObjPair, ObjSimple, Pattern, Quote, QuoteTemplate, SD_Debugger, SpecialDo, SpecialVal, SV_Name,
-	SV_Null, Splat, SuperCall, SuperCallDo, SuperMember, SwitchDo, SwitchDoPart, SwitchVal,
-	SwitchValPart, Throw, Val, Use, UseDo, UseGlobal, With, Yield, YieldTo } from '../MsAst'
-import { DotName, Group, G_Block, G_Bracket, G_Parenthesis, G_Space, G_Quote, isGroup, isKeyword,
-	Keyword, KW_And, KW_As, KW_Assert, KW_AssertNot, KW_Assign, KW_AssignMutable, KW_Break,
-	KW_BreakWithVal, KW_CaseVal, KW_CaseDo, KW_Cond, KW_CatchDo, KW_CatchVal, KW_Class,
+	Module, ModuleExportDefault, ModuleExportNamed, MS_Mutate, MS_New, MS_NewMutable, New, Not,
+	ObjEntry, ObjEntryAssign, ObjEntryComputed, ObjPair, ObjSimple, Pattern, Quote, QuoteTemplate,
+	SD_Debugger, SpecialDo, SpecialVal, SV_Name, SV_Null, Splat, SuperCall, SuperCallDo,
+	SuperMember, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart, Throw, Val, Use, UseDo,
+	UseGlobal, With, Yield, YieldTo } from '../MsAst'
+import { DocComment, DotName, Group, G_Block, G_Bracket, G_Parenthesis, G_Space, G_Quote, isGroup,
+	isKeyword, Keyword, KW_And, KW_As, KW_Assert, KW_AssertNot, KW_Assign, KW_AssignMutable,
+	KW_Break, KW_BreakWithVal, KW_CaseVal, KW_CaseDo, KW_Cond, KW_CatchDo, KW_CatchVal, KW_Class,
 	KW_Construct, KW_Debug, KW_Debugger, KW_Do, KW_Ellipsis, KW_Else, KW_ExceptDo, KW_ExceptVal,
 	KW_Finally, KW_ForBag, KW_ForDo, KW_ForVal, KW_Focus, KW_Fun, KW_FunDo, KW_FunGen, KW_FunGenDo,
 	KW_FunThis, KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo, KW_Get, KW_IfDo, KW_IfVal, KW_Ignore,
@@ -22,7 +23,7 @@ import { DotName, Group, G_Block, G_Bracket, G_Parenthesis, G_Space, G_Quote, is
 	KW_SwitchVal, KW_Throw, KW_TryDo, KW_TryVal, KW_Type, KW_UnlessDo, KW_UnlessVal, KW_Use,
 	KW_UseDebug, KW_UseDo, KW_UseLazy, KW_With, KW_Yield, KW_YieldTo, Name, keywordName,
 	opKeywordKindToSpecialValueKind } from '../Token'
-import { cat, head, ifElse, isEmpty, last, opIf, opMap, repeat, rtail, tail } from '../util'
+import { assert, cat, head, ifElse, isEmpty, last, opIf, opMap, repeat, rtail, tail } from '../util'
 import Slice from './Slice'
 
 // Since there are so many parsing functions,
@@ -56,23 +57,25 @@ const
 	unexpected = token => context.fail(token.loc, `Unexpected ${token}`)
 
 const parseModule = tokens => {
+	// Module doc comment must come first.
+	const [ opComment, rest0 ] = tryTakeComment(tokens)
 	// Use statements must appear in order.
-	const { uses: doUses, rest: rest0 } = tryParseUses(KW_UseDo, tokens)
-	const { uses: plainUses, opUseGlobal, rest: rest1 } = tryParseUses(KW_Use, rest0)
-	const { uses: lazyUses, rest: rest2 } = tryParseUses(KW_UseLazy, rest1)
-	const { uses: debugUses, rest: rest3 } = tryParseUses(KW_UseDebug, rest2)
+	const { uses: doUses, rest: rest1 } = tryParseUses(KW_UseDo, rest0)
+	const { uses: plainUses, opUseGlobal, rest: rest2 } = tryParseUses(KW_Use, rest1)
+	const { uses: lazyUses, rest: rest3 } = tryParseUses(KW_UseLazy, rest2)
+	const { uses: debugUses, rest: rest4 } = tryParseUses(KW_UseDebug, rest3)
 
-	const { lines, exports, opDefaultExport } = parseModuleBlock(rest3)
+	const lines = parseModuleBlock(rest4)
 
-	if (context.opts.includeModuleName() && !exports.some(_ => _.name === 'name')) {
+	if (context.opts.includeModuleName()) {
 		const name = new LocalDeclareName(tokens.loc)
-		lines.push(new AssignSingle(tokens.loc, name,
-			Quote.forString(tokens.loc, context.opts.moduleName())))
-		exports.push(name)
+		const assign = new AssignSingle(tokens.loc, name,
+			Quote.forString(tokens.loc, context.opts.moduleName()))
+		lines.push(new ModuleExportNamed(tokens.loc, assign))
 	}
+
 	const uses = plainUses.concat(lazyUses)
-	return new Module(tokens.loc,
-		doUses, uses, opUseGlobal, debugUses, lines, exports, opDefaultExport)
+	return new Module(tokens.loc, opComment, doUses, uses, opUseGlobal, debugUses, lines)
 }
 
 // parseBlock
@@ -113,45 +116,50 @@ const
 	},
 
 	parseBlockDo = tokens => {
-		const lines = _plainBlockLines(tokens)
-		return new BlockDo(tokens.loc, lines)
+		const [ opComment, rest ] = tryTakeComment(tokens)
+		const lines = _plainBlockLines(rest)
+		return new BlockDo(tokens.loc, opComment, lines)
 	},
 
 	parseBlockVal = tokens => {
-		const { lines, kReturn } = _parseBlockLines(tokens)
+		const [ opComment, rest ] = tryTakeComment(tokens)
+		const { lines, kReturn } = _parseBlockLines(rest)
 		switch (kReturn) {
 			case KReturn_Bag:
-				return BlockBag.of(tokens.loc, lines)
+				return BlockBag.of(tokens.loc, opComment, lines)
 			case KReturn_Map:
-				return BlockMap.of(tokens.loc, lines)
+				return BlockMap.of(tokens.loc, opComment, lines)
 			case KReturn_Obj:
 				const [ doLines, opVal ] = _tryTakeLastVal(lines)
 				// opName written to by _tryAddName.
-				return BlockObj.of(tokens.loc, doLines, opVal, null)
+				return BlockObj.of(tokens.loc, opComment, doLines, opVal, null)
 			default: {
 				context.check(!isEmpty(lines), tokens.loc, 'Value block must end in a value.')
 				const val = last(lines)
 				if (val instanceof Throw)
-					return new BlockValThrow(tokens.loc, rtail(lines), val)
+					return new BlockValThrow(tokens.loc, opComment, rtail(lines), val)
 				else {
 					context.check(val instanceof Val, val.loc, 'Value block must end in a value.')
-					return new BlockWithReturn(tokens.loc, rtail(lines), val)
+					return new BlockWithReturn(tokens.loc, opComment, rtail(lines), val)
 				}
 			}
 		}
 	},
 
 	parseModuleBlock = tokens => {
-		const { lines, kReturn } = _parseBlockLines(tokens)
+		const { lines, kReturn } = _parseBlockLines(tokens, true)
+		const opComment = null
 		const loc = tokens.loc
 		switch (kReturn) {
 			case KReturn_Bag: case KReturn_Map: {
-				const block = (kReturn === KReturn_Bag ? BlockBag : BlockMap).of(loc, lines)
-				return { lines: [ ], exports: [ ], opDefaultExport: new BlockWrap(loc, block) }
+				const cls = kReturn === KReturn_Bag ? BlockBag : BlockMap
+				const block = cls.of(loc, opComment, lines)
+				const val = new BlockWrap(loc, block)
+				const assignee = LocalDeclare.plain(loc, context.opts.moduleName())
+				const assign = new AssignSingle(loc, assignee, val)
+				return [ new ModuleExportDefault(loc, assign) ]
 			}
-			default: {
-				const exports = [ ]
-				let opDefaultExport = null
+			case KReturn_Obj: {
 				const moduleName = context.opts.moduleName()
 
 				// Module exports look like a BlockObj,  but are really different.
@@ -161,28 +169,32 @@ const
 				//	if! cond
 				//		a. b
 				// in a module context, it will be an error. (The module creates no `built` local.)
-				const getLineExports = line => {
-					if (line instanceof ObjEntryAssign) {
-						for (const _ of line.assign.allAssignees())
-							if (_.name === moduleName) {
-								context.check(opDefaultExport === null, _.loc, () =>
-									`Default export already declared at ${opDefaultExport.loc}`)
-								opDefaultExport = new LocalAccess(_.loc, _.name)
-							} else
-								exports.push(_)
-						return line.assign
+				const convertToExports = line => {
+					if (line instanceof ObjEntry) {
+						context.check(line instanceof ObjEntryAssign, line.loc,
+							'Module exports can not be computed.')
+						context.check(line.assign instanceof AssignSingle, line.loc,
+							'Export AssignDestructure not yet supported.')
+						return line.assign.assignee.name === moduleName ?
+							new ModuleExportDefault(line.loc, line.assign) :
+							new ModuleExportNamed(line.loc, line.assign)
 					} else if (line instanceof Debug)
-						line.lines = line.lines.map(getLineExports)
+						line.lines = line.lines.map(convertToExports)
 					return line
 				}
 
-				const moduleLines = lines.map(getLineExports)
-
-				if (isEmpty(exports) && opDefaultExport === null) {
-					const [ lines, opDefaultExport ] = _tryTakeLastVal(moduleLines)
-					return { lines, exports, opDefaultExport }
-				} else
-					return { lines: moduleLines, exports, opDefaultExport }
+				return lines.map(convertToExports)
+			}
+			default: {
+				const [ moduleLines, opDefaultExport ] = _tryTakeLastVal(lines)
+				if (opDefaultExport !== null) {
+					const _ = opDefaultExport
+					moduleLines.push(new ModuleExportDefault(_.loc,
+						new AssignSingle(_.loc,
+							LocalDeclare.plain(opDefaultExport.loc, context.opts.moduleName()),
+							_)))
+				}
+				return moduleLines
 			}
 		}
 	}
@@ -462,13 +474,13 @@ const parseFun = (kind, tokens) => {
 	const opDeclareThis = opIf(isThis, () => new LocalDeclareThis(tokens.loc))
 
 	const { opReturnType, rest } = _tryTakeReturnType(tokens)
-	const { args, opRestArg, block, opIn, opOut } = _funArgsAndBlock(isDo, rest)
+	const { args, opRestArg, block, opIn, opOut, opComment } = _funArgsAndBlock(isDo, rest)
 	// Need res declare if there is a return type or out condition.
 	const opDeclareRes = ifElse(opReturnType,
 		_ => new LocalDeclareRes(_.loc, _),
 		() => opMap(opOut, _ => new LocalDeclareRes(_.loc, null)))
 	return new Fun(tokens.loc,
-		opDeclareThis, isGen, args, opRestArg, block, opIn, opDeclareRes, opOut)
+		opDeclareThis, isGen, args, opRestArg, block, opIn, opDeclareRes, opOut, opComment)
 }
 
 // parseFun privates
@@ -502,11 +514,11 @@ const
 			return h.kind === KW_CaseVal ?
 				{
 					args, opRestArg: null, memberArgs: [ ], opIn: null, opOut: null,
-					block: new BlockWithReturn(tokens.loc, [ ], eCase)
+					block: new BlockWithReturn(tokens.loc, null, [ ], eCase)
 				} :
 				{
 					args, opRestArg: null, memberArgs: [ ], opIn: null, opOut: null,
-					block: new BlockDo(tokens.loc, [ eCase ])
+					block: new BlockDo(tokens.loc, null, [ eCase ])
 				}
 		} else {
 			const [ before, blockLines ] = beforeAndBlock(tokens)
@@ -1123,12 +1135,13 @@ const parseClass = tokens => {
 
 	let opDo = null, statics = [ ], opConstructor = null, methods = [ ]
 
-	let rest = block
+	let [ opComment, rest ] = tryTakeComment(block)
+
 	const line1 = rest.headSlice()
 	if (isKeyword(KW_Do, line1.head())) {
 		const done = justBlockDo(KW_Do, line1.tail())
 		opDo = new ClassDo(line1.loc, new LocalDeclareFocus(line1.loc), done)
-		rest = block.tail()
+		rest = rest.tail()
 	}
 	if (!rest.isEmpty()) {
 		const line2 = rest.headSlice()
@@ -1146,7 +1159,7 @@ const parseClass = tokens => {
 		}
 	}
 
-	return new Class(tokens.loc, opExtended, opDo, statics, opConstructor, methods)
+	return new Class(tokens.loc, opExtended, opComment, opDo, statics, opConstructor, methods)
 }
 
 const
@@ -1250,4 +1263,25 @@ const parseCond = tokens => {
 	context.check(parts.length === 3, tokens.loc, () =>
 		`${code('cond')} takes exactly 3 arguments.`)
 	return new Cond(tokens.loc, parts[0], parts[1], parts[2])
+}
+
+const tryTakeComment = lines => {
+	let comments = [ ]
+	let rest = lines
+
+	while (true) {
+		if (rest.isEmpty())
+			break
+
+		const hs = rest.headSlice()
+		const h = hs.head()
+		if (!(h instanceof DocComment))
+			break
+
+		assert(hs.size() === 1)
+		comments.push(h)
+		rest = rest.tail()
+	}
+
+	return [ isEmpty(comments) ? null : comments.map(_ => _.text).join('\n'), rest ]
 }

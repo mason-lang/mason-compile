@@ -45,7 +45,7 @@
 			"spread": true,
 			"templateStrings": true
 		},
-		"globals": { "describe": true, "it": true, "_ms": true },
+		"globals": { "describe": true, "it": true },
 		"rules": {
 			"comma-style": [ 1, "last" ],
 			"camelcase": 0,
