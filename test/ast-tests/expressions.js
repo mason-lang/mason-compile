@@ -1,14 +1,14 @@
-import { AssignSingle, BagSimple, BlockDo, Call, LD_Const, LocalDeclare, Member, New, ObjPair,
+import {AssignSingle, BagSimple, BlockDo, Call, LD_Const, LocalDeclare, Member, New, ObjPair,
 	ObjSimple, Quote, QuoteTemplate, SpecialVal, Splat, SV_False, SV_Null, SV_True, SV_Undefined,
-	With } from '../../dist/private/MsAst'
-import { aAccess, aDeclare, assignAZero, blockPass, focusAccess, focusDeclare, loc, one, two, zero
+	With} from '../../dist/private/MsAst'
+import {aAccess, aDeclare, assignAZero, blockPass, focusAccess, focusDeclare, loc, one, two, zero
 	} from './util/ast-util'
-import { test } from './util/test-asts'
+import {test} from './util/test-asts'
 
 describe('expressions', () => {
 	test(
 		'[0 1]',
-		new BagSimple(loc, [ zero, one ]),
+		new BagSimple(loc, [zero, one]),
 		'[0,1]')
 
 	test(
@@ -36,12 +36,12 @@ describe('expressions', () => {
 	describe('Call', () => {
 		test(
 			'0 1',
-			new Call(loc, zero, [ one ]),
+			new Call(loc, zero, [one]),
 			'0(1)')
 
 		test(
 			'0()',
-			new Call(loc, zero, [ ]),
+			new Call(loc, zero, []),
 			'0()')
 
 		test(
@@ -50,7 +50,7 @@ describe('expressions', () => {
 				a ...a`,
 			[
 				assignAZero,
-				new Call(loc, aAccess, [ new Splat(loc, aAccess) ])
+				new Call(loc, aAccess, [new Splat(loc, aAccess)])
 			],
 			`
 				const a=0;
@@ -58,7 +58,7 @@ describe('expressions', () => {
 
 		test(
 			'0[1 2]',
-			Call.sub(loc, [ zero, one, two ]),
+			Call.sub(loc, [zero, one, two]),
 			'_ms.sub(0,1,2)')
 
 		test(
@@ -68,7 +68,7 @@ describe('expressions', () => {
 
 		test(
 			'new 0',
-			new New(loc, zero, [ ]),
+			new New(loc, zero, []),
 			'new (0)()')
 	})
 
@@ -99,7 +99,7 @@ describe('expressions', () => {
 	describe('Quote', () => {
 		test(
 			'"a"',
-			new Quote(loc, [ 'a' ]),
+			new Quote(loc, ['a']),
 			'`a`')
 
 		test(
@@ -108,22 +108,22 @@ describe('expressions', () => {
 					a
 						b
 					c`,
-			new Quote(loc, [ 'a\n\tb\nc' ]),
+			new Quote(loc, ['a\n\tb\nc']),
 			'`a\n\tb\nc`')
 
 		test(
 			'"a\\{\\n"',
-			new Quote(loc, [ 'a\\{\\n' ]),
+			new Quote(loc, ['a\\{\\n']),
 			'`a\\{\\n`')
 
 		test(
 			'"a{0}b"',
-			new Quote(loc, [ 'a', zero, 'b' ]),
+			new Quote(loc, ['a', zero, 'b']),
 			'`a${0}b`')
 
 		test(
 			'0"a{0}b"',
-			new QuoteTemplate(loc, zero, new Quote(loc, [ 'a', zero, 'b' ])),
+			new QuoteTemplate(loc, zero, new Quote(loc, ['a', zero, 'b'])),
 			'0`a${0}b`')
 	})
 
@@ -147,13 +147,13 @@ describe('expressions', () => {
 				(a=>{
 					return a
 				})(0)`,
-			{ warnings: [ 'Unused local variable {{a}}.' ] })
+			{warnings: ['Unused local variable {{a}}.']})
 		test(
 			`
 				with 0
 					_ _`,
 			new With(loc, focusDeclare, zero,
-				new BlockDo(loc, null, [ new Call(loc, focusAccess, [ focusAccess ]) ])),
+				new BlockDo(loc, null, [new Call(loc, focusAccess, [focusAccess])])),
 			`
 				(_=>{
 					_(_);

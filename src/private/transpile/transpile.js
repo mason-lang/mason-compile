@@ -1,31 +1,31 @@
-import { ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryExpression,
+import {ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryExpression,
 	BlockStatement, BreakStatement, CallExpression, CatchClause, ClassBody, ClassExpression,
 	ConditionalExpression, DebuggerStatement, ExpressionStatement, ForOfStatement,
 	FunctionExpression, Identifier, IfStatement, Literal, LogicalExpression, MemberExpression,
 	MethodDefinition, NewExpression, ObjectExpression, Program, Property, ReturnStatement,
 	SpreadElement, SwitchCase, SwitchStatement, TaggedTemplateExpression, TemplateElement,
 	TemplateLiteral, ThisExpression, ThrowStatement, TryStatement, VariableDeclaration,
-	UnaryExpression, VariableDeclarator, YieldExpression } from 'esast/dist/ast'
-import { functionExpressionThunk, idCached, loc, member, propertyIdOrLiteralCached, toStatement
+	UnaryExpression, VariableDeclarator, YieldExpression} from 'esast/dist/ast'
+import {functionExpressionThunk, idCached, loc, member, propertyIdOrLiteralCached, toStatement
 	} from 'esast/dist/util'
 import manglePath from '../manglePath'
 import * as MsAstTypes from '../MsAst'
-import { AssignSingle, Call, Constructor, L_And, L_Or, LD_Lazy, LD_Mutable, Member, MS_Mutate,
+import {AssignSingle, Call, Constructor, L_And, L_Or, LD_Lazy, LD_Mutable, Member, MS_Mutate,
 	MS_New, MS_NewMutable, LocalDeclare, Pattern, Splat, SD_Debugger, SV_Contains, SV_False,
-	SV_Name, SV_Null, SV_Sub, SV_True, SV_Undefined, SwitchDoPart, Quote, Use } from '../MsAst'
-import { assert, cat, flatMap, flatOpMap, ifElse, isEmpty, implementMany, isPositive, last, opIf,
-	opMap, tail } from '../util'
-import { AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj,
+	SV_Name, SV_Null, SV_Sub, SV_True, SV_Undefined, SwitchDoPart, Quote, Use} from '../MsAst'
+import {assert, cat, flatMap, flatOpMap, ifElse, isEmpty, implementMany, isPositive, last, opIf,
+	opMap, tail} from '../util'
+import {AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj,
 	DeclareLexicalThis, ExportsDefault, ExportsGet, IdArguments, IdBuilt, IdConstructor, IdDefine,
 	IdExports, IdExtract, IdFocus, IdLexicalThis, IdSuper, GlobalError, LitEmptyString, LitNull,
 	LitStrExports, LitStrThrow, LitZero, ReturnBuilt, ReturnExports, ReturnRes, SwitchCaseNoMatch,
-	ThrowAssertFail, ThrowNoCaseMatch, UseStrict } from './ast-constants'
-import { IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot,
+	ThrowAssertFail, ThrowNoCaseMatch, UseStrict} from './ast-constants'
+import {IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot,
 	msAssertNotMember, msAssoc, msCheckContains, msExtract, msGet, msGetDefaultExport, msGetModule,
 	msLazy, msLazyGet, msLazyGetModule, msNewMutableProperty, msNewProperty, msSet, msSetName,
-	msSetLazy, msSome, msSymbol, MsNone } from './ms-call'
-import { accessLocalDeclare, declare, forStatementInfinite, idForDeclareCached,
-	opTypeCheckForLocalDeclare } from './util'
+	msSetLazy, msSome, msSymbol, MsNone} from './ms-call'
+import {accessLocalDeclare, declare, forStatementInfinite, idForDeclareCached,
+	opTypeCheckForLocalDeclare} from './util'
 
 let context, verifyResults, isInGenerator, isInConstructor
 let nextDestructuredId
@@ -48,7 +48,7 @@ const
 	t1 = (expr, arg) => loc(expr.transpile(arg), expr.loc),
 	t3 = (expr, arg, arg2, arg3) => loc(expr.transpile(arg, arg2, arg3), expr.loc),
 	tLines = exprs => {
-		const out = [ ]
+		const out = []
 		for (const expr of exprs) {
 			const ast = expr.transpile()
 			if (ast instanceof Array)
@@ -90,7 +90,7 @@ implementMany(MsAstTypes, 'transpile', {
 	AssignSingle(valWrap) {
 		const val = valWrap === undefined ? t0(this.value) : valWrap(t0(this.value))
 		const declare = makeDeclarator(this.assignee, val, false)
-		return new VariableDeclaration(this.assignee.isMutable() ? 'let' : 'const', [ declare ])
+		return new VariableDeclaration(this.assignee.isMutable() ? 'let' : 'const', [declare])
 	},
 	// TODO:ES6 Just use native destructuring assign
 	AssignDestructure() {
@@ -170,11 +170,11 @@ implementMany(MsAstTypes, 'transpile', {
 
 	CaseDo() {
 		const body = caseBody(this.parts, this.opElse)
-		return ifElse(this.opCased, _ => new BlockStatement([ t0(_), body ]), () => body)
+		return ifElse(this.opCased, _ => new BlockStatement([t0(_), body]), () => body)
 	},
 	CaseVal() {
 		const body = caseBody(this.parts, this.opElse)
-		const block = ifElse(this.opCased, _ => [ t0(_), body ], () => [ body ])
+		const block = ifElse(this.opCased, _ => [t0(_), body], () => [body])
 		return blockWrap(new BlockStatement(block))
 	},
 	CaseDoPart: casePart,
@@ -195,7 +195,7 @@ implementMany(MsAstTypes, 'transpile', {
 
 	ClassDo(classExpr) {
 		const lead = new VariableDeclaration('const', [
-			new VariableDeclarator(t0(this.declareFocus), classExpr) ])
+			new VariableDeclarator(t0(this.declareFocus), classExpr)])
 		const ret = new ReturnStatement(t0(this.declareFocus))
 		const block = t3(this.block, lead, null, ret)
 		return blockWrap(block)
@@ -238,10 +238,10 @@ implementMany(MsAstTypes, 'transpile', {
 		return new CatchClause(t0(this.caught), t0(this.block))
 	},
 
-	Debug() { return context.opts.includeChecks() ? tLines(this.lines) : [ ] },
+	Debug() { return context.opts.includeChecks() ? tLines(this.lines) : [] },
 
 	ExceptDo() { return transpileExcept(this) },
-	ExceptVal() { return blockWrap(new BlockStatement([ transpileExcept(this) ])) },
+	ExceptVal() { return blockWrap(new BlockStatement([transpileExcept(this)])) },
 
 	ForDo() { return forLoop(this.opIteratee, this.block) },
 
@@ -254,7 +254,7 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	ForVal() {
-		return blockWrap(new BlockStatement([ forLoop(this.opIteratee, this.block) ]))
+		return blockWrap(new BlockStatement([forLoop(this.opIteratee, this.block)]))
 	},
 
 	Fun(leadStatements) {
@@ -295,7 +295,7 @@ implementMany(MsAstTypes, 'transpile', {
 			new FunctionExpression(id, args, body, this.isGenerator)
 	},
 
-	Ignore() { return [ ] },
+	Ignore() { return [] },
 
 	Lazy() { return lazyWrap(t0(this.value)) },
 
@@ -305,17 +305,17 @@ implementMany(MsAstTypes, 'transpile', {
 		// Since the Fun should have opDeclareThis, it will never be an ArrowFunctionExpression.
 		assert(value instanceof FunctionExpression)
 
-		const { key, computed } = methodKeyComputed(this.symbol)
+		const {key, computed} = methodKeyComputed(this.symbol)
 		return new MethodDefinition(key, value, 'method', isStatic, computed)
 	},
 	MethodGetter(isStatic) {
-		const value = new FunctionExpression(null, [ ], t1(this.block, DeclareLexicalThis))
-		const { key, computed } = methodKeyComputed(this.symbol)
+		const value = new FunctionExpression(null, [], t1(this.block, DeclareLexicalThis))
+		const {key, computed} = methodKeyComputed(this.symbol)
 		return new MethodDefinition(key, value, 'get', isStatic, computed)
 	},
 	MethodSetter(isStatic) {
-		const value = new FunctionExpression(null, [ IdFocus ], t1(this.block, DeclareLexicalThis))
-		const { key, computed } = methodKeyComputed(this.symbol)
+		const value = new FunctionExpression(null, [IdFocus], t1(this.block, DeclareLexicalThis))
+		const {key, computed} = methodKeyComputed(this.symbol)
 		return new MethodDefinition(key, value, 'set', isStatic, computed)
 	},
 
@@ -374,7 +374,7 @@ implementMany(MsAstTypes, 'transpile', {
 
 		verifyResults.builtinPathToNames.forEach((used, path) => {
 			if (path !== 'global') {
-				const usedDeclares = [ ]
+				const usedDeclares = []
 				let opUseDefault = null
 				let defaultName = last(path.split('/'))
 				for (const name of used) {
@@ -438,7 +438,7 @@ implementMany(MsAstTypes, 'transpile', {
 		if (this.parts.length === 0)
 			return LitEmptyString
 		else {
-			const quasis = [ ], expressions = [ ]
+			const quasis = [], expressions = []
 
 			// TemplateLiteral must start with a TemplateElement
 			if (typeof this.parts[0] !== 'string')
@@ -498,23 +498,23 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	SwitchDo() { return transpileSwitch(this) },
-	SwitchVal() { return blockWrap(new BlockStatement([ transpileSwitch(this) ])) },
+	SwitchVal() { return blockWrap(new BlockStatement([transpileSwitch(this)])) },
 	SwitchDoPart: switchPart,
 	SwitchValPart: switchPart,
 
 	Throw() {
 		return ifElse(this.opThrown,
 			_ => doThrow(_),
-			() => new ThrowStatement(new NewExpression(GlobalError, [ LitStrThrow ])))
+			() => new ThrowStatement(new NewExpression(GlobalError, [LitStrThrow])))
 	},
 
 	With() {
 		const idDeclare = idForDeclareCached(this.declare)
 		const block = t3(this.block, null, null, new ReturnStatement(idDeclare))
 		const fun = isInGenerator ?
-			new FunctionExpression(null, [ idDeclare ], block, true) :
-			new ArrowFunctionExpression([ idDeclare ], block)
-		const call = new CallExpression(fun, [ t0(this.value) ])
+			new FunctionExpression(null, [idDeclare], block, true) :
+			new ArrowFunctionExpression([idDeclare], block)
+		const call = new CallExpression(fun, [t0(this.value)])
 		return isInGenerator ? new YieldExpression(call, true) : call
 	},
 
@@ -525,16 +525,16 @@ implementMany(MsAstTypes, 'transpile', {
 
 function casePart(alternate) {
 	if (this.test instanceof Pattern) {
-		const { type, patterned, locals } = this.test
+		const {type, patterned, locals} = this.test
 		const decl = new VariableDeclaration('const', [
-			new VariableDeclarator(IdExtract, msExtract(t0(type), t0(patterned))) ])
+			new VariableDeclarator(IdExtract, msExtract(t0(type), t0(patterned)))])
 		const test = new BinaryExpression('!==', IdExtract, LitNull)
 		const extract = new VariableDeclaration('const', locals.map((_, idx) =>
 			new VariableDeclarator(
 				idForDeclareCached(_),
 				new MemberExpression(IdExtract, new Literal(idx)))))
 		const res = t1(this.result, extract)
-		return new BlockStatement([ decl, new IfStatement(test, res, alternate) ])
+		return new BlockStatement([decl, new IfStatement(test, res, alternate)])
 	} else
 		// alternate written to by `caseBody`.
 		return new IfStatement(t0(this.test), t0(this.result), alternate)
@@ -576,11 +576,11 @@ function switchPart() {
 	*/
 	const block = t3(this.result, null, null, opOut)
 	// If switch has multiple values, build up a statement like: `case 1: case 2: { doBlock() }`
-	const x = [ ]
+	const x = []
 	for (let i = 0; i < this.values.length - 1; i = i + 1)
 		// These cases fallthrough to the one at the end.
-		x.push(new SwitchCase(t0(this.values[i]), [ ]))
-	x.push(new SwitchCase(t0(this.values[this.values.length - 1]), [ block ]))
+		x.push(new SwitchCase(t0(this.values[i]), []))
+	x.push(new SwitchCase(t0(this.values[this.values.length - 1]), [block]))
 	return x
 }
 
@@ -588,7 +588,7 @@ function switchPart() {
 const
 	// Wraps a block (with `return` statements in it) in an IIFE.
 	blockWrap = block => {
-		const invoke = new CallExpression(functionExpressionThunk(block, isInGenerator), [ ])
+		const invoke = new CallExpression(functionExpressionThunk(block, isInGenerator), [])
 		return isInGenerator ? new YieldExpression(invoke, true) : invoke
 	},
 
@@ -605,24 +605,24 @@ const
 
 	forLoop = (opIteratee, block) =>
 		ifElse(opIteratee,
-			({ element, bag }) => {
+			({element, bag}) => {
 				const declare = new VariableDeclaration('let',
-					[ new VariableDeclarator(t0(element)) ])
+					[new VariableDeclarator(t0(element))])
 				return new ForOfStatement(declare, t0(bag), t0(block))
 			},
 			() => forStatementInfinite(t0(block))),
 
 	doThrow = thrown =>
 		new ThrowStatement(thrown instanceof Quote ?
-			new NewExpression(GlobalError, [ t0(thrown) ]) :
+			new NewExpression(GlobalError, [t0(thrown)]) :
 			t0(thrown)),
 
 	methodKeyComputed = symbol => {
 		if (typeof symbol === 'string')
-			return { key: propertyIdOrLiteralCached(symbol), computed: false }
+			return {key: propertyIdOrLiteralCached(symbol), computed: false}
 		else {
 			const key = symbol instanceof Quote ? t0(symbol) : msSymbol(t0(symbol))
-			return { key, computed: true }
+			return {key, computed: true}
 		}
 	},
 
@@ -672,7 +672,7 @@ const
 			allUsePaths.map(_ => new Literal(_))))
 
 		const useToIdentifier = new Map()
-		const useIdentifiers = [ ]
+		const useIdentifiers = []
 		for (let i = 0; i < allUses.length; i = i + 1) {
 			const _ = allUses[i]
 			const id = idCached(`${pathBaseName(_.path)}_${i}`)
@@ -697,13 +697,13 @@ const
 
 		const lazyBody =
 			context.opts.lazyModule() ?
-				new BlockStatement([ new ExpressionStatement(
+				new BlockStatement([new ExpressionStatement(
 					new AssignmentExpression('=', ExportsGet,
-						msLazy(functionExpressionThunk(fullBody)))) ]) :
+						msLazy(functionExpressionThunk(fullBody))))]) :
 				fullBody
 
 		return new CallExpression(IdDefine,
-			[ arrUsePaths, new ArrowFunctionExpression(useArgs, lazyBody) ])
+			[arrUsePaths, new ArrowFunctionExpression(useArgs, lazyBody)])
 	},
 
 	pathBaseName = path =>
@@ -743,7 +743,7 @@ const
 	},
 
 	makeDeclarator = (assignee, value, valueIsAlreadyLazy) => {
-		const { name, opType } = assignee
+		const {name, opType} = assignee
 		const isLazy = assignee.isLazy()
 		// TODO: assert(assignee.opType === null)
 		// or TODO: Allow type check on lazy value?

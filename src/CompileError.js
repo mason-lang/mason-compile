@@ -1,4 +1,4 @@
-import { type } from './private/util'
+import {type} from './private/util'
 
 export default function CompileError(warning) {
 	if (!(this instanceof CompileError))

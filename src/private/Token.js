@@ -1,5 +1,5 @@
-import { code } from '../CompileError'
-import { SV_False, SV_Name, SV_Null, SV_True, SV_Undefined } from './MsAst'
+import {code} from '../CompileError'
+import {SV_False, SV_Name, SV_Null, SV_True, SV_Undefined} from './MsAst'
 
 /*
 Token tree, output of `lex/group`.
@@ -76,8 +76,8 @@ const
 	}
 
 export const
-	G_Parenthesis = g('( )'),
-	G_Bracket = g('[ ]'),
+	G_Parenthesis = g('()'),
+	G_Bracket = g('[]'),
 	// Lines in an indented block.
 	// Sub-tokens will always be G_Line groups.
 	// Note that G_Blocks do not always map to Block* MsAsts.
@@ -160,7 +160,7 @@ const reserved_words = [
 	'gen!',
 	'goto!',
 	'is',
-	'isa',
+	'meta',
 	'of',
 	'of!',
 	'to',

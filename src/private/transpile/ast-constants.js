@@ -1,8 +1,8 @@
-import { ArrayExpression, BinaryExpression, CallExpression, ExpressionStatement, Identifier,
+import {ArrayExpression, BinaryExpression, CallExpression, ExpressionStatement, Identifier,
 	IfStatement, Literal, NewExpression, ObjectExpression, ReturnStatement, SwitchCase,
-	ThisExpression, UnaryExpression, VariableDeclaration, VariableDeclarator } from 'esast/dist/ast'
-import { member } from 'esast/dist/util'
-import { _IdError, throwErrorFromString } from './util'
+	ThisExpression, UnaryExpression, VariableDeclaration, VariableDeclarator} from 'esast/dist/ast'
+import {member} from 'esast/dist/util'
+import {_IdError, throwErrorFromString} from './util'
 
 export const
 	GlobalError = new Identifier('Error'),
@@ -28,7 +28,7 @@ export const
 	ReturnExports = new ReturnStatement(IdExports),
 	ReturnRes = new ReturnStatement(new Identifier('res')),
 	SwitchCaseNoMatch = new SwitchCase(undefined, [
-		throwErrorFromString('No branch of `switch` matches.') ]),
+		throwErrorFromString('No branch of `switch` matches.')]),
 	SymbolIterator = member(new Identifier('Symbol'), 'iterator'),
 	ThrowAssertFail = throwErrorFromString('Assertion failed.'),
 	ThrowNoCaseMatch = throwErrorFromString('No branch of `case` matches.'),
@@ -42,16 +42,16 @@ export const
 			new Literal('function')),
 		new VariableDeclaration('var', [
 			new VariableDeclarator(IdDefine, new CallExpression(
-				new CallExpression(new Identifier('require'), [ new Literal('amdefine') ]),
-				[ new Identifier('module') ])) ])),
+				new CallExpression(new Identifier('require'), [new Literal('amdefine')]),
+				[new Identifier('module')]))])),
 	DeclareBuiltBag = new VariableDeclaration('const',
-		[ new VariableDeclarator(IdBuilt, LitEmptyArray) ]),
+		[new VariableDeclarator(IdBuilt, LitEmptyArray)]),
 	DeclareBuiltMap = new VariableDeclaration('const', [
 		new VariableDeclarator(IdBuilt,
-			new NewExpression(member(new Identifier('global'), 'Map'), [ ])) ]),
+			new NewExpression(member(new Identifier('global'), 'Map'), []))]),
 	DeclareBuiltObj = new VariableDeclaration('const', [
-		new VariableDeclarator(IdBuilt, new ObjectExpression([ ])) ]),
+		new VariableDeclarator(IdBuilt, new ObjectExpression([]))]),
 	DeclareLexicalThis = new VariableDeclaration('const',
-		[ new VariableDeclarator(IdLexicalThis, new ThisExpression()) ]),
+		[new VariableDeclarator(IdLexicalThis, new ThisExpression())]),
 	ExportsDefault = member(IdExports, 'default'),
 	ExportsGet = member(IdExports, '_get')

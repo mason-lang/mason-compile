@@ -1,48 +1,54 @@
-import { last, type } from './util'
+import {last, type} from './util'
 
 export default class CompileOptions {
-	constructor(opts) {
-		// TODO:ES6 Optional arguments
-		if (opts === undefined) opts = { }
+	constructor(opts = {}) {
+		if (opts === undefined) opts = {}
 		type(opts, Object)
 
-		const defaultTo = (name, _default) => {
-			const _ = opts[name]
-			if (_ === undefined)
-				return _default
-			else {
-				type(_, _default.constructor)
-				return _
-			}
-		}
-
 		const define = (name, _default) => {
-			this[`_${name}`] = defaultTo(name, _default)
+			const getDefault = () => {
+				const _ = opts[name]
+				if (_ === undefined)
+					return _default
+				else {
+					type(_, _default.constructor)
+					return _
+				}
+			}
+			this[`_${name}`] = getDefault()
 		}
 
 		const defaults = {
-			includeAmdefine: true,
+			includeAmdefine: false,
 			includeSourceMap: true,
 			includeModuleName: true,
-			forceNonLazyModule: false,
+			lazyModules: true,
 			useStrict: true,
 			checks: true,
 			'warn-as-error': false,
 			useBoot: true,
-			mslPath: 'msl',
+			mslPath: 'msl'
 		}
+
+		const allOpts = new Set(Object.keys(defaults).concat(['inFile', 'builtins']))
+
 		for (const _ in defaults)
 			define(_, defaults[_])
 
-		this._inFile = opts.inFile
+		for (const _ in opts)
+			if (!allOpts.has(_))
+				throw new Error(`Unrecognized key ${_}`)
 
-		if (this._inFile === undefined) {
+		const inFile = opts.inFile
+		if (inFile === undefined) {
 			if (this._includeSourceMap)
 				throw new Error('Either supply `inFile` option or make `includeSourceMap` false.')
 			if (this._includeModuleName)
 				throw new Error('Either supply `inFile` option or make `includeModuleName` false.')
-		} else
-			type(this._inFile, String)
+		} else {
+			type(inFile, String)
+			this._inFile = inFile
+		}
 
 		const builtins = opts.builtins || defaultBuiltins(this._mslPath)
 		this.builtinNameToPath = generateBuiltinsMap(builtins)
@@ -64,7 +70,7 @@ export default class CompileOptions {
 	includeModuleName() { return this._includeModuleName }
 	includeUseStrict() { return this._useStrict }
 
-	lazyModule() { return !this._forceNonLazyModule }
+	lazyModule() { return !this._lazyModules }
 
 	useBoot() { return this._useBoot }
 	bootPath() { return `${this._mslPath}/private/boot` }
@@ -80,23 +86,25 @@ const
 		path.substring(0, path.length - 1 - extname(path).length),
 	defaultBuiltins = mslPath => {
 		const builtins = {
-			global: [ 'Array', 'Boolean', 'Error', 'Function', 'Math', 'Number', 'Object',
-				'RegExp', 'String', 'Symbol' ],
-			'msl.@.?': [ 'un-?' ],
-			'msl.@.@': [ '_', '-!', 'all?', 'count', 'empty?', 'empty!', 'iterator' ],
-			'msl.@.@-Type': [ 'empty' ],
-			'msl.@.Map.Map': [ '_', 'assoc!', '?get' ],
-			'msl.@.Range': [ '_' ],
-			'msl.@.Seq.Seq': [ '_', '+>!' ],
-			'msl.@.Seq.Stream': [ '_' ],
-			'msl.@.Set.Set': [ '_' ],
-			'msl.compare': [ '=?', '<?', '<=?', '>?', '>=?', 'min', 'max' ],
-			'msl.Generator': [ 'gen-next!' ],
-			'msl.math.methods': [ '+', '-', '*', '/' ],
-			'msl.math.Number': [ 'neg' ],
-			'msl.Type.Kind': [ '_', 'kind!', 'self-kind!' ],
-			'msl.Type.Method': [ '_', 'impl!', 'impl-for', 'self-impl!' ],
-			'msl.Type.Type': [ '=>' ]
+			global: ['Array', 'Boolean', 'Error', 'Function', 'Math', 'Number', 'Object',
+				'RegExp', 'String', 'Symbol'],
+			'msl.@.?': ['un-?'],
+			'msl.@.@': ['_', '-!', 'all?', 'count', 'empty?', 'empty!', 'iterator'],
+			'msl.@.@-Type': ['empty'],
+			'msl.@.Map.Map': ['_', 'assoc!', '?get'],
+			'msl.@.Range': ['_'],
+			'msl.@.Seq.Seq': ['_', '+>!'],
+			'msl.@.Seq.Stream': ['_'],
+			'msl.@.Set.Set': ['_'],
+			'msl.$': ['_'],
+			'msl.compare': ['=?', '<?', '<=?', '>?', '>=?', 'min', 'max'],
+			'msl.Generator': ['gen-next!'],
+			'msl.math.methods': ['+', '-', '*', '/'],
+			'msl.math.Number': ['divisible?', 'int/', 'modulo', 'neg', 'log'],
+			'msl.to-string': ['_', 'inspect'],
+			'msl.Type.Kind': ['_', 'kind!', 'self-kind!'],
+			'msl.Type.Method': ['_', 'impl!', 'impl-for', 'self-impl!'],
+			'msl.Type.Type': ['=>']
 		}
 		if (mslPath !== 'msl')
 			for (let key in builtins) {

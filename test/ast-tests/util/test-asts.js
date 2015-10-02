@@ -1,17 +1,17 @@
-import { BlockDo, BlockWithReturn, ModuleExportDefault, Val } from '../../../dist/private/MsAst'
+import {BlockDo, BlockWithReturn, ModuleExportDefault, Val} from '../../../dist/private/MsAst'
 import CompileContext from '../../../dist/private/CompileContext'
 import CompileOptions from '../../../dist/private/CompileOptions'
 import lex from '../../../dist/private/lex'
 import parse from '../../../dist/private/parse/parse'
 import render from '../../../dist/private/render'
 import transpile from '../../../dist/private/transpile/transpile'
-import { last, rtail } from '../../../dist/private/util'
+import {last, rtail} from '../../../dist/private/util'
 import verify from '../../../dist/private/verify'
-import { loc } from './ast-util'
+import {loc} from './ast-util'
 
 export const test = (ms, ast, js, opts) => {
 	// TODO:ES6 Optional arguments
-	opts = opts || { }
+	opts = opts || {}
 
 	const isMultiLineTest = ast instanceof Array
 	ast = isMultiLineTest ?
@@ -21,7 +21,7 @@ export const test = (ms, ast, js, opts) => {
 		ast
 	ms = dedent(ms)
 	js = dedent(js)
-	const warnings = opts.warnings || [ ]
+	const warnings = opts.warnings || []
 	const name = opts.name || `\`${ms.replace(/\n\t+/g, '; ')}\``
 
 	it(name, () => {
@@ -64,10 +64,8 @@ export const test = (ms, ast, js, opts) => {
 
 const options = new CompileOptions({
 	inFile: './test-compile.ms',
-	inclideAmdefine: false,
 	includeSourceMap: false,
 	includeModuleName: false,
-	forceNonLazyModule: true,
 	useStrict: false
 })
 

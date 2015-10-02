@@ -1,12 +1,12 @@
-import Loc, { Pos, StartLine, StartPos, StartColumn, singleCharLoc } from 'esast/dist/Loc'
-import { code } from '../CompileError'
-import { NumberLiteral } from './MsAst'
-import { DocComment, DotName, Group, G_Block, G_Bracket, G_Line, G_Parenthesis, G_Space, G_Quote,
+import Loc, {Pos, StartLine, StartPos, StartColumn, singleCharLoc} from 'esast/dist/Loc'
+import {code} from '../CompileError'
+import {NumberLiteral} from './MsAst'
+import {DocComment, DotName, Group, G_Block, G_Bracket, G_Line, G_Parenthesis, G_Space, G_Quote,
 	isKeyword, Keyword, KW_AssignMutable, KW_Ellipsis, KW_Focus, KW_Fun, KW_FunDo, KW_FunGen,
 	KW_FunGenDo, KW_FunThis, KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo, KW_Lazy, KW_LocalMutate,
 	KW_ObjAssign, KW_Region, KW_Todo, KW_Type, Name, opKeywordKindFromName, showGroupKind
 	} from './Token'
-import { assert, isEmpty, last } from './util'
+import {assert, isEmpty, last} from './util'
 
 /*
 This produces the Token tree (see Token.js).
@@ -25,7 +25,7 @@ export default (context, sourceString) => {
 	// We only ever write to the innermost Group;
 	// when we close that Group we add it to the enclosing Group and continue with that one.
 	// Note that `curGroup` is conceptually the top of the stack, but is not stored in `stack`.
-	const groupStack = [ ]
+	const groupStack = []
 	let curGroup
 	const
 		addToCurrentGroup = token => {
@@ -42,7 +42,7 @@ export default (context, sourceString) => {
 			groupStack.push(curGroup)
 			// Contents will be added to by `addToCurrentGroup`.
 			// curGroup.loc.end will be written to when closing it.
-			curGroup = new Group(new Loc(openPos, null), [ ], groupKind)
+			curGroup = new Group(new Loc(openPos, null), [], groupKind)
 		},
 
 		maybeCloseGroup = (closePos, closeKind) => {
@@ -383,13 +383,13 @@ export default (context, sourceString) => {
 
 				case OpenParenthesis:
 					if (tryEat(CloseParenthesis))
-						addToCurrentGroup(new Group(loc(), [ ], G_Parenthesis))
+						addToCurrentGroup(new Group(loc(), [], G_Parenthesis))
 					else
 						openParenthesis(loc())
 					break
 				case OpenBracket:
 					if (tryEat(CloseBracket))
-						addToCurrentGroup(new Group(loc(), [ ], G_Bracket))
+						addToCurrentGroup(new Group(loc(), [], G_Bracket))
 					else {
 						openGroup(startPos(), G_Bracket)
 						openGroup(pos(), G_Space)
@@ -641,7 +641,7 @@ export default (context, sourceString) => {
 		closeGroup(pos(), G_Quote)
 	}
 
-	curGroup = new Group(new Loc(StartPos, null), [ ], G_Block)
+	curGroup = new Group(new Loc(StartPos, null), [], G_Block)
 	openLine(StartPos)
 
 	lexPlain(false)

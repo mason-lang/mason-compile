@@ -1,6 +1,6 @@
-import { Assert, Throw } from '../../dist/private/MsAst'
-import { loc, one, strA, zero } from './util/ast-util'
-import { test } from './util/test-asts'
+import {Assert, Throw} from '../../dist/private/MsAst'
+import {loc, one, strA, zero} from './util/ast-util'
+import {test} from './util/test-asts'
 
 describe('except', () => {
 	// TODO:
@@ -29,7 +29,7 @@ describe('assert', () => {
 describe('throw', () => {
 	test(
 		'throw!',
-		new Throw(loc),
+		new Throw(loc, null),
 		'throw new (Error)("An error occurred.")')
 	test(
 		'throw! "a"',

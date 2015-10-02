@@ -1,4 +1,4 @@
-import render, { renderWithSourceMap } from 'esast/dist/render'
+import render, {renderWithSourceMap} from 'esast/dist/render'
 
 export default (context, esAst) =>
 	context.opts.includeSourceMap() ?

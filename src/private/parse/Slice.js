@@ -1,5 +1,5 @@
 import Loc from 'esast/dist/Loc'
-import { isEmpty } from '../util'
+import {isEmpty} from '../util'
 
 /*
 Represents a section of tokens that the parser is currently working on.
@@ -8,7 +8,7 @@ So, taking the tail is O(1).
 */
 export default class Slice {
 	static group(groupToken) {
-		const { subTokens, loc } = groupToken
+		const {subTokens, loc} = groupToken
 		return new Slice(subTokens, 0, subTokens.length, loc)
 	}
 
@@ -69,17 +69,17 @@ export default class Slice {
 	// Every output but last will be { before, at }; last will be just { before }.
 	opSplitManyWhere(splitOn) {
 		let iLast = this.start
-		const out = [ ]
+		const out = []
 		for (let i = this.start; i < this.end; i = i + 1)
 			if (splitOn(this.tokens[i])) {
-				out.push({ before: this._chop(iLast, i), at: this.tokens[i] })
+				out.push({before: this._chop(iLast, i), at: this.tokens[i]})
 				iLast = i + 1
 			}
 
 		if (isEmpty(out))
 			return null
 		else {
-			out.push({ before: this._chopStart(iLast) })
+			out.push({before: this._chopStart(iLast)})
 			return out
 		}
 	}

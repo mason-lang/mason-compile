@@ -7,7 +7,7 @@ export const
 	cat = function() {
 		// TODO:ES6 Splat
 		const parts = Array.prototype.slice.call(arguments)
-		const out = [ ]
+		const out = []
 		for (const _ of parts)
 			if (_ instanceof Array)
 				out.push(..._)
@@ -25,7 +25,7 @@ export const
 
 	// flatMap where opMapper returns optionals instead of arrays.
 	flatOpMap = (arr, opMapper) => {
-		const out = [ ]
+		const out = []
 		for (const em of arr) {
 			const _ = opMapper(em)
 			if (_ !== null)

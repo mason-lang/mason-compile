@@ -182,7 +182,7 @@ export default class MsAst {
 			this.value = value
 		}
 
-		allAssignees() { return [ this.assignee ] }
+		allAssignees() { return [this.assignee] }
 	}
 
 	export class AssignDestructure extends Assign {
@@ -217,11 +217,8 @@ export default class MsAst {
 
 // Errors
 	export class Throw extends Do {
-		constructor(loc, opThrown /* Opt[Val] */) {
+		constructor(loc, opThrown/* Opt[Val] */) {
 			super(loc)
-			// TODO:ES6 optional arguments
-			if (opThrown === undefined)
-				opThrown = null
 			this.opThrown = opThrown
 		}
 	}
@@ -308,12 +305,7 @@ export default class MsAst {
 
 	// TODO: BlockBag, BlockMap, BlockObj => BlockBuild(kind, ...)
 	export class BlockObj extends BlockVal {
-		static of(loc, opComment, lines, opObjed, opName) {
-			// TODO:ES6 optional arguments
-			if (opObjed === undefined)
-				opObjed = null
-			if (opName === undefined)
-				opName = null
+		static of(loc, opComment, lines, opObjed=null, opName=null) {
 			return new BlockObj(loc, opComment, new LocalDeclareBuilt(loc), lines, opObjed, opName)
 		}
 
@@ -448,18 +440,10 @@ export default class MsAst {
 			args, // Array[LocalDeclare]
 			opRestArg, // Opt[LocalDeclare]
 			block, // Block
-			opIn, // Opt[Debug]
-			opDeclareRes, // Opt[LocalDeclareRes]
-			opOut) { // Opt[Debug]) {
+			opIn=null, // Opt[Debug]
+			opDeclareRes=null, // Opt[LocalDeclareRes]
+			opOut=null) { // Opt[Debug]) {
 			super(loc)
-			// TODO:ES6 Optional args
-			if (opIn === undefined)
-				opIn = null
-			if (opDeclareRes === undefined)
-				opDeclareRes = null
-			if (opOut === undefined)
-				opOut = null
-
 			this.opDeclareThis = opDeclareThis
 			this.isGenerator = isGenerator
 			this.args = args
@@ -473,11 +457,8 @@ export default class MsAst {
 
 // Generator
 	export class Yield extends Val {
-		constructor(loc, opYielded /* Opt[Val] */) {
+		constructor(loc, opYielded=null /* Opt[Val] */) {
 			super(loc)
-			// TODO:ES6 Optional arguments
-			if (opYielded === undefined)
-				opYielded = null
 			this.opYielded = opYielded
 		}
 	}
@@ -496,7 +477,7 @@ export default class MsAst {
 			opComment,
 			opDo, // Opt[ClassDo],
 			statics, // Array[MethodImplLike]
-			opConstructor, // Opt[Fun]
+			opConstructor, // Opt[Constructor]
 			methods) { // Array[MethodImplLike]
 			super(loc)
 			this.opSuperClass = opSuperClass
@@ -575,7 +556,7 @@ export default class MsAst {
 // Calls
 	export class Call extends Val {
 		static contains(loc, testType, tested) {
-			return new Call(loc, new SpecialVal(loc, SV_Contains), [ testType, tested ])
+			return new Call(loc, new SpecialVal(loc, SV_Contains), [testType, tested])
 		}
 
 		static sub(loc, args) {
@@ -618,9 +599,6 @@ export default class MsAst {
 			parts, // Array[CaseDoPart]
 			opElse) { // Opt[BlockDo]
 			super(loc)
-			// TODO:ES6 Optional arguments
-			if (opElse === undefined)
-				opElse = null
 			this.opCased = opCased
 			this.parts = parts
 			this.opElse = opElse
@@ -633,9 +611,6 @@ export default class MsAst {
 			parts, // Array[CaseValPart]
 			opElse) { // Opt[BlockVal]
 			super(loc)
-			// TODO:ES6 Optional arguments
-			if (opElse === undefined)
-				opElse = null
 			this.opCased = opCased
 			this.parts = parts
 			this.opElse = opElse
@@ -831,7 +806,7 @@ export default class MsAst {
 
 	export class Quote extends Val {
 		static forString(loc, str) {
-			return new Quote(loc, [ str ])
+			return new Quote(loc, [str])
 		}
 
 		// parts are Strings interleaved with Vals.

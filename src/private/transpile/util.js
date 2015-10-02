@@ -1,9 +1,9 @@
-import { ExpressionStatement, ForStatement, Identifier, Literal, NewExpression, ThrowStatement,
-	VariableDeclarator, VariableDeclaration } from 'esast/dist/ast'
+import {ExpressionStatement, ForStatement, Identifier, Literal, NewExpression, ThrowStatement,
+	VariableDeclarator, VariableDeclaration} from 'esast/dist/ast'
 import mangleIdentifier from 'esast/dist/mangle-identifier'
-import { opIf, opMap } from '../util'
-import { msCheckContains, msUnlazy } from './ms-call'
-import { t0 } from './transpile'
+import {opIf, opMap} from '../util'
+import {msCheckContains, msUnlazy} from './ms-call'
+import {t0} from './transpile'
 
 // Define this here to avoid circular dependency with ast-constants.
 export const _IdError = new Identifier('Error')
@@ -16,7 +16,7 @@ export const
 
 	declare = (localDeclare, val) =>
 		new VariableDeclaration('const',
-			[ new VariableDeclarator(idForDeclareCached(localDeclare), val) ]),
+			[new VariableDeclarator(idForDeclareCached(localDeclare), val)]),
 
 	forStatementInfinite = body =>
 		new ForStatement(null, null, null, body),
@@ -40,7 +40,7 @@ export const
 					new Literal(localDeclare.name))))),
 
 	throwErrorFromString = msg =>
-		new ThrowStatement(new NewExpression(_IdError, [ new Literal(msg) ]))
+		new ThrowStatement(new NewExpression(_IdError, [new Literal(msg)]))
 
 const
 	declareToId = new WeakMap()

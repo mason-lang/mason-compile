@@ -1,7 +1,7 @@
-import { MemberSet, MS_New, MS_NewMutable, MS_Mutate, SD_Debugger, SpecialDo
+import {MemberSet, MS_New, MS_NewMutable, MS_Mutate, SD_Debugger, SpecialDo
 	} from '../../dist/private/MsAst'
-import { loc, one, zero } from './util/ast-util'
-import { test } from './util/test-asts'
+import {loc, one, zero} from './util/ast-util'
+import {test} from './util/test-asts'
 
 describe('statements', () => {
 	test(

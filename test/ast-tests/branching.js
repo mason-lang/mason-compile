@@ -1,8 +1,8 @@
-import { BlockWithReturn, CaseDo, CaseDoPart, CaseVal, CaseValPart, ConditionalDo, ConditionalVal,
-	Fun, Pattern, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart } from '../../dist/private/MsAst'
-import { aAccess, assignAZero, assignFocusZero, bDeclare, bAccess, blockDbg, blockOne, blockTwo,
-	blockPass, focusAccess, focusDeclare, loc, one, zero } from './util/ast-util'
-import { test } from './util/test-asts'
+import {BlockWithReturn, CaseDo, CaseDoPart, CaseVal, CaseValPart, ConditionalDo, ConditionalVal,
+	Fun, Pattern, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart} from '../../dist/private/MsAst'
+import {aAccess, assignAZero, assignFocusZero, bDeclare, bAccess, blockDbg, blockOne, blockTwo,
+	blockPass, focusAccess, focusDeclare, loc, one, zero} from './util/ast-util'
+import {test} from './util/test-asts'
 
 describe('conditionals', () => {
 	test(
@@ -41,7 +41,7 @@ describe('case', () => {
 			case!
 				0
 					debugger!`,
-		new CaseDo(loc, null, [ new CaseDoPart(loc, zero, blockDbg) ], null),
+		new CaseDo(loc, null, [new CaseDoPart(loc, zero, blockDbg)], null),
 		`
 			if(0){
 				debugger
@@ -53,7 +53,7 @@ describe('case', () => {
 					pass`,
 		new CaseDo(loc,
 			assignFocusZero,
-			[ new CaseDoPart(loc, focusAccess, blockPass) ],
+			[new CaseDoPart(loc, focusAccess, blockPass)],
 			null),
 		`
 			{
@@ -68,7 +68,7 @@ describe('case', () => {
 				else
 					pass`,
 		new CaseDo(loc, null,
-			[ new CaseDoPart(loc, zero, blockDbg) ],
+			[new CaseDoPart(loc, zero, blockDbg)],
 			blockPass),
 		`
 			if(0){
@@ -83,7 +83,7 @@ describe('case', () => {
 				else
 					2`,
 		new CaseVal(loc, null,
-			[ new CaseValPart(loc, zero, blockOne) ],
+			[new CaseValPart(loc, zero, blockOne)],
 			blockTwo),
 		`
 			(()=>{
@@ -106,8 +106,8 @@ describe('case', () => {
 			new CaseVal(loc, assignFocusZero,
 				[
 					new CaseValPart(loc,
-						new Pattern(loc, aAccess, [ bDeclare ], focusAccess),
-						new BlockWithReturn(loc, null, [ ], bAccess))
+						new Pattern(loc, aAccess, [bDeclare], focusAccess),
+						new BlockWithReturn(loc, null, [], bAccess))
 				],
 				blockOne)
 		],
@@ -134,13 +134,12 @@ describe('case', () => {
 			loc,
 			null,
 			false,
-			[ focusDeclare ],
+			[focusDeclare],
 			null,
-			new BlockWithReturn(loc, null, [ ],
+			new BlockWithReturn(loc, null, [],
 				new CaseVal(loc, null,
-					[
-						new CaseValPart(loc, focusAccess, blockOne)
-					]))),
+					[new CaseValPart(loc, focusAccess, blockOne)],
+					null))),
 		`
 			_=>{
 				return (()=>{
@@ -158,7 +157,7 @@ describe('switch', () => {
 				1
 					pass`,
 		new SwitchDo(loc, zero,
-			[ new SwitchDoPart(loc, [ one ], blockPass) ],
+			[new SwitchDoPart(loc, [one], blockPass)],
 			null),
 		`
 			switch(0){
@@ -176,9 +175,9 @@ describe('switch', () => {
 				else
 					1`,
 		new SwitchVal(loc, zero,
-			[ new SwitchValPart(loc,
-				[ one ],
-				new BlockWithReturn(loc, null, [ assignAZero ], aAccess)) ],
+			[new SwitchValPart(loc,
+				[one],
+				new BlockWithReturn(loc, null, [assignAZero], aAccess))],
 			blockOne),
 		`
 			(()=>{
@@ -196,7 +195,7 @@ describe('switch', () => {
 				or 0 1
 					pass`,
 		new SwitchDo(loc, zero,
-			[ new SwitchDoPart(loc, [ zero, one ], blockPass) ],
+			[new SwitchDoPart(loc, [zero, one], blockPass)],
 			null),
 		`
 			switch(0){

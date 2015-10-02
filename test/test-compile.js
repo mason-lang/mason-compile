@@ -1,6 +1,6 @@
-import { Suite } from 'benchmark'
-import { Node } from 'esast/dist/ast'
-import { readFileSync } from 'fs'
+import {Suite} from 'benchmark'
+import {Node} from 'esast/dist/ast'
+import {readFileSync} from 'fs'
 import numeral from 'numeral'
 import compile from '../dist/compile'
 import MsAst from '../dist/private/MsAst'
@@ -20,13 +20,11 @@ const doTest = isPerfTest => {
 	const source = readFileSync('test/test-compile.ms', 'utf-8')
 	const opts = {
 		inFile: './test-compile.ms',
-		includeAmdefine: false,
 		includeSourceMap: true,
 		includeModuleName: false,
-		forceNonLazyModule: true,
 		useStrict: false,
 		builtins: {
-			global: [ 'Array', 'Boolean', 'Error', 'Function', 'Number', 'Object', 'Symbol' ]
+			global: ['Array', 'Boolean', 'Error', 'Function', 'Number', 'Object', 'Symbol']
 		}
 	}
 	const context = new CompileContext(new CompileOptions(opts))
@@ -40,7 +38,7 @@ const doTest = isPerfTest => {
 		// console.log(`+++\n${verifyResults.___}`)
 		const esAst = transpile(context, msAst, verifyResults)
 		// console.log(`==>\n${esAst}`)
-		const { code } = render(context, esAst)
+		const {code} = render(context, esAst)
 
 		for (const _ of context.warnings)
 			console.log(_)
@@ -104,5 +102,5 @@ const
 					nLeaves = nLeaves + 1
 		}
 		visit(tree)
-		return { size: visited.size, nLeaves }
+		return {size: visited.size, nLeaves}
 	}

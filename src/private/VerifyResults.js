@@ -1,4 +1,4 @@
-import { isEmpty } from './util'
+import {isEmpty} from './util'
 
 export default class VerifyResults {
 	constructor() {
@@ -47,7 +47,7 @@ export default class VerifyResults {
 
 export class LocalInfo {
 	static empty(isInDebug) {
-		return new LocalInfo(isInDebug, [ ], [ ])
+		return new LocalInfo(isInDebug, [], [])
 	}
 
 	constructor(

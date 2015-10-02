@@ -5,7 +5,7 @@ import lex from './private/lex'
 import parse from './private/parse/parse'
 import render from './private/render'
 import transpile from './private/transpile/transpile'
-import { type } from './private/util'
+import {type} from './private/util'
 import verify from './private/verify'
 
 // See private/Opts.js for description of opts
@@ -16,11 +16,10 @@ export default (source, opts) => {
 		const ast = parse(context, lex(context, source))
 		const esAst = transpile(context, ast, verify(context, ast))
 		const result = render(context, esAst)
-		return { warnings: context.warnings, result }
+		return {warnings: context.warnings, result}
 	} catch (error) {
-		if (error instanceof CompileError)
-			return { warnings: context.warnings, result: error }
-		else
+		if (!(error instanceof CompileError))
 			throw error
+		return {warnings: context.warnings, result: error}
 	}
 }

@@ -1,10 +1,10 @@
-import { code } from '../CompileError'
+import {code} from '../CompileError'
 import * as MsAstTypes from './MsAst'
-import { AssignDestructure, AssignSingle, BlockVal, Call, Class, Constructor, Debug, Do, ForVal,
+import {AssignDestructure, AssignSingle, BlockVal, Call, Class, Constructor, Debug, Do, ForVal,
 	Fun, LocalDeclareBuilt, LocalDeclareFocus, LocalDeclareRes, ModuleExport, ObjEntry, Pattern,
-	SuperCallDo, Yield, YieldTo } from './MsAst'
-import { assert, cat, head, ifElse, implementMany, isEmpty, opEach, reverseIter } from './util'
-import VerifyResults, { LocalInfo } from './VerifyResults'
+	SuperCallDo, Yield, YieldTo} from './MsAst'
+import {assert, cat, head, ifElse, implementMany, isEmpty, opEach, reverseIter} from './util'
+import VerifyResults, {LocalInfo} from './VerifyResults'
 
 /*
 The verifier generates information needed during transpiling, the VerifyResults.
@@ -12,7 +12,7 @@ The verifier generates information needed during transpiling, the VerifyResults.
 export default (_context, msAst) => {
 	context = _context
 	locals = new Map()
-	pendingBlockLocals = [ ]
+	pendingBlockLocals = []
 	isInDebug = isInGenerator = false
 	okToNotUse = new Set()
 	opLoop = null
@@ -161,7 +161,7 @@ const
 
 	// Should have verified that addedLocals all have different names.
 	plusLocals = (addedLocals, action) => {
-		const shadowedLocals = [ ]
+		const shadowedLocals = []
 		for (const _ of addedLocals) {
 			const shadowed = locals.get(_.name)
 			if (shadowed !== undefined)
@@ -193,7 +193,7 @@ const
 
 	withBlockLocals = action => {
 		const oldPendingBlockLocals = pendingBlockLocals
-		pendingBlockLocals = [ ]
+		pendingBlockLocals = []
 		plusLocals(oldPendingBlockLocals, action)
 		pendingBlockLocals = oldPendingBlockLocals
 	}
@@ -359,7 +359,7 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	// Only reach here for in/out condition.
-	Debug() { verifyLines([ this ]) },
+	Debug() { verifyLines([this]) },
 
 	ExceptDo: verifyExcept,
 	ExceptVal: verifyExcept,
@@ -405,7 +405,7 @@ implementMany(MsAstTypes, 'verify', {
 			else {
 				const names = results.builtinPathToNames.get(builtinPath)
 				if (names === undefined)
-					results.builtinPathToNames.set(builtinPath, new Set([ this.name ]))
+					results.builtinPathToNames.set(builtinPath, new Set([this.name]))
 				else
 					names.add(this.name)
 			}
@@ -462,12 +462,12 @@ implementMany(MsAstTypes, 'verify', {
 	MethodGetter() {
 		verifyMethod(this, () => {
 			okToNotUse.add(this.declareThis)
-			verifyAndPlusLocals([ this.declareThis ], () => { this.block.verify() })
+			verifyAndPlusLocals([this.declareThis], () => { this.block.verify() })
 		})
 	},
 	MethodSetter() {
 		verifyMethod(this, () => {
-			verifyAndPlusLocals([ this.declareThis, this.declareFocus ], () => {
+			verifyAndPlusLocals([this.declareThis, this.declareFocus], () => {
 				this.block.verify()
 			})
 		})
@@ -514,7 +514,7 @@ implementMany(MsAstTypes, 'verify', {
 	ObjSimple() {
 		const keys = new Set()
 		for (const pair of this.pairs) {
-			const { key, value } = pair
+			const {key, value} = pair
 			context.check(!keys.has(key), pair.loc, () => `Duplicate key ${key}`)
 			keys.add(key)
 			value.verify()
@@ -644,7 +644,7 @@ const
 	verifyFor = forLoop => {
 		const verifyBlock = () => withLoop(forLoop, () => forLoop.block.verify())
 		ifElse(forLoop.opIteratee,
-			({ element, bag }) => {
+			({element, bag}) => {
 				bag.verify()
 				verifyAndPlusLocal(element, verifyBlock)
 			},
@@ -700,14 +700,14 @@ const
 
 	lineNewLocals = line =>
 		line instanceof AssignSingle ?
-			[ line.assignee ] :
+			[line.assignee] :
 			line instanceof AssignDestructure ?
 			line.assignees :
 			line instanceof ObjEntry ?
 			lineNewLocals(line.assign) :
 			line instanceof ModuleExport ?
 			lineNewLocals(line.assign) :
-			[ ],
+			[],
 
 	verifyLines = lines => {
 		/*
@@ -719,7 +719,7 @@ const
 		It doesn't really matter what order we add locals in since it's not allowed
 		to have two locals of the same name in the same block.
 		*/
-		const newLocals = [ ]
+		const newLocals = []
 
 		const getLineLocals = line => {
 			if (line instanceof Debug)
@@ -753,7 +753,7 @@ const
 		const thisBlockLocalNames = new Set()
 
 		// All shadowed locals for this block.
-		const shadowed = [ ]
+		const shadowed = []
 
 		const verifyLine = line => {
 			if (line instanceof Debug)

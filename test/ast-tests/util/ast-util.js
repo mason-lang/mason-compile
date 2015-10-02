@@ -1,6 +1,6 @@
-import Loc, { StartPos } from 'esast/dist/Loc'
-import { AssignSingle, BlockDo, BlockWithReturn, Fun, LocalDeclare, LocalAccess, LocalDeclareFocus,
-	NumberLiteral, Quote, SD_Debugger, SpecialDo } from '../../../dist/private/MsAst'
+import Loc, {StartPos} from 'esast/dist/Loc'
+import {AssignSingle, BlockDo, BlockWithReturn, Fun, LocalDeclare, LocalAccess, LocalDeclareFocus,
+	NumberLiteral, Quote, SD_Debugger, SpecialDo} from '../../../dist/private/MsAst'
 
 export const
 	loc = new Loc(StartPos, StartPos),
@@ -21,10 +21,10 @@ export const
 	assignAZero = new AssignSingle(loc, aDeclare, zero),
 	assignFocusZero = new AssignSingle(loc, focusDeclare, zero),
 
-	blockDbg = new BlockDo(loc, null, [ new SpecialDo(loc, SD_Debugger) ]),
-	blockOne = new BlockWithReturn(loc, null, [ ], one),
-	blockTwo = new BlockWithReturn(loc, null, [ ], two),
-	blockPass = new BlockDo(loc, null, [ ]),
+	blockDbg = new BlockDo(loc, null, [new SpecialDo(loc, SD_Debugger)]),
+	blockOne = new BlockWithReturn(loc, null, [], one),
+	blockTwo = new BlockWithReturn(loc, null, [], two),
+	blockPass = new BlockDo(loc, null, []),
 
 	funDo = lines =>
 		new Fun(

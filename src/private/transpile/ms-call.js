@@ -1,5 +1,5 @@
-import { CallExpression, Identifier } from 'esast/dist/ast'
-import { member, thunk } from 'esast/dist/util'
+import {CallExpression, Identifier} from 'esast/dist/ast'
+import {member, thunk} from 'esast/dist/util'
 
 const ms = name => {
 	const m = member(IdMs, name)

@@ -1,5 +1,5 @@
-import CompileError, { Warning } from '../CompileError'
-import { Pos, singleCharLoc } from 'esast/dist/Loc'
+import CompileError, {Warning} from '../CompileError'
+import {Pos, singleCharLoc} from 'esast/dist/Loc'
 
 export default class CompileContext {
 	constructor(opts) {
