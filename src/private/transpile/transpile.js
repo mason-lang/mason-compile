@@ -12,7 +12,7 @@ import manglePath from '../manglePath'
 import * as MsAstTypes from '../MsAst'
 import {AssignSingle, Call, Constructor, L_And, L_Or, LD_Lazy, LD_Mutable, Member, MS_Mutate,
 	MS_New, MS_NewMutable, LocalDeclare, Pattern, Splat, SD_Debugger, SV_Contains, SV_False,
-	SV_Name, SV_Null, SV_Sub, SV_True, SV_Undefined, SwitchDoPart, Quote, Use} from '../MsAst'
+	SV_Name, SV_Null, SV_Sub, SV_True, SV_Undefined, SwitchDoPart, Quote, Import} from '../MsAst'
 import {assert, cat, flatMap, flatOpMap, ifElse, isEmpty, implementMany, isPositive, last, opIf,
 	opMap, tail} from '../util'
 import {AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj,
@@ -370,25 +370,25 @@ implementMany(MsAstTypes, 'transpile', {
 
 	Module() {
 		const body = tLines(this.lines)
-		const otherUses = this.uses.concat(this.debugUses)
+		const otherImports = this.imports.concat(this.debugImports)
 
-		verifyResults.builtinPathToNames.forEach((used, path) => {
+		verifyResults.builtinPathToNames.forEach((imported, path) => {
 			if (path !== 'global') {
-				const usedDeclares = []
-				let opUseDefault = null
+				const importedDeclares = []
+				let opImportDefault = null
 				let defaultName = last(path.split('/'))
-				for (const name of used) {
+				for (const name of imported) {
 					const declare = LocalDeclare.plain(this.loc, name)
 					if (name === defaultName)
-						opUseDefault = declare
+						opImportDefault = declare
 					else
-						usedDeclares.push(declare)
+						importedDeclares.push(declare)
 				}
-				otherUses.push(new Use(this.loc, path, usedDeclares, opUseDefault))
+				otherImports.push(new Import(this.loc, path, importedDeclares, opImportDefault))
 			}
 		})
 
-		const amd = amdWrapModule(this.doUses, otherUses, body)
+		const amd = amdWrapModule(this.doImports, otherImports, body)
 
 		return new Program(cat(
 			opIf(context.opts.includeUseStrict(), () => UseStrict),
@@ -660,40 +660,40 @@ const IdBoot = new Identifier('_boot')
 
 // Module helpers
 const
-	amdWrapModule = (doUses, otherUses, body) => {
-		const useBoot = context.opts.useBoot()
+	amdWrapModule = (doImports, otherImports, body) => {
+		const shouldImportBoot = context.opts.importBoot()
 
-		const allUses = doUses.concat(otherUses)
-		const allUsePaths = allUses.map(_ => manglePath(_.path))
+		const allImports = doImports.concat(otherImports)
+		const allImportPaths = allImports.map(_ => manglePath(_.path))
 
-		const arrUsePaths = new ArrayExpression(cat(
-			opIf(useBoot, () => new Literal(context.opts.bootPath())),
+		const arrImportPaths = new ArrayExpression(cat(
+			opIf(shouldImportBoot, () => new Literal(context.opts.bootPath())),
 			LitStrExports,
-			allUsePaths.map(_ => new Literal(_))))
+			allImportPaths.map(_ => new Literal(_))))
 
-		const useToIdentifier = new Map()
-		const useIdentifiers = []
-		for (let i = 0; i < allUses.length; i = i + 1) {
-			const _ = allUses[i]
+		const importToIdentifier = new Map()
+		const importIdentifiers = []
+		for (let i = 0; i < allImports.length; i = i + 1) {
+			const _ = allImports[i]
 			const id = idCached(`${pathBaseName(_.path)}_${i}`)
-			useIdentifiers.push(id)
-			useToIdentifier.set(_, id)
+			importIdentifiers.push(id)
+			importToIdentifier.set(_, id)
 		}
 
-		const useArgs = cat(opIf(useBoot, () => IdBoot), IdExports, useIdentifiers)
+		const importArgs = cat(opIf(shouldImportBoot, () => IdBoot), IdExports, importIdentifiers)
 
-		const doBoot = opIf(useBoot, () => new ExpressionStatement(msGetModule(IdBoot)))
+		const doBoot = opIf(shouldImportBoot, () => new ExpressionStatement(msGetModule(IdBoot)))
 
-		const useDos = doUses.map(use =>
-			loc(new ExpressionStatement(msGetModule(useToIdentifier.get(use))), use.loc))
+		const importDos = doImports.map(_ =>
+			loc(new ExpressionStatement(msGetModule(importToIdentifier.get(_))), _.loc))
 
-		// Extracts used values from the modules.
-		const opDeclareUsedLocals = opIf(!isEmpty(otherUses),
+		// Extracts imported values from the modules.
+		const opDeclareImportedLocals = opIf(!isEmpty(otherImports),
 			() => new VariableDeclaration('const',
-				flatMap(otherUses, use => useDeclarators(use, useToIdentifier.get(use)))))
+				flatMap(otherImports, _ => importDeclarators(_, importToIdentifier.get(_)))))
 
 		const fullBody = new BlockStatement(cat(
-			doBoot, useDos, opDeclareUsedLocals, body, ReturnExports))
+			doBoot, importDos, opDeclareImportedLocals, body, ReturnExports))
 
 		const lazyBody =
 			context.opts.lazyModule() ?
@@ -703,27 +703,27 @@ const
 				fullBody
 
 		return new CallExpression(IdDefine,
-			[arrUsePaths, new ArrowFunctionExpression(useArgs, lazyBody)])
+			[arrImportPaths, new ArrowFunctionExpression(importArgs, lazyBody)])
 	},
 
 	pathBaseName = path =>
 		path.substr(path.lastIndexOf('/') + 1),
 
-	useDeclarators = (use, moduleIdentifier) => {
+	importDeclarators = ({imported, opImportDefault}, moduleIdentifier) => {
 		// TODO: Could be neater about this
-		const isLazy = (isEmpty(use.used) ? use.opUseDefault : use.used[0]).isLazy()
+		const isLazy = (isEmpty(imported) ? opImportDefault : imported[0]).isLazy()
 		const value = (isLazy ? msLazyGetModule : msGetModule)(moduleIdentifier)
 
-		const usedDefault = opMap(use.opUseDefault, def => {
+		const importedDefault = opMap(opImportDefault, def => {
 			const defexp = msGetDefaultExport(moduleIdentifier)
 			const val = isLazy ? lazyWrap(defexp) : defexp
 			return loc(new VariableDeclarator(idForDeclareCached(def), val), def.loc)
 		})
 
-		const usedDestruct = isEmpty(use.used) ? null :
-			makeDestructureDeclarators(use.used, isLazy, value, true, false)
+		const importedDestruct = isEmpty(imported) ? null :
+			makeDestructureDeclarators(imported, isLazy, value, true, false)
 
-		return cat(usedDefault, usedDestruct)
+		return cat(importedDefault, importedDestruct)
 	}
 
 // General utils. Not in util.js because these close over context.

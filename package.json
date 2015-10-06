@@ -4,6 +4,7 @@
 	"files": ["dist", "src"],
 	"scripts": {
 		"build": "gulp compile",
+		"watch": "gulp watch",
 		"lint": "eslint gulpfile.js src test",
 		"test": "gulp compile-tests; mocha compiled-test/**/*.js"
 	},
@@ -14,7 +15,7 @@
 	"devDependencies": {
 		"benchmark": "1.0.0",
 			"microtime": "2.0.0",
-		"eslint": "1.5.1",
+		"eslint": "1.6.0",
 		"gulp": "3.9.0",
 		"gulp-babel": "5.2.1",
 		"gulp-header": "1.7.1",

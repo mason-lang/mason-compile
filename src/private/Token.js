@@ -9,7 +9,7 @@ it doesn't have to handle a "left parenthesis", only a Group(tokens, G_Parenthes
 */
 
 // `.name`, `..name`, etc.
-// Currently nDots > 1 is only used by `use` blocks.
+// Currently nDots > 1 is only used by `import` blocks.
 export class DotName {
 	constructor(loc, nDots /* Number */, name /* String */) {
 		this.loc = loc
@@ -243,10 +243,10 @@ export const
 	KW_Undefined = kw('undefined'),
 	KW_UnlessVal = kw('unless'),
 	KW_UnlessDo = kw('unless!'),
-	KW_Use = kw('use'),
-	KW_UseDebug = kw('use-debug'),
-	KW_UseDo = kw('use!'),
-	KW_UseLazy = kw('use~'),
+	KW_Import = kw('import'),
+	KW_ImportDebug = kw('import-debug'),
+	KW_ImportDo = kw('import!'),
+	KW_ImportLazy = kw('import~'),
 	KW_With = kw('with'),
 	KW_Yield = kw('<~'),
 	KW_YieldTo = kw('<~~'),

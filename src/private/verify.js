@@ -474,12 +474,12 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	Module() {
-		// No need to verify this.doUses.
-		for (const _ of this.uses)
+		// No need to verify this.doImports.
+		for (const _ of this.imports)
 			_.verify()
-		verifyOpEach(this.opUseGlobal)
+		verifyOpEach(this.opImportGlobal)
 		withInDebug(() => {
-			for (const _ of this.debugUses)
+			for (const _ of this.debugImports)
 				_.verify()
 		})
 
@@ -555,8 +555,8 @@ implementMany(MsAstTypes, 'verify', {
 		verifyOpEach(this.opThrown)
 	},
 
-	Use: verifyUse,
-	UseGlobal: verifyUse,
+	Import: verifyImport,
+	ImportGlobal: verifyImport,
 
 	With() {
 		this.value.verify()
@@ -624,7 +624,7 @@ function verifySuperCall() {
 		_.verify()
 }
 
-function verifyUse() {
+function verifyImport() {
 	// Since Uses are always in the outermost scope, don't have to worry about shadowing.
 	// So we mutate `locals` directly.
 	const addUseLocal = _ => {
@@ -634,9 +634,9 @@ function verifyUse() {
 		verifyLocalDeclare(_)
 		setLocal(_)
 	}
-	for (const _ of this.used)
+	for (const _ of this.imported)
 		addUseLocal(_)
-	opEach(this.opUseDefault, addUseLocal)
+	opEach(this.opImportDefault, addUseLocal)
 }
 
 // Helpers specific to certain MsAst types:
@@ -693,7 +693,11 @@ const
 
 	failMissingLocal = (loc, name) => {
 		context.fail(loc, () => {
-			const showLocals = code(Array(...locals.keys()).join(' '))
+			// TODO:ES6 `Array.from(locals.keys())` should work
+			const keys = []
+			for (const key of locals.keys())
+				keys.push(key)
+			const showLocals = code(keys.join(' '))
 			return `No such local ${code(name)}.\nLocals are:\n${showLocals}.`
 		})
 	},

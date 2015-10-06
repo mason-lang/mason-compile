@@ -3,15 +3,15 @@ import {code} from '../../CompileError'
 import {Assert, AssignDestructure, AssignSingle, BagEntry, BagEntryMany, BagSimple, BlockBag,
 	BlockDo, BlockMap, BlockObj, BlockValThrow, BlockWithReturn, BlockWrap, Break, BreakWithVal,
 	Call, CaseDo, CaseDoPart, CaseVal, CaseValPart, Catch, Class, ClassDo, Cond, ConditionalDo,
-	Constructor, ConditionalVal, Debug, Ignore, Iteratee, NumberLiteral, ExceptDo, ExceptVal,
-	ForBag, ForDo, ForVal, Fun, L_And, L_Or, Lazy, LD_Const, LD_Lazy, LD_Mutable, LocalAccess,
-	LocalDeclare, LocalDeclareFocus, LocalDeclareName, LocalDeclareRes, LocalDeclareThis,
-	LocalMutate, Logic, MapEntry, Member, MemberSet, MethodGetter, MethodImpl, MethodSetter,
-	Module, ModuleExportDefault, ModuleExportNamed, MS_Mutate, MS_New, MS_NewMutable, New, Not,
-	ObjEntry, ObjEntryAssign, ObjEntryComputed, ObjPair, ObjSimple, Pattern, Quote, QuoteTemplate,
-	SD_Debugger, SpecialDo, SpecialVal, SV_Name, SV_Null, Splat, SuperCall, SuperCallDo,
-	SuperMember, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart, Throw, Val, Use, UseDo,
-	UseGlobal, With, Yield, YieldTo} from '../MsAst'
+	Constructor, ConditionalVal, Debug, Ignore, Import, ImportDo, ImportGlobal, Iteratee,
+	NumberLiteral, ExceptDo, ExceptVal, ForBag, ForDo, ForVal, Fun, L_And, L_Or, Lazy, LD_Const,
+	LD_Lazy, LD_Mutable, LocalAccess, LocalDeclare, LocalDeclareFocus, LocalDeclareName,
+	LocalDeclareRes, LocalDeclareThis, LocalMutate, Logic, MapEntry, Member, MemberSet,
+	MethodGetter, MethodImpl, MethodSetter, Module, ModuleExportDefault, ModuleExportNamed,
+	MS_Mutate, MS_New, MS_NewMutable, New, Not, ObjEntry, ObjEntryAssign, ObjEntryComputed,
+	ObjPair, ObjSimple, Pattern, Quote, QuoteTemplate, SD_Debugger, SpecialDo, SpecialVal, SV_Name,
+	SV_Null, Splat, SuperCall, SuperCallDo, SuperMember, SwitchDo, SwitchDoPart, SwitchVal,
+	SwitchValPart, Throw, Val, With, Yield, YieldTo} from '../MsAst'
 import {DocComment, DotName, Group, G_Block, G_Bracket, G_Parenthesis, G_Space, G_Quote, isGroup,
 	isKeyword, Keyword, KW_And, KW_As, KW_Assert, KW_AssertNot, KW_Assign, KW_AssignMutable,
 	KW_Break, KW_BreakWithVal, KW_CaseVal, KW_CaseDo, KW_Cond, KW_CatchDo, KW_CatchVal, KW_Class,
@@ -20,8 +20,8 @@ import {DocComment, DotName, Group, G_Block, G_Bracket, G_Parenthesis, G_Space, 
 	KW_FunThis, KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo, KW_Get, KW_IfDo, KW_IfVal, KW_Ignore,
 	KW_In, KW_Lazy, KW_LocalMutate, KW_MapEntry, KW_Name, KW_New, KW_Not, KW_ObjAssign, KW_Or,
 	KW_Pass, KW_Out, KW_Region, KW_Set, KW_Static, KW_SuperDo, KW_SuperVal, KW_SwitchDo,
-	KW_SwitchVal, KW_Throw, KW_TryDo, KW_TryVal, KW_Type, KW_UnlessDo, KW_UnlessVal, KW_Use,
-	KW_UseDebug, KW_UseDo, KW_UseLazy, KW_With, KW_Yield, KW_YieldTo, Name, keywordName,
+	KW_SwitchVal, KW_Throw, KW_TryDo, KW_TryVal, KW_Type, KW_UnlessDo, KW_UnlessVal, KW_Import,
+	KW_ImportDebug, KW_ImportDo, KW_ImportLazy, KW_With, KW_Yield, KW_YieldTo, Name, keywordName,
 	opKeywordKindToSpecialValueKind} from '../Token'
 import {assert, cat, head, ifElse, isEmpty, last, opIf, opMap, repeat, rtail, tail} from '../util'
 import Slice from './Slice'
@@ -59,11 +59,11 @@ const
 const parseModule = tokens => {
 	// Module doc comment must come first.
 	const [opComment, rest0] = tryTakeComment(tokens)
-	// Use statements must appear in order.
-	const {uses: doUses, rest: rest1} = tryParseUses(KW_UseDo, rest0)
-	const {uses: plainUses, opUseGlobal, rest: rest2} = tryParseUses(KW_Use, rest1)
-	const {uses: lazyUses, rest: rest3} = tryParseUses(KW_UseLazy, rest2)
-	const {uses: debugUses, rest: rest4} = tryParseUses(KW_UseDebug, rest3)
+	// Import statements must appear in order.
+	const {imports: doImports, rest: rest1} = tryParseImports(KW_ImportDo, rest0)
+	const {imports: plainImports, opImportGlobal, rest: rest2} = tryParseImports(KW_Import, rest1)
+	const {imports: lazyImports, rest: rest3} = tryParseImports(KW_ImportLazy, rest2)
+	const {imports: debugImports, rest: rest4} = tryParseImports(KW_ImportDebug, rest3)
 
 	const lines = parseModuleBlock(rest4)
 
@@ -74,8 +74,9 @@ const parseModule = tokens => {
 		lines.push(new ModuleExportNamed(tokens.loc, assign))
 	}
 
-	const uses = plainUses.concat(lazyUses)
-	return new Module(tokens.loc, opComment, doUses, uses, opUseGlobal, debugUses, lines)
+	const imports = plainImports.concat(lazyImports)
+	return new Module(
+		tokens.loc, opComment, doImports, imports, opImportGlobal, debugImports, lines)
 }
 
 // parseBlock
@@ -935,62 +936,67 @@ const _parseSpacedFold = (start, rest) => {
 	return acc
 }
 
-const tryParseUses = (useKeywordKind, tokens) => {
+const tryParseImports = (importKeywordKind, tokens) => {
 	if (!tokens.isEmpty()) {
 		const line0 = tokens.headSlice()
-		if (isKeyword(useKeywordKind, line0.head())) {
-			const {uses, opUseGlobal} = _parseUses(useKeywordKind, line0.tail())
-			if (new Set([KW_UseDo, KW_UseLazy, KW_UseDebug]).has(useKeywordKind))
-				context.check(opUseGlobal === null, line0.loc, 'Can\'t use global here.')
-			return {uses, opUseGlobal, rest: tokens.tail()}
+		if (isKeyword(importKeywordKind, line0.head())) {
+			const {imports, opImportGlobal} = _parseImports(importKeywordKind, line0.tail())
+			if (new Set([KW_ImportDo, KW_ImportLazy, KW_ImportDebug]).has(importKeywordKind))
+				context.check(opImportGlobal === null, line0.loc, 'Can\'t use global here.')
+			return {imports, opImportGlobal, rest: tokens.tail()}
 		}
 	}
-	return {uses: [], opUseGlobal: null, rest: tokens}
+	return {imports: [], opImportGlobal: null, rest: tokens}
 }
 
-// tryParseUse privates
+// tryParseImports privates
 const
-	_parseUses = (useKeywordKind, tokens) => {
-		const lines = justBlock(useKeywordKind, tokens)
-		let opUseGlobal = null
+	_parseImports = (importKeywordKind, tokens) => {
+		const lines = justBlock(importKeywordKind, tokens)
+		let opImportGlobal = null
 
-		const uses = []
+		const imports = []
 
 		for (const line of lines.slices()) {
 			const {path, name} = _parseRequire(line.head())
-			if (useKeywordKind === KW_UseDo) {
+			if (importKeywordKind === KW_ImportDo) {
 				if (line.size() > 1)
 					unexpected(line.second())
-				uses.push(new UseDo(line.loc, path))
+				imports.push(new ImportDo(line.loc, path))
 			} else
 				if (path === 'global') {
-					context.check(opUseGlobal === null, line.loc, 'Can\'t use global twice')
-					const {used, opUseDefault} = _parseThingsUsed(name, false, line.tail())
-					opUseGlobal = new UseGlobal(line.loc, used, opUseDefault)
+					context.check(opImportGlobal === null, line.loc, 'Can\'t use global twice')
+					const {imported, opImportDefault} =
+						_parseThingsImported(name, false, line.tail())
+					opImportGlobal = new ImportGlobal(line.loc, imported, opImportDefault)
 				} else {
-					const isLazy = useKeywordKind === KW_UseLazy || useKeywordKind === KW_UseDebug
-					const {used, opUseDefault} = _parseThingsUsed(name, isLazy, line.tail())
-					uses.push(new Use(line.loc, path, used, opUseDefault))
+					const isLazy =
+						importKeywordKind === KW_ImportLazy || importKeywordKind === KW_ImportDebug
+					const {imported, opImportDefault} =
+						_parseThingsImported(name, isLazy, line.tail())
+					imports.push(new Import(line.loc, path, imported, opImportDefault))
 				}
 		}
 
-		return {uses, opUseGlobal}
+		return {imports, opImportGlobal}
 	},
-	_parseThingsUsed = (name, isLazy, tokens) => {
-		const useDefault = () => LocalDeclare.untyped(tokens.loc, name, isLazy ? LD_Lazy : LD_Const)
+	_parseThingsImported = (name, isLazy, tokens) => {
+		const importDefault = () =>
+			LocalDeclare.untyped(tokens.loc, name, isLazy ? LD_Lazy : LD_Const)
 		if (tokens.isEmpty())
-			return {used: [], opUseDefault: useDefault()}
+			return {imported: [], opImportDefault: importDefault()}
 		else {
-			const [opUseDefault, rest] =
-				isKeyword(KW_Focus, tokens.head()) ? [useDefault(), tokens.tail()] : [null, tokens]
-			const used = parseLocalDeclaresJustNames(rest).map(l => {
+			const [opImportDefault, rest] = isKeyword(KW_Focus, tokens.head()) ?
+				[importDefault(), tokens.tail()] :
+				[null, tokens]
+			const imported = parseLocalDeclaresJustNames(rest).map(l => {
 				context.check(l.name !== '_', l.pos,
 					() => `${code('_')} not allowed as import name.`)
 				if (isLazy)
 					l.kind = LD_Lazy
 				return l
 			})
-			return {used, opUseDefault}
+			return {imported, opImportDefault}
 		}
 	},
 	_parseRequire = t => {

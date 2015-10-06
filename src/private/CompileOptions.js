@@ -26,7 +26,7 @@ export default class CompileOptions {
 			useStrict: true,
 			checks: true,
 			'warn-as-error': false,
-			useBoot: true,
+			importBoot: true,
 			mslPath: 'msl'
 		}
 
@@ -72,7 +72,7 @@ export default class CompileOptions {
 
 	lazyModule() { return !this._lazyModules }
 
-	useBoot() { return this._useBoot }
+	importBoot() { return this._importBoot }
 	bootPath() { return `${this._mslPath}/private/boot` }
 }
 
@@ -118,12 +118,12 @@ const
 		const m = new Map()
 		for (const path in builtins) {
 			const realPath = path.replace(/\./g, '/')
-			for (let used of builtins[path]) {
-				if (used === '_')
-					used = last(path.split('.'))
-				if (m.has(used))
-					throw new Error(`Builtin ${used} defined more than once.`)
-				m.set(used, realPath)
+			for (let imported of builtins[path]) {
+				if (imported === '_')
+					imported = last(path.split('.'))
+				if (m.has(imported))
+					throw new Error(`Builtin ${imported} defined more than once.`)
+				m.set(imported, realPath)
 			}
 		}
 		return m

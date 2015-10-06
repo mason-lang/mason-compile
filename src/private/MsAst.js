@@ -38,17 +38,17 @@ export default class MsAst {
 	export class Module extends MsAst {
 		constructor(loc,
 			opComment, // Opt[String]
-			doUses, // Array[UseDo]
-			uses, // Array[Use]
-			opUseGlobal, // Nullable[UseGlobal]
-			debugUses, // Array[Use]
+			doImports, // Array[ImportDo]
+			imports, // Array[Import]
+			opImportGlobal, // Nullable[ImportGlobal]
+			debugImports, // Array[Import]
 			lines) { // Array[Do]
 			super(loc)
 			this.opComment = opComment
-			this.doUses = doUses
-			this.uses = uses
-			this.opUseGlobal = opUseGlobal
-			this.debugUses = debugUses
+			this.doImports = doImports
+			this.imports = imports
+			this.opImportGlobal = opImportGlobal
+			this.debugImports = debugImports
 			this.lines = lines
 		}
 	}
@@ -62,30 +62,32 @@ export default class MsAst {
 	export class ModuleExportNamed extends ModuleExport { }
 	export class ModuleExportDefault extends ModuleExport { }
 
-	export class UseDo extends MsAst {
+	export class ImportDo extends MsAst {
 		constructor(loc, path /* String */) {
 			super(loc)
 			this.path = path
 		}
 	}
 
-	export class Use extends MsAst {
+	export class Import extends MsAst {
 		constructor(loc,
 			path, // String
-			used, // Array[LocalDeclare]
-			opUseDefault) { // Opt[LocalDeclare]
+			imported, // Array[LocalDeclare]
+			opImportDefault) { // Opt[LocalDeclare]
 			super(loc)
 			this.path = path
-			this.used = used
-			this.opUseDefault = opUseDefault
+			this.imported = imported
+			this.opImportDefault = opImportDefault
 		}
 	}
 
-	export class UseGlobal extends MsAst {
-		constructor(loc, used /* Array[LocalDeclare] */, opUseDefault /* Opt[LocalDeclare] */) {
+	export class ImportGlobal extends MsAst {
+		constructor(loc,
+			imported, // Array[LocalDeclare]
+			opImportDefault) { /* Opt[LocalDeclare] */
 			super(loc)
-			this.used = used
-			this.opUseDefault = opUseDefault
+			this.imported = imported
+			this.opImportDefault = opImportDefault
 		}
 	}
 

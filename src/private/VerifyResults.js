@@ -12,7 +12,7 @@ export default class VerifyResults {
 		// Maps *every* SV_Name to the nearest name.
 		this.names = new Map()
 		// String -> Set.
-		// For each path, the names of each builtin used.
+		// For each path, the names of each builtin imported.
 		// Like the inverse of context.opts.builtinNameToPath,
 		// but only includes names actually used.
 		this.builtinPathToNames = new Map()
