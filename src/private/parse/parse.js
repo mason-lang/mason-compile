@@ -13,16 +13,16 @@ import {Assert, AssignDestructure, AssignSingle, BagEntry, BagEntryMany, BagSimp
 	SV_Null, Splat, SuperCall, SuperCallDo, SuperMember, SwitchDo, SwitchDoPart, SwitchVal,
 	SwitchValPart, Throw, Val, With, Yield, YieldTo} from '../MsAst'
 import {DocComment, DotName, Group, G_Block, G_Bracket, G_Parenthesis, G_Space, G_Quote, isGroup,
-	isKeyword, Keyword, KW_And, KW_As, KW_Assert, KW_AssertNot, KW_Assign, KW_AssignMutable,
-	KW_Break, KW_BreakWithVal, KW_CaseVal, KW_CaseDo, KW_Cond, KW_CatchDo, KW_CatchVal, KW_Class,
-	KW_Construct, KW_Debug, KW_Debugger, KW_Do, KW_Ellipsis, KW_Else, KW_ExceptDo, KW_ExceptVal,
-	KW_Finally, KW_ForBag, KW_ForDo, KW_ForVal, KW_Focus, KW_Fun, KW_FunDo, KW_FunGen, KW_FunGenDo,
-	KW_FunThis, KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo, KW_Get, KW_IfDo, KW_IfVal, KW_Ignore,
-	KW_In, KW_Lazy, KW_LocalMutate, KW_MapEntry, KW_Name, KW_New, KW_Not, KW_ObjAssign, KW_Or,
-	KW_Pass, KW_Out, KW_Region, KW_Set, KW_Static, KW_SuperDo, KW_SuperVal, KW_SwitchDo,
-	KW_SwitchVal, KW_Throw, KW_TryDo, KW_TryVal, KW_Type, KW_UnlessDo, KW_UnlessVal, KW_Import,
-	KW_ImportDebug, KW_ImportDo, KW_ImportLazy, KW_With, KW_Yield, KW_YieldTo, Name, keywordName,
-	opKeywordKindToSpecialValueKind} from '../Token'
+	isAnyKeyword, isKeyword, Keyword, KW_And, KW_As, KW_Assert, KW_AssertNot, KW_Assign,
+	KW_AssignMutable, KW_Break, KW_BreakWithVal, KW_CaseVal, KW_CaseDo, KW_Cond, KW_CatchDo,
+	KW_CatchVal, KW_Class, KW_Construct, KW_Debug, KW_Debugger, KW_Do, KW_Ellipsis, KW_Else,
+	KW_ExceptDo, KW_ExceptVal, KW_Finally, KW_ForBag, KW_ForDo, KW_ForVal, KW_Focus, KW_Fun,
+	KW_FunDo, KW_FunGen, KW_FunGenDo, KW_FunThis, KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo,
+	KW_Get, KW_IfDo, KW_IfVal, KW_Ignore, KW_In, KW_Lazy, KW_LocalMutate, KW_MapEntry, KW_Name,
+	KW_New, KW_Not, KW_ObjAssign, KW_Or, KW_Pass, KW_Out, KW_Region, KW_Set, KW_Static, KW_SuperDo,
+	KW_SuperVal, KW_SwitchDo, KW_SwitchVal, KW_Throw, KW_TryDo, KW_TryVal, KW_Type, KW_UnlessDo,
+	KW_UnlessVal, KW_Import, KW_ImportDebug, KW_ImportDo, KW_ImportLazy, KW_With, KW_Yield,
+	KW_YieldTo, Name, keywordName, opKeywordKindToSpecialValueKind} from '../Token'
 import {assert, cat, head, ifElse, isEmpty, last, opIf, opMap, repeat, rtail, tail} from '../util'
 import Slice from './Slice'
 
@@ -127,13 +127,13 @@ const
 		const {lines, kReturn} = _parseBlockLines(rest)
 		switch (kReturn) {
 			case KReturn_Bag:
-				return BlockBag.of(tokens.loc, opComment, lines)
+				return new BlockBag(tokens.loc, opComment, lines)
 			case KReturn_Map:
-				return BlockMap.of(tokens.loc, opComment, lines)
+				return new BlockMap(tokens.loc, opComment, lines)
 			case KReturn_Obj:
 				const [doLines, opVal] = _tryTakeLastVal(lines)
 				// opName written to by _tryAddName.
-				return BlockObj.of(tokens.loc, opComment, doLines, opVal, null)
+				return new BlockObj(tokens.loc, opComment, doLines, opVal, null)
 			default: {
 				context.check(!isEmpty(lines), tokens.loc, 'Value block must end in a value.')
 				const val = last(lines)
@@ -154,7 +154,7 @@ const
 		switch (kReturn) {
 			case KReturn_Bag: case KReturn_Map: {
 				const cls = kReturn === KReturn_Bag ? BlockBag : BlockMap
-				const block = cls.of(loc, opComment, lines)
+				const block = new cls(loc, opComment, lines)
 				const val = new BlockWrap(loc, block)
 				const assignee = LocalDeclare.plain(loc, context.opts.moduleName())
 				const assign = new AssignSingle(loc, assignee, val)
@@ -256,7 +256,7 @@ const parseCase = (isVal, casedFromFun, tokens) => {
 
 	let opCased
 	if (casedFromFun) {
-		checkEmpty(before, 'Can\'t make focus -- is implicitly provided as first argument.')
+		checkEmpty(before, 'Can\'t make focus — is implicitly provided as first argument.')
 		opCased = null
 	} else
 		opCased = opIf(!before.isEmpty(), () => AssignSingle.focus(before.loc, parseExpr(before)))
@@ -295,9 +295,16 @@ const
 		return parseExpr(tokens)
 	}
 
-const parseSwitch = (isVal, tokens) => {
+const parseSwitch = (isVal, switchedFromFun, tokens) => {
 	const [before, block] = beforeAndBlock(tokens)
-	const switched = parseExpr(before)
+
+	let switched
+	if (switchedFromFun) {
+		checkEmpty(before, 'Value to switch on is `_`, the function\'s implicit argument.')
+		switched = LocalAccess.focus(tokens.loc)
+	} else
+		switched = parseExpr(before)
+
 	const lastLine = Slice.group(block.last())
 	const [partLines, opElse] = isKeyword(KW_Else, lastLine.head()) ?
 		[block.rtail(), (isVal ? justBlockVal : justBlockDo)(KW_Else, lastLine.tail())] :
@@ -423,7 +430,7 @@ const
 						case KW_SuperVal:
 							return new SuperCall(at.loc, parseExprParts(after))
 						case KW_SwitchVal:
-							return parseSwitch(true, after)
+							return parseSwitch(true, false, after)
 						case KW_With:
 							return parseWith(after)
 						case KW_Yield:
@@ -508,18 +515,22 @@ const
 	_funArgsAndBlock = (isDo, tokens, includeMemberArgs) => {
 		checkNonEmpty(tokens, 'Expected an indented block.')
 		const h = tokens.head()
-		// Might be `|case`
-		if (h instanceof Keyword && (h.kind === KW_CaseVal || h.kind === KW_CaseDo)) {
-			const eCase = parseCase(h.kind === KW_CaseVal, true, tokens.tail())
+
+		// Might be `|case` (or `|case!`, `|switch`, `|switch!`)
+		if (isAnyKeyword(_funFocusKeywords, h)) {
+			const isVal = h.kind === KW_CaseVal || h.kind === KW_SwitchVal
+			const isCase = h.kind === KW_CaseVal || h.kind === KW_CaseDo
+			const expr = (isCase ? parseCase : parseSwitch)(isVal, true, tokens.tail())
+
 			const args = [new LocalDeclareFocus(h.loc)]
-			return h.kind === KW_CaseVal ?
+			return isVal ?
 				{
 					args, opRestArg: null, memberArgs: [], opIn: null, opOut: null,
-					block: new BlockWithReturn(tokens.loc, null, [], eCase)
+					block: new BlockWithReturn(tokens.loc, null, [], expr)
 				} :
 				{
 					args, opRestArg: null, memberArgs: [], opIn: null, opOut: null,
-					block: new BlockDo(tokens.loc, null, [eCase])
+					block: new BlockDo(tokens.loc, null, [expr])
 				}
 		} else {
 			const [before, blockLines] = beforeAndBlock(tokens)
@@ -533,6 +544,7 @@ const
 			return {args, opRestArg, memberArgs, block, opIn, opOut}
 		}
 	},
+	_funFocusKeywords = new Set([KW_CaseVal, KW_CaseDo, KW_SwitchVal, KW_SwitchDo]),
 
 	_parseFunLocals = (tokens, includeMemberArgs) => {
 		if (tokens.isEmpty())
@@ -624,7 +636,7 @@ const
 				case KW_SuperDo:
 					return new SuperCallDo(tokens.loc, parseExprParts(rest))
 				case KW_SwitchDo:
-					return parseSwitch(false, rest)
+					return parseSwitch(false, false, rest)
 				case KW_Throw:
 					return new Throw(tokens.loc, opIf(!rest.isEmpty(), () => parseExpr(rest)))
 				case KW_Name:
@@ -941,7 +953,7 @@ const tryParseImports = (importKeywordKind, tokens) => {
 		const line0 = tokens.headSlice()
 		if (isKeyword(importKeywordKind, line0.head())) {
 			const {imports, opImportGlobal} = _parseImports(importKeywordKind, line0.tail())
-			if (new Set([KW_ImportDo, KW_ImportLazy, KW_ImportDebug]).has(importKeywordKind))
+			if (importKeywordKind !== KW_Import)
 				context.check(opImportGlobal === null, line0.loc, 'Can\'t use global here.')
 			return {imports, opImportGlobal, rest: tokens.tail()}
 		}
@@ -1055,7 +1067,7 @@ const
 		// TODO: Better way?
 		if (block.lines.length === 1 && block.lines[0] instanceof Val)
 			block.lines[0] = new BagEntry(block.lines[0].loc, block.lines[0])
-		return ForBag.of(tokens.loc, _parseOpIteratee(before), block)
+		return new ForBag(tokens.loc, _parseOpIteratee(before), block)
 	}
 
 

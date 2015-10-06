@@ -269,4 +269,6 @@ export const
 	isGroup = (groupKind, token) =>
 		token instanceof Group && token.kind === groupKind,
 	isKeyword = (keywordKind, token) =>
-		token instanceof Keyword && token.kind === keywordKind
+		token instanceof Keyword && token.kind === keywordKind,
+	isAnyKeyword = (keywordKinds, token) =>
+		token instanceof Keyword && keywordKinds.has(token.kind)

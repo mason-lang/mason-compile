@@ -1,5 +1,6 @@
-import {BlockWithReturn, CaseDo, CaseDoPart, CaseVal, CaseValPart, ConditionalDo, ConditionalVal,
-	Fun, Pattern, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart} from '../../dist/private/MsAst'
+import {BlockDo, BlockWithReturn, CaseDo, CaseDoPart, CaseVal, CaseValPart, ConditionalDo,
+	ConditionalVal, Fun, Pattern, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart
+	} from '../../dist/private/MsAst'
 import {aAccess, assignAZero, assignFocusZero, bDeclare, bAccess, blockDbg, blockOne, blockTwo,
 	blockPass, focusAccess, focusDeclare, loc, one, zero} from './util/ast-util'
 import {test} from './util/test-asts'
@@ -148,6 +149,25 @@ describe('case', () => {
 					} else throw new (Error)("No branch of \`case\` matches.")
 				})()
 			}`)
+	test(
+		`
+			|case!
+				_
+					pass`,
+		new Fun(
+			loc,
+			null,
+			false,
+			[focusDeclare],
+			null,
+			new BlockDo(loc, null, [
+				new CaseDo(loc, null,
+					[new CaseDoPart(loc, focusAccess, blockPass)],
+					null)])),
+		`
+			_=>{
+				if(_){} else throw new (Error)("No branch of \`case\` matches.")
+			}`)
 })
 
 describe('switch', () => {
@@ -204,5 +224,55 @@ describe('switch', () => {
 					break
 				}
 				default:throw new (Error)("No branch of \`switch\` matches.")
+			}`)
+	test(
+		`
+			|switch
+				0
+					1`,
+		new Fun(
+			loc,
+			null,
+			false,
+			[focusDeclare],
+			null,
+			new BlockWithReturn(loc, null, [],
+				new SwitchVal(loc, focusAccess,
+					[new SwitchValPart(loc, [zero], blockOne)],
+					null))),
+		`
+			_=>{
+				return (()=>{
+					switch(_){
+						case 0:{
+							return 1
+						}
+						default:throw new (Error)("No branch of \`switch\` matches.")
+					}
+				})()
+			}`)
+	test(
+		`
+			|switch!
+				0
+					pass`,
+		new Fun(
+			loc,
+			null,
+			false,
+			[focusDeclare],
+			null,
+			new BlockDo(loc, null, [
+				new SwitchDo(loc, focusAccess,
+					[new SwitchDoPart(loc, [zero], blockPass)],
+					null)])),
+		`
+			_=>{
+				switch(_){
+					case 0:{
+						break
+					}
+					default:throw new (Error)("No branch of \`switch\` matches.")
+				}
 			}`)
 })

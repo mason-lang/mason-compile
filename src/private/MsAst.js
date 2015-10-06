@@ -307,19 +307,14 @@ export default class MsAst {
 
 	// TODO: BlockBag, BlockMap, BlockObj => BlockBuild(kind, ...)
 	export class BlockObj extends BlockVal {
-		static of(loc, opComment, lines, opObjed=null, opName=null) {
-			return new BlockObj(loc, opComment, new LocalDeclareBuilt(loc), lines, opObjed, opName)
-		}
-
 		constructor(
 			loc,
 			opComment,
-			built, // LocalDeclareBuilt
 			lines, // Array[Union[LineContent ObjEntry]]
 			opObjed, // Opt[Val]
 			opName) { // Opt[String]
 			super(loc, opComment)
-			this.built = built
+			this.built = new LocalDeclareBuilt(loc)
 			this.lines = lines
 			this.opObjed = opObjed
 			this.opName = opName
@@ -353,17 +348,9 @@ export default class MsAst {
 	}
 
 	export class BlockBag extends BlockVal {
-		static of(loc, opComment, lines) {
-			return new BlockBag(loc, opComment, new LocalDeclareBuilt(loc), lines)
-		}
-
-		constructor(
-			loc,
-			opComment,
-			built, // LocalDeclareBuilt
-			lines) { // Union[LineContent BagEntry]
+		constructor(loc, opComment, lines /* Union[LineContent BagEntry] */) {
 			super(loc, opComment)
-			this.built = built
+			this.built = new LocalDeclareBuilt(loc)
 			this.lines = lines
 		}
 	}
@@ -383,17 +370,9 @@ export default class MsAst {
 	}
 
 	export class BlockMap extends BlockVal {
-		static of(loc, opComment, lines) {
-			return new BlockMap(loc, opComment, new LocalDeclareBuilt(loc), lines)
-		}
-
-		constructor(
-			loc,
-			opComment,
-			built, // LocalDeclareBuilt
-			lines) { // Union[LineContent MapEntry]
+		constructor(loc, opComment, lines /* Union[LineContent MapEntry] */) {
 			super(loc, opComment)
-			this.built = built
+			this.built = new LocalDeclareBuilt(loc)
 			this.lines = lines
 		}
 	}
@@ -706,16 +685,9 @@ export default class MsAst {
 	}
 
 	export class ForBag extends Val {
-		static of(loc, opIteratee, block) {
-			return new ForBag(loc, new LocalDeclareBuilt(loc), opIteratee, block)
-		}
-
-		constructor(loc,
-			built, // LocalDeclareBuilt
-			opIteratee, // Opt[Iteratee]
-			block) { // BlockDo
+		constructor(loc, opIteratee /* Opt[Iteratee] */, block /* BlockDo */) {
 			super(loc)
-			this.built = built
+			this.built = new LocalDeclareBuilt(loc)
 			this.opIteratee = opIteratee
 			this.block = block
 		}
