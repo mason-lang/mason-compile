@@ -3,7 +3,7 @@
 	"version": "0.0.0",
 	"files": ["dist", "src"],
 	"scripts": {
-		"build": "gulp compile",
+		"prepublish": "gulp compile",
 		"watch": "gulp watch",
 		"lint": "eslint gulpfile.js src test",
 		"test": "gulp compile-tests; mocha compiled-test/**/*.js"

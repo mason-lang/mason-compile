@@ -257,7 +257,9 @@ implementMany(MsAstTypes, 'verify', {
 			_.verify()
 	},
 
-	BlockDo() { verifyLines(this.lines) },
+	BlockDo() {
+		verifyLines(this.lines)
+	},
 
 	BlockValThrow() {
 		const newLocals = verifyLines(this.lines)
@@ -279,7 +281,9 @@ implementMany(MsAstTypes, 'verify', {
 	BlockBag: verifyBlockBagOrMap,
 	BlockMap: verifyBlockBagOrMap,
 
-	BlockWrap() { withIIFE(() => this.block.verify()) },
+	BlockWrap() {
+		withIIFE(() => this.block.verify())
+	},
 
 	Break() {
 		verifyInLoop(this)
@@ -300,9 +304,13 @@ implementMany(MsAstTypes, 'verify', {
 			_.verify()
 	},
 
-	CaseDo() { verifyCase(this) },
+	CaseDo() {
+		verifyCase(this)
+	},
 	CaseDoPart: verifyCasePart,
-	CaseVal() { withIIFE(() => verifyCase(this)) },
+	CaseVal() {
+		withIIFE(() => verifyCase(this))
+	},
 	CaseValPart: verifyCasePart,
 
 	Catch() {
@@ -359,16 +367,24 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	// Only reach here for in/out condition.
-	Debug() { verifyLines([this]) },
+	Debug() {
+		verifyLines([this])
+	},
 
 	ExceptDo: verifyExcept,
 	ExceptVal: verifyExcept,
 
-	ForBag() { verifyAndPlusLocal(this.built, () => verifyFor(this)) },
+	ForBag() {
+		verifyAndPlusLocal(this.built, () => verifyFor(this))
+	},
 
-	ForDo() { verifyFor(this) },
+	ForDo() {
+		verifyFor(this)
+	},
 
-	ForVal() { verifyFor(this) },
+	ForVal() {
+		verifyFor(this)
+	},
 
 	Fun() {
 		withBlockLocals(() => {
@@ -394,7 +410,9 @@ implementMany(MsAstTypes, 'verify', {
 			accessLocal(this, _)
 	},
 
-	Lazy() { withBlockLocals(() => this.value.verify()) },
+	Lazy() {
+		withBlockLocals(() => this.value.verify())
+	},
 
 	LocalAccess() {
 		const declare = locals.get(this.name)
@@ -436,7 +454,9 @@ implementMany(MsAstTypes, 'verify', {
 			_.verify()
 	},
 
-	Not() { this.arg.verify() },
+	Not() {
+		this.arg.verify()
+	},
 
 	NumberLiteral() { },
 
@@ -446,7 +466,9 @@ implementMany(MsAstTypes, 'verify', {
 		this.val.verify()
 	},
 
-	Member() { this.object.verify() },
+	Member() {
+		this.object.verify()
+	},
 
 	MemberSet() {
 		this.object.verify()
@@ -483,7 +505,9 @@ implementMany(MsAstTypes, 'verify', {
 				_.verify()
 		})
 
-		withName(context.opts.moduleName(), () => { verifyLines(this.lines) })
+		withName(context.opts.moduleName(), () => {
+			verifyLines(this.lines)
+		})
 	},
 
 	ModuleExport() {
@@ -538,7 +562,9 @@ implementMany(MsAstTypes, 'verify', {
 		setName(this)
 	},
 
-	Splat() { this.splatted.verify() },
+	Splat() {
+		this.splatted.verify()
+	},
 
 	SuperCall: verifySuperCall,
 	SuperCallDo: verifySuperCall,
@@ -546,9 +572,13 @@ implementMany(MsAstTypes, 'verify', {
 		context.check(method !== null, this.loc, 'Must be in method.')
 	},
 
-	SwitchDo() { verifySwitch(this) },
+	SwitchDo() {
+		verifySwitch(this)
+	},
 	SwitchDoPart: verifySwitchPart,
-	SwitchVal() { withIIFE(() => verifySwitch(this)) },
+	SwitchVal() {
+		withIIFE(() => verifySwitch(this))
+	},
 	SwitchValPart: verifySwitchPart,
 
 	Throw() {
@@ -584,7 +614,9 @@ function verifyBagEntry() {
 }
 
 function verifyBlockBagOrMap() {
-	verifyAndPlusLocal(this.built, () => verifyLines(this.lines))
+	verifyAndPlusLocal(this.built, () => {
+		verifyLines(this.lines)
+	})
 }
 
 function verifyCasePart() {
