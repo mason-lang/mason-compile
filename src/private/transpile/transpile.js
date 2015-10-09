@@ -22,8 +22,8 @@ import {AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, Declar
 	ThrowAssertFail, ThrowNoCaseMatch, UseStrict} from './ast-constants'
 import {IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot,
 	msAssertNotMember, msAssoc, msCheckContains, msExtract, msGet, msGetDefaultExport, msGetModule,
-	msLazy, msLazyGet, msLazyGetModule, msNewMutableProperty, msNewProperty, msSet, msSetName,
-	msSetLazy, msSome, msSymbol, MsNone} from './ms-call'
+	msLazy, msLazyGet, msLazyGetModule, msNewMutableProperty, msNewProperty, msSetLazy, msSome,
+	msSymbol, MsNone} from './ms-call'
 import {accessLocalDeclare, declare, forStatementInfinite, idForDeclareCached,
 	opTypeCheckForLocalDeclare} from './util'
 
@@ -140,15 +140,10 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	BlockObj(lead, opDeclareRes, opOut) {
-		const lines = cat(DeclareBuiltObj, tLines(this.lines))
-		const res = ifElse(this.opObjed,
-			objed => ifElse(this.opName,
-				name => msSet(t0(objed), IdBuilt, new Literal(name)),
-				() => msSet(t0(objed), IdBuilt)),
-			() => ifElse(this.opName,
-				_ => msSetName(IdBuilt, new Literal(_)),
-				() => IdBuilt))
-		return transpileBlock(res, lines, lead, opDeclareRes, opOut)
+		return transpileBlock(
+			IdBuilt,
+			cat(DeclareBuiltObj, tLines(this.lines)),
+			lead, opDeclareRes, opOut)
 	},
 
 	BlockMap(lead, opDeclareRes, opOut) {

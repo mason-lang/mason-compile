@@ -243,15 +243,10 @@ implementMany(MsAstTypes, 'verify', {
 		plusLocals(newLocals, () => this.returned.verify())
 	},
 
-	BlockObj() {
-		verifyAndPlusLocal(this.built, () => {
-			const newLocals = verifyLines(this.lines)
-			opEach(this.opObjed, _ => plusLocals(newLocals, () => _.verify()))
-		})
-	},
 
-	BlockBag: verifyBlockBagOrMap,
-	BlockMap: verifyBlockBagOrMap,
+	BlockObj: verifyBlockBuild,
+	BlockBag: verifyBlockBuild,
+	BlockMap: verifyBlockBuild,
 
 	BlockWrap() {
 		withIIFE(() => this.block.verify())
@@ -576,7 +571,7 @@ function verifyBagEntry() {
 	this.value.verify()
 }
 
-function verifyBlockBagOrMap() {
+function verifyBlockBuild() {
 	verifyAndPlusLocal(this.built, () => {
 		verifyLines(this.lines)
 	})

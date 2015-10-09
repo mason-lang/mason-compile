@@ -27,8 +27,6 @@ export const
 	msLazyGetModule = ms('lazyGetModule'),
 	msNewMutableProperty = ms('newMutableProperty'),
 	msNewProperty = ms('newProperty'),
-	msSet = ms('set'),
-	msSetName = ms('setName'),
 	msSetLazy = ms('setLazy'),
 	msSome = ms('some'),
 	msSymbol = ms('symbol'),

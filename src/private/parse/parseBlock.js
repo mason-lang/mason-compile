@@ -60,9 +60,7 @@ export const
 			case KReturn_Map:
 				return new BlockMap(tokens.loc, opComment, lines)
 			case KReturn_Obj:
-				const [doLines, opVal] = tryTakeLastVal(lines)
-				// opName written to by _tryAddName.
-				return new BlockObj(tokens.loc, opComment, doLines, opVal, null)
+				return new BlockObj(tokens.loc, opComment, lines)
 			default: {
 				context.check(!isEmpty(lines), tokens.loc, 'Value block must end in a value.')
 				const val = last(lines)

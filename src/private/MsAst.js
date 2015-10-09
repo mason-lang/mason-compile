@@ -297,17 +297,10 @@ export default class MsAst {
 
 	// TODO: BlockBag, BlockMap, BlockObj => BlockBuild(kind, ...)
 	export class BlockObj extends BlockVal {
-		constructor(
-			loc,
-			opComment,
-			lines, // Array[Union[LineContent ObjEntry]]
-			opObjed, // Opt[Val]
-			opName) { // Opt[String]
+		constructor(loc, opComment, lines /* Array[Union[LineContent ObjEntry]] */) {
 			super(loc, opComment)
 			this.built = new LocalDeclareBuilt(loc)
 			this.lines = lines
-			this.opObjed = opObjed
-			this.opName = opName
 		}
 	}
 
