@@ -1,12 +1,12 @@
 import {Assert, AssignSingle, AssignDestructure, BagEntry, BagEntryMany, Break, BreakWithVal, Call,
-	ConditionalDo, Debug, Ignore, LD_Mutable, LocalAccess, LocalMutate, MapEntry, MemberSet,
+	ConditionalDo, Ignore, LD_Mutable, LocalAccess, LocalMutate, MapEntry, MemberSet,
 	MS_New, MS_NewMutable, MS_Mutate, ObjEntryAssign, ObjEntryComputed, SD_Debugger, SpecialDo,
 	SpecialVal, SuperCallDo, SV_Name, SV_Null, Throw, Yield, YieldTo} from '../MsAst'
-import {DotName, G_Block, G_Space, isGroup, isKeyword, Keyword, keywordName, KW_Assert,
-	KW_AssertNot, KW_Assign, KW_AssignMutable, KW_Break, KW_BreakWithVal, KW_CaseDo, KW_Debug,
-	KW_Debugger, KW_Ellipsis, KW_ExceptDo, KW_Focus, KW_ForDo, KW_IfDo, KW_Ignore, KW_LocalMutate,
-	KW_MapEntry, KW_Name, KW_ObjAssign, KW_Pass, KW_Region, KW_SuperDo, KW_SwitchDo, KW_Throw,
-	KW_UnlessDo, KW_Yield, KW_YieldTo, Name} from '../Token'
+import {DotName, G_Space, isGroup, isKeyword, Keyword, keywordName, KW_Assert,
+	KW_AssertNot, KW_Assign, KW_AssignMutable, KW_Break, KW_BreakWithVal, KW_CaseDo, KW_Debugger,
+	KW_Ellipsis, KW_ExceptDo, KW_Focus, KW_ForDo, KW_IfDo, KW_Ignore, KW_LocalMutate, KW_MapEntry,
+	KW_Name, KW_ObjAssign, KW_Pass, KW_Region, KW_SuperDo, KW_SwitchDo, KW_Throw, KW_UnlessDo,
+	KW_Yield, KW_YieldTo, Name} from '../Token'
 import {ifElse, isEmpty, opIf, tail} from '../util'
 import {checkEmpty, checkNonEmpty, context} from './context'
 import {beforeAndBlock, parseBlockDo, parseLinesFromBlock} from './parseBlock'
@@ -39,13 +39,6 @@ export default tokens => {
 				return new BreakWithVal(tokens.loc, parseExpr(rest))
 			case KW_CaseDo:
 				return parseCase(false, false, rest)
-			case KW_Debug:
-				return new Debug(tokens.loc,
-					isGroup(G_Block, tokens.second()) ?
-					// `debug`, then indented block
-					parseLinesFromBlock() :
-					// `debug`, then single line
-					parseLineOrLines(rest))
 			case KW_Debugger:
 				noRest()
 				return new SpecialDo(tokens.loc, SD_Debugger)
@@ -182,8 +175,7 @@ const
 			if (locals.length === 1) {
 				const assignee = locals[0]
 				const assign = new AssignSingle(loc, assignee, value)
-				const isTest = isObjAssign && assignee.name.endsWith('test')
-				return isTest ? new Debug(loc, [wrap(assign)]) : wrap(assign)
+				return wrap(assign)
 			} else {
 				const kind = locals[0].kind
 				for (const _ of locals)

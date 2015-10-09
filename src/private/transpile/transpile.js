@@ -52,7 +52,7 @@ const
 		for (const expr of exprs) {
 			const ast = expr.transpile()
 			if (ast instanceof Array)
-				// Debug may produce multiple statements.
+				// Ignore produces 0 statements and Region produces many.
 				for (const _ of ast)
 					out.push(toStatement(_))
 			else
@@ -238,8 +238,6 @@ implementMany(MsAstTypes, 'transpile', {
 		return new CatchClause(t0(this.caught), t0(this.block))
 	},
 
-	Debug() { return context.opts.includeChecks() ? tLines(this.lines) : [] },
-
 	ExceptDo() { return transpileExcept(this) },
 	ExceptVal() { return blockWrap(new BlockStatement([transpileExcept(this)])) },
 
@@ -370,7 +368,6 @@ implementMany(MsAstTypes, 'transpile', {
 
 	Module() {
 		const body = tLines(this.lines)
-		const otherImports = this.imports.concat(this.debugImports)
 
 		verifyResults.builtinPathToNames.forEach((imported, path) => {
 			if (path !== 'global') {
@@ -384,11 +381,11 @@ implementMany(MsAstTypes, 'transpile', {
 					else
 						importedDeclares.push(declare)
 				}
-				otherImports.push(new Import(this.loc, path, importedDeclares, opImportDefault))
+				this.imports.push(new Import(this.loc, path, importedDeclares, opImportDefault))
 			}
 		})
 
-		const amd = amdWrapModule(this.doImports, otherImports, body)
+		const amd = amdWrapModule(this.doImports, this.imports, body)
 
 		return new Program(cat(
 			opIf(context.opts.includeUseStrict(), () => UseStrict),
@@ -660,10 +657,10 @@ const IdBoot = new Identifier('_boot')
 
 // Module helpers
 const
-	amdWrapModule = (doImports, otherImports, body) => {
+	amdWrapModule = (doImports, imports, body) => {
 		const shouldImportBoot = context.opts.importBoot()
 
-		const allImports = doImports.concat(otherImports)
+		const allImports = doImports.concat(imports)
 		const allImportPaths = allImports.map(_ => manglePath(_.path))
 
 		const arrImportPaths = new ArrayExpression(cat(
@@ -688,9 +685,9 @@ const
 			loc(new ExpressionStatement(msGetModule(importToIdentifier.get(_))), _.loc))
 
 		// Extracts imported values from the modules.
-		const opDeclareImportedLocals = opIf(!isEmpty(otherImports),
+		const opDeclareImportedLocals = opIf(!isEmpty(imports),
 			() => new VariableDeclaration('const',
-				flatMap(otherImports, _ => importDeclarators(_, importToIdentifier.get(_)))))
+				flatMap(imports, _ => importDeclarators(_, importToIdentifier.get(_)))))
 
 		const fullBody = new BlockStatement(cat(
 			doBoot, importDos, opDeclareImportedLocals, body, ReturnExports))

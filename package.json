@@ -5,6 +5,7 @@
 	"scripts": {
 		"prepublish": "gulp compile",
 		"watch": "gulp watch",
+		"doc": "esdoc -c esdoc.json",
 		"lint": "eslint gulpfile.js src test",
 		"test": "gulp compile-tests; mocha compiled-test/**/*.js"
 	},
@@ -15,6 +16,7 @@
 	"devDependencies": {
 		"benchmark": "1.0.0",
 			"microtime": "2.0.0",
+		"esdoc": "0.4.0",
 		"eslint": "1.6.0",
 		"gulp": "3.9.0",
 		"gulp-babel": "5.2.1",

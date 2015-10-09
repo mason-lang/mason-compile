@@ -41,14 +41,12 @@ export default class MsAst {
 			doImports, // Array[ImportDo]
 			imports, // Array[Import]
 			opImportGlobal, // Nullable[ImportGlobal]
-			debugImports, // Array[Import]
 			lines) { // Array[Do]
 			super(loc)
 			this.opComment = opComment
 			this.doImports = doImports
 			this.imports = imports
 			this.opImportGlobal = opImportGlobal
-			this.debugImports = debugImports
 			this.lines = lines
 		}
 	}
@@ -264,14 +262,6 @@ export default class MsAst {
 		}
 	}
 
-// Debug
-	export class Debug extends Do {
-		constructor(loc, lines /* Array[LineContent] */) {
-			super(loc)
-			this.lines = lines
-		}
-	}
-
 // Block
 	export class Block extends MsAst {
 		constructor(loc, opComment /* Opt[String] */) {
@@ -421,9 +411,9 @@ export default class MsAst {
 			args, // Array[LocalDeclare]
 			opRestArg, // Opt[LocalDeclare]
 			block, // Block
-			opIn=null, // Opt[Debug]
+			opIn=null, // Opt[BlockDo]
 			opDeclareRes=null, // Opt[LocalDeclareRes]
-			opOut=null) { // Opt[Debug]) {
+			opOut=null) { // Opt[BlockDo]) {
 			super(loc)
 			this.opDeclareThis = opDeclareThis
 			this.isGenerator = isGenerator

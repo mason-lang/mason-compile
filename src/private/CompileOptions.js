@@ -22,7 +22,7 @@ export default class CompileOptions {
 			includeAmdefine: false,
 			includeSourceMap: true,
 			includeModuleName: true,
-			lazyModules: true,
+			lazyModules: false,
 			useStrict: true,
 			checks: true,
 			'warn-as-error': false,
@@ -70,7 +70,7 @@ export default class CompileOptions {
 	includeModuleName() { return this._includeModuleName }
 	includeUseStrict() { return this._useStrict }
 
-	lazyModule() { return !this._lazyModules }
+	lazyModule() { return this._lazyModules }
 
 	importBoot() { return this._importBoot }
 	bootPath() { return `${this._mslPath}/private/boot` }

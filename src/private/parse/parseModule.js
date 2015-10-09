@@ -1,8 +1,8 @@
 import {code} from '../../CompileError'
 import {AssignSingle, ImportDo, ImportGlobal, Import, LD_Const, LD_Lazy, LocalDeclare,
 	LocalDeclareName, Module, ModuleExportNamed, Quote} from '../MsAst'
-import {DotName, G_Space, isGroup, isKeyword, Name, KW_Focus, KW_Import, KW_ImportDebug,
-		KW_ImportDo, KW_ImportLazy} from '../Token'
+import {DotName, G_Space, isGroup, isKeyword, Name, KW_Focus, KW_Import, KW_ImportDo, KW_ImportLazy
+	} from '../Token'
 import {cat, repeat} from '../util'
 import {context, unexpected} from './context'
 import {justBlock, parseModuleBlock} from './parseBlock'
@@ -17,9 +17,8 @@ export default tokens => {
 	const {imports: doImports, rest: rest1} = tryParseImports(KW_ImportDo, rest0)
 	const {imports: plainImports, opImportGlobal, rest: rest2} = tryParseImports(KW_Import, rest1)
 	const {imports: lazyImports, rest: rest3} = tryParseImports(KW_ImportLazy, rest2)
-	const {imports: debugImports, rest: rest4} = tryParseImports(KW_ImportDebug, rest3)
 
-	const lines = parseModuleBlock(rest4)
+	const lines = parseModuleBlock(rest3)
 
 	if (context.opts.includeModuleName()) {
 		const name = new LocalDeclareName(tokens.loc)
@@ -30,7 +29,7 @@ export default tokens => {
 
 	const imports = plainImports.concat(lazyImports)
 	return new Module(
-		tokens.loc, opComment, doImports, imports, opImportGlobal, debugImports, lines)
+		tokens.loc, opComment, doImports, imports, opImportGlobal, lines)
 }
 
 const
@@ -66,10 +65,8 @@ const
 						parseThingsImported(name, false, line.tail())
 					opImportGlobal = new ImportGlobal(line.loc, imported, opImportDefault)
 				} else {
-					const isLazy =
-						importKeywordKind === KW_ImportLazy || importKeywordKind === KW_ImportDebug
 					const {imported, opImportDefault} =
-						parseThingsImported(name, isLazy, line.tail())
+						parseThingsImported(name, importKeywordKind === KW_ImportLazy, line.tail())
 					imports.push(new Import(line.loc, path, imported, opImportDefault))
 				}
 		}

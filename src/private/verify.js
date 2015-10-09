@@ -1,10 +1,10 @@
 import {code} from '../CompileError'
 import * as MsAstTypes from './MsAst'
-import {AssignDestructure, AssignSingle, BlockVal, Call, Class, Constructor, Debug, Do, ForVal,
-	Fun, LocalDeclareBuilt, LocalDeclareFocus, LocalDeclareRes, ModuleExport, ObjEntry, Pattern,
+import {AssignDestructure, AssignSingle, BlockVal, Call, Class, Constructor, Do, ForVal, Fun,
+	LocalDeclareBuilt, LocalDeclareFocus, LocalDeclareRes, ModuleExport, ObjEntry, Pattern,
 	SuperCallDo, Yield, YieldTo} from './MsAst'
-import {assert, cat, head, ifElse, implementMany, isEmpty, opEach, reverseIter} from './util'
-import VerifyResults, {LocalInfo} from './VerifyResults'
+import {assert, cat, ifElse, implementMany, isEmpty, opEach, reverseIter} from './util'
+import VerifyResults from './VerifyResults'
 
 /*
 The verifier generates information needed during transpiling, the VerifyResults.
@@ -13,7 +13,7 @@ export default (_context, msAst) => {
 	context = _context
 	locals = new Map()
 	pendingBlockLocals = []
-	isInDebug = isInGenerator = false
+	isInGenerator = false
 	okToNotUse = new Set()
 	opLoop = null
 	method = null
@@ -51,7 +51,6 @@ let
 	It would work for `~a is b`, though.
 	*/
 	pendingBlockLocals,
-	isInDebug,
 	// Whether we are currently able to yield.
 	isInGenerator,
 	// Current method we are in, or a Constructor, or null.
@@ -72,24 +71,14 @@ const
 	setLocal = localDeclare =>
 		locals.set(localDeclare.name, localDeclare),
 
-	// When a local is returned from a BlockObj or Module,
-	// the return 'access' is considered to be 'debug' if the local is.
-	accessLocalForReturn = (access, declare) => {
-		const info = results.localDeclareToInfo.get(declare)
-		_addLocalAccess(info, access, info.isInDebug)
-	},
-
 	accessLocal = (access, name) => {
 		const declare = getLocalDeclare(name, access.loc)
-		setLocalDeclareAccessed(declare, access)
+		setDeclareAccessed(declare, access)
 	},
 
-	setLocalDeclareAccessed = (declare, access) => {
-		_addLocalAccess(results.localDeclareToInfo.get(declare), access, isInDebug)
+	setDeclareAccessed = (declare, access) => {
+		results.localDeclareToAccesses.get(declare).push(access)
 	},
-
-	_addLocalAccess = (localInfo, access, isDebugAccess) =>
-		(isDebugAccess ? localInfo.debugAccesses : localInfo.nonDebugAccesses).push(access),
 
 	// For expressions affecting lineNewLocals, they will be registered before being verified.
 	// So, LocalDeclare.verify just the type.
@@ -100,7 +89,7 @@ const
 	},
 
 	registerLocal = localDeclare => {
-		results.localDeclareToInfo.set(localDeclare, LocalInfo.empty(isInDebug))
+		results.localDeclareToAccesses.set(localDeclare, [])
 	},
 
 	setName = expr => {
@@ -109,13 +98,6 @@ const
 
 // These functions change verifier state and efficiently return to the old state when finished.
 const
-	withInDebug = action => {
-		const oldIsInDebug = isInDebug
-		isInDebug = true
-		action()
-		isInDebug = oldIsInDebug
-	},
-
 	withInGenerator = (newIsInGenerator, action) => {
 		const oldIsInGenerator = isInGenerator
 		isInGenerator = newIsInGenerator
@@ -198,22 +180,12 @@ const
 		pendingBlockLocals = oldPendingBlockLocals
 	}
 
-const verifyLocalUse = () =>
-	results.localDeclareToInfo.forEach((info, local) => {
-		if (!(local instanceof LocalDeclareBuilt || local instanceof LocalDeclareRes)) {
-			const noNonDebug = isEmpty(info.nonDebugAccesses)
-			if (noNonDebug && isEmpty(info.debugAccesses))
-				context.warnIf(!okToNotUse.has(local), local.loc, () =>
-					`Unused local variable ${code(local.name)}.`)
-			else if (info.isInDebug)
-				context.warnIf(!noNonDebug, () => head(info.nonDebugAccesses).loc, () =>
-					`Debug-only local ${code(local.name)} used outside of debug.`)
-			else
-				context.warnIf(noNonDebug, local.loc, () =>
-					`Local ${code(local.name)} used only in debug.`)
-		}
-	})
-
+const verifyLocalUse = () => {
+	for (const [accesses, local] of results.localDeclareToAccesses)
+		if (!(local instanceof LocalDeclareBuilt || local instanceof LocalDeclareRes))
+			context.warnIf(isEmpty(accesses) && !okToNotUse.has(local), local.loc, () =>
+				`Unused local variable ${code(local.name)}.`)
+}
 
 implementMany(MsAstTypes, 'verify', {
 	Assert() {
@@ -363,12 +335,7 @@ implementMany(MsAstTypes, 'verify', {
 				`Class has no superclass, so ${code('super!')} is not allowed.`)
 
 		for (const _ of this.memberArgs)
-			setLocalDeclareAccessed(_, this)
-	},
-
-	// Only reach here for in/out condition.
-	Debug() {
-		verifyLines([this])
+			setDeclareAccessed(_, this)
 	},
 
 	ExceptDo: verifyExcept,
@@ -429,7 +396,7 @@ implementMany(MsAstTypes, 'verify', {
 			}
 		} else {
 			results.localAccessToDeclare.set(this, declare)
-			setLocalDeclareAccessed(declare, this)
+			setDeclareAccessed(declare, this)
 		}
 	},
 
@@ -500,10 +467,6 @@ implementMany(MsAstTypes, 'verify', {
 		for (const _ of this.imports)
 			_.verify()
 		verifyOpEach(this.opImportGlobal)
-		withInDebug(() => {
-			for (const _ of this.debugImports)
-				_.verify()
-		})
 
 		withName(context.opts.moduleName(), () => {
 			verifyLines(this.lines)
@@ -513,7 +476,7 @@ implementMany(MsAstTypes, 'verify', {
 	ModuleExport() {
 		this.assign.verify()
 		for (const _ of this.assign.allAssignees())
-			accessLocalForReturn(this, _)
+			setDeclareAccessed(_, this)
 	},
 
 	New() {
@@ -526,7 +489,7 @@ implementMany(MsAstTypes, 'verify', {
 		accessLocal(this, 'built')
 		this.assign.verify()
 		for (const _ of this.assign.allAssignees())
-			accessLocalForReturn(this, _)
+			setDeclareAccessed(_, this)
 	},
 
 	ObjEntryComputed() {
@@ -758,17 +721,11 @@ const
 		const newLocals = []
 
 		const getLineLocals = line => {
-			if (line instanceof Debug)
-				withInDebug(() => {
-					for (const _ of reverseIter(line.lines))
-						getLineLocals(_)
-				})
-			else
-				for (const _ of reverseIter(lineNewLocals(line))) {
-					// Register the local now. Can't wait until the assign is verified.
-					registerLocal(_)
-					newLocals.push(_)
-				}
+			for (const _ of reverseIter(lineNewLocals(line))) {
+				// Register the local now. Can't wait until the assign is verified.
+				registerLocal(_)
+				newLocals.push(_)
+			}
 		}
 		for (const _ of reverseIter(lines))
 			getLineLocals(_)
@@ -792,30 +749,24 @@ const
 		const shadowed = []
 
 		const verifyLine = line => {
-			if (line instanceof Debug)
-				// TODO: Do anything in this situation?
-				// context.check(!inDebug, line.loc, 'Redundant `debug`.')
-				withInDebug(() => line.lines.forEach(verifyLine))
-			else {
-				verifyIsStatement(line)
-				for (const newLocal of lineNewLocals(line)) {
-					const name = newLocal.name
-					const oldLocal = locals.get(name)
-					if (oldLocal !== undefined) {
-						context.check(!thisBlockLocalNames.has(name), newLocal.loc,
-							() => `A local ${code(name)} is already in this block.`)
-						shadowed.push(oldLocal)
-					}
-					thisBlockLocalNames.add(name)
-					setLocal(newLocal)
-
-					// Now that it's added as a local, it's no longer pending.
-					// We added pendingBlockLocals in the right order that we can just pop them off.
-					const popped = pendingBlockLocals.pop()
-					assert(popped === newLocal)
+			verifyIsStatement(line)
+			for (const newLocal of lineNewLocals(line)) {
+				const name = newLocal.name
+				const oldLocal = locals.get(name)
+				if (oldLocal !== undefined) {
+					context.check(!thisBlockLocalNames.has(name), newLocal.loc,
+						() => `A local ${code(name)} is already in this block.`)
+					shadowed.push(oldLocal)
 				}
-				line.verify()
+				thisBlockLocalNames.add(name)
+				setLocal(newLocal)
+
+				// Now that it's added as a local, it's no longer pending.
+				// We added pendingBlockLocals in the right order that we can just pop them off.
+				const popped = pendingBlockLocals.pop()
+				assert(popped === newLocal)
 			}
+			line.verify()
 		}
 
 		lines.forEach(verifyLine)

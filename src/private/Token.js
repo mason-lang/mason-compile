@@ -190,7 +190,6 @@ export const
 	KW_Cond = kw('cond'),
 	KW_Class = kw('class'),
 	KW_Construct = kw('construct!'),
-	KW_Debug = kw('debug'),
 	KW_Debugger = kw('debugger!'),
 	KW_Do = kw('do!'),
 	// Three dots followed by a space, as in `... things-added-to-@`.
@@ -244,7 +243,6 @@ export const
 	KW_UnlessVal = kw('unless'),
 	KW_UnlessDo = kw('unless!'),
 	KW_Import = kw('import'),
-	KW_ImportDebug = kw('import-debug'),
 	KW_ImportDo = kw('import!'),
 	KW_ImportLazy = kw('import~'),
 	KW_With = kw('with'),

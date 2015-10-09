@@ -1,4 +1,4 @@
-import {BlockDo, BlockWithReturn, Debug, Fun, LD_Mutable, LocalDeclare, LocalDeclareFocus,
+import {BlockDo, BlockWithReturn, Fun, LD_Mutable, LocalDeclare, LocalDeclareFocus,
 	LocalDeclareRes, LocalDeclareThis} from '../MsAst'
 import {DotName, G_Space, isAnyKeyword, isGroup, isKeyword, KW_CaseDo, KW_CaseVal, KW_Fun,
 	KW_FunDo, KW_FunGen, KW_FunGenDo, KW_FunThis, KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo,
@@ -138,8 +138,9 @@ const
 		if (!tokens.isEmpty()) {
 			const firstLine = tokens.headSlice()
 			if (isKeyword(inOrOut, firstLine.head())) {
-				const inOut = new Debug(
+				const inOut = new BlockDo(
 					firstLine.loc,
+					null,
 					parseLinesFromBlock(firstLine))
 				return [inOut, tokens.tail()]
 			}

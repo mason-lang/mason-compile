@@ -1,7 +1,7 @@
 import {code} from '../../CompileError'
 import {AssignSingle, BagEntry, BlockBag, BlockDo, BlockObj, BlockMap, BlockValThrow,
-	BlockWithReturn, BlockWrap, Debug, LocalDeclare, MapEntry, ModuleExportDefault,
-	ModuleExportNamed, ObjEntry, ObjEntryAssign, Throw, Val} from '../MsAst'
+	BlockWithReturn, BlockWrap, LocalDeclare, MapEntry, ModuleExportDefault, ModuleExportNamed,
+	ObjEntry, ObjEntryAssign, Throw, Val} from '../MsAst'
 import {G_Block, isGroup, keywordName} from '../Token'
 import {isEmpty, last, rtail} from '../util'
 import {checkEmpty, checkNonEmpty, context} from './context'
@@ -31,7 +31,7 @@ export const
 	justBlockVal = (keyword, tokens) =>
 		parseBlockVal(justBlock(keyword, tokens)),
 
-	// Gets lines in a region or Debug.
+	// Gets lines in a region.
 	parseLinesFromBlock = tokens => {
 		const h = tokens.head()
 		context.check(tokens.size() > 1 && tokens.size() === 2 && isGroup(G_Block, tokens.second()),
@@ -108,8 +108,8 @@ export const
 						return line.assign.assignee.name === moduleName ?
 							new ModuleExportDefault(line.loc, line.assign) :
 							new ModuleExportNamed(line.loc, line.assign)
-					} else if (line instanceof Debug)
-						line.lines = line.lines.map(convertToExports)
+					}
+					// TODO: If Region, line.lines = line.lines.map(convertToExports)
 					return line
 				}
 
@@ -156,10 +156,8 @@ const
 	parseBlockLines = lineTokens => {
 		let isBag = false, isMap = false, isObj = false
 		const checkLine = line => {
-			if (line instanceof Debug)
-				for (const _ of line.lines)
-					checkLine(_)
-			else if (line instanceof BagEntry)
+			// TODO: if Region, loop over its lines
+			if (line instanceof BagEntry)
 				isBag = true
 			else if (line instanceof MapEntry)
 				isMap = true
