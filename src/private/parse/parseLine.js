@@ -1,8 +1,8 @@
 import {Assert, AssignSingle, AssignDestructure, BagEntry, BagEntryMany, Break, BreakWithVal, Call,
 	ConditionalDo, Ignore, LD_Mutable, LocalAccess, LocalMutate, MapEntry, MemberSet,
 	MS_New, MS_NewMutable, MS_Mutate, ObjEntryAssign, ObjEntryComputed, SD_Debugger, SpecialDo,
-	SpecialVal, SuperCallDo, SV_Name, SV_Null, Throw, Yield, YieldTo} from '../MsAst'
-import {DotName, G_Space, isGroup, isKeyword, Keyword, keywordName, KW_Assert,
+	SpecialVal, SuperCallDo, SV_Name, Throw, Yield, YieldTo} from '../MsAst'
+import {DotName, G_Quote, G_Space, isGroup, isKeyword, Keyword, keywordName, KW_Assert,
 	KW_AssertNot, KW_Assign, KW_AssignMutable, KW_Break, KW_BreakWithVal, KW_CaseDo, KW_Debugger,
 	KW_Ellipsis, KW_ExceptDo, KW_Focus, KW_ForDo, KW_IfDo, KW_Ignore, KW_LocalMutate, KW_MapEntry,
 	KW_Name, KW_ObjAssign, KW_Pass, KW_Region, KW_SuperDo, KW_SwitchDo, KW_Throw, KW_UnlessDo,
@@ -15,6 +15,7 @@ import parseExcept from './parseExcept'
 import {parseForDo} from './parseFor'
 import parseLine from './parseLine'
 import parseLocalDeclares, {parseLocalDeclaresJustNames} from './parseLocalDeclares'
+import parseQuote from './parseQuote'
 import {parseExpr, parseExprParts, parseSpaced, parseSwitch} from './parse*'
 import Slice from './Slice'
 
@@ -23,7 +24,7 @@ export default tokens => {
 	const rest = tokens.tail()
 
 	const noRest = () =>
-		checkEmpty(rest, () => `Did not expect anything after ${head}`)
+		checkEmpty(rest, () => `Did not expect anything after ${head}.`)
 
 	// We only deal with mutable expressions here, otherwise we fall back to parseExpr.
 	if (head instanceof Keyword)
@@ -104,28 +105,32 @@ const
 	},
 
 	parseAssignLike = (before, at, after, loc) => {
-		if (at.kind === KW_MapEntry)
+		const kind = at.kind
+		if (kind === KW_MapEntry)
 			return new MapEntry(loc, parseExpr(before), parseExpr(after))
 
-		// TODO: This code is kind of ugly.
-		// It parses `x.y = z` and the like.
 		if (before.size() === 1) {
 			const token = before.head()
+
+			// `.x = y`
 			if (token instanceof DotName)
-				return parseMemberSet(	LocalAccess.this(token.loc), token.name, at, after, loc)
-			if (isGroup(G_Space, token)) {
+				return parseMemberSet(LocalAccess.this(token.loc), token.name, at, after, loc)
+			// `x.y = z`
+			else if (isGroup(G_Space, token)) {
 				const spaced = Slice.group(token)
 				const dot = spaced.last()
 				if (dot instanceof DotName) {
 					context.check(dot.nDots === 1, dot.loc, 'Must have only 1 `.`.')
 					return parseMemberSet(parseSpaced(spaced.rtail()), dot.name, at, after, loc)
 				}
-			}
+			// `"1". 1`
+			} else if (isGroup(G_Quote, token) && kind === KW_ObjAssign)
+				return new ObjEntryComputed(loc, parseQuote(Slice.group(token)), parseExpr(after))
 		}
 
-		return at.kind === KW_LocalMutate ?
+		return kind === KW_LocalMutate ?
 			parseLocalMutate(before, after, loc) :
-			parseAssign(before, at, after, loc)
+			parseAssign(before, kind, after, loc)
 	},
 
 	parseMemberSet = (object, name, at, after, loc) =>
@@ -135,7 +140,7 @@ const
 			case KW_Assign: return MS_New
 			case KW_AssignMutable: return MS_NewMutable
 			case KW_LocalMutate: return MS_Mutate
-			default: throw new Error()
+			default: context.fail(at.loc, `Unexpected ${at}.`)
 		}
 	},
 
@@ -147,11 +152,9 @@ const
 		return new LocalMutate(loc, name, value)
 	},
 
-	parseAssign = (localsTokens, assigner, valueTokens, loc) => {
-		const kind = assigner.kind
+	parseAssign = (localsTokens, kind, valueTokens, loc) => {
 		const locals = parseLocalDeclares(localsTokens)
-		const opName = opIf(locals.length === 1, () => locals[0].name)
-		const value = parseAssignValue(kind, opName, valueTokens)
+		const value = parseAssignValue(kind, valueTokens)
 
 		const isYield = kind === KW_Yield || kind === KW_YieldTo
 		if (isEmpty(locals)) {
@@ -186,10 +189,8 @@ const
 		}
 	},
 
-	parseAssignValue = (kind, opName, valueTokens) => {
-		const value = valueTokens.isEmpty() && kind === KW_ObjAssign ?
-			new SpecialVal(valueTokens.loc, SV_Null) :
-			parseExpr(valueTokens)
+	parseAssignValue = (kind, valueTokens) => {
+		const value = parseExpr(valueTokens)
 		switch (kind) {
 			case KW_Yield:
 				return new Yield(value.loc, value)
