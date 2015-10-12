@@ -4,12 +4,16 @@
 export let context
 
 export const
-	checkEmpty = (tokens, message) =>
-		context.check(tokens.isEmpty(), tokens.loc, message),
-	checkNonEmpty = (tokens, message) =>
-		context.check(!tokens.isEmpty(), tokens.loc, message),
+	checkEmpty = (tokens, message) => {
+		context.check(tokens.isEmpty(), tokens.loc, message)
+	},
+	checkNonEmpty = (tokens, message) => {
+		context.check(!tokens.isEmpty(), tokens.loc, message)
+	},
 	// TODO:ES6 Should be able to just do `context = _context`, because it's a `let` declaration.
 	setContext = _context => {
 		context = _context
 	},
-	unexpected = token => context.fail(token.loc, `Unexpected ${token}`)
+	unexpected = token => {
+		context.fail(token.loc, `Unexpected ${token}`)
+	}

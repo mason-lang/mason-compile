@@ -202,14 +202,39 @@ export default class MsAst {
 	}
 
 	export const
-		MS_New = 0,
-		MS_Mutate = 1,
-		MS_NewMutable = 2
+		SET_Init = 0,
+		SET_Mutate = 1,
+		SET_InitMutable = 2
+
 	export class MemberSet extends Do {
-		constructor(loc, object /* Val */, name /* String */, kind /* Number */, value /* Val */) {
+		constructor(
+			loc,
+			object, // Val
+			name, // String
+			opType, // Opt[Val]
+			kind, // Number (SET_*)
+			value) { // Val
 			super(loc)
 			this.object = object
 			this.name = name
+			this.opType = opType
+			this.kind = kind
+			this.value = value
+		}
+	}
+
+	export class SetSub extends Do {
+		constructor(
+			loc,
+			object, // Val
+			subbeds, // Array[Val]
+			opType, // Opt[Val]
+			kind, // Number (SET_*)
+			value) { // Val
+			super(loc)
+			this.object = object
+			this.subbeds = subbeds
+			this.opType = opType
 			this.kind = kind
 			this.value = value
 		}

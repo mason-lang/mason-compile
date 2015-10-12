@@ -10,9 +10,10 @@ import {functionExpressionThunk, idCached, loc, member, propertyIdOrLiteralCache
 	} from 'esast/dist/util'
 import manglePath from '../manglePath'
 import * as MsAstTypes from '../MsAst'
-import {AssignSingle, Call, Constructor, L_And, L_Or, LD_Lazy, LD_Mutable, Member, MS_Mutate,
-	MS_New, MS_NewMutable, LocalDeclare, Pattern, Splat, SD_Debugger, SV_Contains, SV_False,
-	SV_Name, SV_Null, SV_Sub, SV_True, SV_Undefined, SwitchDoPart, Quote, Import} from '../MsAst'
+import {AssignSingle, Call, Constructor, L_And, L_Or, LD_Lazy, LD_Mutable, Member, LocalDeclare,
+	Pattern, Splat, SD_Debugger, SET_Init, SET_InitMutable, SET_Mutate, SV_Contains, SV_False,
+	SV_Name, SV_Null, SV_SetSub, SV_Sub, SV_True, SV_Undefined, SwitchDoPart, Quote, Import
+	} from '../MsAst'
 import {assert, cat, flatMap, flatOpMap, ifElse, isEmpty, implementMany, isPositive, last, opIf,
 	opMap, tail} from '../util'
 import {AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj,
@@ -22,8 +23,8 @@ import {AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, Declar
 	ThrowAssertFail, ThrowNoCaseMatch, UseStrict} from './ast-constants'
 import {IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot,
 	msAssertNotMember, msAssoc, msCheckContains, msExtract, msGet, msGetDefaultExport, msGetModule,
-	msLazy, msLazyGet, msLazyGetModule, msNewMutableProperty, msNewProperty, msSetLazy, msSome,
-	msSymbol, MsNone} from './ms-call'
+	msLazy, msLazyGet, msLazyGetModule, msNewMutableProperty, msNewProperty, msSetLazy, msSetSub,
+	msSome, msSymbol, MsNone} from './ms-call'
 import {accessLocalDeclare, declare, forStatementInfinite, idForDeclareCached,
 	opTypeCheckForLocalDeclare} from './util'
 
@@ -348,15 +349,14 @@ implementMany(MsAstTypes, 'transpile', {
 	Member() { return member(t0(this.object), this.name) },
 
 	MemberSet() {
+		const val = maybeWrapInCheckContains(t0(this.value), this.opType, this.name)
 		switch (this.kind) {
-			case MS_Mutate:
-				return new AssignmentExpression('=',
-					member(t0(this.object), this.name),
-					t0(this.value))
-			case MS_New:
-				return msNewProperty(t0(this.object), new Literal(this.name), t0(this.value))
-			case MS_NewMutable:
-				return msNewMutableProperty(t0(this.object), new Literal(this.name), t0(this.value))
+			case SET_Init:
+				return msNewProperty(t0(this.object), new Literal(this.name), val)
+			case SET_InitMutable:
+				return msNewMutableProperty(t0(this.object), new Literal(this.name), val)
+			case SET_Mutate:
+				return new AssignmentExpression('=', member(t0(this.object), this.name), val)
 			default: throw new Error()
 		}
 	},
@@ -458,6 +458,26 @@ implementMany(MsAstTypes, 'transpile', {
 		return new TaggedTemplateExpression(t0(this.tag), t0(this.quote))
 	},
 
+	SetSub() {
+		const kind = (() => {
+			switch (this.kind) {
+				case SET_Init:
+					return 'init'
+				case SET_InitMutable:
+					return 'init-mutable'
+				case SET_Mutate:
+					return 'mutate'
+				default:
+					throw new Error()
+			}
+		})()
+		return msSetSub(
+			t0(this.object),
+			this.subbeds.length === 1 ? t0(this.subbeds[0]) : this.subbeds.map(t0),
+			maybeWrapInCheckContains(t0(this.value), this.opType, 'value'),
+			new Literal(kind))
+	},
+
 	SpecialDo() {
 		switch (this.kind) {
 			case SD_Debugger: return new DebuggerStatement()
@@ -472,6 +492,7 @@ implementMany(MsAstTypes, 'transpile', {
 			case SV_False: return new Literal(false)
 			case SV_Name: return new Literal(verifyResults.name(this))
 			case SV_Null: return new Literal(null)
+			case SV_SetSub: return member(IdMs, 'setSub')
 			case SV_Sub: return member(IdMs, 'sub')
 			case SV_True: return new Literal(true)
 			case SV_Undefined: return new UnaryExpression('void', LitZero)
@@ -746,7 +767,7 @@ const
 	},
 
 	maybeWrapInCheckContains = (ast, opType, name) =>
-		context.opts.includeChecks() && opType !== null ?
+		 context.opts.includeChecks() && opType !== null ?
 			msCheckContains(t0(opType), ast, new Literal(name)) :
 			ast,
 

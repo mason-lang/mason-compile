@@ -60,7 +60,7 @@ let
 	name
 
 const
-	verifyOpEach = op => {
+	verifyOp = op => {
 		if (op !== null)
 			op.verify()
 	},
@@ -190,7 +190,7 @@ const verifyLocalUse = () => {
 implementMany(MsAstTypes, 'verify', {
 	Assert() {
 		this.condition.verify()
-		verifyOpEach(this.opThrown)
+		verifyOp(this.opThrown)
 	},
 
 	AssignSingle() {
@@ -286,8 +286,8 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	Class() {
-		verifyOpEach(this.opSuperClass)
-		verifyOpEach(this.opDo)
+		verifyOp(this.opSuperClass)
+		verifyOp(this.opDo)
 		for (const _ of this.statics)
 			_.verify()
 		if (this.opConstructor !== null)
@@ -356,10 +356,12 @@ implementMany(MsAstTypes, 'verify', {
 				withLoop(null, () => {
 					const allArgs = cat(this.opDeclareThis, this.args, this.opRestArg)
 					verifyAndPlusLocals(allArgs, () => {
-						verifyOpEach(this.opIn)
+						verifyOp(this.opIn)
 						this.block.verify()
 						opEach(this.opDeclareRes, verifyLocalDeclare)
-						const verifyOut = () => verifyOpEach(this.opOut)
+						const verifyOut = () => {
+							verifyOp(this.opOut)
+						}
 						ifElse(this.opDeclareRes, _ => plusLocal(_, verifyOut), verifyOut)
 					})
 				}))
@@ -400,7 +402,7 @@ implementMany(MsAstTypes, 'verify', {
 		const builtinPath = context.opts.builtinNameToPath.get(this.name)
 		context.warnIf(builtinPath !== undefined, this.loc, () =>
 			`Local ${code(this.name)} overrides builtin from ${code(builtinPath)}.`)
-		verifyOpEach(this.opType)
+		verifyOp(this.opType)
 	},
 
 	LocalMutate() {
@@ -434,6 +436,7 @@ implementMany(MsAstTypes, 'verify', {
 
 	MemberSet() {
 		this.object.verify()
+		verifyOp(this.opType)
 		this.value.verify()
 	},
 
@@ -461,7 +464,7 @@ implementMany(MsAstTypes, 'verify', {
 		// No need to verify this.doImports.
 		for (const _ of this.imports)
 			_.verify()
-		verifyOpEach(this.opImportGlobal)
+		verifyOp(this.opImportGlobal)
 
 		withName(context.opts.moduleName(), () => {
 			verifyLines(this.lines)
@@ -514,6 +517,14 @@ implementMany(MsAstTypes, 'verify', {
 		this.quote.verify()
 	},
 
+	SetSub() {
+		this.object.verify()
+		for (const _ of this.subbeds)
+			_.verify()
+		verifyOp(this.opType)
+		this.value.verify()
+	},
+
 	SpecialDo() { },
 
 	SpecialVal() {
@@ -540,7 +551,7 @@ implementMany(MsAstTypes, 'verify', {
 	SwitchValPart: verifySwitchPart,
 
 	Throw() {
-		verifyOpEach(this.opThrown)
+		verifyOp(this.opThrown)
 	},
 
 	Import: verifyImport,
@@ -557,7 +568,7 @@ implementMany(MsAstTypes, 'verify', {
 
 	Yield() {
 		context.check(isInGenerator, this.loc, 'Cannot yield outside of generator context')
-		verifyOpEach(this.opYielded)
+		verifyOp(this.opYielded)
 	},
 
 	YieldTo() {
@@ -596,8 +607,8 @@ function verifySwitchPart() {
 
 function verifyExcept() {
 	this._try.verify()
-	verifyOpEach(this._catch)
-	verifyOpEach(this._finally)
+	verifyOp(this._catch)
+	verifyOp(this._finally)
 }
 
 function verifySuperCall() {
@@ -649,7 +660,7 @@ const
 		const doIt = () => {
 			for (const part of _.parts)
 				part.verify()
-			verifyOpEach(_.opElse)
+			verifyOp(_.opElse)
 		}
 		ifElse(_.opCased,
 			_ => {
@@ -669,7 +680,7 @@ const
 		_.switched.verify()
 		for (const part of _.parts)
 			part.verify()
-		verifyOpEach(_.opElse)
+		verifyOp(_.opElse)
 	}
 
 // General utilities:

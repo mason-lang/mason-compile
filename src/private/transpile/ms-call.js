@@ -28,6 +28,7 @@ export const
 	msNewMutableProperty = ms('newMutableProperty'),
 	msNewProperty = ms('newProperty'),
 	msSetLazy = ms('setLazy'),
+	msSetSub = ms('setSub'),
 	msSome = ms('some'),
 	msSymbol = ms('symbol'),
 	msUnlazy = ms('unlazy'),
