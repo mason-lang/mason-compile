@@ -1,5 +1,5 @@
 import {BagEntry, ForDo, ForBag, ForVal, Iteratee, LocalDeclareFocus, Val} from '../MsAst'
-import {isKeyword, KW_In} from '../Token'
+import {isKeyword, KW_Of} from '../Token'
 import {ifElse, opIf} from '../util'
 import {context} from './context'
 import {parseExpr} from './parse*'
@@ -32,7 +32,7 @@ const
 	parseOpIteratee = tokens =>
 		opIf(!tokens.isEmpty(), () => {
 			const [element, bag] =
-				ifElse(tokens.opSplitOnceWhere(_ => isKeyword(KW_In, _)),
+				ifElse(tokens.opSplitOnceWhere(_ => isKeyword(KW_Of, _)),
 					({before, after}) => {
 						context.check(before.size() === 1, before.loc, 'TODO: pattern in for')
 						return [parseLocalDeclaresJustNames(before)[0], parseExpr(after)]
