@@ -152,6 +152,7 @@ export default (context, sourceString) => {
 		peek = () => sourceString.charCodeAt(index),
 		peekNext = () => sourceString.charCodeAt(index + 1),
 		peekPrev = () => sourceString.charCodeAt(index - 1),
+		peek2Before = () => sourceString.charCodeAt(index - 2),
 
 		// May eat a Newline.
 		// Caller *must* check for that case and increment line!
@@ -331,6 +332,19 @@ export default (context, sourceString) => {
 
 				const str = sourceString.slice(startIndex, index)
 				addToCurrentGroup(new NumberLiteral(loc(), str))
+			},
+			eatIndent = () => {
+				const optIndent = context.opts.indent()
+				if (optIndent === '\t') {
+					const indent = skipWhileEquals(Tab)
+					context.check(peek() !== Space, pos, 'Line begins in a space')
+					return indent
+				} else {
+					const spaces = skipWhileEquals(Space)
+					context.check(spaces % optIndent === 0, pos, () =>
+						`Indentation spaces must be a multiple of ${optIndent}`)
+					return spaces / optIndent
+				}
 			}
 
 		const
@@ -407,13 +421,12 @@ export default (context, sourceString) => {
 					break
 				case Newline: {
 					context.check(!isInQuote, loc, 'Quote interpolation cannot contain newline')
+					context.warnIf(peek2Before() === Space, pos, 'Line ends in a space.')
 
 					// Skip any blank lines.
 					skipNewlines()
 					const oldIndent = indent
-					indent = skipWhileEquals(Tab)
-					context.check(peek() !== Space, pos, 'Line begins in a space')
-					context.warnIf(peekPrev() === Space, 'Line ends in a space.')
+					indent = eatIndent()
 					if (indent > oldIndent) {
 						context.check(indent === oldIndent + 1, loc,
 							'Line is indented more than once')
@@ -711,4 +724,3 @@ const
 	// Anything not explicitly reserved is a valid name character.
 	reservedCharacters = '`#%^&\\\';,',
 	isNameCharacter = _charPred('()[]{}.:| \n\t"' + reservedCharacters, true)
-

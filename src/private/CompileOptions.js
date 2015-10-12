@@ -6,16 +6,7 @@ export default class CompileOptions {
 		type(opts, Object)
 
 		const define = (name, _default) => {
-			const getDefault = () => {
-				const _ = opts[name]
-				if (_ === undefined)
-					return _default
-				else {
-					type(_, _default.constructor)
-					return _
-				}
-			}
-			this[`_${name}`] = getDefault()
+			this[`_${name}`] = opts[name] === undefined ? _default : opts[name]
 		}
 
 		const defaults = {
@@ -25,9 +16,9 @@ export default class CompileOptions {
 			lazyModules: false,
 			useStrict: true,
 			checks: true,
-			'warn-as-error': false,
 			importBoot: true,
-			mslPath: 'msl'
+			mslPath: 'msl',
+			indent: '\t'
 		}
 
 		const allOpts = new Set(Object.keys(defaults).concat(['inFile', 'builtins']))
@@ -37,7 +28,7 @@ export default class CompileOptions {
 
 		for (const _ in opts)
 			if (!allOpts.has(_))
-				throw new Error(`Unrecognized key ${_}`)
+				throw new Error(`Unrecognized option ${_}`)
 
 		const inFile = opts.inFile
 		if (inFile === undefined) {
@@ -50,8 +41,15 @@ export default class CompileOptions {
 			this._inFile = inFile
 		}
 
+		if (!(this._indent === '\t' || 2 <= this._indent && this._indent <= 8))
+			throw new Error(`opts.indent must be '\t' or a number 2-8, got: ${this._indent}`)
+
 		const builtins = opts.builtins || defaultBuiltins(this._mslPath)
 		this.builtinNameToPath = generateBuiltinsMap(builtins)
+	}
+
+	indent() {
+		return this._indent
 	}
 
 	moduleName() {
@@ -62,8 +60,6 @@ export default class CompileOptions {
 	modulePath() { return this._inFile }
 
 	includeChecks() { return this._checks }
-
-	warnAsError() { return this['_warn-as-error'] }
 
 	includeAmdefine() { return this._includeAmdefine }
 	includeSourceMap() { return this._includeSourceMap }

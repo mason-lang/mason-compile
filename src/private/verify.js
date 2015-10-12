@@ -181,7 +181,7 @@ const
 	}
 
 const verifyLocalUse = () => {
-	for (const [accesses, local] of results.localDeclareToAccesses)
+	for (const [local, accesses] of results.localDeclareToAccesses)
 		if (!(local instanceof LocalDeclareBuilt || local instanceof LocalDeclareRes))
 			context.warnIf(isEmpty(accesses) && !okToNotUse.has(local), local.loc, () =>
 				`Unused local variable ${code(local.name)}.`)

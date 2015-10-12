@@ -17,10 +17,7 @@ export default class CompileContext {
 	}
 
 	warn(loc, message) {
-		if (this.opts.warnAsError())
-			this.fail(loc, message)
-		else
-			this.warnings.push(warning(loc, message))
+		this.warnings.push(warning(loc, message))
 	}
 
 	warnIf(cond, loc, message) {
