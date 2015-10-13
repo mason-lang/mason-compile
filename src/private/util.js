@@ -65,6 +65,9 @@ export const
 
 	opMap = opEach,
 
+	opOr = (op, or) =>
+		op === null ? or() : op,
+
 	repeat = (em, n) => {
 		assert(n >= 0)
 		const out = []

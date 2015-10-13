@@ -45,6 +45,10 @@ export default class Slice {
 		return this.tokens[this.end - 1]
 	}
 
+	nextToLast() {
+		return this.tokens[this.end - 2]
+	}
+
 	tail() {
 		return this._chopStart(this.start + 1)
 	}

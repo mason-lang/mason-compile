@@ -346,7 +346,9 @@ implementMany(MsAstTypes, 'transpile', {
 
 	MapEntry() { return msAssoc(IdBuilt, t0(this.key), t0(this.val)) },
 
-	Member() { return member(t0(this.object), this.name) },
+	Member() {
+		return memberStringOrVal(t0(this.object), this.name)
+	},
 
 	MemberSet() {
 		const val = maybeWrapInCheckContains(t0(this.value), this.opType, this.name)
@@ -507,7 +509,7 @@ implementMany(MsAstTypes, 'transpile', {
 	SuperCall: superCall,
 	SuperCallDo: superCall,
 	SuperMember() {
-		return member(IdSuper, this.name)
+		return memberStringOrVal(IdSuper, this.name)
 	},
 
 	SwitchDo() { return transpileSwitch(this) },
@@ -629,6 +631,11 @@ const
 		new ThrowStatement(thrown instanceof Quote ?
 			new NewExpression(GlobalError, [t0(thrown)]) :
 			t0(thrown)),
+
+	memberStringOrVal = (object, memberName) =>
+		typeof memberName === 'string' ?
+			member(object, memberName) :
+			new MemberExpression(object, t0(memberName)),
 
 	methodKeyComputed = symbol => {
 		if (typeof symbol === 'string')

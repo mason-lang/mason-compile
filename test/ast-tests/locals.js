@@ -1,6 +1,6 @@
-import {AssignDestructure, AssignSingle, Debug, LocalAccess, LD_Lazy, LD_Mutable, LocalDeclare,
+import {AssignDestructure, AssignSingle, LocalAccess, LD_Lazy, LD_Mutable, LocalDeclare,
 	LocalMutate, Throw} from '../../dist/private/MsAst'
-import {aDeclare, assignAZero, bDeclare, funDo, loc, one, zero} from './util/ast-util'
+import {aDeclare, assignAZero, bDeclare, loc, one, zero} from './util/ast-util'
 import {test} from './util/test-asts'
 
 describe('locals', () => {
@@ -38,17 +38,6 @@ describe('locals', () => {
 		'a b = 0',
 		new AssignDestructure(loc, [aDeclare, bDeclare], zero),
 		'const _$0=0,a=_$0.a,b=_$0.b')
-
-	test(
-		// Must test inside of a Fun because `debug` can only transpile in a block context.
-		`
-			!|
-				debug throw!`,
-		funDo([new Debug(loc, [new Throw(loc, null)])]),
-		`
-			()=>{
-				throw new (Error)("An error occurred.")
-			}`)
 
 	test(
 		`

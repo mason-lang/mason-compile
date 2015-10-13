@@ -1,12 +1,12 @@
 import {code} from '../../CompileError'
 import {AssignSingle, ImportDo, ImportGlobal, Import, LD_Const, LD_Lazy, LocalDeclare,
 	LocalDeclareName, Module, ModuleExportNamed, Quote} from '../MsAst'
-import {DotName, G_Space, isGroup, isKeyword, Name, KW_Focus, KW_Import, KW_ImportDo, KW_ImportLazy
-	} from '../Token'
-import {cat, repeat} from '../util'
-import {context, unexpected} from './context'
+import {G_Space, isGroup, isKeyword, KW_Dot, KW_Ellipsis, KW_Focus, KW_Import, KW_ImportDo,
+	KW_ImportLazy} from '../Token'
+import {checkNonEmpty, context, unexpected} from './context'
 import {justBlock, parseModuleBlock} from './parseBlock'
 import {parseLocalDeclaresJustNames} from './parseLocalDeclares'
+import parseName, {tryParseName} from './parseName'
 import Slice from './Slice'
 import tryTakeComment from './tryTakeComment'
 
@@ -94,34 +94,53 @@ const
 		}
 	},
 
-	parseRequire = t => {
-		if (t instanceof Name)
-			return {path: t.name, name: t.name}
-		else if (t instanceof DotName)
-			return {path: cat(partsFromDotName(t), t.name).join('/'), name: t.name}
+	parseRequire = token => {
+		const name = tryParseName(token)
+		if (name !== null)
+			return {path: name, name}
 		else {
-			context.check(isGroup(G_Space, t), t.loc, 'Not a valid module name.')
-			return parseSpacedRequire(Slice.group(t))
-		}
-	},
+			context.check(isGroup(G_Space, token), token.loc, 'Not a valid module name.')
+			const tokens = Slice.group(token)
 
-	parseSpacedRequire = tokens => {
-		const first = tokens.head()
-		let parts
-		if (first instanceof DotName)
-			parts = partsFromDotName(first)
-		else {
-			context.check(first instanceof Name, first.loc, 'Not a valid part of module path.')
-			parts = []
-		}
-		parts.push(first.name)
-		for (const token of tokens.tail()) {
-			context.check(token instanceof DotName && token.nDots === 1, token.loc,
-				'Not a valid part of module path.')
-			parts.push(token.name)
-		}
-		return {path: parts.join('/'), name: tokens.last().name}
-	},
+			// Take leading dots. There can be any number, so count ellipsis as 3 dots in a row.
+			let rest = tokens
+			const parts = []
+			const isDotty = _ =>
+				isKeyword(KW_Dot, _) || isKeyword(KW_Ellipsis, _)
+			const head = rest.head()
+			if (isDotty(head)) {
+				parts.push('.')
+				if (isKeyword(KW_Ellipsis, head)) {
+					parts.push('..')
+					parts.push('..')
+				}
+				rest = rest.tail()
 
-	partsFromDotName = dotName =>
-		dotName.nDots === 1 ? ['.'] : repeat('..', dotName.nDots - 1)
+				while (!rest.isEmpty() && isDotty(rest.head())) {
+					parts.push('..')
+					if (isKeyword(KW_Ellipsis, rest.head())) {
+						parts.push('..')
+						parts.push('..')
+					}
+					rest = rest.tail()
+				}
+			}
+
+			// Take name, then any number of dot-then-name (`.x`)
+			for (;;) {
+				checkNonEmpty(rest)
+				parts.push(parseName(rest.head()))
+				rest = rest.tail()
+
+				if (rest.isEmpty())
+					break
+
+				// If there's something left, it should be a dot, followed by a name.
+				if (!isKeyword(KW_Dot, rest.head()))
+					unexpected(rest.head())
+				rest = rest.tail()
+			}
+
+			return {path: parts.join('/'), name: parts[parts.length - 1]}
+		}
+	}

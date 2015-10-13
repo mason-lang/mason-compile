@@ -432,6 +432,8 @@ implementMany(MsAstTypes, 'verify', {
 
 	Member() {
 		this.object.verify()
+		if (typeof this.name !== 'string')
+			this.name.verify()
 	},
 
 	MemberSet() {
@@ -539,6 +541,8 @@ implementMany(MsAstTypes, 'verify', {
 	SuperCallDo: verifySuperCall,
 	SuperMember() {
 		context.check(method !== null, this.loc, 'Must be in method.')
+		if (typeof this.name !== 'string')
+			this.name.verify()
 	},
 
 	SwitchDo() {

@@ -1,13 +1,14 @@
-import {BlockDo, BlockWithReturn, Fun, LD_Mutable, LocalDeclare, LocalDeclareFocus,
-	LocalDeclareRes, LocalDeclareThis} from '../MsAst'
-import {DotName, G_Space, isAnyKeyword, isGroup, isKeyword, KW_CaseDo, KW_CaseVal, KW_Fun,
+import {BlockDo, BlockWithReturn, Fun, LD_Mutable, LocalDeclareFocus, LocalDeclareRes,
+	LocalDeclareThis} from '../MsAst'
+import {G_Space, isAnyKeyword, isGroup, isKeyword, KW_CaseDo, KW_CaseVal, KW_Ellipsis, KW_Fun,
 	KW_FunDo, KW_FunGen, KW_FunGenDo, KW_FunThis, KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo,
 	KW_In, KW_Out, KW_SwitchDo, KW_SwitchVal, KW_Type} from '../Token'
 import {head, ifElse, opIf, opMap} from '../util'
 import {checkNonEmpty} from './context'
 import {beforeAndBlock, parseBlockDo, parseBlockVal, parseLinesFromBlock} from './parseBlock'
 import parseCase from './parseCase'
-import parseLocalDeclares, {parseLocalDeclaresAndMemberArgs} from './parseLocalDeclares'
+import parseLocalDeclares, {parseLocalDeclareFromSpaced, parseLocalDeclaresAndMemberArgs
+	} from './parseLocalDeclares'
 import parseSpaced from './parseSpaced'
 import parseSwitch from './parseSwitch'
 import Slice from './Slice'
@@ -116,16 +117,15 @@ const
 		if (tokens.isEmpty())
 			return {args: [], memberArgs: [], opRestArg: null}
 		else {
-			let rest, opRestArg
+			let rest = tokens, opRestArg = null
 			const l = tokens.last()
-			if (l instanceof DotName && l.nDots === 3) {
-				rest = tokens.rtail()
-				opRestArg = LocalDeclare.plain(l.loc, l.name)
-			} else {
-				rest = tokens
-				opRestArg = null
+			if (isGroup(G_Space, l)) {
+				const g = Slice.group(l)
+				if (isKeyword(KW_Ellipsis, g.head())) {
+					rest = tokens.rtail()
+					opRestArg = parseLocalDeclareFromSpaced(g.tail())
+				}
 			}
-
 			if (includeMemberArgs) {
 				const {declares: args, memberArgs} = parseLocalDeclaresAndMemberArgs(rest)
 				return {args, memberArgs, opRestArg}

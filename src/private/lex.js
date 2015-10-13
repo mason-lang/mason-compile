@@ -1,8 +1,8 @@
 import Loc, {Pos, StartLine, StartPos, StartColumn, singleCharLoc} from 'esast/dist/Loc'
 import {code} from '../CompileError'
 import {NumberLiteral} from './MsAst'
-import {DocComment, DotName, Group, G_Block, G_Bracket, G_Line, G_Parenthesis, G_Space, G_Quote,
-	isKeyword, Keyword, KW_AssignMutable, KW_Ellipsis, KW_Focus, KW_Fun, KW_FunDo, KW_FunGen,
+import {DocComment, Group, G_Block, G_Bracket, G_Line, G_Parenthesis, G_Space, G_Quote, isKeyword,
+	Keyword, KW_AssignMutable, KW_Dot, KW_Ellipsis, KW_Focus, KW_Fun, KW_FunDo, KW_FunGen,
 	KW_FunGenDo, KW_FunThis, KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo, KW_Lazy, KW_LocalMutate,
 	KW_ObjAssign, KW_Region, KW_Todo, KW_Type, Name, opKeywordKindFromName, showGroupKind
 	} from './Token'
@@ -363,9 +363,7 @@ export default (context, sourceString) => {
 			},
 			_handleName = name => {
 				const keywordKind = opKeywordKindFromName(name)
-				if (keywordKind !== undefined) {
-					context.check(keywordKind !== -1, pos, () =>
-						`Reserved name ${code(name)}`)
+				if (keywordKind !== undefined)
 					if (keywordKind === KW_Region) {
 						// TODO: Eat and put it in Region expression
 						skipRestOfLine()
@@ -374,7 +372,7 @@ export default (context, sourceString) => {
 						skipRestOfLine()
 					else
 						keyword(keywordKind)
-				} else
+				else
 					addToCurrentGroup(new Name(loc(), name))
 			}
 
@@ -531,24 +529,12 @@ export default (context, sourceString) => {
 							keyword(KW_FunThisGen)
 						}
 						space(loc())
-					} else {
-						// +1 for the dot we just ate.
-						const nDots = skipWhileEquals(Dot) + 1
-						const next = peek()
-						if (nDots === 3 && next === Space || next === Newline)
-							keyword(KW_Ellipsis)
-						else {
-							context.check(!isDigit(next), loc(), 'Can not have digit here.')
-							let name = takeWhile(isNameCharacter)
-							const add = () => addToCurrentGroup(new DotName(loc(), nDots, name))
-							if (name.endsWith('_')) {
-								name = name.slice(0, name.length - 1)
-								add()
-								keyword(KW_Focus)
-							} else
-								add()
-						}
-					}
+					} else if (peek() === Dot && peekNext() === Dot) {
+						eat()
+						eat()
+						keyword(KW_Ellipsis)
+					} else
+						keyword(KW_Dot)
 					break
 				}
 

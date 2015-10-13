@@ -2,11 +2,11 @@ import {Assert, AssignSingle, AssignDestructure, BagEntry, BagEntryMany, Break, 
 	ConditionalDo, Ignore, LD_Mutable, LocalAccess, LocalMutate, MapEntry, MemberSet,
 	ObjEntryAssign, ObjEntryComputed, SD_Debugger, SET_Init, SET_InitMutable, SET_Mutate, SetSub,
 	SpecialDo, SpecialVal, SuperCallDo, SV_Name, Throw, Yield, YieldTo} from '../MsAst'
-import {DotName, G_Bracket, G_Quote, G_Space, isGroup, isKeyword, Keyword, keywordName, KW_Assert,
+import {G_Bracket, G_Quote, G_Space, isGroup, isKeyword, Keyword, keywordName, KW_Assert,
 	KW_AssertNot, KW_Assign, KW_AssignMutable, KW_Break, KW_BreakWithVal, KW_CaseDo, KW_Debugger,
-	KW_Ellipsis, KW_ExceptDo, KW_Focus, KW_ForDo, KW_IfDo, KW_Ignore, KW_LocalMutate, KW_MapEntry,
-	KW_Name, KW_ObjAssign, KW_Pass, KW_Region, KW_SuperDo, KW_SwitchDo, KW_Throw, KW_Type,
-	KW_UnlessDo, KW_Yield, KW_YieldTo, Name} from '../Token'
+	KW_Dot, KW_Ellipsis, KW_ExceptDo, KW_Focus, KW_ForDo, KW_IfDo, KW_Ignore, KW_LocalMutate,
+	KW_MapEntry, KW_Name, KW_ObjAssign, KW_Pass, KW_Region, KW_SuperDo, KW_SwitchDo, KW_Throw,
+	KW_Type, KW_UnlessDo, KW_Yield, KW_YieldTo, Name} from '../Token'
 import {ifElse, isEmpty, opIf, tail} from '../util'
 import {checkEmpty, checkNonEmpty, context, unexpected} from './context'
 import {beforeAndBlock, parseBlockDo, parseLinesFromBlock} from './parseBlock'
@@ -14,6 +14,7 @@ import parseCase from './parseCase'
 import parseExcept from './parseExcept'
 import {parseForDo} from './parseFor'
 import parseLine from './parseLine'
+import {tryParseName} from './parseName'
 import parseLocalDeclares, {parseLocalDeclaresJustNames} from './parseLocalDeclares'
 import parseQuote from './parseQuote'
 import {parseExpr, parseExprParts, parseSpaced, parseSwitch} from './parse*'
@@ -111,26 +112,27 @@ const
 
 		if (before.size() === 1) {
 			const token = before.head()
-
-			// `.x = y`
-			if (token instanceof DotName)
-				return parseMemberSet(LocalAccess.this(token.loc), token.name, null, at, after, loc)
-			// `x.y = z`
-			else if (isGroup(G_Space, token)) {
+			// `a.b = c`, `.b = c`, `a[b] = c`
+			if (isGroup(G_Space, token)) {
 				const spaced = Slice.group(token)
 				const [value, opType] = ifElse(spaced.opSplitOnceWhere(_ => isKeyword(KW_Type, _)),
 					({before, after}) => [before, parseExpr(after)],
 					() => [spaced, null])
 
 				const last = value.last()
-				const object = () => {
-					const obj = value.rtail()
+				const object = obj => {
+					if (obj === undefined)
+						obj = value.rtail()
 					return obj.isEmpty() ? LocalAccess.this(obj.loc) : parseSpaced(obj)
 				}
 
-				if (last instanceof DotName) {
-					context.check(last.nDots === 1, last.loc, 'Must have only 1 `.`.')
-					return parseMemberSet(object(), last.name, opType, at, after, loc)
+				if (isKeyword(KW_Dot, value.nextToLast())) {
+					const name = tryParseName(last)
+					if (name !== null) {
+						const set = object(value.rtail().rtail())
+						return parseMemberSet(set, name, opType, at, after, loc)
+					} else
+						unexpected(last)
 				} else if (isGroup(G_Bracket, last))
 					return parseSubSet(object(), Slice.group(last), opType, at, after, loc)
 			// `"1". 1`

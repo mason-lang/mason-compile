@@ -536,7 +536,7 @@ export default class MsAst {
 	}
 
 	export class SuperMember extends Val {
-		constructor(loc, name /* String */) {
+		constructor(loc, name /* Union[String Val] */) {
 			super(loc)
 			this.name = name
 		}
@@ -779,7 +779,7 @@ export default class MsAst {
 	}
 
 	export class Member extends Val {
-		constructor(loc, object /* Val */, name /* String */) {
+		constructor(loc, object /* Val */, name /* Union[String Val] */) {
 			super(loc)
 			this.object = object
 			this.name = name

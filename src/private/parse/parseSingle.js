@@ -1,11 +1,11 @@
-import {BagSimple, LocalAccess, Member, NumberLiteral, SpecialVal, Splat} from '../MsAst'
-import {DotName, Group, G_Block, G_Bracket, G_Parenthesis, G_Space, G_Quote, Name,
+import {BagSimple, LocalAccess, NumberLiteral, SpecialVal} from '../MsAst'
+import {Group, G_Block, G_Bracket, G_Parenthesis, G_Space, G_Quote, Name,
 	opKeywordKindToSpecialValueKind, Keyword, KW_Focus} from '../Token'
 import {ifElse} from '../util'
 import {unexpected} from './context'
 import {blockWrap} from './parseBlock'
-import {parseExpr, parseExprParts, parseSpaced} from './parse*'
 import parseQuote from './parseQuote'
+import {parseExpr, parseExprParts, parseSpaced} from './parse*'
 import Slice from './Slice'
 
 export default token => {
@@ -38,16 +38,6 @@ export default token => {
 				return ifElse(opKeywordKindToSpecialValueKind(token.kind),
 					_ => new SpecialVal(loc, _),
 					() => unexpected(token))
-
-		}
-	else if (token instanceof DotName)
-		switch (token.nDots) {
-			case 1:
-				return new Member(token.loc, LocalAccess.this(token.loc), token.name)
-			case 3:
-				return new Splat(loc, new LocalAccess(loc, token.name))
-			default:
-				unexpected(token)
 		}
 	else
 		unexpected(token)

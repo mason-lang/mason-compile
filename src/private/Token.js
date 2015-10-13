@@ -8,18 +8,6 @@ This means that the parser avoids doing much of the work that parsers normally h
 it doesn't have to handle a "left parenthesis", only a Group(tokens, G_Parenthesis).
 */
 
-// `.name`, `..name`, etc.
-// Currently nDots > 1 is only used by `import` blocks.
-export class DotName {
-	constructor(loc, nDots /* Number */, name /* String */) {
-		this.loc = loc
-		this.nDots = nDots
-		this.name = name
-	}
-
-	toString() { return `${'.'.repeat(this.nDots)}${this.name}` }
-}
-
 // kind is a G_***.
 export class Group {
 	constructor(loc, subTokens /* Array[Token] */, kind /* Number */) {
@@ -46,7 +34,6 @@ export class Keyword {
 }
 
 // A name is guaranteed to *not* be a keyword.
-// It's also not a DotName.
 export class Name {
 	constructor(loc, name /* String */) {
 		this.loc = loc
@@ -105,15 +92,17 @@ export const
 	G_Space = g('spaced group'),
 	showGroupKind = groupKind => groupKindToName.get(groupKind)
 
-
 let nextKeywordKind = 0
 const
 	keywordNameToKind = new Map(),
 	keywordKindToName = new Map(),
+	nameKeywords = new Set(),
+	reservedKeywords = new Set(),
 	// These keywords are special names.
 	// When lexing a name, a map lookup is done by keywordKindFromName.
 	kw = name => {
 		const kind = kwNotName(name)
+		nameKeywords.add(kind)
 		keywordNameToKind.set(name, kind)
 		return kind
 	},
@@ -123,6 +112,10 @@ const
 		keywordKindToName.set(kind, debugName)
 		nextKeywordKind = nextKeywordKind + 1
 		return kind
+	},
+	kwReserved = name => {
+		const kind = kw(name)
+		reservedKeywords.add(kind)
 	}
 
 const reserved_words = [
@@ -168,7 +161,7 @@ const reserved_words = [
 ]
 
 for (const name of reserved_words)
-	keywordNameToKind.set(name, -1)
+	kwReserved(name)
 
 export const
 	KW_And = kw('and'),
@@ -176,8 +169,8 @@ export const
 	KW_Assert = kw('assert!'),
 	KW_AssertNot = kw('forbid!'),
 	KW_Assign = kw('='),
-	KW_AssignMutable = kw('::='),
-	KW_LocalMutate = kw(':='),
+	KW_AssignMutable = kwNotName('::='),
+	KW_LocalMutate = kwNotName(':='),
 	KW_Break = kw('break!'),
 	KW_BreakWithVal = kw('break'),
 	KW_Built = kw('built'),
@@ -190,8 +183,8 @@ export const
 	KW_Construct = kw('construct!'),
 	KW_Debugger = kw('debugger!'),
 	KW_Do = kw('do!'),
-	// Three dots followed by a space, as in `... things-added-to-@`.
-	KW_Ellipsis = kw('... '),
+	KW_Dot = kwNotName('.'),
+	KW_Ellipsis = kwNotName('... '),
 	KW_Else = kw('else'),
 	KW_ExceptDo = kw('except!'),
 	KW_ExceptVal = kw('except'),
@@ -220,7 +213,7 @@ export const
 	KW_New = kw('new'),
 	KW_Not = kw('not'),
 	KW_Null = kw('null'),
-	KW_ObjAssign = kw('. '),
+	KW_ObjAssign = kwNotName('. '),
 	KW_Of = kw('of'),
 	KW_Or = kw('or'),
 	KW_Out = kw('out'),
@@ -268,4 +261,8 @@ export const
 	isKeyword = (keywordKind, token) =>
 		token instanceof Keyword && token.kind === keywordKind,
 	isAnyKeyword = (keywordKinds, token) =>
-		token instanceof Keyword && keywordKinds.has(token.kind)
+		token instanceof Keyword && keywordKinds.has(token.kind),
+	isNameKeyword = token =>
+		isAnyKeyword(nameKeywords, token),
+	isReservedKeyword = token =>
+		isAnyKeyword(reservedKeywords, token)
