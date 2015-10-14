@@ -210,7 +210,7 @@ export default class MsAst {
 		constructor(
 			loc,
 			object, // Val
-			name, // String
+			name, // Union[String Val]
 			opType, // Opt[Val]
 			kind, // Number (SET_*)
 			value) { // Val

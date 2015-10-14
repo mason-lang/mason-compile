@@ -14,8 +14,8 @@ import parseCase from './parseCase'
 import parseExcept from './parseExcept'
 import {parseForDo} from './parseFor'
 import parseLine from './parseLine'
-import {tryParseName} from './parseName'
 import parseLocalDeclares, {parseLocalDeclaresJustNames} from './parseLocalDeclares'
+import parseMemberName from './parseMemberName'
 import parseQuote from './parseQuote'
 import {parseExpr, parseExprParts, parseSpaced, parseSwitch} from './parse*'
 import Slice from './Slice'
@@ -112,7 +112,7 @@ const
 
 		if (before.size() === 1) {
 			const token = before.head()
-			// `a.b = c`, `.b = c`, `a[b] = c`
+			// `a.b = c`, `.b = c`, `a."b" = c`, `."b" = c`, `a[b] = c`
 			if (isGroup(G_Space, token)) {
 				const spaced = Slice.group(token)
 				const [value, opType] = ifElse(spaced.opSplitOnceWhere(_ => isKeyword(KW_Type, _)),
@@ -120,21 +120,18 @@ const
 					() => [spaced, null])
 
 				const last = value.last()
-				const object = obj => {
-					if (obj === undefined)
-						obj = value.rtail()
-					return obj.isEmpty() ? LocalAccess.this(obj.loc) : parseSpaced(obj)
-				}
+				const object = obj =>
+					obj.isEmpty() ? LocalAccess.this(obj.loc) : parseSpaced(obj)
 
 				if (isKeyword(KW_Dot, value.nextToLast())) {
-					const name = tryParseName(last)
-					if (name !== null) {
-						const set = object(value.rtail().rtail())
-						return parseMemberSet(set, name, opType, at, after, loc)
-					} else
-						unexpected(last)
-				} else if (isGroup(G_Bracket, last))
-					return parseSubSet(object(), Slice.group(last), opType, at, after, loc)
+					const name = parseMemberName(last)
+					const set = object(value.rtail().rtail())
+					const kind = memberSetKind(at)
+					return new MemberSet(loc, set, name, opType, kind, parseExpr(after))
+				} else if (isGroup(G_Bracket, last)) {
+					const set = object(value.rtail())
+					return parseSubSet(set, Slice.group(last), opType, at, after, loc)
+				}
 			// `"1". 1`
 			} else if (isGroup(G_Quote, token) && kind === KW_ObjAssign)
 				return new ObjEntryComputed(loc, parseQuote(Slice.group(token)), parseExpr(after))
@@ -145,8 +142,6 @@ const
 			parseAssign(before, kind, after, loc)
 	},
 
-	parseMemberSet = (object, name, opType, at, after, loc) =>
-		new MemberSet(loc, object, name, opType, memberSetKind(at), parseExpr(after)),
 	memberSetKind = at => {
 		switch (at.kind) {
 			case KW_Assign:

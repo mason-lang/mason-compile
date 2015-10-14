@@ -6,7 +6,8 @@ import {Group, G_Bracket, G_Parenthesis, G_Quote, isGroup, isKeyword, Keyword, K
 import {assert, cat} from '../util'
 import {checkEmpty, context, unexpected} from './context'
 import {parseExprParts} from './parse*'
-import parseName, {tryParseName} from './parseName'
+import parseMemberName from './parseMemberName'
+import parseName from './parseName'
 import parseQuote from './parseQuote'
 import parseSingle from './parseSingle'
 import Slice from './Slice'
@@ -82,14 +83,4 @@ const parseSpacedFold = (start, rest) => {
 		}
 	}
 	return acc
-}
-
-const parseMemberName = token => {
-	const name = tryParseName(token)
-	if (name !== null)
-		return name
-	else if (isGroup(G_Quote, token))
-		return parseQuote(Slice.group(token))
-	else
-		unexpected(token)
 }

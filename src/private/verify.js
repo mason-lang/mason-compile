@@ -60,9 +60,14 @@ let
 	name
 
 const
-	verifyOp = op => {
-		if (op !== null)
-			op.verify()
+	verifyOp = _ => {
+		if (_ !== null)
+			_.verify()
+	},
+
+	verifyName = _ => {
+		if (typeof _ !== 'string')
+			_.verify()
 	},
 
 	deleteLocal = localDeclare =>
@@ -432,12 +437,12 @@ implementMany(MsAstTypes, 'verify', {
 
 	Member() {
 		this.object.verify()
-		if (typeof this.name !== 'string')
-			this.name.verify()
+		verifyName(this.name)
 	},
 
 	MemberSet() {
 		this.object.verify()
+		verifyName(this.name)
 		verifyOp(this.opType)
 		this.value.verify()
 	},
@@ -510,8 +515,7 @@ implementMany(MsAstTypes, 'verify', {
 
 	Quote() {
 		for (const _ of this.parts)
-			if (typeof _ !== 'string')
-				_.verify()
+			verifyName(_)
 	},
 
 	QuoteTemplate() {
@@ -541,8 +545,7 @@ implementMany(MsAstTypes, 'verify', {
 	SuperCallDo: verifySuperCall,
 	SuperMember() {
 		context.check(method !== null, this.loc, 'Must be in method.')
-		if (typeof this.name !== 'string')
-			this.name.verify()
+		verifyName(this.name)
 	},
 
 	SwitchDo() {
@@ -675,8 +678,7 @@ const
 	},
 
 	verifyMethod = (_, doVerify) => {
-		if (typeof _.symbol !== 'string')
-			_.symbol.verify()
+		verifyName(_.symbol)
 		withMethod(_, doVerify)
 	},
 

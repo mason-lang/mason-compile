@@ -351,14 +351,17 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	MemberSet() {
+		const obj = t0(this.object)
+		const name = () =>
+			typeof this.name === 'string' ? new Literal(this.name) : t0(this.name)
 		const val = maybeWrapInCheckContains(t0(this.value), this.opType, this.name)
 		switch (this.kind) {
 			case SET_Init:
-				return msNewProperty(t0(this.object), new Literal(this.name), val)
+				return msNewProperty(obj, name(), val)
 			case SET_InitMutable:
-				return msNewMutableProperty(t0(this.object), new Literal(this.name), val)
+				return msNewMutableProperty(obj, name(), val)
 			case SET_Mutate:
-				return new AssignmentExpression('=', member(t0(this.object), this.name), val)
+				return new AssignmentExpression('=', memberStringOrVal(obj, this.name), val)
 			default: throw new Error()
 		}
 	},
