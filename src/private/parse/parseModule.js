@@ -1,9 +1,10 @@
 import {code} from '../../CompileError'
+import {check, options} from '../context'
 import {AssignSingle, ImportDo, ImportGlobal, Import, LD_Const, LD_Lazy, LocalDeclare,
 	LocalDeclareName, Module, ModuleExportNamed, Quote} from '../MsAst'
 import {G_Space, isGroup, isKeyword, KW_Dot, KW_Ellipsis, KW_Focus, KW_Import, KW_ImportDo,
 	KW_ImportLazy} from '../Token'
-import {checkNonEmpty, context, unexpected} from './context'
+import {checkNonEmpty, unexpected} from './checks'
 import {justBlock, parseModuleBlock} from './parseBlock'
 import {parseLocalDeclaresJustNames} from './parseLocalDeclares'
 import parseName, {tryParseName} from './parseName'
@@ -20,10 +21,10 @@ export default tokens => {
 
 	const lines = parseModuleBlock(rest3)
 
-	if (context.opts.includeModuleName()) {
+	if (options.includeModuleName()) {
 		const name = new LocalDeclareName(tokens.loc)
 		const assign = new AssignSingle(tokens.loc, name,
-			Quote.forString(tokens.loc, context.opts.moduleName()))
+			Quote.forString(tokens.loc, options.moduleName()))
 		lines.push(new ModuleExportNamed(tokens.loc, assign))
 	}
 
@@ -39,7 +40,7 @@ const
 			if (isKeyword(importKeywordKind, line0.head())) {
 				const {imports, opImportGlobal} = parseImports(importKeywordKind, line0.tail())
 				if (importKeywordKind !== KW_Import)
-					context.check(opImportGlobal === null, line0.loc, 'Can\'t use global here.')
+					check(opImportGlobal === null, line0.loc, 'Can\'t use global here.')
 				return {imports, opImportGlobal, rest: tokens.tail()}
 			}
 		}
@@ -60,7 +61,7 @@ const
 				imports.push(new ImportDo(line.loc, path))
 			} else
 				if (path === 'global') {
-					context.check(opImportGlobal === null, line.loc, 'Can\'t use global twice')
+					check(opImportGlobal === null, line.loc, 'Can\'t use global twice')
 					const {imported, opImportDefault} =
 						parseThingsImported(name, false, line.tail())
 					opImportGlobal = new ImportGlobal(line.loc, imported, opImportDefault)
@@ -84,8 +85,7 @@ const
 				[importDefault(), tokens.tail()] :
 				[null, tokens]
 			const imported = parseLocalDeclaresJustNames(rest).map(l => {
-				context.check(l.name !== '_', l.pos,
-					() => `${code('_')} not allowed as import name.`)
+				check(l.name !== '_', l.pos, () => `${code('_')} not allowed as import name.`)
 				if (isLazy)
 					l.kind = LD_Lazy
 				return l
@@ -99,7 +99,7 @@ const
 		if (name !== null)
 			return {path: name, name}
 		else {
-			context.check(isGroup(G_Space, token), token.loc, 'Not a valid module name.')
+			check(isGroup(G_Space, token), token.loc, 'Not a valid module name.')
 			const tokens = Slice.group(token)
 
 			// Take leading dots. There can be any number, so count ellipsis as 3 dots in a row.

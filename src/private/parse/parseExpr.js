@@ -1,5 +1,6 @@
 import Loc from 'esast/dist/Loc'
 import {code} from '../../CompileError'
+import {check, fail} from '../context'
 import {Call, Cond, ConditionalVal, LocalDeclareFocus, Logic, L_And, L_Or, New, Not, ObjPair,
 	ObjSimple, SuperCall, With, Yield, YieldTo} from '../MsAst'
 import {isKeyword, Keyword, KW_And, KW_As, KW_CaseVal, KW_Class, KW_Cond, KW_ExceptVal, KW_ForBag,
@@ -7,7 +8,7 @@ import {isKeyword, Keyword, KW_And, KW_As, KW_CaseVal, KW_Class, KW_Cond, KW_Exc
 	KW_FunThisGenDo, KW_IfVal, KW_New, KW_Not, KW_ObjAssign, KW_Or, KW_SuperVal, KW_SwitchVal,
 	KW_UnlessVal, KW_With, KW_Yield, KW_YieldTo, Name} from '../Token'
 import {cat, head, ifElse, opIf, tail} from '../util'
-import {checkNonEmpty, context} from './context'
+import {checkNonEmpty} from './checks'
 import {parseClass, parseExcept, parseSingle, parseSwitch} from './parse*'
 import {beforeAndBlock, parseBlockDo, parseBlockVal} from './parseBlock'
 import parseCase from './parseCase'
@@ -26,7 +27,7 @@ export default tokens =>
 			const pairs = []
 			for (let i = 0; i < splits.length - 1; i = i + 1) {
 				const name = splits[i].before.last()
-				context.check(name instanceof Name, name.loc, () =>
+				check(name instanceof Name, name.loc, () =>
 					`Expected a name, not ${name}`)
 				const tokensValue = i === splits.length - 2 ?
 					splits[i + 1].before :
@@ -121,7 +122,7 @@ const
 		const parts = parseExprParts(tokens)
 		switch (parts.length) {
 			case 0:
-				context.fail(tokens.loc, 'Expected an expression, got nothing.')
+				fail(tokens.loc, 'Expected an expression, got nothing.')
 			case 1:
 				return head(parts)
 			default:
@@ -131,8 +132,7 @@ const
 
 	parseCond = tokens => {
 		const parts = parseExprParts(tokens)
-		context.check(parts.length === 3, tokens.loc, () =>
-			`${code('cond')} takes exactly 3 arguments.`)
+		check(parts.length === 3, tokens.loc, () => `${code('cond')} takes exactly 3 arguments.`)
 		return new Cond(tokens.loc, parts[0], parts[1], parts[2])
 	},
 
@@ -141,7 +141,7 @@ const
 
 		const [val, declare] = ifElse(before.opSplitOnceWhere(_ => isKeyword(KW_As, _)),
 			({before, after}) => {
-				context.check(after.size() === 1, () =>
+				check(after.size() === 1, () =>
 					`Expected only 1 token after ${code('as')}.`)
 				return [parseExprPlain(before), parseLocalDeclare(after.head())]
 			},

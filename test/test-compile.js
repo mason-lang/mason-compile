@@ -3,10 +3,9 @@ import {Node} from 'esast/dist/ast'
 import {readFileSync} from 'fs'
 import numeral from 'numeral'
 import compile from '../dist/compile'
-import MsAst from '../dist/private/MsAst'
-import CompileContext from '../dist/private/CompileContext'
-import CompileOptions from '../dist/private/CompileOptions'
+import {setContext, warnings} from '../dist/private/context'
 import lex from '../dist/private/lex'
+import MsAst from '../dist/private/MsAst'
 import parse from '../dist/private/parse/parse'
 import render from '../dist/private/render'
 import transpile from '../dist/private/transpile/transpile'
@@ -30,29 +29,30 @@ const doTest = isPerfTest => {
 			]
 		}
 	}
-	const context = new CompileContext(new CompileOptions(opts))
+
+	setContext(opts)
 
 	try {
-		const rootToken = lex(context, source)
+		const rootToken = lex(source)
 		// console.log(`==>\n${rootToken}`)
-		const msAst = parse(context, rootToken)
+		const msAst = parse(rootToken)
 		// console.log(`==>\n${msAst}`)
-		const verifyResults = verify(context, msAst)
+		const verifyResults = verify(msAst)
 		// console.log(`+++\n${verifyResults.___}`)
-		const esAst = transpile(context, msAst, verifyResults)
+		const esAst = transpile(msAst, verifyResults)
 		// console.log(`==>\n${esAst}`)
-		const {code} = render(context, esAst)
+		const {code} = render(esAst)
 
-		for (const _ of context.warnings)
+		for (const _ of warnings)
 			console.log(_)
 
 		if (isPerfTest)
 			benchmark({
-				lex() { lex(context, source) },
-				parse() { parse(context, rootToken) },
-				verify() { verify(context, msAst) },
-				transpile() { transpile(context, msAst, verifyResults) },
-				render() { render(context, esAst) },
+				lex() { lex(source) },
+				parse() { parse(rootToken) },
+				verify() { verify(msAst) },
+				transpile() { transpile(msAst, verifyResults) },
+				render() { render(esAst) },
 				all() { compile(source, opts) }
 			})
 		else {

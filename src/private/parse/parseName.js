@@ -1,4 +1,4 @@
-import {unexpected} from './context'
+import {unexpected} from './checks'
 import {isNameKeyword, keywordName, Name} from '../Token'
 import {opOr} from '../util'
 

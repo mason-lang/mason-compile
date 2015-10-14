@@ -1,5 +1,5 @@
 import {G_Quote, isGroup} from '../Token'
-import {unexpected} from './context'
+import {unexpected} from './checks'
 import {tryParseName} from './parseName'
 import parseQuote from './parseQuote'
 import Slice from './Slice'

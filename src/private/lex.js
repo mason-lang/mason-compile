@@ -1,5 +1,6 @@
 import Loc, {Pos, StartLine, StartPos, StartColumn, singleCharLoc} from 'esast/dist/Loc'
 import {code} from '../CompileError'
+import {check, fail, options, warn, warnIf} from './context'
 import {NumberLiteral} from './MsAst'
 import {DocComment, Group, G_Block, G_Bracket, G_Line, G_Parenthesis, G_Space, G_Quote, isKeyword,
 	Keyword, KW_AssignMutable, KW_Dot, KW_Ellipsis, KW_Focus, KW_Fun, KW_FunDo, KW_FunGen,
@@ -11,7 +12,7 @@ import {assert, isEmpty, last} from './util'
 /*
 This produces the Token tree (see Token.js).
 */
-export default (context, sourceString) => {
+export default sourceString => {
 	/*
 	Lexing algorithm requires trailing newline to close any blocks.
 	Use a 0-terminated string because it's faster than checking whether index === length.
@@ -51,7 +52,7 @@ export default (context, sourceString) => {
 		},
 
 		closeGroup = (closePos, closeKind) => {
-			context.check(closeKind === curGroup.kind, closePos, () =>
+			check(closeKind === curGroup.kind, closePos, () =>
 				`Trying to close ${showGroupKind(closeKind)}, ` +
 				`but last opened ${showGroupKind(curGroup.kind)}`)
 			_closeGroup(closePos, closeKind)
@@ -68,7 +69,7 @@ export default (context, sourceString) => {
 						// Spaced should always have at least two elements.
 						addToCurrentGroup(size === 1 ? justClosed.subTokens[0] : justClosed)
 					else
-						context.warn(justClosed.loc, 'Unnecessary space.')
+						warn(justClosed.loc, 'Unnecessary space.')
 					break
 				}
 				case G_Line:
@@ -78,7 +79,7 @@ export default (context, sourceString) => {
 						addToCurrentGroup(justClosed)
 					break
 				case G_Block:
-					context.check(!isEmpty(justClosed.subTokens), closePos, 'Empty block.')
+					check(!isEmpty(justClosed.subTokens), closePos, 'Empty block.')
 					addToCurrentGroup(justClosed)
 					break
 				default:
@@ -176,7 +177,7 @@ export default (context, sourceString) => {
 
 		mustEat = (charToEat, precededBy) => {
 			const canEat = tryEat(charToEat)
-			context.check(canEat, pos, () =>
+			check(canEat, pos, () =>
 				`${code(precededBy)} must be followed by ${showChar(charToEat)}`)
 		},
 
@@ -334,14 +335,14 @@ export default (context, sourceString) => {
 				addToCurrentGroup(new NumberLiteral(loc(), str))
 			},
 			eatIndent = () => {
-				const optIndent = context.opts.indent()
+				const optIndent = options.indent()
 				if (optIndent === '\t') {
 					const indent = skipWhileEquals(Tab)
-					context.check(peek() !== Space, pos, 'Line begins in a space')
+					check(peek() !== Space, pos, 'Line begins in a space')
 					return indent
 				} else {
 					const spaces = skipWhileEquals(Space)
-					context.check(spaces % optIndent === 0, pos, () =>
+					check(spaces % optIndent === 0, pos, () =>
 						`Indentation spaces must be a multiple of ${optIndent}`)
 					return spaces / optIndent
 				}
@@ -349,7 +350,7 @@ export default (context, sourceString) => {
 
 		const
 			handleName = () => {
-				context.check(isNameCharacter(peekPrev()), loc(), () =>
+				check(isNameCharacter(peekPrev()), loc(), () =>
 					`Reserved character ${showChar(peekPrev())}`)
 
 				// All other characters should be handled in a case above.
@@ -384,7 +385,7 @@ export default (context, sourceString) => {
 				case NullChar:
 					return
 				case CloseBrace:
-					context.check(isInQuote, loc, () =>
+					check(isInQuote, loc, () =>
 						`Reserved character ${showChar(CloseBrace)}`)
 					return
 				case Quote:
@@ -418,15 +419,15 @@ export default (context, sourceString) => {
 					space(loc())
 					break
 				case Newline: {
-					context.check(!isInQuote, loc, 'Quote interpolation cannot contain newline')
-					context.warnIf(peek2Before() === Space, pos, 'Line ends in a space.')
+					check(!isInQuote, loc, 'Quote interpolation cannot contain newline')
+					warnIf(peek2Before() === Space, pos, 'Line ends in a space.')
 
 					// Skip any blank lines.
 					skipNewlines()
 					const oldIndent = indent
 					indent = eatIndent()
 					if (indent > oldIndent) {
-						context.check(indent === oldIndent + 1, loc,
+						check(indent === oldIndent + 1, loc,
 							'Line is indented more than once')
 						const l = loc()
 						// Block at end of line goes in its own spaced group.
@@ -451,7 +452,7 @@ export default (context, sourceString) => {
 				case Tab:
 					// We always eat tabs in the Newline handler,
 					// so this will only happen in the middle of a line.
-					context.fail(loc(), 'Tab may only be used to indent')
+					fail(loc(), 'Tab may only be used to indent')
 
 				// FUN
 
@@ -474,7 +475,7 @@ export default (context, sourceString) => {
 					if (tryEat(Space) || tryEat(Tab)) {
 						const text = eatRestOfLine()
 						closeSpaceOKIfEmpty(startPos())
-						context.check(
+						check(
 							curGroup.kind === G_Line && curGroup.subTokens.length === 0, loc, () =>
 							`Doc comment must go on its own line. (Did you mean ${code('||')}?)`)
 						addToCurrentGroup(new DocComment(loc(), text))
@@ -550,7 +551,7 @@ export default (context, sourceString) => {
 
 				case Ampersand: case Backslash: case Backtick: case Caret:
 				case Comma: case Percent: case Semicolon:
-					context.fail(loc, `Reserved character ${showChar(characterEaten)}`)
+					fail(loc, `Reserved character ${showChar(characterEaten)}`)
 				default:
 					handleName()
 			}
@@ -565,7 +566,7 @@ export default (context, sourceString) => {
 		const isIndented = tryEatNewline()
 		if (isIndented) {
 			const actualIndent = skipWhileEquals(Tab)
-			context.check(actualIndent === quoteIndent, pos,
+			check(actualIndent === quoteIndent, pos,
 				'Indented quote must have exactly one more indent than previous line.')
 		}
 
@@ -610,7 +611,7 @@ export default (context, sourceString) => {
 					// Go back to before we ate it.
 					originalPos.column = originalPos.column - 1
 
-					context.check(isIndented, locSingle, 'Unclosed quote.')
+					check(isIndented, locSingle, 'Unclosed quote.')
 					// Allow extra blank lines.
 					const numNewlines = skipNewlines()
 					const newIndent = skipWhileEquals(Tab)

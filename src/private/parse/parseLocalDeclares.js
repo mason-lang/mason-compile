@@ -1,8 +1,9 @@
 import {code} from '../../CompileError'
+import {check} from '../context'
 import {LD_Const, LD_Lazy, LocalDeclare} from '../MsAst'
 import {G_Space, isGroup, isKeyword, KW_Dot, KW_Focus, KW_Lazy, KW_Type, Name} from '../Token'
 import {opIf} from '../util'
-import {checkNonEmpty, context} from './context'
+import {checkNonEmpty} from './checks'
 import {parseSpaced} from './parse*'
 import Slice from './Slice'
 
@@ -36,7 +37,7 @@ export const
 		const rest2 = rest.tail()
 		const opType = opIf(!rest2.isEmpty(), () => {
 			const colon = rest2.head()
-			context.check(isKeyword(KW_Type, colon), colon.loc, () => `Expected ${code(':')}`)
+			check(isKeyword(KW_Type, colon), colon.loc, () => `Expected ${code(':')}`)
 			const tokensType = rest2.tail()
 			checkNonEmpty(tokensType, () => `Expected something after ${colon}`)
 			return parseSpaced(tokensType)
@@ -60,8 +61,7 @@ export const
 		if (isKeyword(KW_Focus, token))
 			return '_'
 		else {
-			context.check(token instanceof Name, token.loc, () =>
-				`Expected a local name, not ${token}.`)
+			check(token instanceof Name, token.loc, () => `Expected a local name, not ${token}.`)
 			return token.name
 		}
 	}

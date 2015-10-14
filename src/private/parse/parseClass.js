@@ -1,10 +1,10 @@
+import {check, fail} from '../context'
 import {Class, ClassDo, Constructor, Fun, LocalDeclareFocus, LocalDeclareThis, MethodImpl,
 	MethodGetter, MethodSetter, Quote} from '../MsAst'
 import {isKeyword, Keyword, KW_Construct, KW_Do, KW_Fun, KW_FunDo, KW_FunGen, KW_FunGenDo,
 	KW_FunThis, KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo, KW_Get, KW_Set, KW_Static
 	} from '../Token'
 import {opIf} from '../util'
-import {context} from './context'
 import {parseExpr} from './parse*'
 import {beforeAndBlock, justBlock, justBlockDo, parseBlockDo, parseBlockVal,} from './parseBlock'
 import parseFun, {_funArgsAndBlock} from './parseFun'
@@ -45,14 +45,10 @@ export default tokens => {
 
 const
 	parseConstructor = tokens => {
-		const {args, memberArgs, opRestArg, block, opIn, opOut} =
-			_funArgsAndBlock(true, tokens, true)
+		const {args, memberArgs, opRestArg, block} = _funArgsAndBlock(true, tokens, true)
+		const _this = new LocalDeclareThis(tokens.loc)
 		const isGenerator = false, opDeclareRes = null
-		const fun = new Fun(tokens.loc,
-			new LocalDeclareThis(tokens.loc),
-			isGenerator,
-			args, opRestArg,
-			block, opIn, opDeclareRes, opOut)
+		const fun = new Fun(tokens.loc, _this, isGenerator, args, opRestArg, block, opDeclareRes)
 		return new Constructor(tokens.loc, fun, memberArgs)
 	},
 
@@ -74,7 +70,7 @@ const
 			return new MethodSetter(tokens.loc, parseExprOrStrLit(before), parseBlockDo(block))
 		} else {
 			const baa = tokens.opSplitOnceWhere(isFunKeyword)
-			context.check(baa !== null, tokens.loc, 'Expected a function keyword somewhere.')
+			check(baa !== null, tokens.loc, 'Expected a function keyword somewhere.')
 			const {before, at, after} = baa
 			const fun = parseFun(methodFunKind(at), after)
 			return new MethodImpl(tokens.loc, parseExprOrStrLit(before), fun)
@@ -97,9 +93,9 @@ const
 			case KW_FunGen: return KW_FunThisGen
 			case KW_FunGenDo: return KW_FunThisGenDo
 			case KW_FunThis: case KW_FunThisDo: case KW_FunThisGen: case KW_FunThisGenDo:
-				context.fail(funKindToken.loc, 'Function `.` is implicit for methods.')
+				fail(funKindToken.loc, 'Function `.` is implicit for methods.')
 			default:
-				context.fail(funKindToken.loc, `Expected function kind, got ${funKindToken}`)
+				fail(funKindToken.loc, `Expected function kind, got ${funKindToken}`)
 		}
 	},
 

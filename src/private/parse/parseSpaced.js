@@ -1,10 +1,11 @@
 import {code} from '../../CompileError'
+import {fail} from '../context'
 import {Call, Lazy, LocalAccess, Member, QuoteTemplate, Splat, SuperCall, SuperMember
 	} from '../MsAst'
 import {Group, G_Bracket, G_Parenthesis, G_Quote, isGroup, isKeyword, Keyword, KW_Dot, KW_Ellipsis,
 	KW_Focus, KW_Lazy, KW_SuperVal, KW_Type} from '../Token'
 import {assert, cat} from '../util'
-import {checkEmpty, context, unexpected} from './context'
+import {checkEmpty, unexpected} from './checks'
 import {parseExprParts} from './parse*'
 import parseMemberName from './parseMemberName'
 import parseName from './parseName'
@@ -36,7 +37,7 @@ export default function parseSpaced(tokens) {
 			const x = new SuperCall(h2.loc, [])
 			return parseSpacedFold(x, rest.tail())
 		} else
-			context.fail(`Expected ${code('.')} or ${code('()')} after ${code('super')}`)
+			fail(`Expected ${code('.')} or ${code('()')} after ${code('super')}`)
 	} else
 		return parseSpacedFold(parseSingle(h), rest)
 }

@@ -9,6 +9,7 @@ import {ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryEx
 import {functionExpressionThunk, idCached, loc, member, propertyIdOrLiteralCached, toStatement
 	} from 'esast/dist/util'
 import manglePath from '../manglePath'
+import {check, options, warnIf} from '../context'
 import * as MsAstTypes from '../MsAst'
 import {AssignSingle, Call, Constructor, L_And, L_Or, LD_Lazy, LD_Mutable, Member, LocalDeclare,
 	Pattern, Splat, SD_Debugger, SET_Init, SET_InitMutable, SET_Mutate, SV_Contains, SV_False,
@@ -28,18 +29,17 @@ import {IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot,
 import {accessLocalDeclare, declare, forStatementInfinite, idForDeclareCached,
 	opTypeCheckForLocalDeclare} from './util'
 
-let context, verifyResults, isInGenerator, isInConstructor
+let verifyResults, isInGenerator, isInConstructor
 let nextDestructuredId
 
-export default (_context, moduleExpression, _verifyResults) => {
-	context = _context
+export default (moduleExpression, _verifyResults) => {
 	verifyResults = _verifyResults
 	isInGenerator = false
 	isInConstructor = false
 	nextDestructuredId = 0
 	const res = t0(moduleExpression)
 	// Release for garbage collection.
-	context = verifyResults = undefined
+	verifyResults = null
 	return res
 }
 
@@ -47,6 +47,7 @@ export const
 	t0 = expr => loc(expr.transpile(), expr.loc)
 const
 	t1 = (expr, arg) => loc(expr.transpile(arg), expr.loc),
+	t2 = (expr, arg, arg2) => loc(expr.transpile(arg, arg2)),
 	t3 = (expr, arg, arg2, arg3) => loc(expr.transpile(arg, arg2, arg3), expr.loc),
 	tLines = exprs => {
 		const out = []
@@ -110,48 +111,48 @@ implementMany(MsAstTypes, 'transpile', {
 
 	BagSimple() { return new ArrayExpression(this.parts.map(t0)) },
 
-	BlockDo(lead, opDeclareRes, opOut) {
+	BlockDo(lead, opDeclareRes, follow) {
 		// TODO:ES6 Optional arguments
 		if (lead === undefined) lead = null
 		if (opDeclareRes === undefined) opDeclareRes = null
-		if (opOut === undefined) opOut = null
+		if (follow === undefined) follow = null
 		assert(opDeclareRes === null)
-		return new BlockStatement(cat(lead, tLines(this.lines), opOut))
+		return new BlockStatement(cat(lead, tLines(this.lines), follow))
 	},
 
-	BlockValThrow(lead, opDeclareRes, opOut) {
+	BlockValThrow(lead, opDeclareRes, follow) {
 		// TODO:ES6 Optional arguments
 		if (lead === undefined) lead = null
 		if (opDeclareRes === undefined) opDeclareRes = null
-		if (opOut === undefined) opOut = null
-		context.warnIf(opDeclareRes !== null || opOut !== null, this.loc,
-			'Out condition ignored because of oh-no!')
+		if (follow === undefined) follow = null
+		warnIf(opDeclareRes !== null || follow !== null, this.loc,
+			'Return type ignored because the block always throws.')
 		return new BlockStatement(cat(lead, tLines(this.lines), t0(this.throw)))
 	},
 
-	BlockWithReturn(lead, opDeclareRes, opOut) {
-		return transpileBlock(t0(this.returned), tLines(this.lines), lead, opDeclareRes, opOut)
+	BlockWithReturn(lead, opDeclareRes, follow) {
+		return transpileBlock(t0(this.returned), tLines(this.lines), lead, opDeclareRes, follow)
 	},
 
-	BlockBag(lead, opDeclareRes, opOut) {
+	BlockBag(lead, opDeclareRes, follow) {
 		return transpileBlock(
 			IdBuilt,
 			cat(DeclareBuiltBag, tLines(this.lines)),
-			lead, opDeclareRes, opOut)
+			lead, opDeclareRes, follow)
 	},
 
-	BlockObj(lead, opDeclareRes, opOut) {
+	BlockObj(lead, opDeclareRes, follow) {
 		return transpileBlock(
 			IdBuilt,
 			cat(DeclareBuiltObj, tLines(this.lines)),
-			lead, opDeclareRes, opOut)
+			lead, opDeclareRes, follow)
 	},
 
-	BlockMap(lead, opDeclareRes, opOut) {
+	BlockMap(lead, opDeclareRes, follow) {
 		return transpileBlock(
 			IdBuilt,
 			cat(DeclareBuiltMap, tLines(this.lines)),
-			lead, opDeclareRes, opOut)
+			lead, opDeclareRes, follow)
 	},
 
 	BlockWrap() { return blockWrap(t0(this.block)) },
@@ -263,18 +264,15 @@ implementMany(MsAstTypes, 'transpile', {
 		const nArgs = new Literal(this.args.length)
 		const opDeclareRest = opMap(this.opRestArg, rest =>
 			declare(rest, new CallExpression(ArraySliceCall, [IdArguments, nArgs])))
-		const argChecks = opIf(context.opts.includeChecks(), () =>
+		const argChecks = opIf(options.includeChecks(), () =>
 			flatOpMap(this.args, opTypeCheckForLocalDeclare))
-
-		const _in = opMap(this.opIn, t0)
 
 		const opDeclareThis =
 			opIf(!isInConstructor && this.opDeclareThis != null, () => DeclareLexicalThis)
 
-		const lead = cat(leadStatements, opDeclareThis, opDeclareRest, argChecks, _in)
+		const lead = cat(leadStatements, opDeclareThis, opDeclareRest, argChecks)
 
-		const _out = opMap(this.opOut, t0)
-		const body = t3(this.block, lead, this.opDeclareRes, _out)
+		const body = t2(this.block, lead, this.opDeclareRes)
 		const args = this.args.map(t0)
 		isInGenerator = oldInGenerator
 		const id = opMap(verifyResults.opName(this), idCached)
@@ -388,8 +386,8 @@ implementMany(MsAstTypes, 'transpile', {
 		const amd = amdWrapModule(this.doImports, this.imports, body)
 
 		return new Program(cat(
-			opIf(context.opts.includeUseStrict(), () => UseStrict),
-			opIf(context.opts.includeAmdefine(), () => AmdefineHeader),
+			opIf(options.includeUseStrict(), () => UseStrict),
+			opIf(options.includeAmdefine(), () => AmdefineHeader),
 			toStatement(amd)))
 	},
 
@@ -404,7 +402,7 @@ implementMany(MsAstTypes, 'transpile', {
 
 	New() {
 		const anySplat = this.args.some(_ => _ instanceof Splat)
-		context.check(!anySplat, this.loc, 'TODO: Splat params for new')
+		check(!anySplat, this.loc, 'TODO: Splat params for new')
 		return new NewExpression(t0(this.type), this.args.map(t0))
 	},
 
@@ -575,7 +573,7 @@ function superCall() {
 }
 
 function switchPart() {
-	const opOut = opIf(this instanceof SwitchDoPart, () => new BreakStatement)
+	const follow = opIf(this instanceof SwitchDoPart, () => new BreakStatement)
 	/*
 	We could just pass block.body for the switch lines, but instead
 	enclose the body of the switch case in curly braces to ensure a new scope.
@@ -592,7 +590,7 @@ function switchPart() {
 			}
 		}
 	*/
-	const block = t3(this.result, null, null, opOut)
+	const block = t3(this.result, null, null, follow)
 	// If switch has multiple values, build up a statement like: `case 1: case 2: { doBlock() }`
 	const x = []
 	for (let i = 0; i < this.values.length - 1; i = i + 1)
@@ -649,19 +647,19 @@ const
 		}
 	},
 
-	transpileBlock = (returned, lines, lead, opDeclareRes, opOut) => {
+	transpileBlock = (returned, lines, lead, opDeclareRes, follow) => {
 		// TODO:ES6 Optional arguments
 		if (lead === undefined) lead = null
 		if (opDeclareRes === undefined) opDeclareRes = null
-		if (opOut === undefined) opOut = null
+		if (follow === undefined) follow = null
 		const fin = ifElse(opDeclareRes,
 			rd => {
 				const ret = maybeWrapInCheckContains(returned, rd.opType, rd.name)
-				return ifElse(opOut,
+				return ifElse(follow,
 					_ => cat(declare(rd, ret), _, ReturnRes),
 					() => new ReturnStatement(ret))
 			},
-			() => cat(opOut, new ReturnStatement(returned)))
+			() => cat(follow, new ReturnStatement(returned)))
 		return new BlockStatement(cat(lead, lines, fin))
 	},
 
@@ -684,13 +682,13 @@ const IdBoot = new Identifier('_boot')
 // Module helpers
 const
 	amdWrapModule = (doImports, imports, body) => {
-		const shouldImportBoot = context.opts.importBoot()
+		const shouldImportBoot = options.importBoot()
 
 		const allImports = doImports.concat(imports)
 		const allImportPaths = allImports.map(_ => manglePath(_.path))
 
 		const arrImportPaths = new ArrayExpression(cat(
-			opIf(shouldImportBoot, () => new Literal(context.opts.bootPath())),
+			opIf(shouldImportBoot, () => new Literal(options.bootPath())),
 			LitStrExports,
 			allImportPaths.map(_ => new Literal(_))))
 
@@ -719,7 +717,7 @@ const
 			doBoot, importDos, opDeclareImportedLocals, body, ReturnExports))
 
 		const lazyBody =
-			context.opts.lazyModule() ?
+			options.lazyModule() ?
 				new BlockStatement([new ExpressionStatement(
 					new AssignmentExpression('=', ExportsGet,
 						msLazy(functionExpressionThunk(fullBody))))]) :
@@ -777,13 +775,13 @@ const
 	},
 
 	maybeWrapInCheckContains = (ast, opType, name) =>
-		 context.opts.includeChecks() && opType !== null ?
+		options.includeChecks() && opType !== null ?
 			msCheckContains(t0(opType), ast, new Literal(name)) :
 			ast,
 
 	getMember = (astObject, gotName, isLazy, isModule) =>
 		isLazy ?
 		msLazyGet(astObject, new Literal(gotName)) :
-		isModule && context.opts.includeChecks() ?
+		isModule && options.includeChecks() ?
 		msGet(astObject, new Literal(gotName)) :
 		member(astObject, gotName)

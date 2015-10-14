@@ -1,7 +1,8 @@
 import {code} from '../../CompileError'
+import {check} from '../context'
 import {LocalAccess, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart} from '../MsAst'
 import {isKeyword, KW_Else, KW_Or} from '../Token'
-import {checkEmpty, context} from './context'
+import {checkEmpty} from './checks'
 import {parseExpr} from './parse*'
 import {beforeAndBlock, justBlockDo, justBlockVal, parseBlockDo, parseBlockVal} from './parseBlock'
 import parseSingle from './parseSingle'
@@ -23,8 +24,7 @@ export default (isVal, switchedFromFun, tokens) => {
 		[block, null]
 
 	const parts = partLines.mapSlices(parseSwitchLine(isVal))
-	context.check(parts.length > 0, tokens.loc, () =>
-		`Must have at least 1 non-${code('else')} test.`)
+	check(parts.length > 0, tokens.loc, () => `Must have at least 1 non-${code('else')} test.`)
 
 	return new (isVal ? SwitchVal : SwitchDo)(tokens.loc, switched, parts, opElse)
 }

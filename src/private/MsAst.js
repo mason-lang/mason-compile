@@ -429,18 +429,14 @@ export default class MsAst {
 			args, // Array[LocalDeclare]
 			opRestArg, // Opt[LocalDeclare]
 			block, // Block
-			opIn=null, // Opt[BlockDo]
-			opDeclareRes=null, // Opt[LocalDeclareRes]
-			opOut=null) { // Opt[BlockDo]) {
+			opDeclareRes) { // Opt[LocalDeclareRes]
 			super(loc)
 			this.opDeclareThis = opDeclareThis
 			this.isGenerator = isGenerator
 			this.args = args
 			this.opRestArg = opRestArg
 			this.block = block
-			this.opIn = opIn
 			this.opDeclareRes = opDeclareRes
-			this.opOut = opOut
 		}
 	}
 

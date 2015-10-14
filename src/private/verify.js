@@ -1,4 +1,5 @@
 import {code} from '../CompileError'
+import {check, fail, options, warnIf} from './context'
 import * as MsAstTypes from './MsAst'
 import {AssignDestructure, AssignSingle, BlockVal, Call, Class, Constructor, Do, ForVal, Fun,
 	LocalDeclareBuilt, LocalDeclareFocus, LocalDeclareRes, ModuleExport, ObjEntry, Pattern,
@@ -9,8 +10,7 @@ import VerifyResults from './VerifyResults'
 /*
 The verifier generates information needed during transpiling, the VerifyResults.
 */
-export default (_context, msAst) => {
-	context = _context
+export default msAst => {
 	locals = new Map()
 	pendingBlockLocals = []
 	isInGenerator = false
@@ -24,13 +24,12 @@ export default (_context, msAst) => {
 
 	const res = results
 	// Release for garbage collection.
-	context = locals = okToNotUse = opLoop = pendingBlockLocals = method = results = null
+	locals = okToNotUse = opLoop = pendingBlockLocals = method = results = null
 	return res
 }
 
 // Use a trick like in parse.js and have everything close over these mutable variables.
 let
-	context,
 	// Map from names to LocalDeclares.
 	locals,
 	// Locals that don't have to be accessed.
@@ -171,8 +170,7 @@ const
 		addedLocals.forEach(verifyLocalDeclare)
 		const names = new Set()
 		for (const _ of addedLocals) {
-			context.check(!names.has(_.name), _.loc, () =>
-				`Duplicate local ${code(_.name)}`)
+			check(!names.has(_.name), _.loc, () => `Duplicate local ${code(_.name)}`)
 			names.add(_.name)
 		}
 		plusLocals(addedLocals, action)
@@ -188,7 +186,7 @@ const
 const verifyLocalUse = () => {
 	for (const [local, accesses] of results.localDeclareToAccesses)
 		if (!(local instanceof LocalDeclareBuilt || local instanceof LocalDeclareRes))
-			context.warnIf(isEmpty(accesses) && !okToNotUse.has(local), local.loc, () =>
+			warnIf(isEmpty(accesses) && !okToNotUse.has(local), local.loc, () =>
 				`Unused local variable ${code(local.name)}.`)
 }
 
@@ -259,13 +257,13 @@ implementMany(MsAstTypes, 'verify', {
 
 	Break() {
 		verifyInLoop(this)
-		context.check(!(opLoop instanceof ForVal), this.loc, () =>
+		check(!(opLoop instanceof ForVal), this.loc, () =>
 			`${code('for')} must break with a value.`)
 	},
 
 	BreakWithVal() {
 		verifyInLoop(this)
-		context.check(opLoop instanceof ForVal, this.loc, () =>
+		check(opLoop instanceof ForVal, this.loc, () =>
 			`${code('break')} only valid inside ${code('for')}`)
 		this.value.verify()
 	},
@@ -286,7 +284,7 @@ implementMany(MsAstTypes, 'verify', {
 	CaseValPart: verifyCasePart,
 
 	Catch() {
-		context.check(this.caught.opType === null, this.caught.loc, 'TODO: Caught types')
+		check(this.caught.opType === null, this.caught.loc, 'TODO: Caught types')
 		verifyAndPlusLocal(this.caught, () => this.block.verify())
 	},
 
@@ -328,10 +326,10 @@ implementMany(MsAstTypes, 'verify', {
 		const superCall = results.constructorToSuper.get(this)
 
 		if (classHasSuper)
-			context.check(superCall !== undefined, this.loc, () =>
+			check(superCall !== undefined, this.loc, () =>
 				`Constructor must contain ${code('super!')}`)
 		else
-			context.check(superCall === undefined, () => superCall.loc, () =>
+			check(superCall === undefined, () => superCall.loc, () =>
 				`Class has no superclass, so ${code('super!')} is not allowed.`)
 
 		for (const _ of this.memberArgs)
@@ -355,19 +353,14 @@ implementMany(MsAstTypes, 'verify', {
 
 	Fun() {
 		withBlockLocals(() => {
-			context.check(this.opDeclareRes === null || this.block instanceof BlockVal, this.loc,
+			check(this.opDeclareRes === null || this.block instanceof BlockVal, this.loc,
 				'Function with return condition must return something.')
 			withInGenerator(this.isGenerator, () =>
 				withLoop(null, () => {
 					const allArgs = cat(this.opDeclareThis, this.args, this.opRestArg)
 					verifyAndPlusLocals(allArgs, () => {
-						verifyOp(this.opIn)
 						this.block.verify()
 						opEach(this.opDeclareRes, verifyLocalDeclare)
-						const verifyOut = () => {
-							verifyOp(this.opOut)
-						}
-						ifElse(this.opDeclareRes, _ => plusLocal(_, verifyOut), verifyOut)
 					})
 				}))
 		})
@@ -386,7 +379,7 @@ implementMany(MsAstTypes, 'verify', {
 	LocalAccess() {
 		const declare = locals.get(this.name)
 		if (declare === undefined) {
-			const builtinPath = context.opts.builtinNameToPath.get(this.name)
+			const builtinPath = options.builtinNameToPath.get(this.name)
 			if (builtinPath === undefined)
 				failMissingLocal(this.loc, this.name)
 			else {
@@ -404,21 +397,21 @@ implementMany(MsAstTypes, 'verify', {
 
 	// Adding LocalDeclares to the available locals is done by Fun or lineNewLocals.
 	LocalDeclare() {
-		const builtinPath = context.opts.builtinNameToPath.get(this.name)
-		context.warnIf(builtinPath !== undefined, this.loc, () =>
+		const builtinPath = options.builtinNameToPath.get(this.name)
+		warnIf(builtinPath !== undefined, this.loc, () =>
 			`Local ${code(this.name)} overrides builtin from ${code(builtinPath)}.`)
 		verifyOp(this.opType)
 	},
 
 	LocalMutate() {
 		const declare = getLocalDeclare(this.name, this.loc)
-		context.check(declare.isMutable(), this.loc, () => `${code(this.name)} is not mutable.`)
+		check(declare.isMutable(), this.loc, () => `${code(this.name)} is not mutable.`)
 		// TODO: Track mutations. Mutable local must be mutated somewhere.
 		this.value.verify()
 	},
 
 	Logic() {
-		context.check(this.args.length > 1, 'Logic expression needs at least 2 arguments.')
+		check(this.args.length > 1, 'Logic expression needs at least 2 arguments.')
 		for (const _ of this.args)
 			_.verify()
 	},
@@ -473,7 +466,7 @@ implementMany(MsAstTypes, 'verify', {
 			_.verify()
 		verifyOp(this.opImportGlobal)
 
-		withName(context.opts.moduleName(), () => {
+		withName(options.moduleName(), () => {
 			verifyLines(this.lines)
 		})
 	},
@@ -507,7 +500,7 @@ implementMany(MsAstTypes, 'verify', {
 		const keys = new Set()
 		for (const pair of this.pairs) {
 			const {key, value} = pair
-			context.check(!keys.has(key), pair.loc, () => `Duplicate key ${key}`)
+			check(!keys.has(key), pair.loc, () => `Duplicate key ${key}`)
 			keys.add(key)
 			value.verify()
 		}
@@ -544,7 +537,7 @@ implementMany(MsAstTypes, 'verify', {
 	SuperCall: verifySuperCall,
 	SuperCallDo: verifySuperCall,
 	SuperMember() {
-		context.check(method !== null, this.loc, 'Must be in method.')
+		check(method !== null, this.loc, 'Must be in method.')
 		verifyName(this.name)
 	},
 
@@ -574,12 +567,12 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	Yield() {
-		context.check(isInGenerator, this.loc, 'Cannot yield outside of generator context')
+		check(isInGenerator, this.loc, 'Cannot yield outside of generator context')
 		verifyOp(this.opYielded)
 	},
 
 	YieldTo() {
-		context.check(isInGenerator, this.loc, 'Cannot yield outside of generator context')
+		check(isInGenerator, this.loc, 'Cannot yield outside of generator context')
 		this.yieldedTo.verify()
 	}
 })
@@ -619,11 +612,11 @@ function verifyExcept() {
 }
 
 function verifySuperCall() {
-	context.check(method !== null, this.loc, 'Must be in a method.')
+	check(method !== null, this.loc, 'Must be in a method.')
 	results.superCallToMethod.set(this, method)
 
 	if (method instanceof Constructor) {
-		context.check(this instanceof SuperCallDo, this.loc, () =>
+		check(this instanceof SuperCallDo, this.loc, () =>
 			`${code('super')} not supported in constructor; use ${code('super!')}`)
 		results.constructorToSuper.set(method, this)
 	}
@@ -637,7 +630,7 @@ function verifyImport() {
 	// So we mutate `locals` directly.
 	const addUseLocal = _ => {
 		const prev = locals.get(_.name)
-		context.check(prev === undefined, _.loc, () =>
+		check(prev === undefined, _.loc, () =>
 			`${code(_.name)} already imported at ${prev.loc}`)
 		verifyLocalDeclare(_)
 		setLocal(_)
@@ -660,8 +653,7 @@ const
 	},
 
 	verifyInLoop = loopUser =>
-		context.check(opLoop !== null, loopUser.loc, 'Not in a loop.'),
-
+		check(opLoop !== null, loopUser.loc, 'Not in a loop.'),
 
 	verifyCase = _ => {
 		const doIt = () => {
@@ -699,7 +691,7 @@ const
 	},
 
 	failMissingLocal = (loc, name) => {
-		context.fail(loc, () => {
+		fail(loc, () => {
 			// TODO:ES6 `Array.from(locals.keys())` should work
 			const keys = []
 			for (const key of locals.keys())
@@ -766,7 +758,7 @@ const
 				const name = newLocal.name
 				const oldLocal = locals.get(name)
 				if (oldLocal !== undefined) {
-					context.check(!thisBlockLocalNames.has(name), newLocal.loc,
+					check(!thisBlockLocalNames.has(name), newLocal.loc,
 						() => `A local ${code(name)} is already in this block.`)
 					shadowed.push(oldLocal)
 				}
@@ -796,5 +788,5 @@ const
 			line instanceof Call ||
 			line instanceof Yield ||
 			line instanceof YieldTo
-		context.check(isStatement, line.loc, 'Expression in statement position.')
+		check(isStatement, line.loc, 'Expression in statement position.')
 	}

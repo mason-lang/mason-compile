@@ -1,10 +1,11 @@
 import {code} from '../../CompileError'
+import {check, options} from '../context'
 import {AssignSingle, BagEntry, BlockBag, BlockDo, BlockObj, BlockMap, BlockValThrow,
 	BlockWithReturn, BlockWrap, LocalDeclare, MapEntry, ModuleExportDefault, ModuleExportNamed,
 	ObjEntry, ObjEntryAssign, Throw, Val} from '../MsAst'
 import {G_Block, isGroup, keywordName} from '../Token'
 import {isEmpty, last, rtail} from '../util'
-import {checkEmpty, checkNonEmpty, context} from './context'
+import {checkEmpty, checkNonEmpty} from './checks'
 import parseLine, {parseLineOrLines} from './parseLine'
 import tryTakeComment from './tryTakeComment'
 import Slice from './Slice'
@@ -14,7 +15,7 @@ export const
 	beforeAndBlock = tokens => {
 		checkNonEmpty(tokens, 'Expected an indented block.')
 		const block = tokens.last()
-		context.check(isGroup(G_Block, block), block.loc, 'Expected an indented block.')
+		check(isGroup(G_Block, block), block.loc, 'Expected an indented block.')
 		return [tokens.rtail(), Slice.group(block)]
 	},
 
@@ -34,7 +35,7 @@ export const
 	// Gets lines in a region.
 	parseLinesFromBlock = tokens => {
 		const h = tokens.head()
-		context.check(tokens.size() > 1 && tokens.size() === 2 && isGroup(G_Block, tokens.second()),
+		check(tokens.size() > 1 && tokens.size() === 2 && isGroup(G_Block, tokens.second()),
 			h.loc, () =>
 			`Expected indented block after ${h}, and nothing else.`)
 		const block = tokens.second()
@@ -62,12 +63,12 @@ export const
 			case KReturn_Obj:
 				return new BlockObj(tokens.loc, opComment, lines)
 			default: {
-				context.check(!isEmpty(lines), tokens.loc, 'Value block must end in a value.')
+				check(!isEmpty(lines), tokens.loc, 'Value block must end in a value.')
 				const val = last(lines)
 				if (val instanceof Throw)
 					return new BlockValThrow(tokens.loc, opComment, rtail(lines), val)
 				else {
-					context.check(val instanceof Val, val.loc, 'Value block must end in a value.')
+					check(val instanceof Val, val.loc, 'Value block must end in a value.')
 					return new BlockWithReturn(tokens.loc, opComment, rtail(lines), val)
 				}
 			}
@@ -83,12 +84,12 @@ export const
 				const cls = kReturn === KReturn_Bag ? BlockBag : BlockMap
 				const block = new cls(loc, opComment, lines)
 				const val = new BlockWrap(loc, block)
-				const assignee = LocalDeclare.plain(loc, context.opts.moduleName())
+				const assignee = LocalDeclare.plain(loc, options.moduleName())
 				const assign = new AssignSingle(loc, assignee, val)
 				return [new ModuleExportDefault(loc, assign)]
 			}
 			case KReturn_Obj: {
-				const moduleName = context.opts.moduleName()
+				const moduleName = options.moduleName()
 
 				// Module exports look like a BlockObj,  but are really different.
 				// In ES6, module exports must be completely static.
@@ -99,9 +100,9 @@ export const
 				// in a module context, it will be an error. (The module creates no `built` local.)
 				const convertToExports = line => {
 					if (line instanceof ObjEntry) {
-						context.check(line instanceof ObjEntryAssign, line.loc,
+						check(line instanceof ObjEntryAssign, line.loc,
 							'Module exports can not be computed.')
-						context.check(line.assign instanceof AssignSingle, line.loc,
+						check(line.assign instanceof AssignSingle, line.loc,
 							'Export AssignDestructure not yet supported.')
 						return line.assign.assignee.name === moduleName ?
 							new ModuleExportDefault(line.loc, line.assign) :
@@ -119,7 +120,7 @@ export const
 					const _ = opDefaultExport
 					moduleLines.push(new ModuleExportDefault(_.loc,
 						new AssignSingle(_.loc,
-							LocalDeclare.plain(opDefaultExport.loc, context.opts.moduleName()),
+							LocalDeclare.plain(opDefaultExport.loc, options.moduleName()),
 							_)))
 				}
 				return moduleLines
@@ -166,9 +167,9 @@ const
 		for (const _ of lines)
 			checkLine(_)
 
-		context.check(!(isObj && isBag), lines.loc, 'Block has both Bag and Obj lines.')
-		context.check(!(isObj && isMap), lines.loc, 'Block has both Obj and Map lines.')
-		context.check(!(isBag && isMap), lines.loc, 'Block has both Bag and Map lines.')
+		check(!(isObj && isBag), lines.loc, 'Block has both Bag and Obj lines.')
+		check(!(isObj && isMap), lines.loc, 'Block has both Obj and Map lines.')
+		check(!(isBag && isMap), lines.loc, 'Block has both Bag and Map lines.')
 
 		const kReturn =
 			isObj ? KReturn_Obj : isBag ? KReturn_Bag : isMap ? KReturn_Map : KReturn_Plain

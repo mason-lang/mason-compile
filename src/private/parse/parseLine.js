@@ -1,3 +1,4 @@
+import {check} from '../context'
 import {Assert, AssignSingle, AssignDestructure, BagEntry, BagEntryMany, Break, BreakWithVal, Call,
 	ConditionalDo, Ignore, LD_Mutable, LocalAccess, LocalMutate, MapEntry, MemberSet,
 	ObjEntryAssign, ObjEntryComputed, SD_Debugger, SET_Init, SET_InitMutable, SET_Mutate, SetSub,
@@ -8,7 +9,7 @@ import {G_Bracket, G_Quote, G_Space, isGroup, isKeyword, Keyword, keywordName, K
 	KW_MapEntry, KW_Name, KW_ObjAssign, KW_Pass, KW_Region, KW_SuperDo, KW_SwitchDo, KW_Throw,
 	KW_Type, KW_UnlessDo, KW_Yield, KW_YieldTo, Name} from '../Token'
 import {ifElse, isEmpty, opIf, tail} from '../util'
-import {checkEmpty, checkNonEmpty, context, unexpected} from './context'
+import {checkEmpty, checkNonEmpty, unexpected} from './checks'
 import {beforeAndBlock, parseBlockDo, parseLinesFromBlock} from './parseBlock'
 import parseCase from './parseCase'
 import parseExcept from './parseExcept'
@@ -162,7 +163,7 @@ const
 
 	parseLocalMutate = (localsTokens, valueTokens, loc) => {
 		const locals = parseLocalDeclaresJustNames(localsTokens)
-		context.check(locals.length === 1, loc, 'TODO: LocalDestructureMutate')
+		check(locals.length === 1, loc, 'TODO: LocalDestructureMutate')
 		const name = locals[0].name
 		const value = parseExpr(valueTokens)
 		return new LocalMutate(loc, name, value)
@@ -174,18 +175,18 @@ const
 
 		const isYield = kind === KW_Yield || kind === KW_YieldTo
 		if (isEmpty(locals)) {
-			context.check(isYield, localsTokens.loc, 'Assignment to nothing')
+			check(isYield, localsTokens.loc, 'Assignment to nothing')
 			return value
 		} else {
 			if (isYield)
 				for (const _ of locals)
-					context.check(!_.isLazy(), _.loc, 'Can not yield to lazy variable.')
+					check(!_.isLazy(), _.loc, 'Can not yield to lazy variable.')
 
 			const isObjAssign = kind === KW_ObjAssign
 
 			if (kind === KW_AssignMutable)
 				for (let _ of locals) {
-					context.check(!_.isLazy(), _.loc, 'Lazy local can not be mutable.')
+					check(!_.isLazy(), _.loc, 'Lazy local can not be mutable.')
 					_.kind = LD_Mutable
 				}
 
@@ -198,7 +199,7 @@ const
 			} else {
 				const kind = locals[0].kind
 				for (const _ of locals)
-					context.check(_.kind === kind, _.loc,
+					check(_.kind === kind, _.loc,
 						'All locals of destructuring assignment must be of the same kind.')
 				return wrap(new AssignDestructure(loc, locals, value, kind))
 			}
@@ -235,7 +236,7 @@ const
 			if (isKeyword(KW_Focus, _))
 				return '_'
 			else {
-				context.check(_ instanceof Name, _.loc, () => `Expected local name, not ${_}.`)
+				check(_ instanceof Name, _.loc, () => `Expected local name, not ${_}.`)
 				return _.name
 			}
 		})

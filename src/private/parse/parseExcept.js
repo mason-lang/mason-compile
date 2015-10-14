@@ -1,9 +1,10 @@
 import {code} from '../../CompileError'
+import {check} from '../context'
 import {Catch, ExceptDo, ExceptVal, LocalDeclareFocus} from '../MsAst'
 import {opIf} from '../util'
 import {isKeyword, keywordName, KW_CatchDo, KW_CatchVal, KW_ExceptVal, KW_Finally, KW_TryDo,
 	KW_TryVal} from '../Token'
-import {checkNonEmpty, context} from './context'
+import {checkNonEmpty} from './checks'
 import {beforeAndBlock, parseBlockVal, parseBlockDo, justBlock, justBlockDo, justBlockVal
 	} from './parseBlock'
 import parseLocalDeclares from './parseLocalDeclares'
@@ -25,7 +26,7 @@ export default (kwExcept, tokens) => {
 	// `try` *must* come first.
 	const firstLine = lines.headSlice()
 	const tokenTry = firstLine.head()
-	context.check(isKeyword(kwTry, tokenTry), tokenTry.loc, () =>
+	check(isKeyword(kwTry, tokenTry), tokenTry.loc, () =>
 		`Must start with ${nameTry()}`)
 	const _try = justDoValBlock(kwTry, firstLine.tail())
 
@@ -36,9 +37,9 @@ export default (kwExcept, tokens) => {
 	const handleFinally = restLines => {
 		const line = restLines.headSlice()
 		const tokenFinally = line.head()
-		context.check(isKeyword(KW_Finally, tokenFinally), tokenFinally.loc, () =>
+		check(isKeyword(KW_Finally, tokenFinally), tokenFinally.loc, () =>
 			`Expected ${nameFinally()}`)
-		context.check(restLines.size() === 1, restLines.loc, () =>
+		check(restLines.size() === 1, restLines.loc, () =>
 			`Nothing is allowed to come after ${nameFinally()}.`)
 		return justBlockDo(KW_Finally, line.tail())
 	}
@@ -64,7 +65,7 @@ const parseOneLocalDeclareOrFocus = tokens => {
 	if (tokens.isEmpty())
 		return new LocalDeclareFocus(tokens.loc)
 	else {
-		context.check(tokens.size() === 1, 'Expected only one local declare.')
+		check(tokens.size() === 1, 'Expected only one local declare.')
 		return parseLocalDeclares(tokens)[0]
 	}
 }

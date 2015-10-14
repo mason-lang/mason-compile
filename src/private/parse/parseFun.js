@@ -2,10 +2,10 @@ import {BlockDo, BlockWithReturn, Fun, LD_Mutable, LocalDeclareFocus, LocalDecla
 	LocalDeclareThis} from '../MsAst'
 import {G_Space, isAnyKeyword, isGroup, isKeyword, KW_CaseDo, KW_CaseVal, KW_Ellipsis, KW_Fun,
 	KW_FunDo, KW_FunGen, KW_FunGenDo, KW_FunThis, KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo,
-	KW_In, KW_Out, KW_SwitchDo, KW_SwitchVal, KW_Type} from '../Token'
-import {head, ifElse, opIf, opMap} from '../util'
-import {checkNonEmpty} from './context'
-import {beforeAndBlock, parseBlockDo, parseBlockVal, parseLinesFromBlock} from './parseBlock'
+	KW_SwitchDo, KW_SwitchVal, KW_Type} from '../Token'
+import {head, opIf, opMap} from '../util'
+import {checkNonEmpty} from './checks'
+import {beforeAndBlock, parseBlockDo, parseBlockVal} from './parseBlock'
 import parseCase from './parseCase'
 import parseLocalDeclares, {parseLocalDeclareFromSpaced, parseLocalDeclaresAndMemberArgs
 	} from './parseLocalDeclares'
@@ -49,13 +49,11 @@ export default (kind, tokens) => {
 	const opDeclareThis = opIf(isThis, () => new LocalDeclareThis(tokens.loc))
 
 	const {opReturnType, rest} = tryTakeReturnType(tokens)
-	const {args, opRestArg, block, opIn, opOut, opComment} = _funArgsAndBlock(isDo, rest)
-	// Need res declare if there is a return type or out condition.
-	const opDeclareRes = ifElse(opReturnType,
-		_ => new LocalDeclareRes(_.loc, _),
-		() => opMap(opOut, _ => new LocalDeclareRes(_.loc, null)))
+	const {args, opRestArg, block, opComment} = _funArgsAndBlock(isDo, rest)
+	// Need res declare if there is a return type.
+	const opDeclareRes = opMap(opReturnType, _ => new LocalDeclareRes(_.loc, _))
 	return new Fun(tokens.loc,
-		opDeclareThis, isGen, args, opRestArg, block, opIn, opDeclareRes, opOut, opComment)
+		opDeclareThis, isGen, args, opRestArg, block, opDeclareRes, opComment)
 }
 
 /*
@@ -78,11 +76,11 @@ export const _funArgsAndBlock = (isDo, tokens, includeMemberArgs) => {
 		const args = [new LocalDeclareFocus(h.loc)]
 		return isVal ?
 			{
-				args, opRestArg: null, memberArgs: [], opIn: null, opOut: null,
+				args, opRestArg: null, memberArgs: [],
 				block: new BlockWithReturn(tokens.loc, null, [], expr)
 			} :
 			{
-				args, opRestArg: null, memberArgs: [], opIn: null, opOut: null,
+				args, opRestArg: null, memberArgs: [],
 				block: new BlockDo(tokens.loc, null, [expr])
 			}
 	} else {
@@ -91,10 +89,8 @@ export const _funArgsAndBlock = (isDo, tokens, includeMemberArgs) => {
 		for (const arg of args)
 			if (!arg.isLazy())
 				arg.kind = LD_Mutable
-		const [opIn, rest0] = tryTakeInOrOut(KW_In, blockLines)
-		const [opOut, rest1] = tryTakeInOrOut(KW_Out, rest0)
-		const block = (isDo ? parseBlockDo : parseBlockVal)(rest1)
-		return {args, opRestArg, memberArgs, block, opIn, opOut}
+		const block = (isDo ? parseBlockDo : parseBlockVal)(blockLines)
+		return {args, opRestArg, memberArgs, block}
 	}
 }
 
@@ -132,18 +128,4 @@ const
 			} else
 				return {args: parseLocalDeclares(rest), opRestArg}
 		}
-	},
-
-	tryTakeInOrOut = (inOrOut, tokens) => {
-		if (!tokens.isEmpty()) {
-			const firstLine = tokens.headSlice()
-			if (isKeyword(inOrOut, firstLine.head())) {
-				const inOut = new BlockDo(
-					firstLine.loc,
-					null,
-					parseLinesFromBlock(firstLine))
-				return [inOut, tokens.tail()]
-			}
-		}
-		return [null, tokens]
 	}

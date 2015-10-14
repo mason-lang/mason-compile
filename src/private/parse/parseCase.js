@@ -1,9 +1,10 @@
 import {code} from '../../CompileError'
+import {check} from '../context'
 import {AssignSingle, CaseDo, CaseDoPart, CaseVal, CaseValPart, LocalAccess, Pattern
 	} from '../MsAst'
 import {G_Space, isGroup, isKeyword, KW_Else, KW_Type} from '../Token'
 import {opIf} from '../util'
-import {checkEmpty, context} from './context'
+import {checkEmpty} from './checks'
 import {parseExpr} from './parse*'
 import {beforeAndBlock, parseBlockDo, parseBlockVal, justBlockDo, justBlockVal} from './parseBlock'
 import parseLocalDeclares from './parseLocalDeclares'
@@ -26,7 +27,7 @@ export default (isVal, casedFromFun, tokens) => {
 		[block, null]
 
 	const parts = partLines.mapSlices(line => parseCaseLine(isVal, line))
-	context.check(parts.length > 0, tokens.loc, () =>
+	check(parts.length > 0, tokens.loc, () =>
 		`Must have at least 1 non-${code('else')} test.`)
 
 	return new (isVal ? CaseVal : CaseDo)(tokens.loc, opCased, parts, opElse)

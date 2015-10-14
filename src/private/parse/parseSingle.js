@@ -2,7 +2,7 @@ import {BagSimple, LocalAccess, NumberLiteral, SpecialVal} from '../MsAst'
 import {Group, G_Block, G_Bracket, G_Parenthesis, G_Space, G_Quote, Name,
 	opKeywordKindToSpecialValueKind, Keyword, KW_Focus} from '../Token'
 import {ifElse} from '../util'
-import {unexpected} from './context'
+import {unexpected} from './checks'
 import {blockWrap} from './parseBlock'
 import parseQuote from './parseQuote'
 import {parseExpr, parseExprParts, parseSpaced} from './parse*'

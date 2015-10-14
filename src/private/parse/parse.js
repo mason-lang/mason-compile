@@ -1,4 +1,3 @@
-import {setContext} from './context'
 import './loadParse*'
 import parseModule from './parseModule'
 import Slice from './Slice'
@@ -13,10 +12,5 @@ There are exceptions such as assignment statements (indicated by a `=` somewhere
 For those we must iterate through tokens and split.
 (See Slice.opSplitOnceWhere and Slice.opSplitManyWhere.)
 */
-export default (_context, rootToken) => {
-	setContext(_context)
-	const msAst = parseModule(Slice.group(rootToken))
-	// Release for garbage collection.
-	setContext(null)
-	return msAst
-}
+export default rootToken =>
+	parseModule(Slice.group(rootToken))
