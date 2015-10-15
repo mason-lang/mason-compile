@@ -30,7 +30,7 @@ export default tokens => {
 
 	const imports = plainImports.concat(lazyImports)
 	return new Module(
-		tokens.loc, opComment, doImports, imports, opImportGlobal, lines)
+		tokens.loc, options.moduleName(), opComment, doImports, imports, opImportGlobal, lines)
 }
 
 const

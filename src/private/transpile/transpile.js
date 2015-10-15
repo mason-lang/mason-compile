@@ -6,7 +6,7 @@ import {ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryEx
 	SpreadElement, SwitchCase, SwitchStatement, TaggedTemplateExpression, TemplateElement,
 	TemplateLiteral, ThisExpression, ThrowStatement, TryStatement, VariableDeclaration,
 	UnaryExpression, VariableDeclarator, YieldExpression} from 'esast/dist/ast'
-import {functionExpressionThunk, idCached, loc, member, propertyIdOrLiteralCached, toStatement
+import {functionExpressionThunk, identifier, loc, member, propertyIdOrLiteral, toStatement
 	} from 'esast/dist/util'
 import manglePath from '../manglePath'
 import {check, options, warnIf} from '../context'
@@ -18,8 +18,8 @@ import {AssignSingle, Call, Constructor, L_And, L_Or, LD_Lazy, LD_Mutable, Membe
 import {assert, cat, flatMap, flatOpMap, ifElse, isEmpty, implementMany, isPositive, last, opIf,
 	opMap, tail} from '../util'
 import {AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj,
-	DeclareLexicalThis, ExportsDefault, ExportsGet, IdArguments, IdBuilt, IdConstructor, IdDefine,
-	IdExports, IdExtract, IdFocus, IdLexicalThis, IdSuper, GlobalError, LitEmptyString, LitNull,
+	DeclareLexicalThis, ExportsDefault, ExportsGet, IdArguments, IdBuilt, IdDefine, IdExports,
+	IdExtract, IdFocus, IdLexicalThis, IdSuper, GlobalError, LitEmptyString, LitNull,
 	LitStrExports, LitStrThrow, LitZero, ReturnBuilt, ReturnExports, ReturnRes, SwitchCaseNoMatch,
 	ThrowAssertFail, ThrowNoCaseMatch, UseStrict} from './ast-constants'
 import {IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot,
@@ -182,7 +182,7 @@ implementMany(MsAstTypes, 'transpile', {
 			this.statics.map(_ => t1(_, true)),
 			opMap(this.opConstructor, t0),
 			this.methods.map(_ => t1(_, false)))
-		const opName = opMap(verifyResults.opName(this), idCached)
+		const opName = opMap(verifyResults.opName(this), identifier)
 		const classExpr = new ClassExpression(
 			opName,
 			opMap(this.opSuperClass, t0), new ClassBody(methods))
@@ -226,7 +226,7 @@ implementMany(MsAstTypes, 'transpile', {
 			t0(this.fun) :
 			t1(this.fun, constructorSetMembers(this))
 
-		const res = new MethodDefinition(IdConstructor, body, 'constructor', false, false)
+		const res = MethodDefinition.constructor(body)
 		isInConstructor = false
 		return res
 	},
@@ -275,7 +275,7 @@ implementMany(MsAstTypes, 'transpile', {
 		const body = t2(this.block, lead, this.opDeclareRes)
 		const args = this.args.map(t0)
 		isInGenerator = oldInGenerator
-		const id = opMap(verifyResults.opName(this), idCached)
+		const id = opMap(verifyResults.opName(this), identifier)
 
 		const canUseArrowFunction =
 			id === null &&
@@ -325,14 +325,14 @@ implementMany(MsAstTypes, 'transpile', {
 		else {
 			const ld = verifyResults.localDeclareForAccess(this)
 			// If ld missing, this is a builtin, and builtins are never lazy
-			return ld === undefined ? idCached(this.name) : accessLocalDeclare(ld)
+			return ld === undefined ? identifier(this.name) : accessLocalDeclare(ld)
 		}
 	},
 
 	LocalDeclare() { return new Identifier(idForDeclareCached(this).name) },
 
 	LocalMutate() {
-		return new AssignmentExpression('=', idCached(this.name), t0(this.value))
+		return new AssignmentExpression('=', identifier(this.name), t0(this.value))
 	},
 
 	Logic() {
@@ -430,7 +430,7 @@ implementMany(MsAstTypes, 'transpile', {
 
 	ObjSimple() {
 		return new ObjectExpression(this.pairs.map(pair =>
-			new Property('init', propertyIdOrLiteralCached(pair.key), t0(pair.value))))
+			new Property('init', propertyIdOrLiteral(pair.key), t0(pair.value))))
 	},
 
 	Quote() {
@@ -441,7 +441,7 @@ implementMany(MsAstTypes, 'transpile', {
 
 			// TemplateLiteral must start with a TemplateElement
 			if (typeof this.parts[0] !== 'string')
-				quasis.push(TemplateElement.Empty)
+				quasis.push(TemplateElement.empty)
 
 			for (let part of this.parts)
 				if (typeof part === 'string')
@@ -449,13 +449,13 @@ implementMany(MsAstTypes, 'transpile', {
 				else {
 					// "{1}{1}" needs an empty quasi in the middle (and on the ends)
 					if (quasis.length === expressions.length)
-						quasis.push(TemplateElement.Empty)
+						quasis.push(TemplateElement.empty)
 					expressions.push(t0(part))
 				}
 
 			// TemplateLiteral must end with a TemplateElement, so one more quasi than expression.
 			if (quasis.length === expressions.length)
-				quasis.push(TemplateElement.Empty)
+				quasis.push(TemplateElement.empty)
 
 			return new TemplateLiteral(quasis, expressions)
 		}
@@ -466,7 +466,7 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	SetSub() {
-		const kind = (() => {
+		const getKind = () => {
 			switch (this.kind) {
 				case SET_Init:
 					return 'init'
@@ -477,7 +477,8 @@ implementMany(MsAstTypes, 'transpile', {
 				default:
 					throw new Error()
 			}
-		})()
+		}
+		const kind = getKind()
 		return msSetSub(
 			t0(this.object),
 			this.subbeds.length === 1 ? t0(this.subbeds[0]) : this.subbeds.map(t0),
@@ -644,7 +645,7 @@ const
 
 	methodKeyComputed = symbol => {
 		if (typeof symbol === 'string')
-			return {key: propertyIdOrLiteralCached(symbol), computed: false}
+			return {key: propertyIdOrLiteral(symbol), computed: false}
 		else {
 			const key = symbol instanceof Quote ? t0(symbol) : msSymbol(t0(symbol))
 			return {key, computed: true}
@@ -700,7 +701,7 @@ const
 		const importIdentifiers = []
 		for (let i = 0; i < allImports.length; i = i + 1) {
 			const _ = allImports[i]
-			const id = idCached(`${pathBaseName(_.path)}_${i}`)
+			const id = identifier(`${pathBaseName(_.path)}_${i}`)
 			importIdentifiers.push(id)
 			importToIdentifier.set(_, id)
 		}

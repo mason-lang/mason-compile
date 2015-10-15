@@ -36,7 +36,9 @@ export default class MsAst {
 
 // Module
 	export class Module extends MsAst {
-		constructor(loc,
+		constructor(
+			loc,
+			name,
 			opComment, // Opt[String]
 			doImports, // Array[ImportDo]
 			imports, // Array[Import]
@@ -442,6 +444,10 @@ export default class MsAst {
 			opRestArg, // Opt[LocalDeclare]
 			block, // Block
 			opDeclareRes) { // Opt[LocalDeclareRes]
+			// TODO:ES6 Optional args
+			if (opDeclareRes === undefined)
+				opDeclareRes = null
+
 			super(loc)
 			this.opDeclareThis = opDeclareThis
 			this.isGenerator = isGenerator

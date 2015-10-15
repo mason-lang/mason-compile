@@ -1,12 +1,10 @@
 import {BlockDo, BlockWithReturn, ModuleExportDefault, Val} from '../../../dist/private/MsAst'
-import CompileContext from '../../../dist/private/CompileContext'
-import CompileOptions from '../../../dist/private/CompileOptions'
-import lex from '../../../dist/private/lex'
-import parse from '../../../dist/private/parse/parse'
+import {parseAst} from '../../../dist/compile'
+import {setContext} from '../../../dist/private/context'
 import render from '../../../dist/private/render'
 import transpile from '../../../dist/private/transpile/transpile'
-import {last, rtail} from '../../../dist/private/util'
 import verify from '../../../dist/private/verify'
+import {last, rtail} from '../../../dist/private/util'
 import {loc} from './ast-util'
 
 export const test = (ms, ast, js, opts) => {
@@ -21,13 +19,14 @@ export const test = (ms, ast, js, opts) => {
 		ast
 	ms = dedent(ms)
 	js = dedent(js)
-	const warnings = opts.warnings || []
+	const expectedWarnings = opts.warnings || []
 	const name = opts.name || `\`${ms.replace(/\n\t+/g, '; ')}\``
 
 	it(name, () => {
-		const context = new CompileContext(options)
+		const {warnings: actualWarnings, result: moduleAst} = parseAst(ms, compileOptions)
 
-		const moduleAst = parse(context, lex(context, ms))
+		if (moduleAst instanceof Error)
+			throw moduleAst
 
 		// This mirrors getting `ast`. Convert lines to block.
 		const lines = moduleAst.lines
@@ -40,21 +39,24 @@ export const test = (ms, ast, js, opts) => {
 		if (!equalAsts(ast, parsedAst))
 			throw new Error(`Different AST.\nExpected: ${ast}\nParsed: ${parsedAst}`)
 
-		const verifyResults = verify(context, ast)
+		setContext(compileOptions)
+		let rendered = render(transpile(ast, verify(ast)))
+		if (rendered instanceof Error)
+			throw rendered
 
-		let rendered = render(context, transpile(context, ast, verifyResults))
 		if (isMultiLineTest)
 			// remove leading '{' and closing '\n}'
 			rendered = dedent(rendered.slice(1, rendered.length - 2))
 
-		if (warnings.length !== context.warnings.length)
+		if (expectedWarnings.length !== actualWarnings.length)
 			throw new Error(
-				`Different warnings.\nExpected ${warnings.length}.\nGot: ${context.warnings}`)
+				`Different warnings.\nExpected ${expectedWarnings.length}.\nGot: ${actualWarnings}`)
 
-		for (let i = 0; i < warnings.length; i = i + 1) {
-			const got = context.warnings[i].message
-			if (warnings[i] !== got)
-				throw new Error(`	Different warning.\nExpected: ${warnings[i]}\nGot: ${got}`)
+		for (let i = 0; i < expectedWarnings.length; i = i + 1) {
+			const expected = expectedWarnings[i]
+			const got = actualWarnings[i].message
+			if (expected !== got)
+				throw new Error(`	Different warning.\nExpected: ${expected}\nGot: ${got}`)
 		}
 
 		if (js !== rendered)
@@ -62,12 +64,12 @@ export const test = (ms, ast, js, opts) => {
 	})
 }
 
-const options = new CompileOptions({
+const compileOptions = {
 	inFile: './test-compile.ms',
 	includeSourceMap: false,
 	includeModuleName: false,
 	useStrict: false
-})
+}
 
 const equalAsts = (a, b) => {
 	if (a === b)

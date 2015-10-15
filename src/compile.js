@@ -23,3 +23,19 @@ export default (source, opts) => {
 		unsetContext()
 	}
 }
+
+export const parseAst = (source, opts) => {
+	type(source, String)
+	setContext(opts)
+	try {
+		const ast = parse(lex(source))
+		verify(ast)
+		return {warnings, result: ast}
+	} catch (error) {
+		if (!(error instanceof CompileError))
+			throw error
+		return {warnings, result: error}
+	} finally {
+		unsetContext()
+	}
+}

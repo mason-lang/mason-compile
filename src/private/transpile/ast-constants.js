@@ -8,7 +8,6 @@ export const
 	GlobalError = new Identifier('Error'),
 	IdArguments = new Identifier('arguments'),
 	IdBuilt = new Identifier('built'),
-	IdConstructor = new Identifier('constructor'),
 	IdDefine = new Identifier('define'),
 	IdError = _IdError,
 	IdExports = new Identifier('exports'),

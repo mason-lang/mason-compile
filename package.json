@@ -45,7 +45,7 @@
 			"spread": true,
 			"templateStrings": true
 		},
-		"globals": {"console": true, "document": true, "describe": true, "it": true, "require": true},
+		"globals": {"console": true, "describe": true, "it": true, "require": true},
 		"rules": {
 			"array-bracket-spacing": 1,
 			"comma-style": [1, "last"],

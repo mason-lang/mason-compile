@@ -1,5 +1,5 @@
-import {CallExpression, Identifier} from 'esast/dist/ast'
-import {member, thunk} from 'esast/dist/util'
+import {ArrowFunctionExpression, CallExpression, Identifier} from 'esast/dist/ast'
+import {member} from 'esast/dist/util'
 
 const ms = name => {
 	const m = member(IdMs, name)
@@ -8,7 +8,8 @@ const ms = name => {
 }
 export const
 	IdMs = new Identifier('_ms'),
-	lazyWrap = value => msLazy(thunk(value)),
+	lazyWrap = value =>
+		msLazy(new ArrowFunctionExpression([], value)),
 	msAdd = ms('add'),
 	msAddMany = ms('addMany'),
 	msAssert = ms('assert'),
