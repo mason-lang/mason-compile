@@ -496,6 +496,11 @@ implementMany(MsAstTypes, 'verify', {
 		this.value.verify()
 	},
 
+	ObjEntryPlain() {
+		accessLocal(this, 'built')
+		this.value.verify()
+	},
+
 	ObjSimple() {
 		const keys = new Set()
 		for (const pair of this.pairs) {

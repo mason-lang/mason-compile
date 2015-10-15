@@ -1,8 +1,9 @@
 import {check} from '../context'
 import {Assert, AssignSingle, AssignDestructure, BagEntry, BagEntryMany, Break, BreakWithVal, Call,
 	ConditionalDo, Ignore, LD_Mutable, LocalAccess, LocalMutate, MapEntry, MemberSet,
-	ObjEntryAssign, ObjEntryComputed, SD_Debugger, SET_Init, SET_InitMutable, SET_Mutate, SetSub,
-	SpecialDo, SpecialVal, SuperCallDo, SV_Name, Throw, Yield, YieldTo} from '../MsAst'
+	ObjEntryAssign, ObjEntryComputed, ObjEntryPlain, SD_Debugger, SET_Init, SET_InitMutable,
+	SET_Mutate, SetSub, SpecialDo, SpecialVal, SuperCallDo, SV_Name, Throw, Yield, YieldTo
+	} from '../MsAst'
 import {G_Bracket, G_Quote, G_Space, isGroup, isKeyword, Keyword, keywordName, KW_Assert,
 	KW_AssertNot, KW_Assign, KW_AssignMutable, KW_Break, KW_BreakWithVal, KW_CaseDo, KW_Debugger,
 	KW_Dot, KW_Ellipsis, KW_ExceptDo, KW_Focus, KW_ForDo, KW_IfDo, KW_Ignore, KW_LocalMutate,
@@ -75,7 +76,7 @@ export default tokens => {
 				if (isKeyword(KW_ObjAssign, rest.head())) {
 					const r = rest.tail()
 					const val = r.isEmpty() ? new SpecialVal(tokens.loc, SV_Name) : parseExpr(r)
-					return ObjEntryComputed.name(tokens.loc, val)
+					return ObjEntryPlain.name(tokens.loc, val)
 				}
 				// else fall through
 			default:
@@ -171,6 +172,15 @@ const
 
 	parseAssign = (localsTokens, kind, valueTokens, loc) => {
 		const locals = parseLocalDeclares(localsTokens)
+
+		// Handle `a.` which moves an outer local into an ObjEntry.
+		if (kind === KW_ObjAssign && valueTokens.isEmpty() && locals.length === 1) {
+			const local = locals[0]
+			check(local.opType === null, local.loc, () =>
+				`Type declaration should go with initial declaration of ${local.name}.`)
+			return ObjEntryPlain.access(loc, local.name)
+		}
+
 		const value = parseAssignValue(kind, valueTokens)
 
 		const isYield = kind === KW_Yield || kind === KW_YieldTo

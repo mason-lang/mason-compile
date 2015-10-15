@@ -424,6 +424,10 @@ implementMany(MsAstTypes, 'transpile', {
 			t0(this.value))
 	},
 
+	ObjEntryPlain() {
+		return new AssignmentExpression('=', member(IdBuilt, this.name), t0(this.value))
+	},
+
 	ObjSimple() {
 		return new ObjectExpression(this.pairs.map(pair =>
 			new Property('init', propertyIdOrLiteralCached(pair.key), t0(pair.value))))

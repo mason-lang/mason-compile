@@ -344,13 +344,25 @@ export default class MsAst {
 	}
 
 	export class ObjEntryComputed extends ObjEntry {
-		static name(loc, value) {
-			return new ObjEntryComputed(loc, Quote.forString(loc, 'name'), value)
-		}
-
 		constructor(loc, key /* Val */, value /* Val */) {
 			super(loc)
 			this.key = key
+			this.value = value
+		}
+	}
+
+	export class ObjEntryPlain extends ObjEntry {
+		static access(loc, name) {
+			return new ObjEntryPlain(loc, name, new LocalAccess(loc, name))
+		}
+
+		static name(loc, value) {
+			return new ObjEntryPlain(loc, 'name', value)
+		}
+
+		constructor(loc, name /* String */, value /* Val */) {
+			super(loc)
+			this.name = name
 			this.value = value
 		}
 	}
