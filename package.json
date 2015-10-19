@@ -16,10 +16,10 @@
 	"devDependencies": {
 		"benchmark": "1.0.0",
 			"microtime": "2.0.0",
-		"esdoc": "0.4.0",
-		"eslint": "1.6.0",
+		"esdoc": "0.4.1",
+		"eslint": "1.7.1",
 		"gulp": "3.9.0",
-		"gulp-babel": "5.2.1",
+		"gulp-babel": "5.3.0",
 		"gulp-header": "1.7.1",
 		"gulp-plumber": "1.0.1",
 		"gulp-sourcemaps": "1.6.0",

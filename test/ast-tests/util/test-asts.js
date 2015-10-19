@@ -1,4 +1,4 @@
-import {BlockDo, BlockWithReturn, ModuleExportDefault, Val} from '../../../dist/private/MsAst'
+import {BlockDo, BlockValReturn, ModuleExportDefault, Val} from '../../../dist/private/MsAst'
 import {parseAst} from '../../../dist/compile'
 import {setContext} from '../../../dist/private/context'
 import render from '../../../dist/private/render'
@@ -14,10 +14,10 @@ export const test = (ms, ast, js, opts) => {
 	const isMultiLineTest = ast instanceof Array
 	ast = isMultiLineTest ?
 		last(ast) instanceof Val ?
-			new BlockWithReturn(loc, null, rtail(ast), last(ast)) :
+			new BlockValReturn(loc, null, rtail(ast), last(ast)) :
 			new BlockDo(loc, null, ast) :
 		ast
-	ms = dedent(ms)
+	ms = dedent(ms) + '\n'
 	js = dedent(js)
 	const expectedWarnings = opts.warnings || []
 	const name = opts.name || `\`${ms.replace(/\n\t+/g, '; ')}\``
@@ -33,7 +33,7 @@ export const test = (ms, ast, js, opts) => {
 		let parsedAst = lines.length === 1 ?
 			lines[0] instanceof ModuleExportDefault ? lines[0].assign.value : lines[0] :
 			last(lines) instanceof ModuleExportDefault ?
-			new BlockWithReturn(loc, null, rtail(lines), last(lines).assign.value) :
+			new BlockValReturn(loc, null, rtail(lines), last(lines).assign.value) :
 			new BlockDo(loc, null, lines)
 
 		if (!equalAsts(ast, parsedAst))

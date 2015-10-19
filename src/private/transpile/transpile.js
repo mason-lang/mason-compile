@@ -9,14 +9,12 @@ import {ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryEx
 import {functionExpressionThunk, identifier, loc, member, propertyIdOrLiteral, toStatement
 	} from 'esast/dist/util'
 import manglePath from '../manglePath'
-import {check, options, warnIf} from '../context'
+import {check, options, warn} from '../context'
 import * as MsAstTypes from '../MsAst'
-import {AssignSingle, Call, Constructor, L_And, L_Or, LD_Lazy, LD_Mutable, Member, LocalDeclare,
-	Pattern, Splat, SD_Debugger, SET_Init, SET_InitMutable, SET_Mutate, SV_Contains, SV_False,
-	SV_Name, SV_Null, SV_SetSub, SV_Sub, SV_True, SV_Undefined, SwitchDoPart, Quote, Import
-	} from '../MsAst'
-import {assert, cat, flatMap, flatOpMap, ifElse, isEmpty, implementMany, isPositive, last, opIf,
-	opMap, tail} from '../util'
+import {AssignSingle, Call, Constructor, Logics, Member, LocalDeclare, LocalDeclares, Pattern,
+	Splat, Setters, SpecialDos, SpecialVals, SwitchDoPart, Quote, Import} from '../MsAst'
+import {assert, cat, flatMap, flatOpMap, ifElse, isEmpty, implementMany, last, opIf, opMap, tail
+	} from '../util'
 import {AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj,
 	DeclareLexicalThis, ExportsDefault, ExportsGet, IdArguments, IdBuilt, IdDefine, IdExports,
 	IdExtract, IdFocus, IdLexicalThis, IdSuper, GlobalError, LitEmptyString, LitNull,
@@ -32,7 +30,8 @@ import {accessLocalDeclare, declare, forStatementInfinite, idForDeclareCached,
 let verifyResults, isInGenerator, isInConstructor
 let nextDestructuredId
 
-export default (moduleExpression, _verifyResults) => {
+/** Transform a {@link MsAst} into an esast. **/
+export default function transpile(moduleExpression, _verifyResults) {
 	verifyResults = _verifyResults
 	isInGenerator = false
 	isInConstructor = false
@@ -97,10 +96,10 @@ implementMany(MsAstTypes, 'transpile', {
 	// TODO:ES6 Just use native destructuring assign
 	AssignDestructure() {
 		return new VariableDeclaration(
-			this.kind() === LD_Mutable ? 'let' : 'const',
+			this.kind() === LocalDeclares.Mutable ? 'let' : 'const',
 			makeDestructureDeclarators(
 				this.assignees,
-				this.kind() === LD_Lazy,
+				this.kind() === LocalDeclares.Lazy,
 				t0(this.value),
 				false))
 	},
@@ -125,12 +124,12 @@ implementMany(MsAstTypes, 'transpile', {
 		if (lead === undefined) lead = null
 		if (opDeclareRes === undefined) opDeclareRes = null
 		if (follow === undefined) follow = null
-		warnIf(opDeclareRes !== null || follow !== null, this.loc,
-			'Return type ignored because the block always throws.')
+		if (opDeclareRes !== null || follow !== null)
+			warn(this.loc, 'Return type ignored because the block always throws.')
 		return new BlockStatement(cat(lead, tLines(this.lines), t0(this.throw)))
 	},
 
-	BlockWithReturn(lead, opDeclareRes, follow) {
+	BlockValReturn(lead, opDeclareRes, follow) {
 		return transpileBlock(t0(this.returned), tLines(this.lines), lead, opDeclareRes, follow)
 	},
 
@@ -316,7 +315,8 @@ implementMany(MsAstTypes, 'transpile', {
 		// http://www.ecma-international.org/ecma-262/5.1/#sec-7.8.3
 		const value = Number(this.value)
 		const lit = new Literal(Math.abs(value))
-		return isPositive(value) ? lit : new UnaryExpression('-', lit)
+		const isPositive = value >= 0 && 1 / value !== -Infinity
+		return isPositive ? lit : new UnaryExpression('-', lit)
 	},
 
 	LocalAccess() {
@@ -336,8 +336,7 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	Logic() {
-		assert(this.kind === L_And || this.kind === L_Or)
-		const op = this.kind === L_And ? '&&' : '||'
+		const op = this.kind === Logics.And ? '&&' : '||'
 		return tail(this.args).reduce((a, b) =>
 			new LogicalExpression(op, a, t0(b)), t0(this.args[0]))
 	},
@@ -354,11 +353,11 @@ implementMany(MsAstTypes, 'transpile', {
 			typeof this.name === 'string' ? new Literal(this.name) : t0(this.name)
 		const val = maybeWrapInCheckContains(t0(this.value), this.opType, this.name)
 		switch (this.kind) {
-			case SET_Init:
+			case Setters.Init:
 				return msNewProperty(obj, name(), val)
-			case SET_InitMutable:
+			case Setters.InitMutable:
 				return msNewMutableProperty(obj, name(), val)
-			case SET_Mutate:
+			case Setters.Mutate:
 				return new AssignmentExpression('=', memberStringOrVal(obj, this.name), val)
 			default: throw new Error()
 		}
@@ -468,11 +467,11 @@ implementMany(MsAstTypes, 'transpile', {
 	SetSub() {
 		const getKind = () => {
 			switch (this.kind) {
-				case SET_Init:
+				case Setters.Init:
 					return 'init'
-				case SET_InitMutable:
+				case Setters.InitMutable:
 					return 'init-mutable'
-				case SET_Mutate:
+				case Setters.Mutate:
 					return 'mutate'
 				default:
 					throw new Error()
@@ -488,7 +487,7 @@ implementMany(MsAstTypes, 'transpile', {
 
 	SpecialDo() {
 		switch (this.kind) {
-			case SD_Debugger: return new DebuggerStatement()
+			case SpecialDos.Debugger: return new DebuggerStatement()
 			default: throw new Error(this.kind)
 		}
 	},
@@ -496,15 +495,24 @@ implementMany(MsAstTypes, 'transpile', {
 	SpecialVal() {
 		// Make new objects because we will assign `loc` to them.
 		switch (this.kind) {
-			case SV_Contains: return member(IdMs, 'contains')
-			case SV_False: return new Literal(false)
-			case SV_Name: return new Literal(verifyResults.name(this))
-			case SV_Null: return new Literal(null)
-			case SV_SetSub: return member(IdMs, 'setSub')
-			case SV_Sub: return member(IdMs, 'sub')
-			case SV_True: return new Literal(true)
-			case SV_Undefined: return new UnaryExpression('void', LitZero)
-			default: throw new Error(this.kind)
+			case SpecialVals.Contains:
+				return member(IdMs, 'contains')
+			case SpecialVals.False:
+				return new Literal(false)
+			case SpecialVals.Name:
+				return new Literal(verifyResults.name(this))
+			case SpecialVals.Null:
+				return new Literal(null)
+			case SpecialVals.SetSub:
+				return member(IdMs, 'setSub')
+			case SpecialVals.Sub:
+				return member(IdMs, 'sub')
+			case SpecialVals.True:
+				return new Literal(true)
+			case SpecialVals.Undefined:
+				return new UnaryExpression('void', LitZero)
+			default:
+				throw new Error(this.kind)
 		}
 	},
 
@@ -670,9 +678,9 @@ const
 
 	transpileExcept = except =>
 		new TryStatement(
-			t0(except._try),
-			opMap(except._catch, t0),
-			opMap(except._finally, t0)),
+			t0(except.try),
+			opMap(except.catch, t0),
+			opMap(except.finally, t0)),
 
 	transpileSwitch = _ => {
 		const parts = flatMap(_.parts, t0)

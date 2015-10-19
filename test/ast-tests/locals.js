@@ -1,5 +1,5 @@
-import {AssignDestructure, AssignSingle, LocalAccess, LD_Lazy, LD_Mutable, LocalDeclare,
-	LocalMutate, Throw} from '../../dist/private/MsAst'
+import {AssignDestructure, AssignSingle, LocalAccess, LocalDeclare, LocalDeclares, LocalMutate,
+	Throw} from '../../dist/private/MsAst'
 import {aDeclare, assignAZero, bDeclare, loc, one, zero} from './util/ast-util'
 import {test} from './util/test-asts'
 
@@ -27,12 +27,12 @@ describe('locals', () => {
 			{warnings: ['Unused local variable {{a}}.']})
 		test(
 			'a ::= 0',
-			new AssignSingle(loc, LocalDeclare.untyped(loc, 'a', LD_Mutable), zero),
+			new AssignSingle(loc, LocalDeclare.untyped(loc, 'a', LocalDeclares.Mutable), zero),
 			'let a=0',
 			{warnings: ['Unused local variable {{a}}.']})
 		test(
 			'~a = 0',
-			new AssignSingle(loc, LocalDeclare.untyped(loc, 'a', LD_Lazy), zero),
+			new AssignSingle(loc, LocalDeclare.untyped(loc, 'a', LocalDeclares.Lazy), zero),
 			'const a=_ms.lazy(()=>0)',
 			{warnings: ['Unused local variable {{a}}.']})
 	})
@@ -48,7 +48,7 @@ describe('locals', () => {
 			a ::= 0
 			a := 1`,
 		[
-			new AssignSingle(loc, LocalDeclare.untyped(loc, 'a', LD_Mutable), zero),
+			new AssignSingle(loc, LocalDeclare.untyped(loc, 'a', LocalDeclares.Mutable), zero),
 			new LocalMutate(loc, 'a', one)
 		],
 		`

@@ -1,10 +1,11 @@
 import {last, type} from './util'
 
+/**
+Stores `opts` parameter to compile methods and supplies defaults.
+See {@link compile} for description of options.
+*/
 export default class CompileOptions {
-	constructor(opts = {}) {
-		if (opts === undefined) opts = {}
-		type(opts, Object)
-
+	constructor(opts) {
 		const define = (name, _default) => {
 			this[`_${name}`] = opts[name] === undefined ? _default : opts[name]
 		}

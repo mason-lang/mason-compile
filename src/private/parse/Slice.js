@@ -1,110 +1,162 @@
 import Loc from 'esast/dist/Loc'
-import {isEmpty} from '../util'
+import {isEmpty, opIf} from '../util'
 
-/*
-Represents a section of tokens that the parser is currently working on.
-Since we don't modify the Token tree, this is just a view on it.
-So, taking the tail is O(1).
+/**
+Represents a slice of the `subTokens` of some {@link Group}.
+This is just a view of it, so taking e.g. {@link tail} is O(1).
+Most parser functions act on a Slice and call other functions on sub-slices.
 */
 export default class Slice {
-	static group(groupToken) {
-		const {subTokens, loc} = groupToken
-		return new Slice(subTokens, 0, subTokens.length, loc)
+	/**
+	Slice representing all subTokens of a {@link Group}.
+	@type {Group} group
+	*/
+	static group(group) {
+		return new Slice(group.subTokens, 0, group.subTokens.length, group.loc)
 	}
 
-	// Do not use `new`. Use Slice.group.
+	/** @private */
 	constructor(tokens, start, end, loc) {
-		this.tokens = tokens
-		this.start = start
-		// end is exclusive.
-		this.end = end
+		/**
+		Array of tokens in use.
+		The slice will only use the ones from `start` to `end`.
+		(This is more efficient than calling {@link Array#slice} many times.)
+		@type {Array<Token>}
+		*/
+		this._tokens = tokens
+		/**
+		Inclusive; index of first token in the slice.
+		@type {number}
+		*/
+		this._start = start
+		/**
+		Exclusive; index of first token *not* in the slice.
+		@type {number}
+		*/
+		this._end = end
+		/**
+		Slice keeps track of changes to `loc` as sub-slices are made,
+		so most parser functions will call `tokens.loc` when constructing the {@link MsAst}.
+		@type {Loc}
+		*/
 		this.loc = loc
 	}
 
+	/** Number of tokens. */
 	size() {
-		return this.end - this.start
+		return this._end - this._start
 	}
 
+	/** True iff there are no tokens left. */
 	isEmpty() {
-		return this.start === this.end
+		return this._start === this._end
 	}
 
 	// For these methods, caller must ensure non-empty.
+
+	/** First token. */
 	head() {
-		return this.tokens[this.start]
+		return this._tokens[this._start]
 	}
+
+	/** Slice of first token. */
 	headSlice() {
 		return Slice.group(this.head())
 	}
 
+	/** Second token. */
 	second() {
-		return this.tokens[this.start + 1]
+		return this._tokens[this._start + 1]
 	}
 
+	/** Last token. */
 	last() {
-		return this.tokens[this.end - 1]
+		return this._tokens[this._end - 1]
 	}
 
+	/** Second-to-last token. */
 	nextToLast() {
-		return this.tokens[this.end - 2]
+		return this._tokens[this._end - 2]
 	}
 
+	/** Slice of all but the first token. */
 	tail() {
-		return this._chopStart(this.start + 1)
+		return this._chopStart(this._start + 1)
 	}
 
+	/** Slice of all but the last token. */
 	rtail() {
-		return this._chopEnd(this.end - 1)
+		return this._chopEnd(this._end - 1)
 	}
 
-	// Looks for the first token to satisfy `splitOn` and does not look further.
-	opSplitOnceWhere(splitOn) {
-		for (let i = this.start; i < this.end; i = i + 1)
-			if (splitOn(this.tokens[i]))
+	/**
+	Splits on the first token satisfying `splitOn`.
+	@splitOn {function(token:Token): boolean}
+	@return {?{before: Slice, at: Token, after: Slice}}
+	*/
+	opSplitOnce(splitOn) {
+		for (let i = this._start; i < this._end; i = i + 1) {
+			const token = this._tokens[i]
+			if (splitOn(token))
 				return {
 					before: this._chopEnd(i),
-					at: this.tokens[i],
+					at: token,
 					after: this._chopStart(i + 1)
 				}
+		}
 		return null
 	}
 
-	// Splits every time  `splitOn` is true.
-	// Every output but last will be { before, at }; last will be just { before }.
-	opSplitManyWhere(splitOn) {
-		let iLast = this.start
+	/**
+	Splits on *every* token satisfying `splitOn`.
+	@splitOn {function(token:Token): boolean}
+	@return {?{Array<{before: Slice, at: Token>}}
+		Last output will not have `at`.
+	*/
+	opSplitMany(splitOn) {
+		let iLast = this._start
 		const out = []
-		for (let i = this.start; i < this.end; i = i + 1)
-			if (splitOn(this.tokens[i])) {
-				out.push({before: this._chop(iLast, i), at: this.tokens[i]})
+		for (let i = this._start; i < this._end; i = i + 1) {
+			const token = this._tokens[i]
+			if (splitOn(token)) {
+				out.push({before: this._chop(iLast, i), at: token})
 				iLast = i + 1
 			}
+		}
 
-		if (isEmpty(out))
-			return null
-		else {
+		return opIf(!isEmpty(out), () => {
 			out.push({before: this._chopStart(iLast)})
 			return out
-		}
+		})
 	}
 
+	/** Iterate over every Token. */
 	* [Symbol.iterator]() {
-		for (let i = this.start; i < this.end; i = i + 1)
-			yield this.tokens[i]
+		for (let i = this._start; i < this._end; i = i + 1)
+			yield this._tokens[i]
 	}
 
+	/**
+	Iterator over a Slice for every Token.
+	Assumes every sub-token is a Slice too; meaning this is a {@link Group.Block} slice.
+	*/
 	* slices() {
 		for (const _ of this)
 			yield Slice.group(_)
 	}
 
-	map(f) {
+	/**
+	Maps over every Token.
+	@param {function(token:Token)} mapper
+	*/
+	map(mapper) {
 		const out = []
 		for (const _ of this)
-			out.push(f(_))
+			out.push(mapper(_))
 		return out
 	}
 
+	/** Maps over a Slice for every Token, as in {@link slices}.	*/
 	mapSlices(f) {
 		const out = []
 		for (const _ of this.slices())
@@ -113,19 +165,21 @@ export default class Slice {
 	}
 
 	_chop(newStart, newEnd) {
-		const loc = new Loc(this.tokens[newStart].loc.start, this.tokens[newEnd - 1].loc.end)
-		return new Slice(this.tokens, newStart, newEnd, loc)
+		const loc = new Loc(this._tokens[newStart].loc.start, this._tokens[newEnd - 1].loc.end)
+		return new Slice(this._tokens, newStart, newEnd, loc)
 	}
+
 	_chopStart(newStart) {
-		const loc = newStart === this.end ?
+		const loc = newStart === this._end ?
 			this.loc :
-			new Loc(this.tokens[newStart].loc.start, this.loc.end)
-		return new Slice(this.tokens, newStart, this.end, loc)
+			new Loc(this._tokens[newStart].loc.start, this.loc.end)
+		return new Slice(this._tokens, newStart, this._end, loc)
 	}
+
 	_chopEnd(newEnd) {
-		const loc = newEnd === this.start ?
+		const loc = newEnd === this._start ?
 			this.loc :
-			new Loc(this.loc.start, this.tokens[newEnd - 1].loc.end)
-		return new Slice(this.tokens, this.start, newEnd, loc)
+			new Loc(this.loc.start, this._tokens[newEnd - 1].loc.end)
+		return new Slice(this._tokens, this._start, newEnd, loc)
 	}
 }

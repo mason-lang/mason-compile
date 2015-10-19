@@ -1,7 +1,11 @@
 import {DocComment} from '../Token'
 import {assert, isEmpty} from '../util'
 
-export default lines => {
+/**
+Takes DocComment lines and puts them into a comment.
+@return {?string}
+*/
+export default function tryTakeComment(lines) {
 	let comments = []
 	let rest = lines
 

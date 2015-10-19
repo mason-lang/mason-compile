@@ -1,7 +1,9 @@
-import render, {renderWithSourceMap} from 'esast/dist/render'
+import esRender, {renderWithSourceMap} from 'esast/dist/render'
 import {options} from './context'
 
-export default esAst =>
-	options.includeSourceMap() ?
+/** Renders the transpiled Ast. */
+export default function render(esAst) {
+	return options.includeSourceMap() ?
 		renderWithSourceMap(esAst, options.modulePath(), `./${options.jsBaseName()}`) :
-		render(esAst)
+		esRender(esAst)
+}

@@ -2,24 +2,24 @@ import {code} from '../../CompileError'
 import {check} from '../context'
 import {Catch, ExceptDo, ExceptVal, LocalDeclareFocus} from '../MsAst'
 import {opIf} from '../util'
-import {isKeyword, keywordName, KW_CatchDo, KW_CatchVal, KW_ExceptVal, KW_Finally, KW_TryDo,
-	KW_TryVal} from '../Token'
+import {isKeyword, keywordName, Keywords} from '../Token'
 import {checkNonEmpty} from './checks'
-import {beforeAndBlock, parseBlockVal, parseBlockDo, justBlock, justBlockDo, justBlockVal
+import {beforeAndBlock, parseBlockVal, parseBlockDo, justBlock, parseJustBlockDo, parseJustBlockVal
 	} from './parseBlock'
 import parseLocalDeclares from './parseLocalDeclares'
 
-export default (kwExcept, tokens) => {
+/** Parse an {@link ExceptDo} or {@link ExceptVal}. */
+export default function parseExcept(kwExcept, tokens) {
 	const
-		isVal = kwExcept === KW_ExceptVal,
-		justDoValBlock = isVal ? justBlockVal : justBlockDo,
+		isVal = kwExcept === Keywords.ExceptVal,
+		justDoValBlock = isVal ? parseJustBlockVal : parseJustBlockDo,
 		parseBlock = isVal ? parseBlockVal : parseBlockDo,
 		Except = isVal ? ExceptVal : ExceptDo,
-		kwTry = isVal ? KW_TryVal : KW_TryDo,
-		kwCatch = isVal ? KW_CatchVal : KW_CatchDo,
+		kwTry = isVal ? Keywords.TryVal : Keywords.TryDo,
+		kwCatch = isVal ? Keywords.CatchVal : Keywords.CatchDo,
 		nameTry = () => code(keywordName(kwTry)),
 		nameCatch = () => code(keywordName(kwCatch)),
-		nameFinally = () => code(keywordName(KW_Finally))
+		nameFinally = () => code(keywordName(Keywords.Finally))
 
 	const lines = justBlock(kwExcept, tokens)
 
@@ -37,11 +37,11 @@ export default (kwExcept, tokens) => {
 	const handleFinally = restLines => {
 		const line = restLines.headSlice()
 		const tokenFinally = line.head()
-		check(isKeyword(KW_Finally, tokenFinally), tokenFinally.loc, () =>
+		check(isKeyword(Keywords.Finally, tokenFinally), tokenFinally.loc, () =>
 			`Expected ${nameFinally()}`)
 		check(restLines.size() === 1, restLines.loc, () =>
 			`Nothing is allowed to come after ${nameFinally()}.`)
-		return justBlockDo(KW_Finally, line.tail())
+		return parseJustBlockDo(Keywords.Finally, line.tail())
 	}
 
 	let _catch, _finally
@@ -61,7 +61,7 @@ export default (kwExcept, tokens) => {
 	return new Except(tokens.loc, _try, _catch, _finally)
 }
 
-const parseOneLocalDeclareOrFocus = tokens => {
+function parseOneLocalDeclareOrFocus(tokens) {
 	if (tokens.isEmpty())
 		return new LocalDeclareFocus(tokens.loc)
 	else {

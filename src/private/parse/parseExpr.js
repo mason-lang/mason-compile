@@ -1,12 +1,9 @@
 import Loc from 'esast/dist/Loc'
 import {code} from '../../CompileError'
 import {check, fail} from '../context'
-import {Call, Cond, ConditionalVal, LocalDeclareFocus, Logic, L_And, L_Or, New, Not, ObjPair,
-	ObjSimple, SuperCall, With, Yield, YieldTo} from '../MsAst'
-import {isKeyword, Keyword, KW_And, KW_As, KW_CaseVal, KW_Class, KW_Cond, KW_ExceptVal, KW_ForBag,
-	KW_ForVal, KW_Fun, KW_FunDo, KW_FunGen, KW_FunGenDo, KW_FunThis, KW_FunThisDo, KW_FunThisGen,
-	KW_FunThisGenDo, KW_IfVal, KW_New, KW_Not, KW_ObjAssign, KW_Or, KW_SuperVal, KW_SwitchVal,
-	KW_UnlessVal, KW_With, KW_Yield, KW_YieldTo, Name} from '../Token'
+import {Call, Cond, ConditionalVal, LocalDeclareFocus, Logic, Logics, New, Not, ObjPair, ObjSimple,
+	SuperCall, With, Yield, YieldTo} from '../MsAst'
+import {isAnyKeyword, isKeyword, Keywords, Name} from '../Token'
 import {cat, head, ifElse, opIf, tail} from '../util'
 import {checkNonEmpty} from './checks'
 import {parseClass, parseExcept, parseSingle, parseSwitch} from './parse*'
@@ -16,8 +13,9 @@ import {parseForBag, parseForVal} from './parseFor'
 import parseFun from './parseFun'
 import {parseLocalDeclare} from './parseLocalDeclares'
 
-export default tokens =>
-	ifElse(tokens.opSplitManyWhere(_ => isKeyword(KW_ObjAssign, _)),
+/** Parse a {@link Val}. */
+export default function parseExpr(tokens) {
+	return ifElse(tokens.opSplitMany(_ => isKeyword(Keywords.ObjAssign, _)),
 		splits => {
 			// Short object form, such as (a. 1, b. 2)
 			const first = splits[0].before
@@ -45,69 +43,63 @@ export default tokens =>
 			}
 		},
 		() => parseExprPlain(tokens))
+}
 
-export const parseExprParts = tokens => {
-	const opSplit = tokens.opSplitOnceWhere(token => {
-		if (token instanceof Keyword)
-			switch (token.kind) {
-				case KW_And: case KW_CaseVal: case KW_Class: case KW_Cond: case KW_ExceptVal:
-				case KW_ForBag: case KW_ForVal: case KW_Fun: case KW_FunDo: case KW_FunGen:
-				case KW_FunGenDo: case KW_FunThis: case KW_FunThisDo: case KW_FunThisGen:
-				case KW_FunThisGenDo: case KW_IfVal: case KW_New: case KW_Not: case KW_Or:
-				case KW_SuperVal: case KW_SwitchVal: case KW_UnlessVal: case KW_With:
-				case KW_Yield: case KW_YieldTo:
-					return true
-				default:
-					return false
-			}
-		return false
-	})
-	return ifElse(opSplit,
+/**
+Treating tokens separately, parse {@link Val}s.
+This is called for e.g. the contents of an array (`[a b c]`).
+This is different from {@link parseExpr} because `a b` will parse as 2 different things, not a call.
+However, `cond a b c` will still parse as a single expression.
+@return {Array<Val>}
+*/
+export function parseExprParts(tokens) {
+	return ifElse(tokens.opSplitOnce(_ => isAnyKeyword(exprSplitKeywords, _)),
 		({before, at, after}) => {
 			const getLast = () => {
 				switch (at.kind) {
-					case KW_And: case KW_Or:
-						return new Logic(at.loc, at.kind === KW_And ? L_And : L_Or,
-							parseExprParts(after))
-					case KW_CaseVal:
+					case Keywords.And: case Keywords.Or: {
+						const kind = at.kind === Keywords.And ? Logics.And : Logics.Or
+						return new Logic(at.loc, kind, parseExprParts(after))
+					}
+					case Keywords.CaseVal:
 						return parseCase(true, false, after)
-					case KW_Class:
+					case Keywords.Class:
 						return parseClass(after)
-					case KW_Cond:
+					case Keywords.Cond:
 						return parseCond(after)
-					case KW_ExceptVal:
-						return parseExcept(KW_ExceptVal, after)
-					case KW_ForBag:
+					case Keywords.ExceptVal:
+						return parseExcept(Keywords.ExceptVal, after)
+					case Keywords.ForBag:
 						return parseForBag(after)
-					case KW_ForVal:
+					case Keywords.ForVal:
 						return parseForVal(after)
-					case KW_Fun: case KW_FunDo: case KW_FunGen: case KW_FunGenDo:
-					case KW_FunThis: case KW_FunThisDo: case KW_FunThisGen:
-					case KW_FunThisGenDo:
+					case Keywords.Fun: case Keywords.FunDo: case Keywords.FunGen:
+					case Keywords.FunGenDo: case Keywords.FunThis: case Keywords.FunThisDo:
+					case Keywords.FunThisGen: case Keywords.FunThisGenDo:
 						return parseFun(at.kind, after)
-					case KW_IfVal: case KW_UnlessVal: {
+					case Keywords.IfVal: case Keywords.UnlessVal: {
 						const [before, block] = beforeAndBlock(after)
 						return new ConditionalVal(tokens.loc,
 							parseExprPlain(before),
 							parseBlockVal(block),
-							at.kind === KW_UnlessVal)
+							at.kind === Keywords.UnlessVal)
 					}
-					case KW_New: {
+					case Keywords.New: {
 						const parts = parseExprParts(after)
 						return new New(at.loc, parts[0], tail(parts))
 					}
-					case KW_Not:
+					case Keywords.Not:
 						return new Not(at.loc, parseExprPlain(after))
-					case KW_SuperVal:
+					case Keywords.SuperVal:
 						return new SuperCall(at.loc, parseExprParts(after))
-					case KW_SwitchVal:
+					case Keywords.SwitchVal:
 						return parseSwitch(true, false, after)
-					case KW_With:
+					case Keywords.With:
 						return parseWith(after)
-					case KW_Yield:
+					case Keywords.Yield:
 						return new Yield(at.loc,
 							opIf(!after.isEmpty(), () => parseExprPlain(after)))
-					case KW_YieldTo:
+					case Keywords.YieldTo:
 						return new YieldTo(at.loc, parseExprPlain(after))
 					default: throw new Error(at.kind)
 				}
@@ -117,35 +109,43 @@ export const parseExprParts = tokens => {
 		() => tokens.map(parseSingle))
 }
 
-const
-	parseExprPlain = tokens => {
-		const parts = parseExprParts(tokens)
-		switch (parts.length) {
-			case 0:
-				fail(tokens.loc, 'Expected an expression, got nothing.')
-			case 1:
-				return head(parts)
-			default:
-				return new Call(tokens.loc, head(parts), tail(parts))
-		}
-	},
+const exprSplitKeywords = new Set([
+	Keywords.And, Keywords.CaseVal, Keywords.Class, Keywords.Cond, Keywords.ExceptVal,
+	Keywords.ForBag, Keywords.ForVal, Keywords.Fun, Keywords.FunDo, Keywords.FunGen,
+	Keywords.FunGenDo, Keywords.FunThis, Keywords.FunThisDo, Keywords.FunThisGen,
+	Keywords.FunThisGenDo, Keywords.IfVal, Keywords.New, Keywords.Not, Keywords.Or,
+	Keywords.SuperVal, Keywords.SwitchVal, Keywords.UnlessVal, Keywords.With, Keywords.Yield,
+	Keywords.YieldTo
+])
 
-	parseCond = tokens => {
-		const parts = parseExprParts(tokens)
-		check(parts.length === 3, tokens.loc, () => `${code('cond')} takes exactly 3 arguments.`)
-		return new Cond(tokens.loc, parts[0], parts[1], parts[2])
-	},
-
-	parseWith = tokens => {
-		const [before, block] = beforeAndBlock(tokens)
-
-		const [val, declare] = ifElse(before.opSplitOnceWhere(_ => isKeyword(KW_As, _)),
-			({before, after}) => {
-				check(after.size() === 1, () =>
-					`Expected only 1 token after ${code('as')}.`)
-				return [parseExprPlain(before), parseLocalDeclare(after.head())]
-			},
-			() => [parseExprPlain(before), new LocalDeclareFocus(tokens.loc)])
-
-		return new With(tokens.loc, declare, val, parseBlockDo(block))
+function parseExprPlain(tokens) {
+	const parts = parseExprParts(tokens)
+	switch (parts.length) {
+		case 0:
+			fail(tokens.loc, 'Expected an expression, got nothing.')
+		case 1:
+			return head(parts)
+		default:
+			return new Call(tokens.loc, head(parts), tail(parts))
 	}
+}
+
+function parseCond(tokens) {
+	const parts = parseExprParts(tokens)
+	check(parts.length === 3, tokens.loc, () => `${code('cond')} takes exactly 3 arguments.`)
+	return new Cond(tokens.loc, parts[0], parts[1], parts[2])
+}
+
+function parseWith(tokens) {
+	const [before, block] = beforeAndBlock(tokens)
+
+	const [val, declare] = ifElse(before.opSplitOnce(_ => isKeyword(Keywords.As, _)),
+		({before, after}) => {
+			check(after.size() === 1, () =>
+				`Expected only 1 token after ${code('as')}.`)
+			return [parseExprPlain(before), parseLocalDeclare(after.head())]
+		},
+		() => [parseExprPlain(before), new LocalDeclareFocus(tokens.loc)])
+
+	return new With(tokens.loc, declare, val, parseBlockDo(block))
+}

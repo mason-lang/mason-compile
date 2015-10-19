@@ -1,14 +1,20 @@
 import {code} from '../../CompileError'
 import {check} from '../context'
 import {LocalAccess, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart} from '../MsAst'
-import {isKeyword, KW_Else, KW_Or} from '../Token'
+import {isKeyword, Keywords} from '../Token'
 import {checkEmpty} from './checks'
 import {parseExpr} from './parse*'
-import {beforeAndBlock, justBlockDo, justBlockVal, parseBlockDo, parseBlockVal} from './parseBlock'
+import {beforeAndBlock, parseJustBlockDo, parseJustBlockVal, parseBlockDo, parseBlockVal
+	} from './parseBlock'
 import parseSingle from './parseSingle'
 import Slice from './Slice'
 
-export default (isVal, switchedFromFun, tokens) => {
+/** Parse a {@link SwitchDo} or {@link SwitchVal}. */
+export default function parseSwitch(isVal, switchedFromFun, tokens) {
+	const
+		parseJustBlock = isVal ? parseJustBlockVal : parseJustBlockDo,
+		Switch = isVal ? SwitchVal : SwitchDo
+
 	const [before, block] = beforeAndBlock(tokens)
 
 	let switched
@@ -19,21 +25,21 @@ export default (isVal, switchedFromFun, tokens) => {
 		switched = parseExpr(before)
 
 	const lastLine = Slice.group(block.last())
-	const [partLines, opElse] = isKeyword(KW_Else, lastLine.head()) ?
-		[block.rtail(), (isVal ? justBlockVal : justBlockDo)(KW_Else, lastLine.tail())] :
+	const [partLines, opElse] = isKeyword(Keywords.Else, lastLine.head()) ?
+		[block.rtail(), parseJustBlock(Keywords.Else, lastLine.tail())] :
 		[block, null]
 
-	const parts = partLines.mapSlices(parseSwitchLine(isVal))
+	const parts = partLines.mapSlices(line => parseSwitchLine(isVal, line))
 	check(parts.length > 0, tokens.loc, () => `Must have at least 1 non-${code('else')} test.`)
 
-	return new (isVal ? SwitchVal : SwitchDo)(tokens.loc, switched, parts, opElse)
+	return new Switch(tokens.loc, switched, parts, opElse)
 }
 
-const parseSwitchLine = isVal => line => {
+function parseSwitchLine(isVal, line) {
 	const [before, block] = beforeAndBlock(line)
 
 	let values
-	if (isKeyword(KW_Or, before.head()))
+	if (isKeyword(Keywords.Or, before.head()))
 		values = before.tail().map(parseSingle)
 	else
 		values = [parseExpr(before)]

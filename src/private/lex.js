@@ -1,24 +1,31 @@
-import Loc, {Pos, StartLine, StartPos, StartColumn, singleCharLoc} from 'esast/dist/Loc'
+import Loc, {Pos, StartLine, StartLoc, StartPos, StartColumn, singleCharLoc} from 'esast/dist/Loc'
 import {code} from '../CompileError'
-import {check, fail, options, warn, warnIf} from './context'
+import {check, fail, options, warn} from './context'
 import {NumberLiteral} from './MsAst'
-import {DocComment, Group, G_Block, G_Bracket, G_Line, G_Parenthesis, G_Space, G_Quote, isKeyword,
-	Keyword, KW_AssignMutable, KW_Dot, KW_Ellipsis, KW_Focus, KW_Fun, KW_FunDo, KW_FunGen,
-	KW_FunGenDo, KW_FunThis, KW_FunThisDo, KW_FunThisGen, KW_FunThisGenDo, KW_Lazy, KW_LocalMutate,
-	KW_ObjAssign, KW_Region, KW_Todo, KW_Type, Name, opKeywordKindFromName, showGroupKind
-	} from './Token'
-import {assert, isEmpty, last} from './util'
+import {DocComment, Group, Groups, isKeyword, Keyword, Keywords, Name, opKeywordKindFromName,
+	showGroupKind} from './Token'
+import {assert, ifElse, isEmpty, last} from './util'
 
-/*
-This produces the Token tree (see Token.js).
+/**
+Lexes the source code into {@link Token}s.
+The Mason lexer also groups tokens as part of lexing.
+This makes writing a recursive-descent parser easy.
+See {@link Group}.
+
+@param {string} sourceString
+@return {Group<Groups.Block>}
+	Block token representing the whole module.
 */
-export default sourceString => {
+export default function lex(sourceString) {
+	// Algorithm requires trailing newline to close any blocks.
+	check(sourceString.endsWith('\n'), StartLoc, 'Source code must end in newline.')
+
 	/*
-	Lexing algorithm requires trailing newline to close any blocks.
-	Use a 0-terminated string because it's faster than checking whether index === length.
-	(When string reaches end `charCodeAt` will return `NaN`, which can't be switched on.)
+	Use a 0-terminated string so that we can use `0` as a switch case.
+	This is faster than checking whether index === length.
+	(If we check past the end of the string we get `NaN`, which can't be switched on.)
 	*/
-	sourceString = `${sourceString}\n\0`
+	sourceString = `${sourceString}\0`
 
 	// --------------------------------------------------------------------------------------------
 	// GROUPING
@@ -63,7 +70,7 @@ export default sourceString => {
 			dropGroup()
 			justClosed.loc.end = closePos
 			switch (closeKind) {
-				case G_Space: {
+				case Groups.Space: {
 					const size = justClosed.subTokens.length
 					if (size !== 0)
 						// Spaced should always have at least two elements.
@@ -72,13 +79,13 @@ export default sourceString => {
 						warn(justClosed.loc, 'Unnecessary space.')
 					break
 				}
-				case G_Line:
+				case Groups.Line:
 					// Line must have content.
 					// This can happen if there was just a comment.
 					if (!isEmpty(justClosed.subTokens))
 						addToCurrentGroup(justClosed)
 					break
-				case G_Block:
+				case Groups.Block:
 					check(!isEmpty(justClosed.subTokens), closePos, 'Empty block.')
 					addToCurrentGroup(justClosed)
 					break
@@ -88,49 +95,49 @@ export default sourceString => {
 		},
 
 		closeSpaceOKIfEmpty = pos => {
-			assert(curGroup.kind === G_Space)
+			assert(curGroup.kind === Groups.Space)
 			if (curGroup.subTokens.length === 0)
 				dropGroup()
 			else
-				_closeGroup(pos, G_Space)
+				_closeGroup(pos, Groups.Space)
 		},
 
 		openParenthesis = loc => {
-			openGroup(loc.start, G_Parenthesis)
-			openGroup(loc.end, G_Space)
+			openGroup(loc.start, Groups.Parenthesis)
+			openGroup(loc.end, Groups.Space)
 		},
 
 		closeParenthesis = loc => {
-			_closeGroup(loc.start, G_Space)
-			closeGroup(loc.end, G_Parenthesis)
+			_closeGroup(loc.start, Groups.Space)
+			closeGroup(loc.end, Groups.Parenthesis)
 		},
 
 		closeGroupsForDedent = pos => {
 			closeLine(pos)
-			closeGroup(pos, G_Block)
+			closeGroup(pos, Groups.Block)
 			// It's OK to be missing a closing parenthesis if there's a block. E.g.:
 			// a (b
 			//	c | no closing paren here
-			while (curGroup.kind === G_Parenthesis || curGroup.kind === G_Space)
+			while (curGroup.kind === Groups.Parenthesis || curGroup.kind === Groups.Space)
 				_closeGroup(pos, curGroup.kind)
 		},
 
 		// When starting a new line, a spaced group is created implicitly.
 		openLine = pos => {
-			openGroup(pos, G_Line)
-			openGroup(pos, G_Space)
+			openGroup(pos, Groups.Line)
+			openGroup(pos, Groups.Space)
 		},
 
 		closeLine = pos => {
-			if (curGroup.kind === G_Space)
+			if (curGroup.kind === Groups.Space)
 				closeSpaceOKIfEmpty()
-			closeGroup(pos, G_Line)
+			closeGroup(pos, Groups.Line)
 		},
 
 		// When encountering a space, it both closes and opens a spaced group.
 		space = loc => {
-			maybeCloseGroup(loc.start, G_Space)
-			openGroup(loc.end, G_Space)
+			maybeCloseGroup(loc.start, Groups.Space)
+			openGroup(loc.end, Groups.Space)
 		}
 
 	// --------------------------------------------------------------------------------------------
@@ -358,23 +365,29 @@ export default sourceString => {
 				if (name.endsWith('_')) {
 					if (name.length > 1)
 						_handleName(name.slice(0, name.length - 1))
-					keyword(KW_Focus)
+					keyword(Keywords.Focus)
 				} else
 					_handleName(name)
 			},
 			_handleName = name => {
-				const keywordKind = opKeywordKindFromName(name)
-				if (keywordKind !== undefined)
-					if (keywordKind === KW_Region) {
-						// TODO: Eat and put it in Region expression
-						skipRestOfLine()
-						keyword(KW_Region)
-					} else if (keywordKind === KW_Todo)
-						skipRestOfLine()
-					else
-						keyword(keywordKind)
-				else
-					addToCurrentGroup(new Name(loc(), name))
+				ifElse(opKeywordKindFromName(name),
+					kind => {
+						switch (kind) {
+							case Keywords.Region:
+								skipRestOfLine()
+								keyword(Keywords.Region)
+								break
+							case Keywords.Todo:
+								// TODO: warn
+								skipRestOfLine()
+								break
+							default:
+								keyword(kind)
+						}
+					},
+					() => {
+						addToCurrentGroup(new Name(loc(), name))
+					})
 			}
 
 		while (true) {
@@ -396,31 +409,32 @@ export default sourceString => {
 
 				case OpenParenthesis:
 					if (tryEat(CloseParenthesis))
-						addToCurrentGroup(new Group(loc(), [], G_Parenthesis))
+						addToCurrentGroup(new Group(loc(), [], Groups.Parenthesis))
 					else
 						openParenthesis(loc())
 					break
 				case OpenBracket:
 					if (tryEat(CloseBracket))
-						addToCurrentGroup(new Group(loc(), [], G_Bracket))
+						addToCurrentGroup(new Group(loc(), [], Groups.Bracket))
 					else {
-						openGroup(startPos(), G_Bracket)
-						openGroup(pos(), G_Space)
+						openGroup(startPos(), Groups.Bracket)
+						openGroup(pos(), Groups.Space)
 					}
 					break
 				case CloseParenthesis:
 					closeParenthesis(loc())
 					break
 				case CloseBracket:
-					_closeGroup(startPos(), G_Space)
-					closeGroup(pos(), G_Bracket)
+					_closeGroup(startPos(), Groups.Space)
+					closeGroup(pos(), Groups.Bracket)
 					break
 				case Space:
 					space(loc())
 					break
 				case Newline: {
 					check(!isInQuote, loc, 'Quote interpolation cannot contain newline')
-					warnIf(peek2Before() === Space, pos, 'Line ends in a space.')
+					if (peek2Before() === Space)
+						warn(pos, 'Line ends in a space.')
 
 					// Skip any blank lines.
 					skipNewlines()
@@ -433,12 +447,12 @@ export default sourceString => {
 						// Block at end of line goes in its own spaced group.
 						// However, `~` preceding a block goes in a group with it.
 						if (isEmpty(curGroup.subTokens) ||
-							!isKeyword(KW_Lazy, last(curGroup.subTokens))) {
-							if (curGroup.kind === G_Space)
+							!isKeyword(Keywords.Lazy, last(curGroup.subTokens))) {
+							if (curGroup.kind === Groups.Space)
 								closeSpaceOKIfEmpty(l.start)
-							openGroup(l.end, G_Space)
+							openGroup(l.end, Groups.Space)
 						}
-						openGroup(l.start, G_Block)
+						openGroup(l.start, Groups.Block)
 						openLine(l.end)
 					} else {
 						const l = loc()
@@ -458,32 +472,32 @@ export default sourceString => {
 
 				case Bang:
 					if (tryEat(Bar))
-						funKeyword(KW_FunDo)
+						funKeyword(Keywords.FunDo)
 					else
 						handleName()
 					break
 				case Tilde:
 					if (tryEat(Bang)) {
 						mustEat(Bar, '~!')
-						funKeyword(KW_FunGenDo)
+						funKeyword(Keywords.FunGenDo)
 					} else if (tryEat(Bar))
-						funKeyword(KW_FunGen)
+						funKeyword(Keywords.FunGen)
 					else
-						keyword(KW_Lazy)
+						keyword(Keywords.Lazy)
 					break
 				case Bar:
 					if (tryEat(Space) || tryEat(Tab)) {
 						const text = eatRestOfLine()
 						closeSpaceOKIfEmpty(startPos())
-						check(
-							curGroup.kind === G_Line && curGroup.subTokens.length === 0, loc, () =>
-							`Doc comment must go on its own line. (Did you mean ${code('||')}?)`)
+						if (!(curGroup.kind === Groups.Line && curGroup.subTokens.length === 0))
+							fail(loc,
+								`Doc comment must go on its own line. Did you mean ${code('||')}?`)
 						addToCurrentGroup(new DocComment(loc(), text))
 					} else if (tryEat(Bar))
 						// non-doc comment
 						skipRestOfLine()
 					else
-						funKeyword(KW_Fun)
+						funKeyword(Keywords.Fun)
 					break
 
 				// NUMBER
@@ -510,48 +524,48 @@ export default sourceString => {
 						// We can't just create a new Group here because we want to
 						// ensure it's not part of the preceding or following spaced group.
 						closeSpaceOKIfEmpty(startPos())
-						keyword(KW_ObjAssign)
+						keyword(Keywords.ObjAssign)
 					} else if (next === Bar) {
 						skip()
-						keyword(KW_FunThis)
+						keyword(Keywords.FunThis)
 						space(loc())
 					} else if (next === Bang && peekNext() === Bar) {
 						skip()
 						skip()
-						keyword(KW_FunThisDo)
+						keyword(Keywords.FunThisDo)
 						space(loc())
 					} else if (next === Tilde) {
 						skip()
 						if (tryEat(Bang)) {
 							mustEat(Bar, '.~!')
-							keyword(KW_FunThisGenDo)
+							keyword(Keywords.FunThisGenDo)
 						} else {
 							mustEat(Bar, '.~')
-							keyword(KW_FunThisGen)
+							keyword(Keywords.FunThisGen)
 						}
 						space(loc())
 					} else if (peek() === Dot && peekNext() === Dot) {
 						eat()
 						eat()
-						keyword(KW_Ellipsis)
+						keyword(Keywords.Ellipsis)
 					} else
-						keyword(KW_Dot)
+						keyword(Keywords.Dot)
 					break
 				}
 
 				case Colon:
 					if (tryEat(Colon)) {
 						mustEat(Equal, '::')
-						keyword(KW_AssignMutable)
+						keyword(Keywords.AssignMutable)
 					} else if (tryEat(Equal))
-						keyword(KW_LocalMutate)
+						keyword(Keywords.LocalMutate)
 					else
-						keyword(KW_Type)
+						keyword(Keywords.Type)
 					break
 
 				case Ampersand: case Backslash: case Backtick: case Caret:
 				case Comma: case Percent: case Semicolon:
-					fail(loc, `Reserved character ${showChar(characterEaten)}`)
+					fail(loc(), `Reserved character ${showChar(characterEaten)}`)
 				default:
 					handleName()
 			}
@@ -583,7 +597,7 @@ export default sourceString => {
 
 		const locSingle = () => singleCharLoc(pos())
 
-		openGroup(locSingle().start, G_Quote)
+		openGroup(locSingle().start, Groups.Quote)
 
 		eatChars: while (true) {
 			const char = eat()
@@ -638,10 +652,10 @@ export default sourceString => {
 		}
 
 		maybeOutputRead()
-		closeGroup(pos(), G_Quote)
+		closeGroup(pos(), Groups.Quote)
 	}
 
-	curGroup = new Group(new Loc(StartPos, null), [], G_Block)
+	curGroup = new Group(new Loc(StartPos, null), [], Groups.Block)
 	openLine(StartPos)
 
 	lexPlain(false)

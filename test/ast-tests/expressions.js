@@ -1,6 +1,6 @@
-import {AssignSingle, BagSimple, BlockDo, Call, LD_Const, LocalDeclare, Member, New, ObjPair,
-	ObjSimple, Quote, QuoteTemplate, SpecialVal, Splat, SV_False, SV_Null, SV_True, SV_Undefined,
-	With} from '../../dist/private/MsAst'
+import {AssignSingle, BagSimple, BlockDo, Call, LocalDeclare, LocalDeclares, Member, New, ObjPair,
+	ObjSimple, Quote, QuoteTemplate, SpecialVal, SpecialVals, Splat, With
+	} from '../../dist/private/MsAst'
 import {aAccess, aDeclare, assignAZero, blockPass, focusAccess, focusDeclare, loc, one, two, zero
 	} from './util/ast-util'
 import {test} from './util/test-asts'
@@ -58,7 +58,7 @@ describe('expressions', () => {
 
 		test(
 			'0[1 2]',
-			Call.sub(loc, [zero, one, two]),
+			Call.sub(loc, zero, [one, two]),
 			'_ms.sub(0,1,2)')
 
 		test(
@@ -82,7 +82,7 @@ describe('expressions', () => {
 			[
 				assignAZero,
 				// TODO: assignFocusZero (but that uses LocalDeclareFocus, not a plain LocalDeclare)
-				new AssignSingle(loc, new LocalDeclare(loc, '_', null, LD_Const), zero),
+				new AssignSingle(loc, new LocalDeclare(loc, '_', null, LocalDeclares.Const), zero),
 				Call.contains(loc, aAccess, focusAccess)
 			],
 			`
@@ -90,10 +90,10 @@ describe('expressions', () => {
 				const _=0;
 				return _ms.contains(a,_)`)
 
-		test('false', new SpecialVal(loc, SV_False), 'false')
-		test('null', new SpecialVal(loc, SV_Null), 'null')
-		test('true', new SpecialVal(loc, SV_True), 'true')
-		test('undefined', new SpecialVal(loc, SV_Undefined), 'void 0')
+		test('false', new SpecialVal(loc, SpecialVals.False), 'false')
+		test('null', new SpecialVal(loc, SpecialVals.Null), 'null')
+		test('true', new SpecialVal(loc, SpecialVals.True), 'true')
+		test('undefined', new SpecialVal(loc, SpecialVals.Undefined), 'void 0')
 	})
 
 	describe('Quote', () => {

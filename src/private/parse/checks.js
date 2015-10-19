@@ -1,19 +1,23 @@
 import {code} from '../../CompileError'
-import {check, fail} from '../context'
+import {fail} from '../context'
 import {isReservedKeyword, keywordName} from '../Token'
 
-export const
-	checkEmpty = (tokens, message) => {
-		check(tokens.isEmpty(), tokens.loc, message)
-	},
+/** Throw a {@link CompileError} if `tokens` has content. */
+export function checkEmpty(tokens, message) {
+	if (!tokens.isEmpty())
+		fail(tokens.loc, message)
+}
 
-	checkNonEmpty = (tokens, message) => {
-		check(!tokens.isEmpty(), tokens.loc, message)
-	},
+/** Throw a {@link CompileError} if `tokens` is empty. */
+export function checkNonEmpty(tokens, message) {
+	if (tokens.isEmpty())
+		fail(tokens.loc, message)
+}
 
-	unexpected = token => {
-		const message = isReservedKeyword(token) ?
-			`Reserved word ${code(keywordName(token.kind))}.` :
-			`Unexpected ${token}.`
-		fail(token.loc, message)
-	}
+/** Throw a {@link CompileError} about encountering an unparseable token. */
+export function unexpected(token) {
+	const message = isReservedKeyword(token) ?
+		`Reserved word ${code(keywordName(token.kind))}.` :
+		`Unexpected ${token}.`
+	fail(token.loc, message)
+}

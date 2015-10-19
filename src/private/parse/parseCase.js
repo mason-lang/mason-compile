@@ -1,17 +1,22 @@
 import {code} from '../../CompileError'
 import {check} from '../context'
-import {AssignSingle, CaseDo, CaseDoPart, CaseVal, CaseValPart, LocalAccess, Pattern
-	} from '../MsAst'
-import {G_Space, isGroup, isKeyword, KW_Else, KW_Type} from '../Token'
+import {AssignSingle, CaseDo, CaseDoPart, CaseVal, CaseValPart, Pattern} from '../MsAst'
+import {Groups, isGroup, isKeyword, Keywords} from '../Token'
 import {opIf} from '../util'
 import {checkEmpty} from './checks'
 import {parseExpr} from './parse*'
-import {beforeAndBlock, parseBlockDo, parseBlockVal, justBlockDo, justBlockVal} from './parseBlock'
+import {beforeAndBlock, parseBlockDo, parseBlockVal, parseJustBlockDo, parseJustBlockVal
+	} from './parseBlock'
 import parseLocalDeclares from './parseLocalDeclares'
 import parseSpaced from './parseSpaced'
 import Slice from './Slice'
 
-export default (isVal, casedFromFun, tokens) => {
+/** Parse a {@link CaseDo} or {@link CaseVal}. */
+export default function parseCase(isVal, casedFromFun, tokens) {
+	const
+		parseJustBlock = isVal ? parseJustBlockVal : parseJustBlockDo,
+		Case = isVal ? CaseVal : CaseDo
+
 	const [before, block] = beforeAndBlock(tokens)
 
 	let opCased
@@ -22,36 +27,35 @@ export default (isVal, casedFromFun, tokens) => {
 		opCased = opIf(!before.isEmpty(), () => AssignSingle.focus(before.loc, parseExpr(before)))
 
 	const lastLine = Slice.group(block.last())
-	const [partLines, opElse] = isKeyword(KW_Else, lastLine.head()) ?
-		[block.rtail(), (isVal ? justBlockVal : justBlockDo)(KW_Else, lastLine.tail())] :
+	const [partLines, opElse] = isKeyword(Keywords.Else, lastLine.head()) ?
+		[block.rtail(), parseJustBlock(Keywords.Else, lastLine.tail())] :
 		[block, null]
 
 	const parts = partLines.mapSlices(line => parseCaseLine(isVal, line))
 	check(parts.length > 0, tokens.loc, () =>
 		`Must have at least 1 non-${code('else')} test.`)
 
-	return new (isVal ? CaseVal : CaseDo)(tokens.loc, opCased, parts, opElse)
+	return new Case(tokens.loc, opCased, parts, opElse)
 }
 
-const
-	parseCaseLine = (isVal, line) => {
-		const [before, block] = beforeAndBlock(line)
-		const test = parseCaseTest(before)
-		const result = (isVal ? parseBlockVal : parseBlockDo)(block)
-		return new (isVal ? CaseValPart : CaseDoPart)(line.loc, test, result)
-	},
+function parseCaseLine(isVal, line) {
+	const [before, block] = beforeAndBlock(line)
+	const test = parseCaseTest(before)
+	const result = (isVal ? parseBlockVal : parseBlockDo)(block)
+	return new (isVal ? CaseValPart : CaseDoPart)(line.loc, test, result)
+}
 
-	parseCaseTest = tokens => {
-		const first = tokens.head()
-		// Pattern match starts with type test and is followed by local declares.
-		// E.g., `:Some val`
-		if (isGroup(G_Space, first) && tokens.size() > 1) {
-			const ft = Slice.group(first)
-			if (isKeyword(KW_Type, ft.head())) {
-				const type = parseSpaced(ft.tail())
-				const locals = parseLocalDeclares(tokens.tail())
-				return new Pattern(first.loc, type, locals, LocalAccess.focus(tokens.loc))
-			}
+function parseCaseTest(tokens) {
+	const first = tokens.head()
+	// Pattern match starts with type test and is followed by local declares.
+	// E.g., `:Some val`
+	if (isGroup(Groups.Space, first) && tokens.size() > 1) {
+		const ft = Slice.group(first)
+		if (isKeyword(Keywords.Type, ft.head())) {
+			const type = parseSpaced(ft.tail())
+			const locals = parseLocalDeclares(tokens.tail())
+			return new Pattern(tokens.loc, type, locals)
 		}
-		return parseExpr(tokens)
 	}
+	return parseExpr(tokens)
+}

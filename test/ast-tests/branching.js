@@ -1,4 +1,4 @@
-import {BlockDo, BlockWithReturn, CaseDo, CaseDoPart, CaseVal, CaseValPart, ConditionalDo,
+import {BlockDo, BlockValReturn, CaseDo, CaseDoPart, CaseVal, CaseValPart, ConditionalDo,
 	ConditionalVal, Fun, Pattern, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart
 	} from '../../dist/private/MsAst'
 import {aAccess, assignAZero, assignFocusZero, bDeclare, bAccess, blockDbg, blockOne, blockTwo,
@@ -107,8 +107,8 @@ describe('case', () => {
 			new CaseVal(loc, assignFocusZero,
 				[
 					new CaseValPart(loc,
-						new Pattern(loc, aAccess, [bDeclare], focusAccess),
-						new BlockWithReturn(loc, null, [], bAccess))
+						new Pattern(loc, aAccess, [bDeclare]),
+						new BlockValReturn(loc, null, [], bAccess))
 				],
 				blockOne)
 		],
@@ -133,11 +133,9 @@ describe('case', () => {
 					1`,
 		new Fun(
 			loc,
-			null,
-			false,
 			[focusDeclare],
 			null,
-			new BlockWithReturn(loc, null, [],
+			new BlockValReturn(loc, null, [],
 				new CaseVal(loc, null,
 					[new CaseValPart(loc, focusAccess, blockOne)],
 					null))),
@@ -156,8 +154,6 @@ describe('case', () => {
 					pass`,
 		new Fun(
 			loc,
-			null,
-			false,
 			[focusDeclare],
 			null,
 			new BlockDo(loc, null, [
@@ -197,7 +193,7 @@ describe('switch', () => {
 		new SwitchVal(loc, zero,
 			[new SwitchValPart(loc,
 				[one],
-				new BlockWithReturn(loc, null, [assignAZero], aAccess))],
+				new BlockValReturn(loc, null, [assignAZero], aAccess))],
 			blockOne),
 		`
 			(()=>{
@@ -232,11 +228,9 @@ describe('switch', () => {
 					1`,
 		new Fun(
 			loc,
-			null,
-			false,
 			[focusDeclare],
 			null,
-			new BlockWithReturn(loc, null, [],
+			new BlockValReturn(loc, null, [],
 				new SwitchVal(loc, focusAccess,
 					[new SwitchValPart(loc, [zero], blockOne)],
 					null))),
@@ -258,8 +252,6 @@ describe('switch', () => {
 					pass`,
 		new Fun(
 			loc,
-			null,
-			false,
 			[focusDeclare],
 			null,
 			new BlockDo(loc, null, [

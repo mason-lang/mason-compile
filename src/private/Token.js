@@ -1,55 +1,96 @@
 import {code} from '../CompileError'
-import {SV_False, SV_Name, SV_Null, SV_True, SV_Undefined} from './MsAst'
+import {SpecialVals} from './MsAst'
 
-/*
-Token tree, output of `lex/group`.
-That's right: in Mason, the tokens form a tree containing both plain tokens and Group tokens.
-This means that the parser avoids doing much of the work that parsers normally have to do;
-it doesn't have to handle a "left parenthesis", only a Group(tokens, G_Parenthesis).
+/**
+Lexed element in a tree of Tokens.
+
+Since {@link lex} does grouping, {@link parse} avoids doing much of the work parsers usually do;
+it doesn't have to handle a "left parenthesis", only a {@link Group} of kind G_Parenthesis.
+This also means that the many different {@link MsAst} types all parse in a similar manner,
+keeping the language consistent.
+
+Besides {@link Group}, {@link Keyword}, {@link Name}, and {@link DocComment},
+{@link NumberLiteral} values are also treated as Tokens.
+
+@abstract
 */
-
-// kind is a G_***.
-export class Group {
-	constructor(loc, subTokens /* Array[Token] */, kind /* Number */) {
+export default class Token {
+	constructor(loc) {
 		this.loc = loc
+	}
+}
+
+/**
+Contains multiple sub-tokens.
+See {@link GroupKind} for explanations.
+*/
+export class Group extends Token {
+	constructor(loc, subTokens, kind) {
+		super(loc)
+		/**
+		Tokens within this group.
+		@type {Array<Token>}
+		*/
 		this.subTokens = subTokens
+		/** @type {Groups} */
 		this.kind = kind
 	}
 
-	toString() { return `${groupKindToName.get(this.kind)}` }
+	toString() {
+		return `${groupKindToName.get(this.kind)}`
+	}
 }
 
-/*
-A key"word" is any set of characters with a particular meaning.
+/**
+A "keyword" is any set of characters with a particular meaning.
+It doensn't necessarily have to be something that might have been a {@link Name}.
+For example, see {@link Keywords.ObjEntry}.
+
 This can even include ones like `. ` (defines an object property, as in `key. value`).
-Kind is a KW_***. See the full list below.
+Kind is a ***. See the full list below.
 */
-export class Keyword {
-	constructor(loc, kind /* Number */) {
-		this.loc = loc
+export class Keyword extends Token {
+	constructor(loc, kind) {
+		super(loc)
+		/** @type {Keywords} */
 		this.kind = kind
 	}
 
-	toString() { return code(keywordKindToName.get(this.kind)) }
+	toString() {
+		return code(keywordKindToName.get(this.kind))
+	}
 }
 
-// A name is guaranteed to *not* be a keyword.
-export class Name {
+/**
+An identifier. Usually the name of some local variable or property.
+A Name is guaranteed to not be any keyword.
+*/
+export class Name extends Token {
 	constructor(loc, name /* String */) {
-		this.loc = loc
+		super(loc)
 		this.name = name
 	}
 
-	toString() { return this.name }
+	toString() {
+		return code(this.name)
+	}
 }
 
-export class DocComment {
-	constructor(loc, text /* String */) {
-		this.loc = loc
+/**
+Documentation comment (beginning with one `|` rather than two).
+Non-doc comments are ignored by {@link lex}.
+These don't affect output, but are passed to various {@link MsAst}s for use by other tools.
+*/
+export class DocComment extends Token {
+	constructor(loc, text) {
+		super(loc)
+		/** @type {string} */
 		this.text = text
 	}
 
-	toString() { return 'doc comment' }
+	toString() {
+		return 'doc comment'
+	}
 }
 
 let nextGroupKind = 0
@@ -62,35 +103,61 @@ const
 		return kind
 	}
 
-export const
-	G_Parenthesis = g('()'),
-	G_Bracket = g('[]'),
-	// Lines in an indented block.
-	// Sub-tokens will always be G_Line groups.
-	// Note that G_Blocks do not always map to Block* MsAsts.
-	G_Block = g('indented block'),
-	// Within a quote.
-	// Sub-tokens may be strings, or G_Parenthesis groups.
-	G_Quote = g('quote'),
-	/*
+/**
+Kinds of {@link Group}.
+@enum {number}
+*/
+export const Groups = {
+	/**
+	Tokens surrounded by parentheses.
+	There may be no closing parenthesis. In:
+
+		a (b
+			c
+
+	The tokens are a Group<Line>(Name, Group<Parenthesis>(...))
+	*/
+	Parenthesis: g('()'),
+	/** Like `Parenthesis`, but simpler because there must be a closing `]`. */
+	Bracket: g('[]'),
+	/**
+	Lines in an indented block.
+	Sub-tokens will always be `Line` groups.
+	Note that `Block`s do not always map to Block* MsAsts.
+	*/
+	Block: g('indented block'),
+	/**
+	Tokens within a quote.
+	`subTokens` may be strings, or G_Parenthesis groups.
+	*/
+	Quote: g('quote'),
+	/**
 	Tokens on a line.
-	NOTE: The indented block following the end of the line is considered to be a part of the line!
+	The indented block following the end of the line is considered to be a part of the line!
 	This means that in this code:
 		a
 			b
 			c
 		d
 	There are 2 lines, one starting with 'a' and one starting with 'd'.
-	The first line contains 'a' and a G_Block which in turn contains two other lines.
+	The first line contains 'a' and a `Block` which in turn contains two other lines.
 	*/
-	G_Line = g('line'),
-	/*
+	Line: g('line'),
+	/**
 	Groups two or more tokens that are *not* separated by spaces.
 	`a[b].c` is an example.
-	A single token on its own will not be given a G_Space.
+	A single token on its own will not be given a `Space` group.
 	*/
-	G_Space = g('spaced group'),
-	showGroupKind = groupKind => groupKindToName.get(groupKind)
+	Space: g('space')
+}
+
+/**
+Outputtable description of a group kind.
+@param {Groups} groupKind
+*/
+export function showGroupKind(groupKind) {
+	return groupKindToName.get(groupKind)
+}
 
 let nextKeywordKind = 0
 const
@@ -150,6 +217,7 @@ const reserved_words = [
 	'del',
 	'del?',
 	'del!',
+	'else!',
 	'final',
 	'gen',
 	'gen!',
@@ -166,104 +234,152 @@ const reserved_words = [
 for (const name of reserved_words)
 	kwReserved(name)
 
-export const
-	KW_And = kw('and'),
-	KW_As = kw('as'),
-	KW_Assert = kw('assert!'),
-	KW_AssertNot = kw('forbid!'),
-	KW_Assign = kw('='),
-	KW_AssignMutable = kwNotName('::='),
-	KW_LocalMutate = kwNotName(':='),
-	KW_Break = kw('break!'),
-	KW_BreakWithVal = kw('break'),
-	KW_Built = kw('built'),
-	KW_CaseDo = kw('case!'),
-	KW_CaseVal = kw('case'),
-	KW_CatchDo = kw('catch!'),
-	KW_CatchVal = kw('catch'),
-	KW_Cond = kw('cond'),
-	KW_Class = kw('class'),
-	KW_Construct = kw('construct!'),
-	KW_Debugger = kw('debugger!'),
-	KW_Do = kw('do!'),
-	KW_Dot = kwNotName('.'),
-	KW_Ellipsis = kwNotName('... '),
-	KW_Else = kw('else'),
-	KW_ExceptDo = kw('except!'),
-	KW_ExceptVal = kw('except'),
-	KW_False = kw('false'),
-	KW_Finally = kw('finally!'),
-	KW_Focus = kw('_'),
-	KW_ForBag = kw('@for'),
-	KW_ForDo = kw('for!'),
-	KW_ForVal = kw('for'),
-	KW_Fun = kwNotName('|'),
-	KW_FunDo = kwNotName('!|'),
-	KW_FunGen = kwNotName('~|'),
-	KW_FunGenDo = kwNotName('~!|'),
-	KW_FunThis = kwNotName('.|'),
-	KW_FunThisDo = kwNotName('.!|'),
-	KW_FunThisGen = kwNotName('.~|'),
-	KW_FunThisGenDo = kwNotName('.~!|'),
-	KW_Get = kw('get'),
-	KW_IfVal = kw('if'),
-	KW_IfDo = kw('if!'),
-	KW_Ignore = kw('ignore'),
-	KW_Lazy = kwNotName('~'),
-	KW_MapEntry = kw('->'),
-	KW_Name = kw('name'),
-	KW_New = kw('new'),
-	KW_Not = kw('not'),
-	KW_Null = kw('null'),
-	KW_ObjAssign = kwNotName('. '),
-	KW_Of = kw('of'),
-	KW_Or = kw('or'),
-	KW_Pass = kw('pass'),
-	KW_Region = kw('region'),
-	KW_Set = kw('set!'),
-	KW_SuperDo = kw('super!'),
-	KW_SuperVal = kw('super'),
-	KW_Static = kw('static'),
-	KW_SwitchDo = kw('switch!'),
-	KW_SwitchVal = kw('switch'),
-	KW_Throw = kw('throw!'),
-	KW_Todo = kw('todo'),
-	KW_True = kw('true'),
-	KW_TryDo = kw('try!'),
-	KW_TryVal = kw('try'),
-	KW_Type = kwNotName(':'),
-	KW_Undefined = kw('undefined'),
-	KW_UnlessVal = kw('unless'),
-	KW_UnlessDo = kw('unless!'),
-	KW_Import = kw('import'),
-	KW_ImportDo = kw('import!'),
-	KW_ImportLazy = kw('import~'),
-	KW_With = kw('with'),
-	KW_Yield = kw('<~'),
-	KW_YieldTo = kw('<~~'),
+/** Kinds of {@link Keyword}. */
+export const Keywords = {
+	And: kw('and'),
+	As: kw('as'),
+	Assert: kw('assert!'),
+	AssertNot: kw('forbid!'),
+	Assign: kw('='),
+	AssignMutable: kwNotName('::='),
+	LocalMutate: kwNotName(':='),
+	Break: kw('break!'),
+	BreakWithVal: kw('break'),
+	Built: kw('built'),
+	CaseDo: kw('case!'),
+	CaseVal: kw('case'),
+	CatchDo: kw('catch!'),
+	CatchVal: kw('catch'),
+	Cond: kw('cond'),
+	Class: kw('class'),
+	Construct: kw('construct!'),
+	Debugger: kw('debugger!'),
+	Do: kw('do!'),
+	Dot: kwNotName('.'),
+	Ellipsis: kwNotName('... '),
+	Else: kw('else'),
+	ExceptDo: kw('except!'),
+	ExceptVal: kw('except'),
+	False: kw('false'),
+	Finally: kw('finally!'),
+	Focus: kw('_'),
+	ForBag: kw('@for'),
+	ForDo: kw('for!'),
+	ForVal: kw('for'),
+	Fun: kwNotName('|'),
+	FunDo: kwNotName('!|'),
+	FunGen: kwNotName('~|'),
+	FunGenDo: kwNotName('~!|'),
+	FunThis: kwNotName('.|'),
+	FunThisDo: kwNotName('.!|'),
+	FunThisGen: kwNotName('.~|'),
+	FunThisGenDo: kwNotName('.~!|'),
+	Get: kw('get'),
+	IfVal: kw('if'),
+	IfDo: kw('if!'),
+	Ignore: kw('ignore'),
+	Lazy: kwNotName('~'),
+	MapEntry: kw('->'),
+	Name: kw('name'),
+	New: kw('new'),
+	Not: kw('not'),
+	Null: kw('null'),
+	ObjAssign: kwNotName('. '),
+	Of: kw('of'),
+	Or: kw('or'),
+	Pass: kw('pass'),
+	Region: kw('region'),
+	Set: kw('set!'),
+	SuperDo: kw('super!'),
+	SuperVal: kw('super'),
+	Static: kw('static'),
+	SwitchDo: kw('switch!'),
+	SwitchVal: kw('switch'),
+	Throw: kw('throw!'),
+	Todo: kw('todo'),
+	True: kw('true'),
+	TryDo: kw('try!'),
+	TryVal: kw('try'),
+	Type: kwNotName(':'),
+	Undefined: kw('undefined'),
+	UnlessVal: kw('unless'),
+	UnlessDo: kw('unless!'),
+	Import: kw('import'),
+	ImportDo: kw('import!'),
+	ImportLazy: kw('import~'),
+	With: kw('with'),
+	Yield: kw('<~'),
+	YieldTo: kw('<~~')
+}
 
-	keywordName = kind =>
-		keywordKindToName.get(kind),
-	// Returns -1 for reserved keyword or undefined for not-a-keyword.
-	opKeywordKindFromName = name =>
-		keywordNameToKind.get(name),
-	opKeywordKindToSpecialValueKind = kw => {
-		switch (kw) {
-			case KW_False: return SV_False
-			case KW_Name: return SV_Name
-			case KW_Null: return SV_Null
-			case KW_True: return SV_True
-			case KW_Undefined: return SV_Undefined
-			default: return null
-		}
-	},
-	isGroup = (groupKind, token) =>
-		token instanceof Group && token.kind === groupKind,
-	isKeyword = (keywordKind, token) =>
-		token instanceof Keyword && token.kind === keywordKind,
-	isAnyKeyword = (keywordKinds, token) =>
-		token instanceof Keyword && keywordKinds.has(token.kind),
-	isNameKeyword = token =>
-		isAnyKeyword(nameKeywords, token),
-	isReservedKeyword = token =>
-		isAnyKeyword(reservedKeywords, token)
+/**
+Name of a keyword.
+@param {Keywords} kind
+@return {string}
+*/
+export function keywordName(kind) {
+	return keywordKindToName.get(kind)
+}
+
+/**
+See if the name is a keyword and if so return its kind.
+@return {?Keywords}
+*/
+export function opKeywordKindFromName(name) {
+	const kind = keywordNameToKind.get(name)
+	return kind === undefined ? null : kind
+}
+
+export function opKeywordKindToSpecialValueKind(kind) {
+	switch (kind) {
+		case Keywords.False:
+			return SpecialVals.False
+		case Keywords.Name:
+			return SpecialVals.Name
+		case Keywords.Null:
+			return SpecialVals.Null
+		case Keywords.True:
+			return SpecialVals.True
+		case Keywords.Undefined:
+			return SpecialVals.Undefined
+		default:
+			return null
+	}
+}
+
+/**
+Whether `token` is a Group of the given kind.
+@param {Groups} groupKind
+@param {Token} token
+*/
+export function isGroup(groupKind, token) {
+	return token instanceof Group && token.kind === groupKind
+}
+
+/**
+Whether `token` is a Keyword of the given kind.
+@param {Keywords} keywordKind
+@param {Token} token
+*/
+export function isKeyword(keywordKind, token) {
+	return token instanceof Keyword && token.kind === keywordKind
+}
+
+/**
+Whether `token` is a Keyword of any of the given kinds.
+@param {Set} keywordKinds
+@param {Token} token
+*/
+export function isAnyKeyword(keywordKinds, token) {
+	return token instanceof Keyword && keywordKinds.has(token.kind)
+}
+
+/** Whether `token` is a Keyword whose value can be used as a property name. */
+export function isNameKeyword(token) {
+	return isAnyKeyword(nameKeywords, token)
+}
+
+/** Whether `token` is a reserved word. */
+export function isReservedKeyword(token) {
+	return isAnyKeyword(reservedKeywords, token)
+}

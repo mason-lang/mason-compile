@@ -1,5 +1,5 @@
 import {code} from '../CompileError'
-import {check, fail, options, warnIf} from './context'
+import {check, fail, options, warn} from './context'
 import * as MsAstTypes from './MsAst'
 import {AssignDestructure, AssignSingle, BlockVal, Call, Class, Constructor, Do, ForVal, Fun,
 	LocalDeclareBuilt, LocalDeclareFocus, LocalDeclareRes, ModuleExport, ObjEntry, Pattern,
@@ -7,10 +7,12 @@ import {AssignDestructure, AssignSingle, BlockVal, Call, Class, Constructor, Do,
 import {assert, cat, ifElse, implementMany, isEmpty, opEach, reverseIter} from './util'
 import VerifyResults from './VerifyResults'
 
-/*
-The verifier generates information needed during transpiling, the VerifyResults.
+/**
+Generates information needed during transpiling, the VerifyResults.
+Also checks for existence of local variables and warns for unused locals.
+@param {MsAst} msAst
 */
-export default msAst => {
+export default function verify(msAst) {
 	locals = new Map()
 	pendingBlockLocals = []
 	isInGenerator = false
@@ -185,10 +187,11 @@ const
 
 const verifyLocalUse = () => {
 	for (const [local, accesses] of results.localDeclareToAccesses)
-		if (!(local instanceof LocalDeclareBuilt || local instanceof LocalDeclareRes))
-			warnIf(isEmpty(accesses) && !okToNotUse.has(local), local.loc, () =>
-				`Unused local variable ${code(local.name)}.`)
+		if (isEmpty(accesses) && !isOkToNotUse(local))
+			warn(local.loc, `Unused local variable ${code(local.name)}.`)
 }
+const isOkToNotUse = local =>
+	local instanceof LocalDeclareBuilt || local instanceof LocalDeclareRes || okToNotUse.has(local)
 
 implementMany(MsAstTypes, 'verify', {
 	Assert() {
@@ -241,7 +244,7 @@ implementMany(MsAstTypes, 'verify', {
 		plusLocals(newLocals, () => this.throw.verify())
 	},
 
-	BlockWithReturn() {
+	BlockValReturn() {
 		const newLocals = verifyLines(this.lines)
 		plusLocals(newLocals, () => this.returned.verify())
 	},
@@ -368,7 +371,7 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	Ignore() {
-		for (const _ of this.ignored)
+		for (const _ of this.ignoredNames)
 			accessLocal(this, _)
 	},
 
@@ -398,8 +401,8 @@ implementMany(MsAstTypes, 'verify', {
 	// Adding LocalDeclares to the available locals is done by Fun or lineNewLocals.
 	LocalDeclare() {
 		const builtinPath = options.builtinNameToPath.get(this.name)
-		warnIf(builtinPath !== undefined, this.loc, () =>
-			`Local ${code(this.name)} overrides builtin from ${code(builtinPath)}.`)
+		if (builtinPath !== undefined)
+			warn(this.loc, `Local ${code(this.name)} overrides builtin from ${code(builtinPath)}.`)
 		verifyOp(this.opType)
 	},
 
@@ -611,9 +614,9 @@ function verifySwitchPart() {
 }
 
 function verifyExcept() {
-	this._try.verify()
-	verifyOp(this._catch)
-	verifyOp(this._finally)
+	this.try.verify()
+	verifyOp(this.catch)
+	verifyOp(this.finally)
 }
 
 function verifySuperCall() {

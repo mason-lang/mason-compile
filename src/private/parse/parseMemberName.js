@@ -1,14 +1,19 @@
-import {G_Quote, isGroup} from '../Token'
+import {Groups, isGroup} from '../Token'
 import {unexpected} from './checks'
 import {tryParseName} from './parseName'
 import parseQuote from './parseQuote'
 import Slice from './Slice'
 
-export default token => {
+/**
+Parse a plain member (`a.b`) or computed member (`a."b"`).
+@param {Token} token
+@return {string|Quote}
+*/
+export default function parseMemberName(token) {
 	const name = tryParseName(token)
 	if (name !== null)
 		return name
-	else if (isGroup(G_Quote, token))
+	else if (isGroup(Groups.Quote, token))
 		return parseQuote(Slice.group(token))
 	else
 		unexpected(token)
