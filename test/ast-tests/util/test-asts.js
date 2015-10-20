@@ -67,7 +67,6 @@ export const test = (ms, ast, js, opts) => {
 const compileOptions = {
 	inFile: './test-compile.ms',
 	includeSourceMap: false,
-	includeModuleName: false,
 	useStrict: false
 }
 

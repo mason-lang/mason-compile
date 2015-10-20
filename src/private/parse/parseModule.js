@@ -1,7 +1,6 @@
 import {code} from '../../CompileError'
 import {check, options} from '../context'
-import {AssignSingle, ImportDo, ImportGlobal, Import, LocalDeclare, LocalDeclareName,
-	LocalDeclares, Module, ModuleExportNamed, Quote} from '../MsAst'
+import {ImportDo, ImportGlobal, Import, LocalDeclare, LocalDeclares, Module} from '../MsAst'
 import {Groups, isGroup, isKeyword, Keywords} from '../Token'
 import {checkNonEmpty, unexpected} from './checks'
 import {justBlock, parseModuleBlock} from './parseBlock'
@@ -25,13 +24,6 @@ export default function parseModule(tokens) {
 	const {imports: lazyImports, rest: rest3} = tryParseImports(Keywords.ImportLazy, rest2)
 
 	const lines = parseModuleBlock(rest3)
-
-	if (options.includeModuleName()) {
-		const name = new LocalDeclareName(tokens.loc)
-		const assign = new AssignSingle(tokens.loc, name,
-			Quote.forString(tokens.loc, options.moduleName()))
-		lines.push(new ModuleExportNamed(tokens.loc, assign))
-	}
 
 	const imports = plainImports.concat(lazyImports)
 	return new Module(

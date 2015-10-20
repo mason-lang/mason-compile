@@ -20,7 +20,6 @@ const doTest = isPerfTest => {
 	const opts = {
 		inFile: './test-compile.ms',
 		includeSourceMap: true,
-		includeModuleName: false,
 		useStrict: false,
 		builtins: {
 			global: [

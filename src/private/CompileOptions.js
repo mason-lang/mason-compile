@@ -13,7 +13,6 @@ export default class CompileOptions {
 		const defaults = {
 			includeAmdefine: false,
 			includeSourceMap: true,
-			includeModuleName: true,
 			lazyModules: false,
 			useStrict: true,
 			checks: true,
@@ -35,8 +34,6 @@ export default class CompileOptions {
 		if (inFile === undefined) {
 			if (this._includeSourceMap)
 				throw new Error('Either supply `inFile` option or make `includeSourceMap` false.')
-			if (this._includeModuleName)
-				throw new Error('Either supply `inFile` option or make `includeModuleName` false.')
 		} else {
 			type(inFile, String)
 			this._inFile = inFile
@@ -64,7 +61,6 @@ export default class CompileOptions {
 
 	includeAmdefine() { return this._includeAmdefine }
 	includeSourceMap() { return this._includeSourceMap }
-	includeModuleName() { return this._includeModuleName }
 	includeUseStrict() { return this._useStrict }
 
 	lazyModule() { return this._lazyModules }

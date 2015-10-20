@@ -156,12 +156,6 @@ export default class MsAst {
 			super(loc, '_', null, LocalDeclares.Const)
 		}
 	}
-	/** Specialization for 'name' */
-	export class LocalDeclareName extends LocalDeclare {
-		constructor(loc) {
-			super(loc, 'name', null, LocalDeclares.Const)
-		}
-	}
 	/** Specialization for 'this' */
 	export class LocalDeclareThis extends LocalDeclare {
 		constructor(loc) {
