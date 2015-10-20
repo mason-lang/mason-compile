@@ -1,5 +1,5 @@
 import {check} from '../context'
-import {BagEntry, ForDo, ForBag, ForVal, Iteratee, LocalDeclareFocus, Val} from '../MsAst'
+import {BagEntry, ForDo, ForBag, ForVal, Iteratee, LocalDeclare, Val} from '../MsAst'
 import {isKeyword, Keywords} from '../Token'
 import {ifElse, opIf} from '../util'
 import {parseExpr} from './parse*'
@@ -40,7 +40,7 @@ function parseOpIteratee(tokens) {
 					check(before.size() === 1, before.loc, 'TODO: pattern in for')
 					return [parseLocalDeclaresJustNames(before)[0], parseExpr(after)]
 				},
-				() => [new LocalDeclareFocus(tokens.loc), parseExpr(tokens)])
+				() => [LocalDeclare.focus(tokens.loc), parseExpr(tokens)])
 		return new Iteratee(tokens.loc, element, bag)
 	})
 }

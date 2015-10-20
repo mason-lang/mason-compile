@@ -1,6 +1,6 @@
 import {code} from '../../CompileError'
 import {check} from '../context'
-import {Catch, ExceptDo, ExceptVal, LocalDeclareFocus} from '../MsAst'
+import {Catch, ExceptDo, ExceptVal, LocalDeclare} from '../MsAst'
 import {opIf} from '../util'
 import {isKeyword, keywordName, Keywords} from '../Token'
 import {checkNonEmpty} from './checks'
@@ -63,7 +63,7 @@ export default function parseExcept(kwExcept, tokens) {
 
 function parseOneLocalDeclareOrFocus(tokens) {
 	if (tokens.isEmpty())
-		return new LocalDeclareFocus(tokens.loc)
+		return LocalDeclare.focus(tokens.loc)
 	else {
 		check(tokens.size() === 1, 'Expected only one local declare.')
 		return parseLocalDeclares(tokens)[0]

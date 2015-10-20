@@ -113,6 +113,19 @@ export default class MsAst {
 			return new LocalDeclare(loc, name, null, LocalDeclares.Const)
 		}
 
+		static built(loc) {
+			return this.plain(loc, 'built')
+		}
+		static focus(loc) {
+			return this.plain(loc, '_')
+		}
+		static this(loc) {
+			return this.plain(loc, 'this')
+		}
+		static res(loc) {
+			return this.plain(loc, 'res')
+		}
+
 		constructor(loc, name, opType, kind) {
 			super(loc)
 			/** @type {string} */
@@ -142,31 +155,6 @@ export default class MsAst {
 		Lazy: 1,
 		/** Declared with `::=`. */
 		Mutable: 2
-	}
-
-	/** Specialization for 'built' */
-	export class LocalDeclareBuilt extends LocalDeclare {
-		constructor(loc) {
-			super(loc, 'built', null, LocalDeclares.Const)
-		}
-	}
-	/** Specialization for '_' */
-	export class LocalDeclareFocus extends LocalDeclare {
-		constructor(loc) {
-			super(loc, '_', null, LocalDeclares.Const)
-		}
-	}
-	/** Specialization for 'this' */
-	export class LocalDeclareThis extends LocalDeclare {
-		constructor(loc) {
-			super(loc, 'this', null, LocalDeclares.Const)
-		}
-	}
-	/** Specialization for 'res' */
-	export class LocalDeclareRes extends LocalDeclare {
-		constructor(loc, opType) {
-			super(loc, 'res', opType, LocalDeclares.Const)
-		}
 	}
 
 	/** Access the local `name`. */
@@ -211,7 +199,7 @@ export default class MsAst {
 	export class AssignSingle extends Assign {
 		/** Assign to `_`. */
 		static focus(loc, value) {
-			return new AssignSingle(loc, new LocalDeclareFocus(loc), value)
+			return new AssignSingle(loc, LocalDeclare.focus(loc), value)
 		}
 
 		constructor(loc, assignee, value) {
@@ -436,7 +424,7 @@ export default class MsAst {
 	export class BlockObj extends BlockVal {
 		constructor(loc, opComment, lines) {
 			super(loc, opComment)
-			this.built = new LocalDeclareBuilt(loc)
+			this.built = LocalDeclare.built(loc)
 			/** @type {Array<LineContent | ObjEntry>} */
 			this.lines = lines
 		}
@@ -506,7 +494,7 @@ export default class MsAst {
 	export class BlockBag extends BlockVal {
 		constructor(loc, opComment, lines) {
 			super(loc, opComment)
-			this.built = new LocalDeclareBuilt(loc)
+			this.built = LocalDeclare.built(loc)
 			/** @type {Array<LineContent | BagEntry>} */
 			this.lines = lines
 		}
@@ -537,7 +525,7 @@ export default class MsAst {
 	export class BlockMap extends BlockVal {
 		constructor(loc, opComment, lines) {
 			super(loc, opComment)
-			this.built = new LocalDeclareBuilt(loc)
+			this.built = LocalDeclare.built(loc)
 			/** @type {LineContent | MapEntry} */
 			this.lines = lines
 		}
@@ -717,7 +705,7 @@ export default class MsAst {
 			super(loc, symbol)
 			/** @type {BlockVal} */
 			this.block = block
-			this.declareThis = new LocalDeclareThis(loc)
+			this.declareThis = LocalDeclare.this(loc)
 		}
 	}
 	/**
@@ -729,8 +717,8 @@ export default class MsAst {
 			super(loc, symbol)
 			/** @type {BlockDo} */
 			this.block = block
-			this.declareThis = new LocalDeclareThis(loc)
-			this.declareFocus = new LocalDeclareFocus(loc)
+			this.declareThis = LocalDeclare.this(loc)
+			this.declareFocus = LocalDeclare.focus(loc)
 		}
 	}
 
@@ -741,7 +729,7 @@ export default class MsAst {
 			/** @type {BlockDo} */
 			this.block = block
 			/** @type {LocalDeclareFocus} */
-			this.declareFocus = new LocalDeclareFocus(loc)
+			this.declareFocus = LocalDeclare.focus(loc)
 		}
 	}
 
@@ -979,7 +967,7 @@ export default class MsAst {
 			this.opIteratee = opIteratee
 			/** @type {BlockDo} */
 			this.block = block
-			this.built = new LocalDeclareBuilt(loc)
+			this.built = LocalDeclare.built(loc)
 		}
 	}
 

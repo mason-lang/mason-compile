@@ -1,7 +1,7 @@
 import Loc from 'esast/dist/Loc'
 import {code} from '../../CompileError'
 import {check, fail} from '../context'
-import {Call, Cond, ConditionalVal, LocalDeclareFocus, Logic, Logics, New, Not, ObjPair, ObjSimple,
+import {Call, Cond, ConditionalVal, LocalDeclare, Logic, Logics, New, Not, ObjPair, ObjSimple,
 	SuperCall, With, Yield, YieldTo} from '../MsAst'
 import {isAnyKeyword, isKeyword, Keywords, Name} from '../Token'
 import {cat, head, ifElse, opIf, tail} from '../util'
@@ -145,7 +145,7 @@ function parseWith(tokens) {
 				`Expected only 1 token after ${code('as')}.`)
 			return [parseExprPlain(before), parseLocalDeclare(after.head())]
 		},
-		() => [parseExprPlain(before), new LocalDeclareFocus(tokens.loc)])
+		() => [parseExprPlain(before), LocalDeclare.focus(tokens.loc)])
 
 	return new With(tokens.loc, declare, val, parseBlockDo(block))
 }

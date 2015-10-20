@@ -1,5 +1,5 @@
 import {check, fail} from '../context'
-import {Class, ClassDo, Constructor, Fun, LocalDeclareThis, MethodImpl, MethodGetter, MethodSetter,
+import {Class, ClassDo, Constructor, Fun, LocalDeclare, MethodImpl, MethodGetter, MethodSetter,
 	Quote} from '../MsAst'
 import {isAnyKeyword, isKeyword, Keywords} from '../Token'
 import {opIf} from '../util'
@@ -45,7 +45,7 @@ export default function parseClass(tokens) {
 
 function parseConstructor(tokens) {
 	const {args, memberArgs, opRestArg, block} = funArgsAndBlock(tokens, true, true)
-	const _this = new LocalDeclareThis(tokens.loc)
+	const _this = LocalDeclare.this(tokens.loc)
 	const isGenerator = false, opDeclareRes = null
 	const fun = new Fun(tokens.loc, args, opRestArg, block, isGenerator, _this, opDeclareRes)
 	return new Constructor(tokens.loc, fun, memberArgs)

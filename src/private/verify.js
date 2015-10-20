@@ -2,8 +2,7 @@ import {code} from '../CompileError'
 import {check, fail, options, warn} from './context'
 import * as MsAstTypes from './MsAst'
 import {AssignDestructure, AssignSingle, BlockVal, Call, Class, Constructor, Do, ForVal, Fun,
-	LocalDeclareBuilt, LocalDeclareFocus, LocalDeclareRes, ModuleExport, ObjEntry, Pattern,
-	SuperCallDo, Yield, YieldTo} from './MsAst'
+	ModuleExport, ObjEntry, Pattern, SuperCallDo, Yield, YieldTo} from './MsAst'
 import {assert, cat, ifElse, implementMany, isEmpty, opEach, reverseIter} from './util'
 import VerifyResults from './VerifyResults'
 
@@ -191,7 +190,7 @@ const verifyLocalUse = () => {
 			warn(local.loc, `Unused local variable ${code(local.name)}.`)
 }
 const isOkToNotUse = local =>
-	local instanceof LocalDeclareBuilt || local instanceof LocalDeclareRes || okToNotUse.has(local)
+	local.name === 'built' || local.name === 'res' || okToNotUse.has(local)
 
 implementMany(MsAstTypes, 'verify', {
 	Assert() {
@@ -568,7 +567,7 @@ implementMany(MsAstTypes, 'verify', {
 	With() {
 		this.value.verify()
 		withIIFE(() => {
-			if (this.declare instanceof LocalDeclareFocus)
+			if (this.declare.name === '_')
 				okToNotUse.add(this.declare)
 			verifyAndPlusLocal(this.declare, () => { this.block.verify() })
 		})

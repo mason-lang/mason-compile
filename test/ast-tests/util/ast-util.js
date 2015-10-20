@@ -1,6 +1,6 @@
 import Loc, {StartPos} from 'esast/dist/Loc'
-import {AssignSingle, BlockDo, BlockValReturn, Fun, LocalDeclare, LocalAccess, LocalDeclareFocus,
-	NumberLiteral, Quote, SpecialDo, SpecialDos} from '../../../dist/private/MsAst'
+import {AssignSingle, BlockDo, BlockValReturn, Fun, LocalAccess, LocalDeclare, NumberLiteral,
+	Quote, SpecialDo, SpecialDos} from '../../../dist/private/MsAst'
 
 export const
 	loc = new Loc(StartPos, StartPos),
@@ -9,7 +9,7 @@ export const
 	aAccess = new LocalAccess(loc, 'a'),
 	bAccess = new LocalAccess(loc, 'b'),
 	focusAccess = new LocalAccess(loc, '_'),
-	focusDeclare = new LocalDeclareFocus(loc),
+	focusDeclare = LocalDeclare.focus(loc),
 
 	// Used where a value is expected.
 	zero = new NumberLiteral(loc, '0'),

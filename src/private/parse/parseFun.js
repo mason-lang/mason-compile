@@ -1,5 +1,4 @@
-import {BlockDo, BlockValReturn, Fun, LocalDeclareFocus, LocalDeclareRes, LocalDeclares,
-	LocalDeclareThis} from '../MsAst'
+import {BlockDo, BlockValReturn, Fun, LocalDeclare, LocalDeclares} from '../MsAst'
 import {Groups, isAnyKeyword, isGroup, isKeyword, Keywords} from '../Token'
 import {head, opIf, opMap} from '../util'
 import {checkNonEmpty} from './checks'
@@ -50,12 +49,12 @@ export default function parseFun(kind, tokens) {
 			break
 		default: throw new Error()
 	}
-	const opDeclareThis = opIf(isThis, () => new LocalDeclareThis(tokens.loc))
+	const opDeclareThis = opIf(isThis, () => LocalDeclare.this(tokens.loc))
 
 	const {opReturnType, rest} = tryTakeReturnType(tokens)
 	const {args, opRestArg, block} = funArgsAndBlock(rest, isDo)
 	// Need res declare if there is a return type.
-	const opDeclareRes = opMap(opReturnType, _ => new LocalDeclareRes(_.loc, _))
+	const opDeclareRes = opMap(opReturnType, _ => LocalDeclare.res(_.loc, _))
 	return new Fun(tokens.loc, args, opRestArg, block, isGenerator, opDeclareThis, opDeclareRes)
 }
 
@@ -86,7 +85,7 @@ export function funArgsAndBlock(tokens, isDo, includeMemberArgs=false) {
 		const isCase = h.kind === Keywords.CaseVal || h.kind === Keywords.CaseDo
 		const expr = (isCase ? parseCase : parseSwitch)(isVal, true, tokens.tail())
 
-		const args = [new LocalDeclareFocus(h.loc)]
+		const args = [LocalDeclare.focus(h.loc)]
 		return isVal ?
 			{
 				args, opRestArg: null, memberArgs: [],
