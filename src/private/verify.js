@@ -492,14 +492,9 @@ implementMany(MsAstTypes, 'verify', {
 			setDeclareAccessed(_, this)
 	},
 
-	ObjEntryComputed() {
-		accessLocal(this, 'built')
-		this.key.verify()
-		this.value.verify()
-	},
-
 	ObjEntryPlain() {
 		accessLocal(this, 'built')
+		verifyName(this.name)
 		this.value.verify()
 	},
 

@@ -1,8 +1,8 @@
 import {check} from '../context'
 import {Assert, AssignSingle, AssignDestructure, BagEntry, BagEntryMany, Break, BreakWithVal, Call,
 	ConditionalDo, Ignore, LocalAccess, LocalDeclares, LocalMutate, MapEntry, MemberSet,
-	ObjEntryAssign, ObjEntryComputed, ObjEntryPlain, SetSub, Setters, SpecialDo, SpecialDos,
-	SpecialVal, SpecialVals, SuperCallDo, Throw, Yield, YieldTo} from '../MsAst'
+	ObjEntryAssign, ObjEntryPlain, SetSub, Setters, SpecialDo, SpecialDos, SpecialVal, SpecialVals,
+	SuperCallDo, Throw, Yield, YieldTo} from '../MsAst'
 import {Groups, isGroup, isAnyKeyword, isKeyword, Keyword, keywordName, Keywords} from '../Token'
 import {ifElse, isEmpty, opIf, tail} from '../util'
 import {checkEmpty, checkNonEmpty, unexpected} from './checks'
@@ -123,7 +123,7 @@ function parseAssignLike(before, at, after, loc) {
 			}
 		// `"1". 1`
 		} else if (isGroup(Groups.Quote, token) && kind === Keywords.ObjAssign)
-			return new ObjEntryComputed(loc, parseQuote(Slice.group(token)), parseExpr(after))
+			return new ObjEntryPlain(loc, parseQuote(Slice.group(token)), parseExpr(after))
 	}
 
 	return kind === Keywords.LocalMutate ?

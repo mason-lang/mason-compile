@@ -449,21 +449,6 @@ export default class MsAst {
 		}
 	}
 
-	/**
-	`"{key}". {value}`
-	ObjEntry of variable name.
-	This of course means that it does not introduce a new local.
-	*/
-	export class ObjEntryComputed extends ObjEntry {
-		constructor(loc, key, value) {
-			super(loc)
-			/** @type {Val} */
-			this.key = key
-			/** @type {Val} */
-			this.value = value
-		}
-	}
-
 	/** ObjEntry that does not introduce a new local. */
 	export class ObjEntryPlain extends ObjEntry {
 		/**
@@ -480,7 +465,7 @@ export default class MsAst {
 
 		constructor(loc, name, value) {
 			super(loc)
-			/** @type {string} */
+			/** @type {string | Val} */
 			this.name = name
 			/** @type {Val} */
 			this.value = value

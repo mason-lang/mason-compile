@@ -417,14 +417,8 @@ implementMany(MsAstTypes, 'transpile', {
 					msSetLazy(IdBuilt, new Literal(_.name), idForDeclareCached(_))))
 	},
 
-	ObjEntryComputed() {
-		return new AssignmentExpression('=',
-			new MemberExpression(IdBuilt, t0(this.key)),
-			t0(this.value))
-	},
-
 	ObjEntryPlain() {
-		return new AssignmentExpression('=', member(IdBuilt, this.name), t0(this.value))
+		return new AssignmentExpression('=', memberStringOrVal(IdBuilt, this.name), t0(this.value))
 	},
 
 	ObjSimple() {
@@ -577,12 +571,8 @@ function superCall() {
 		const call = new CallExpression(IdSuper, args)
 		const memberSets = constructorSetMembers(method)
 		return cat(call, memberSets)
-	} else {
-		const m = typeof method.symbol === 'string' ?
-			member(IdSuper, method.symbol) :
-			new MemberExpression(IdSuper, t0(method.symbol))
-		return new CallExpression(m, args)
-	}
+	} else
+		return new CallExpression(memberStringOrVal(IdSuper, method.symbol), args)
 }
 
 function switchPart() {
