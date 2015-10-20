@@ -11,7 +11,7 @@
 	},
 	"dependencies": {
 		"amdefine": "1.0.0",
-		"esast": "andy-hanson/esast"
+		"esast": "mason-lang/esast"
 	},
 	"devDependencies": {
 		"benchmark": "1.0.0",
