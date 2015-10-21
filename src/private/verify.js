@@ -585,6 +585,8 @@ implementMany(MsAstTypes, 'verify', {
 	}
 })
 
+// Shared implementations
+
 function verifyBagEntry() {
 	accessLocal(this, 'built')
 	this.value.verify()
@@ -648,7 +650,8 @@ function verifyImport() {
 	opEach(this.opImportDefault, addUseLocal)
 }
 
-// Helpers specific to certain MsAst types:
+// Helpers specific to certain MsAst types
+
 const
 	verifyFor = forLoop => {
 		const verifyBlock = () => withLoop(forLoop, () => forLoop.block.verify())
@@ -689,110 +692,111 @@ const
 		verifyOp(_.opElse)
 	}
 
-// General utilities:
-const
-	getLocalDeclare = (name, accessLoc) => {
-		const declare = locals.get(name)
-		if (declare === undefined)
-			failMissingLocal(accessLoc, name)
-		return declare
-	},
+// General utilities
 
-	failMissingLocal = (loc, name) => {
-		// TODO:ES6 `Array.from(locals.keys())` should work
-		const keys = []
-		for (const key of locals.keys())
-			keys.push(key)
-		const showLocals = code(keys.join(' '))
-		fail(loc, `No such local ${code(name)}.\nLocals are:\n${showLocals}.`)
-	},
+function getLocalDeclare(name, accessLoc) {
+	const declare = locals.get(name)
+	if (declare === undefined)
+		failMissingLocal(accessLoc, name)
+	return declare
+}
 
-	lineNewLocals = line =>
-		line instanceof AssignSingle ?
-			[line.assignee] :
-			line instanceof AssignDestructure ?
-			line.assignees :
-			line instanceof ObjEntry ?
-			lineNewLocals(line.assign) :
-			line instanceof ModuleExport ?
-			lineNewLocals(line.assign) :
-			[],
+function failMissingLocal(loc, name) {
+	// TODO:ES6 `Array.from(locals.keys())` should work
+	const keys = []
+	for (const key of locals.keys())
+		keys.push(key)
+	const showLocals = code(keys.join(' '))
+	fail(loc, `No such local ${code(name)}.\nLocals are:\n${showLocals}.`)
+}
 
-	verifyLines = lines => {
-		/*
-		We need to bet all block locals up-front because
-		Functions within lines can access locals from later lines.
-		NOTE: We push these onto pendingBlockLocals in reverse
-		so that when we iterate through lines forwards, we can pop from pendingBlockLocals
-		to remove pending locals as they become real locals.
-		It doesn't really matter what order we add locals in since it's not allowed
-		to have two locals of the same name in the same block.
-		*/
-		const newLocals = []
+function lineNewLocals(line) {
+	return line instanceof AssignSingle ?
+		[line.assignee] :
+		line instanceof AssignDestructure ?
+		line.assignees :
+		line instanceof ObjEntry ?
+		lineNewLocals(line.assign) :
+		line instanceof ModuleExport ?
+		lineNewLocals(line.assign) :
+		[]
+}
 
-		const getLineLocals = line => {
-			for (const _ of reverseIter(lineNewLocals(line))) {
-				// Register the local now. Can't wait until the assign is verified.
-				registerLocal(_)
-				newLocals.push(_)
-			}
+function verifyLines(lines) {
+	/*
+	We need to get all block locals up-front because
+	Functions within lines can access locals from later lines.
+	NOTE: We push these onto pendingBlockLocals in reverse
+	so that when we iterate through lines forwards, we can pop from pendingBlockLocals
+	to remove pending locals as they become real locals.
+	It doesn't really matter what order we add locals in since it's not allowed
+	to have two locals of the same name in the same block.
+	*/
+	const newLocals = []
+
+	const getLineLocals = line => {
+		for (const _ of reverseIter(lineNewLocals(line))) {
+			// Register the local now. Can't wait until the assign is verified.
+			registerLocal(_)
+			newLocals.push(_)
 		}
-		for (const _ of reverseIter(lines))
-			getLineLocals(_)
-		pendingBlockLocals.push(...newLocals)
-
-		/*
-		Keeps track of locals which have already been added in this block.
-		Mason allows shadowing, but not within the same block.
-		So, this is allowed:
-			a = 1
-			b =
-				a = 2
-				...
-		But not:
-			a = 1
-			a = 2
-		*/
-		const thisBlockLocalNames = new Set()
-
-		// All shadowed locals for this block.
-		const shadowed = []
-
-		const verifyLine = line => {
-			verifyIsStatement(line)
-			for (const newLocal of lineNewLocals(line)) {
-				const name = newLocal.name
-				const oldLocal = locals.get(name)
-				if (oldLocal !== undefined) {
-					check(!thisBlockLocalNames.has(name), newLocal.loc,
-						() => `A local ${code(name)} is already in this block.`)
-					shadowed.push(oldLocal)
-				}
-				thisBlockLocalNames.add(name)
-				setLocal(newLocal)
-
-				// Now that it's added as a local, it's no longer pending.
-				// We added pendingBlockLocals in the right order that we can just pop them off.
-				const popped = pendingBlockLocals.pop()
-				assert(popped === newLocal)
-			}
-			line.verify()
-		}
-
-		lines.forEach(verifyLine)
-
-		newLocals.forEach(deleteLocal)
-		shadowed.forEach(setLocal)
-
-		return newLocals
-	},
-
-	verifyIsStatement = line => {
-		const isStatement =
-			line instanceof Do ||
-			// Some values are also acceptable.
-			line instanceof Call ||
-			line instanceof Yield ||
-			line instanceof YieldTo
-		check(isStatement, line.loc, 'Expression in statement position.')
 	}
+	for (const _ of reverseIter(lines))
+		getLineLocals(_)
+	pendingBlockLocals.push(...newLocals)
+
+	/*
+	Keeps track of locals which have already been added in this block.
+	Mason allows shadowing, but not within the same block.
+	So, this is allowed:
+		a = 1
+		b =
+			a = 2
+			...
+	But not:
+		a = 1
+		a = 2
+	*/
+	const thisBlockLocalNames = new Set()
+
+	// All shadowed locals for this block.
+	const shadowed = []
+
+	const verifyLine = line => {
+		verifyIsStatement(line)
+		for (const newLocal of lineNewLocals(line)) {
+			const name = newLocal.name
+			const oldLocal = locals.get(name)
+			if (oldLocal !== undefined) {
+				check(!thisBlockLocalNames.has(name), newLocal.loc,
+					() => `A local ${code(name)} is already in this block.`)
+				shadowed.push(oldLocal)
+			}
+			thisBlockLocalNames.add(name)
+			setLocal(newLocal)
+
+			// Now that it's added as a local, it's no longer pending.
+			// We added pendingBlockLocals in the right order that we can just pop them off.
+			const popped = pendingBlockLocals.pop()
+			assert(popped === newLocal)
+		}
+		line.verify()
+	}
+
+	lines.forEach(verifyLine)
+
+	newLocals.forEach(deleteLocal)
+	shadowed.forEach(setLocal)
+
+	return newLocals
+}
+
+function verifyIsStatement(line) {
+	const isStatement =
+		line instanceof Do ||
+		// Some values are also acceptable.
+		line instanceof Call ||
+		line instanceof Yield ||
+		line instanceof YieldTo
+	check(isStatement, line.loc, 'Expression in statement position.')
+}

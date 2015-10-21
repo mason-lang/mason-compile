@@ -1,46 +1,109 @@
-import {ExpressionStatement, ForStatement, Identifier, Literal, NewExpression, ThrowStatement,
+import {ExpressionStatement, Identifier, Literal, MemberExpression, NewExpression, ThrowStatement,
 	VariableDeclarator, VariableDeclaration} from 'esast/dist/ast'
 import mangleIdentifier from 'esast/dist/mangle-identifier'
-import {opIf, opMap} from '../util'
-import {msCheckContains, msUnlazy} from './ms-call'
-import {t0} from './transpile'
+import {loc, toStatement} from 'esast/dist/util'
+import {member} from 'esast/dist/util'
+import {options} from '../context'
+import {Quote} from '../MsAst'
+import {assert, opIf, opMap} from '../util'
+import {GlobalError} from './ast-constants'
+import {lazyWrap, msCheckContains, msGet, msLazyGet, msUnlazy} from './ms-call'
 
-// Define this here to avoid circular dependency with ast-constants.
-export const _IdError = new Identifier('Error')
+export function t0(expr) {
+	return loc(expr.transpile(), expr.loc)
+}
+export function t1(expr, arg) {
+	return loc(expr.transpile(arg), expr.loc)
+}
+export function t2(expr, arg, arg2) {
+	return loc(expr.transpile(arg, arg2))
+}
+export function t3(expr, arg, arg2, arg3) {
+	return loc(expr.transpile(arg, arg2, arg3), expr.loc)
+}
+export function tLines(exprs) {
+	const out = []
+	for (const expr of exprs) {
+		const ast = expr.transpile()
+		if (ast instanceof Array)
+			// Ignore produces 0 statements and Region produces many.
+			for (const _ of ast)
+				out.push(toStatement(_))
+		else
+			out.push(loc(toStatement(ast), expr.loc))
+	}
+	return out
+}
 
-export const
-	accessLocalDeclare = localDeclare => {
-		const id = idForDeclareCached(localDeclare)
-		return localDeclare.isLazy() ? msUnlazy(id) : new Identifier(id.name)
-	},
+export function accessLocalDeclare(localDeclare) {
+	const id = idForDeclareCached(localDeclare)
+	return localDeclare.isLazy() ? msUnlazy(id) : new Identifier(id.name)
+}
 
-	declare = (localDeclare, val) =>
-		new VariableDeclaration('const',
-			[new VariableDeclarator(idForDeclareCached(localDeclare), val)]),
+export function declare(localDeclare, val) {
+	return new VariableDeclaration('const',
+		[new VariableDeclarator(idForDeclareCached(localDeclare), val)])
+}
 
-	forStatementInfinite = body =>
-		new ForStatement(null, null, null, body),
+const declareToId = new WeakMap()
+export function idForDeclareCached(localDeclare) {
+	let _ = declareToId.get(localDeclare)
+	if (_ === undefined) {
+		_ = new Identifier(mangleIdentifier(localDeclare.name))
+		declareToId.set(localDeclare, _)
+	}
+	return _
+}
 
-	idForDeclareCached = localDeclare => {
-		let _ = declareToId.get(localDeclare)
-		if (_ === undefined) {
-			_ = new Identifier(mangleIdentifier(localDeclare.name))
-			declareToId.set(localDeclare, _)
-		}
-		return _
-	},
+export function opTypeCheckForLocalDeclare(localDeclare) {
+	// TODO: Way to typecheck lazies
+	return opIf(!localDeclare.isLazy(), () =>
+		opMap(localDeclare.opType, type =>
+			new ExpressionStatement(msCheckContains(
+				t0(type),
+				accessLocalDeclare(localDeclare),
+				new Literal(localDeclare.name)))))
+}
 
-	opTypeCheckForLocalDeclare = localDeclare =>
-		// TODO: Way to typecheck lazies
-		opIf(!localDeclare.isLazy(), () =>
-			opMap(localDeclare.opType, type =>
-				new ExpressionStatement(msCheckContains(
-					t0(type),
-					accessLocalDeclare(localDeclare),
-					new Literal(localDeclare.name))))),
+export function throwErrorFromString(message) {
+	// TODO:ES6 Should be able to use IdError
+	return new ThrowStatement(
+		new NewExpression(new Identifier('Error'), [new Literal(message)]))
+}
 
-	throwErrorFromString = msg =>
-		new ThrowStatement(new NewExpression(_IdError, [new Literal(msg)]))
+export function makeDeclarator(assignee, value, valueIsAlreadyLazy) {
+	const {name, opType} = assignee
+	const isLazy = assignee.isLazy()
+	// TODO: assert(assignee.opType === null)
+	// or TODO: Allow type check on lazy value?
+	value = isLazy ? value : maybeWrapInCheckContains(value, opType, name)
+	const val = isLazy && !valueIsAlreadyLazy ? lazyWrap(value) : value
+	assert(isLazy || !valueIsAlreadyLazy)
+	return new VariableDeclarator(idForDeclareCached(assignee), val)
+}
 
-const
-	declareToId = new WeakMap()
+export function maybeWrapInCheckContains(ast, opType, name) {
+	return options.includeChecks() && opType !== null ?
+		msCheckContains(t0(opType), ast, new Literal(name)) :
+		ast
+}
+
+export function getMember(astObject, gotName, isLazy, isModule) {
+	return isLazy ?
+		msLazyGet(astObject, new Literal(gotName)) :
+		isModule && options.includeChecks() ?
+		msGet(astObject, new Literal(gotName)) :
+		member(astObject, gotName)
+}
+
+export function doThrow(thrown) {
+	return new ThrowStatement(thrown instanceof Quote ?
+		new NewExpression(GlobalError, [t0(thrown)]) :
+		t0(thrown))
+}
+
+export function memberStringOrVal(object, memberName) {
+	return typeof memberName === 'string' ?
+		member(object, memberName) :
+		new MemberExpression(object, t0(memberName))
+}

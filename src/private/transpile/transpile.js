@@ -1,33 +1,31 @@
 import {ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryExpression,
 	BlockStatement, BreakStatement, CallExpression, CatchClause, ClassBody, ClassExpression,
-	ConditionalExpression, DebuggerStatement, ExpressionStatement, ForOfStatement,
-	FunctionExpression, Identifier, IfStatement, Literal, LogicalExpression, MemberExpression,
-	MethodDefinition, NewExpression, ObjectExpression, Program, Property, ReturnStatement,
-	SpreadElement, SwitchCase, SwitchStatement, TaggedTemplateExpression, TemplateElement,
-	TemplateLiteral, ThisExpression, ThrowStatement, TryStatement, VariableDeclaration,
-	UnaryExpression, VariableDeclarator, YieldExpression} from 'esast/dist/ast'
-import {functionExpressionThunk, identifier, loc, member, propertyIdOrLiteral, toStatement
-	} from 'esast/dist/util'
-import manglePath from '../manglePath'
+	ConditionalExpression, DebuggerStatement, ForOfStatement, ForStatement, FunctionExpression,
+	Identifier, IfStatement, Literal, LogicalExpression, MemberExpression, MethodDefinition,
+	NewExpression, ObjectExpression, Property, ReturnStatement, SpreadElement, SwitchCase,
+	SwitchStatement, TaggedTemplateExpression, TemplateElement, TemplateLiteral, ThisExpression,
+	ThrowStatement, TryStatement, VariableDeclaration, UnaryExpression, VariableDeclarator,
+	YieldExpression} from 'esast/dist/ast'
+import {functionExpressionThunk, identifier, member, propertyIdOrLiteral} from 'esast/dist/util'
 import {check, options} from '../context'
 import * as MsAstTypes from '../MsAst'
-import {AssignSingle, Call, Constructor, Logics, Member, LocalDeclare, LocalDeclares, Pattern,
-	Splat, Setters, SpecialDos, SpecialVals, SwitchDoPart, Quote, Import} from '../MsAst'
-import {assert, cat, flatMap, flatOpMap, ifElse, isEmpty, implementMany, last, opIf, opMap, tail
-	} from '../util'
-import {AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj,
-	DeclareLexicalThis, ExportsDefault, ExportsGet, IdArguments, IdBuilt, IdDefine, IdExports,
-	IdExtract, IdFocus, IdLexicalThis, IdSuper, GlobalError, LitEmptyString, LitNull,
-	LitStrExports, LitStrThrow, LitZero, ReturnBuilt, ReturnExports, SwitchCaseNoMatch,
-	ThrowAssertFail, ThrowNoCaseMatch, UseStrict} from './ast-constants'
-import {IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot,
-	msAssertNotMember, msCheckContains, msExtract, msGet, msGetDefaultExport, msGetModule, msLazy,
-	msLazyGet, msLazyGetModule, msNewMutableProperty, msNewProperty, msSetLazy, msSetSub, msSome,
-	msSymbol, MsNone} from './ms-call'
-import {accessLocalDeclare, declare, forStatementInfinite, idForDeclareCached,
-	opTypeCheckForLocalDeclare} from './util'
+import {AssignSingle, Call, Constructor, Logics, Member, LocalDeclares, Pattern, Splat, Setters,
+	SpecialDos, SpecialVals, SwitchDoPart, Quote} from '../MsAst'
+import {assert, cat, flatMap, flatOpMap, ifElse, implementMany, opIf, opMap, tail} from '../util'
+import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, DeclareLexicalThis,
+	ExportsDefault, IdArguments, IdBuilt, IdExports, IdExtract, IdFocus, IdLexicalThis, IdSuper,
+	GlobalError, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt, SwitchCaseNoMatch,
+	ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
+import {IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot, msAssertNotMember,
+	msExtract, msNewMutableProperty, msNewProperty, msSetLazy, msSetSub, msSome, msSymbol, MsNone
+	} from './ms-call'
+import transpileModule from './transpileModule'
+import {accessLocalDeclare, declare, doThrow, getMember, idForDeclareCached, makeDeclarator,
+	maybeWrapInCheckContains, memberStringOrVal, opTypeCheckForLocalDeclare, t0, t1, t2, t3, tLines
+	} from './util'
 
-let verifyResults, isInGenerator, isInConstructor
+export let verifyResults
+let isInGenerator, isInConstructor
 let nextDestructuredId
 
 /** Transform a {@link MsAst} into an esast. **/
@@ -41,26 +39,6 @@ export default function transpile(moduleExpression, _verifyResults) {
 	verifyResults = null
 	return res
 }
-
-export const
-	t0 = expr => loc(expr.transpile(), expr.loc)
-const
-	t1 = (expr, arg) => loc(expr.transpile(arg), expr.loc),
-	t2 = (expr, arg, arg2) => loc(expr.transpile(arg, arg2)),
-	t3 = (expr, arg, arg2, arg3) => loc(expr.transpile(arg, arg2, arg3), expr.loc),
-	tLines = exprs => {
-		const out = []
-		for (const expr of exprs) {
-			const ast = expr.transpile()
-			if (ast instanceof Array)
-				// Ignore produces 0 statements and Region produces many.
-				for (const _ of ast)
-					out.push(toStatement(_))
-			else
-				out.push(loc(toStatement(ast), expr.loc))
-		}
-		return out
-	}
 
 implementMany(MsAstTypes, 'transpile', {
 	Assert() {
@@ -359,32 +337,7 @@ implementMany(MsAstTypes, 'transpile', {
 		}
 	},
 
-	Module() {
-		const body = tLines(this.lines)
-
-		verifyResults.builtinPathToNames.forEach((imported, path) => {
-			if (path !== 'global') {
-				const importedDeclares = []
-				let opImportDefault = null
-				let defaultName = last(path.split('/'))
-				for (const name of imported) {
-					const declare = LocalDeclare.plain(this.loc, name)
-					if (name === defaultName)
-						opImportDefault = declare
-					else
-						importedDeclares.push(declare)
-				}
-				this.imports.push(new Import(this.loc, path, importedDeclares, opImportDefault))
-			}
-		})
-
-		const amd = amdWrapModule(this.doImports, this.imports, body)
-
-		return new Program(cat(
-			opIf(options.includeUseStrict(), () => UseStrict),
-			opIf(options.includeAmdefine(), () => AmdefineHeader),
-			toStatement(amd)))
-	},
+	Module: transpileModule,
 
 	ModuleExportNamed() {
 		return t1(this.assign, val =>
@@ -544,6 +497,8 @@ implementMany(MsAstTypes, 'transpile', {
 	YieldTo() { return new YieldExpression(t0(this.yieldedTo), true) }
 })
 
+// Shared implementations
+
 function casePart(alternate) {
 	if (this.test instanceof Pattern) {
 		const {type, patterned, locals} = this.test
@@ -601,178 +556,76 @@ function switchPart() {
 	return x
 }
 
-// Functions specific to certain expressions.
-const
-	// Wraps a block (with `return` statements in it) in an IIFE.
-	blockWrap = block => {
-		const invoke = new CallExpression(functionExpressionThunk(block, isInGenerator), [])
-		return isInGenerator ? new YieldExpression(invoke, true) : invoke
-	},
+// Functions specific to certain expressions
 
-	caseBody = (parts, opElse) => {
-		let acc = ifElse(opElse, t0, () => ThrowNoCaseMatch)
-		for (let i = parts.length - 1; i >= 0; i = i - 1)
-			acc = t1(parts[i], acc)
-		return acc
-	},
+// Wraps a block (with `return` statements in it) in an IIFE.
+function blockWrap(block) {
+	const invoke = new CallExpression(functionExpressionThunk(block, isInGenerator), [])
+	return isInGenerator ? new YieldExpression(invoke, true) : invoke
+}
 
-	constructorSetMembers = constructor =>
-		constructor.memberArgs.map(_ =>
-			msNewProperty(new ThisExpression(), new Literal(_.name), idForDeclareCached(_))),
+function caseBody(parts, opElse) {
+	let acc = ifElse(opElse, t0, () => ThrowNoCaseMatch)
+	for (let i = parts.length - 1; i >= 0; i = i - 1)
+		acc = t1(parts[i], acc)
+	return acc
+}
 
-	forLoop = (opIteratee, block) =>
-		ifElse(opIteratee,
-			({element, bag}) => {
-				const declare = new VariableDeclaration('let',
-					[new VariableDeclarator(t0(element))])
-				return new ForOfStatement(declare, t0(bag), t0(block))
-			},
-			() => forStatementInfinite(t0(block))),
+function constructorSetMembers(constructor) {
+	return constructor.memberArgs.map(_ =>
+		msNewProperty(new ThisExpression(), new Literal(_.name), idForDeclareCached(_)))
+}
 
-	doThrow = thrown =>
-		new ThrowStatement(thrown instanceof Quote ?
-			new NewExpression(GlobalError, [t0(thrown)]) :
-			t0(thrown)),
+function forLoop(opIteratee, block) {
+	return ifElse(opIteratee,
+		({element, bag}) => {
+			const declare = new VariableDeclaration('let',
+				[new VariableDeclarator(t0(element))])
+			return new ForOfStatement(declare, t0(bag), t0(block))
+		},
+		() => new ForStatement(null, null, null, t0(block)))
+}
 
-	memberStringOrVal = (object, memberName) =>
-		typeof memberName === 'string' ?
-			member(object, memberName) :
-			new MemberExpression(object, t0(memberName)),
-
-	methodKeyComputed = symbol => {
-		if (typeof symbol === 'string')
-			return {key: propertyIdOrLiteral(symbol), computed: false}
-		else {
-			const key = symbol instanceof Quote ? t0(symbol) : msSymbol(t0(symbol))
-			return {key, computed: true}
-		}
-	},
-
-	transpileBlock = (returned, lines, lead, opReturnType) => {
-		const fin = new ReturnStatement(
-			maybeWrapInCheckContains(returned, opReturnType, 'returned value'))
-		return new BlockStatement(cat(lead, lines, fin))
-	},
-
-	transpileExcept = except =>
-		new TryStatement(
-			t0(except.try),
-			opMap(except.catch, t0),
-			opMap(except.finally, t0)),
-
-	transpileSwitch = _ => {
-		const parts = flatMap(_.parts, t0)
-		parts.push(ifElse(_.opElse,
-			_ => new SwitchCase(undefined, t0(_).body),
-			() => SwitchCaseNoMatch))
-		return new SwitchStatement(t0(_.switched), parts)
+function methodKeyComputed(symbol) {
+	if (typeof symbol === 'string')
+		return {key: propertyIdOrLiteral(symbol), computed: false}
+	else {
+		const key = symbol instanceof Quote ? t0(symbol) : msSymbol(t0(symbol))
+		return {key, computed: true}
 	}
+}
 
-const IdBoot = new Identifier('_boot')
+function transpileBlock(returned, lines, lead, opReturnType) {
+	const fin = new ReturnStatement(
+		maybeWrapInCheckContains(returned, opReturnType, 'returned value'))
+	return new BlockStatement(cat(lead, lines, fin))
+}
 
-// Module helpers
-const
-	amdWrapModule = (doImports, imports, body) => {
-		const shouldImportBoot = options.importBoot()
+function transpileExcept(except) {
+	return new TryStatement(
+		t0(except.try),
+		opMap(except.catch, t0),
+		opMap(except.finally, t0))
+}
 
-		const allImports = doImports.concat(imports)
-		const allImportPaths = allImports.map(_ => manglePath(_.path))
+function transpileSwitch(_) {
+	const parts = flatMap(_.parts, t0)
+	parts.push(ifElse(_.opElse,
+		_ => new SwitchCase(undefined, t0(_).body),
+		() => SwitchCaseNoMatch))
+	return new SwitchStatement(t0(_.switched), parts)
+}
 
-		const arrImportPaths = new ArrayExpression(cat(
-			opIf(shouldImportBoot, () => new Literal(options.bootPath())),
-			LitStrExports,
-			allImportPaths.map(_ => new Literal(_))))
-
-		const importToIdentifier = new Map()
-		const importIdentifiers = []
-		for (let i = 0; i < allImports.length; i = i + 1) {
-			const _ = allImports[i]
-			const id = identifier(`${pathBaseName(_.path)}_${i}`)
-			importIdentifiers.push(id)
-			importToIdentifier.set(_, id)
-		}
-
-		const importArgs = cat(opIf(shouldImportBoot, () => IdBoot), IdExports, importIdentifiers)
-
-		const doBoot = opIf(shouldImportBoot, () => new ExpressionStatement(msGetModule(IdBoot)))
-
-		const importDos = doImports.map(_ =>
-			loc(new ExpressionStatement(msGetModule(importToIdentifier.get(_))), _.loc))
-
-		// Extracts imported values from the modules.
-		const opDeclareImportedLocals = opIf(!isEmpty(imports),
-			() => new VariableDeclaration('const',
-				flatMap(imports, _ => importDeclarators(_, importToIdentifier.get(_)))))
-
-		const fullBody = new BlockStatement(cat(
-			doBoot, importDos, opDeclareImportedLocals, body, ReturnExports))
-
-		const lazyBody =
-			options.lazyModule() ?
-				new BlockStatement([new ExpressionStatement(
-					new AssignmentExpression('=', ExportsGet,
-						msLazy(functionExpressionThunk(fullBody))))]) :
-				fullBody
-
-		return new CallExpression(IdDefine,
-			[arrImportPaths, new ArrowFunctionExpression(importArgs, lazyBody)])
-	},
-
-	pathBaseName = path =>
-		path.substr(path.lastIndexOf('/') + 1),
-
-	importDeclarators = ({imported, opImportDefault}, moduleIdentifier) => {
-		// TODO: Could be neater about this
-		const isLazy = (isEmpty(imported) ? opImportDefault : imported[0]).isLazy()
-		const value = (isLazy ? msLazyGetModule : msGetModule)(moduleIdentifier)
-
-		const importedDefault = opMap(opImportDefault, def => {
-			const defexp = msGetDefaultExport(moduleIdentifier)
-			const val = isLazy ? lazyWrap(defexp) : defexp
-			return loc(new VariableDeclarator(idForDeclareCached(def), val), def.loc)
-		})
-
-		const importedDestruct = isEmpty(imported) ? null :
-			makeDestructureDeclarators(imported, isLazy, value, true, false)
-
-		return cat(importedDefault, importedDestruct)
-	}
-
-// General utils. Not in util.js because these close over context.
-const
-	makeDestructureDeclarators = (assignees, isLazy, value, isModule) => {
-		const destructuredName = `_$${nextDestructuredId}`
-		nextDestructuredId = nextDestructuredId + 1
-		const idDestructured = new Identifier(destructuredName)
-		const declarators = assignees.map(assignee => {
-			// TODO: Don't compile it if it's never accessed
-			const get = getMember(idDestructured, assignee.name, isLazy, isModule)
-			return makeDeclarator(assignee, get, isLazy)
-		})
-		// Getting lazy module is done by ms.lazyGetModule.
-		const val = isLazy && !isModule ? lazyWrap(value) : value
-		return cat(new VariableDeclarator(idDestructured, val), declarators)
-	},
-
-	makeDeclarator = (assignee, value, valueIsAlreadyLazy) => {
-		const {name, opType} = assignee
-		const isLazy = assignee.isLazy()
-		// TODO: assert(assignee.opType === null)
-		// or TODO: Allow type check on lazy value?
-		value = isLazy ? value : maybeWrapInCheckContains(value, opType, name)
-		const val = isLazy && !valueIsAlreadyLazy ? lazyWrap(value) : value
-		assert(isLazy || !valueIsAlreadyLazy)
-		return new VariableDeclarator(idForDeclareCached(assignee), val)
-	},
-
-	maybeWrapInCheckContains = (ast, opType, name) =>
-		options.includeChecks() && opType !== null ?
-			msCheckContains(t0(opType), ast, new Literal(name)) :
-			ast,
-
-	getMember = (astObject, gotName, isLazy, isModule) =>
-		isLazy ?
-		msLazyGet(astObject, new Literal(gotName)) :
-		isModule && options.includeChecks() ?
-		msGet(astObject, new Literal(gotName)) :
-		member(astObject, gotName)
+export function makeDestructureDeclarators(assignees, isLazy, value, isModule) {
+	const destructuredName = `_$${nextDestructuredId}`
+	nextDestructuredId = nextDestructuredId + 1
+	const idDestructured = new Identifier(destructuredName)
+	const declarators = assignees.map(assignee => {
+		// TODO: Don't compile it if it's never accessed
+		const get = getMember(idDestructured, assignee.name, isLazy, isModule)
+		return makeDeclarator(assignee, get, isLazy)
+	})
+	// Getting lazy module is done by ms.lazyGetModule.
+	const val = isLazy && !isModule ? lazyWrap(value) : value
+	return cat(new VariableDeclarator(idDestructured, val), declarators)
+}
