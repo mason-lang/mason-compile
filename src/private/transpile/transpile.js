@@ -21,9 +21,9 @@ import {AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, Declar
 	LitStrExports, LitStrThrow, LitZero, ReturnBuilt, ReturnExports, ReturnRes, SwitchCaseNoMatch,
 	ThrowAssertFail, ThrowNoCaseMatch, UseStrict} from './ast-constants'
 import {IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot,
-	msAssertNotMember, msAssoc, msCheckContains, msExtract, msGet, msGetDefaultExport, msGetModule,
-	msLazy, msLazyGet, msLazyGetModule, msNewMutableProperty, msNewProperty, msSetLazy, msSetSub,
-	msSome, msSymbol, MsNone} from './ms-call'
+	msAssertNotMember, msCheckContains, msExtract, msGet, msGetDefaultExport, msGetModule, msLazy,
+	msLazyGet, msLazyGetModule, msNewMutableProperty, msNewProperty, msSetLazy, msSetSub, msSome,
+	msSymbol, MsNone} from './ms-call'
 import {accessLocalDeclare, declare, forStatementInfinite, idForDeclareCached,
 	opTypeCheckForLocalDeclare} from './util'
 
@@ -341,7 +341,7 @@ implementMany(MsAstTypes, 'transpile', {
 			new LogicalExpression(op, a, t0(b)), t0(this.args[0]))
 	},
 
-	MapEntry() { return msAssoc(IdBuilt, t0(this.key), t0(this.val)) },
+	MapEntry() { return msSetSub(IdBuilt, t0(this.key), t0(this.val)) },
 
 	Member() {
 		return memberStringOrVal(t0(this.object), this.name)

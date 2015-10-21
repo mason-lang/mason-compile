@@ -16,7 +16,6 @@ export const
 	msAssertMember = ms('assertMember'),
 	msAssertNot = ms('assertNot'),
 	msAssertNotMember = ms('assertNotMember'),
-	msAssoc = ms('assoc'),
 	msCheckContains = ms('checkContains'),
 	msError = ms('error'),
 	msGet = ms('get'),

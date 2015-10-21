@@ -20,30 +20,32 @@ export class Warning {
 		/** Text description of the problem. */
 		this.message = message
 	}
+
+	/**
+	Applies `codeFormatter` to parts of `this.message` created by {@link code}.
+	@param {function(code: string)} codeFormatter
+	@return
+		Generator yielding strings (for non-`code`)
+		and results of `formatter(code)` for `code` parts.
+	*/
+	* messageParts(codeFormatter) {
+		const message = this.message
+		const codeRegex = /{{(.*?)}}/g
+		let prevIdx = 0
+		while (true) {
+			const match = codeRegex.exec(message)
+			if (match === null) {
+				yield message.slice(prevIdx, message.length)
+				break
+			} else {
+				yield message.slice(prevIdx, match.index)
+				yield codeFormatter(match[1])
+				prevIdx = codeRegex.lastIndex
+			}
+		}
+	}
 }
 
 /** Used when generating warning messages to highlight a part of that message. */
 export const code = str =>
 	`{{${str}}}`
-
-/**
-Applies `formatter` to parts of `this.message` created by {@link code}.
-@return
-	Generator yielding strings (for non-`code`)
-	and results of `formatter(code)` for parts made by {@link code}.
-*/
-export function* formatCode(message, formatter) {
-	const codeRegex = /{{(.*?)}}/g
-	let prevIdx = 0
-	while (true) {
-		const match = codeRegex.exec(message)
-		if (match === null) {
-			yield message.slice(prevIdx, message.length)
-			break
-		} else {
-			yield message.slice(prevIdx, match.index)
-			yield formatter(match[1])
-			prevIdx = codeRegex.lastIndex
-		}
-	}
-}

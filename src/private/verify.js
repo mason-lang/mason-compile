@@ -693,14 +693,12 @@ const
 	},
 
 	failMissingLocal = (loc, name) => {
-		fail(loc, () => {
-			// TODO:ES6 `Array.from(locals.keys())` should work
-			const keys = []
-			for (const key of locals.keys())
-				keys.push(key)
-			const showLocals = code(keys.join(' '))
-			return `No such local ${code(name)}.\nLocals are:\n${showLocals}.`
-		})
+		// TODO:ES6 `Array.from(locals.keys())` should work
+		const keys = []
+		for (const key of locals.keys())
+			keys.push(key)
+		const showLocals = code(keys.join(' '))
+		fail(loc, `No such local ${code(name)}.\nLocals are:\n${showLocals}.`)
 	},
 
 	lineNewLocals = line =>
