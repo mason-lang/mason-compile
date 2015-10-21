@@ -9,6 +9,7 @@ import {checkNonEmpty} from './checks'
 import {parseClass, parseExcept, parseSingle, parseSwitch} from './parse*'
 import {beforeAndBlock, parseBlockDo, parseBlockVal} from './parseBlock'
 import parseCase from './parseCase'
+import parseDel from './parseDel'
 import {parseForBag, parseForVal} from './parseFor'
 import parseFun from './parseFun'
 import {parseLocalDeclare} from './parseLocalDeclares'
@@ -67,6 +68,8 @@ export function parseExprParts(tokens) {
 						return parseClass(after)
 					case Keywords.Cond:
 						return parseCond(after)
+					case Keywords.DelVal:
+						return parseDel(after)
 					case Keywords.ExceptVal:
 						return parseExcept(Keywords.ExceptVal, after)
 					case Keywords.ForBag:
@@ -110,9 +113,9 @@ export function parseExprParts(tokens) {
 }
 
 const exprSplitKeywords = new Set([
-	Keywords.And, Keywords.CaseVal, Keywords.Class, Keywords.Cond, Keywords.ExceptVal,
-	Keywords.ForBag, Keywords.ForVal, Keywords.Fun, Keywords.FunDo, Keywords.FunGen,
-	Keywords.FunGenDo, Keywords.FunThis, Keywords.FunThisDo, Keywords.FunThisGen,
+	Keywords.And, Keywords.CaseVal, Keywords.Class, Keywords.Cond, Keywords.DelVal,
+	Keywords.ExceptVal, Keywords.ForBag, Keywords.ForVal, Keywords.Fun, Keywords.FunDo,
+	Keywords.FunGen, Keywords.FunGenDo, Keywords.FunThis, Keywords.FunThisDo, Keywords.FunThisGen,
 	Keywords.FunThisGenDo, Keywords.IfVal, Keywords.New, Keywords.Not, Keywords.Or,
 	Keywords.SuperVal, Keywords.SwitchVal, Keywords.UnlessVal, Keywords.With, Keywords.Yield,
 	Keywords.YieldTo

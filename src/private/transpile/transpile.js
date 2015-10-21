@@ -491,6 +491,8 @@ implementMany(MsAstTypes, 'transpile', {
 		switch (this.kind) {
 			case SpecialVals.Contains:
 				return member(IdMs, 'contains')
+			case SpecialVals.DelSub:
+				return member(IdMs, 'delSub')
 			case SpecialVals.False:
 				return new Literal(false)
 			case SpecialVals.Name:

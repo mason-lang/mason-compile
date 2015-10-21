@@ -8,6 +8,7 @@ import {ifElse, isEmpty, opIf, tail} from '../util'
 import {checkEmpty, checkNonEmpty, unexpected} from './checks'
 import {beforeAndBlock, parseBlockDo, parseLinesFromBlock} from './parseBlock'
 import parseCase from './parseCase'
+import parseDel from './parseDel'
 import parseExcept from './parseExcept'
 import {parseForDo} from './parseFor'
 import parseLocalDeclares, {parseLocalDeclaresJustNames, parseLocalName} from './parseLocalDeclares'
@@ -41,6 +42,8 @@ export default function parseLine(tokens) {
 			case Keywords.Debugger:
 				noRest()
 				return new SpecialDo(tokens.loc, SpecialDos.Debugger)
+			case Keywords.DelDo:
+				return parseDel(rest)
 			case Keywords.Ellipsis:
 				return new BagEntryMany(tokens.loc, parseExpr(rest))
 			case Keywords.ForDo:

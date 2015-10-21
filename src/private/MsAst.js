@@ -764,6 +764,11 @@ export default class MsAst {
 			return new Call(loc, new SpecialVal(loc, SpecialVals.Sub), cat(subbed, args))
 		}
 
+		/** `del! {subbed}[{args}]` */
+		static delSub(loc, subbed, args) {
+			return new Call(loc, new SpecialVal(loc, SpecialVals.DelSub), cat(subbed, args))
+		}
+
 		constructor(loc, called, args) {
 			super(loc)
 			/** @type {Val} */
@@ -1179,18 +1184,20 @@ export default class MsAst {
 	export const SpecialVals = {
 		/** `_ms.contains` used for {@link Call.contains} */
 		Contains: 0,
+		/** `_ms.delSub` used for {@link Call.delSub} */
+		DelSub: 1,
 		/** `false` literal */
-		False: 1,
+		False: 2,
 		/** `null` literal */
-		Null: 2,
+		Null: 3,
 		/** `_ms.sub` used for {@link Call.sub} */
-		Sub: 3,
+		Sub: 4,
 		/** `true` literal */
-		True: 4,
+		True: 5,
 		/** `void 0` */
-		Undefined: 5,
+		Undefined: 6,
 		// TODO: kill
-		Name: 6
+		Name: 7
 	}
 
 	/**
