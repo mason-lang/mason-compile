@@ -122,9 +122,6 @@ export default class MsAst {
 		static this(loc) {
 			return this.plain(loc, 'this')
 		}
-		static res(loc) {
-			return this.plain(loc, 'res')
-		}
 
 		constructor(loc, name, opType, kind) {
 			super(loc)
@@ -580,7 +577,7 @@ export default class MsAst {
 	*/
 	export class Fun extends Val {
 		constructor(loc, args, opRestArg, block,
-			isGenerator=false, opDeclareThis=null, opDeclareRes=null) {
+			isGenerator=false, opDeclareThis=null, opReturnType=null) {
 			super(loc)
 			/** @type {?LocalDeclareThis} */
 			this.opDeclareThis = opDeclareThis
@@ -592,8 +589,8 @@ export default class MsAst {
 			this.opRestArg = opRestArg
 			/** @type {Block} */
 			this.block = block
-			/** @type {?LocalDeclareRes} */
-			this.opDeclareRes = opDeclareRes
+			/** @type {?Val} */
+			this.opReturnType = opReturnType
 		}
 	}
 

@@ -60,7 +60,7 @@
 			"no-spaced-func": 1,
 			"no-throw-literal": 1,
 			"no-trailing-spaces": 1,
-			"no-unused-vars": 1,
+			"no-unused-vars": [1, {"argsIgnorePattern": "^_"}],
 			"no-var": 1,
 			"no-void": 1,
 			"no-undef": 1,

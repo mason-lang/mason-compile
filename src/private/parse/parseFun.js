@@ -1,6 +1,6 @@
 import {BlockDo, BlockValReturn, Fun, LocalDeclare, LocalDeclares} from '../MsAst'
 import {Groups, isAnyKeyword, isGroup, isKeyword, Keywords} from '../Token'
-import {head, opIf, opMap} from '../util'
+import {head, opIf} from '../util'
 import {checkNonEmpty} from './checks'
 import {beforeAndBlock, parseBlockDo, parseBlockVal} from './parseBlock'
 import parseCase from './parseCase'
@@ -50,12 +50,9 @@ export default function parseFun(kind, tokens) {
 		default: throw new Error()
 	}
 	const opDeclareThis = opIf(isThis, () => LocalDeclare.this(tokens.loc))
-
 	const {opReturnType, rest} = tryTakeReturnType(tokens)
 	const {args, opRestArg, block} = funArgsAndBlock(rest, isDo)
-	// Need res declare if there is a return type.
-	const opDeclareRes = opMap(opReturnType, _ => LocalDeclare.res(_.loc, _))
-	return new Fun(tokens.loc, args, opRestArg, block, isGenerator, opDeclareThis, opDeclareRes)
+	return new Fun(tokens.loc, args, opRestArg, block, isGenerator, opDeclareThis, opReturnType)
 }
 
 /**

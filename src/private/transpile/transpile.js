@@ -9,7 +9,7 @@ import {ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryEx
 import {functionExpressionThunk, identifier, loc, member, propertyIdOrLiteral, toStatement
 	} from 'esast/dist/util'
 import manglePath from '../manglePath'
-import {check, options, warn} from '../context'
+import {check, options} from '../context'
 import * as MsAstTypes from '../MsAst'
 import {AssignSingle, Call, Constructor, Logics, Member, LocalDeclare, LocalDeclares, Pattern,
 	Splat, Setters, SpecialDos, SpecialVals, SwitchDoPart, Quote, Import} from '../MsAst'
@@ -18,7 +18,7 @@ import {assert, cat, flatMap, flatOpMap, ifElse, isEmpty, implementMany, last, o
 import {AmdefineHeader, ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj,
 	DeclareLexicalThis, ExportsDefault, ExportsGet, IdArguments, IdBuilt, IdDefine, IdExports,
 	IdExtract, IdFocus, IdLexicalThis, IdSuper, GlobalError, LitEmptyString, LitNull,
-	LitStrExports, LitStrThrow, LitZero, ReturnBuilt, ReturnExports, ReturnRes, SwitchCaseNoMatch,
+	LitStrExports, LitStrThrow, LitZero, ReturnBuilt, ReturnExports, SwitchCaseNoMatch,
 	ThrowAssertFail, ThrowNoCaseMatch, UseStrict} from './ast-constants'
 import {IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot,
 	msAssertNotMember, msCheckContains, msExtract, msGet, msGetDefaultExport, msGetModule, msLazy,
@@ -110,55 +110,51 @@ implementMany(MsAstTypes, 'transpile', {
 
 	BagSimple() { return new ArrayExpression(this.parts.map(t0)) },
 
-	BlockDo(lead, opDeclareRes, follow) {
-		// TODO:ES6 Optional arguments
-		if (lead === undefined) lead = null
-		if (opDeclareRes === undefined) opDeclareRes = null
-		if (follow === undefined) follow = null
-		assert(opDeclareRes === null)
+	BlockDo(lead=null, opReturnType=null, follow=null) {
+		assert(opReturnType === null)
 		return new BlockStatement(cat(lead, tLines(this.lines), follow))
 	},
 
-	BlockValThrow(lead, opDeclareRes, follow) {
-		// TODO:ES6 Optional arguments
-		if (lead === undefined) lead = null
-		if (opDeclareRes === undefined) opDeclareRes = null
-		if (follow === undefined) follow = null
-		if (opDeclareRes !== null || follow !== null)
-			warn(this.loc, 'Return type ignored because the block always throws.')
+	BlockValThrow(lead=null, _opReturnType) {
 		return new BlockStatement(cat(lead, tLines(this.lines), t0(this.throw)))
 	},
 
-	BlockValReturn(lead, opDeclareRes, follow) {
-		return transpileBlock(t0(this.returned), tLines(this.lines), lead, opDeclareRes, follow)
+	BlockValReturn(lead=null, opReturnType=null) {
+		return transpileBlock(t0(this.returned), tLines(this.lines), lead, opReturnType)
 	},
 
-	BlockBag(lead, opDeclareRes, follow) {
+	BlockBag(lead=null, opReturnType=null) {
 		return transpileBlock(
 			IdBuilt,
 			cat(DeclareBuiltBag, tLines(this.lines)),
-			lead, opDeclareRes, follow)
+			lead, opReturnType)
 	},
 
-	BlockObj(lead, opDeclareRes, follow) {
+	BlockObj(lead=null, opReturnType=null) {
 		return transpileBlock(
 			IdBuilt,
 			cat(DeclareBuiltObj, tLines(this.lines)),
-			lead, opDeclareRes, follow)
+			lead, opReturnType)
 	},
 
-	BlockMap(lead, opDeclareRes, follow) {
+	BlockMap(lead=null, opReturnType=null) {
 		return transpileBlock(
 			IdBuilt,
 			cat(DeclareBuiltMap, tLines(this.lines)),
-			lead, opDeclareRes, follow)
+			lead, opReturnType)
 	},
 
-	BlockWrap() { return blockWrap(t0(this.block)) },
+	BlockWrap() {
+		return blockWrap(t0(this.block))
+	},
 
-	Break() { return new BreakStatement() },
+	Break() {
+		return new BreakStatement()
+	},
 
-	BreakWithVal() { return new ReturnStatement(t0(this.value)) },
+	BreakWithVal() {
+		return new ReturnStatement(t0(this.value))
+	},
 
 	Call() {
 		return new CallExpression(t0(this.called), this.args.map(t0))
@@ -251,11 +247,7 @@ implementMany(MsAstTypes, 'transpile', {
 		return blockWrap(new BlockStatement([forLoop(this.opIteratee, this.block)]))
 	},
 
-	Fun(leadStatements) {
-		// TODO:ES6 Optional args
-		if (leadStatements === undefined)
-			leadStatements = null
-
+	Fun(leadStatements=null) {
 		const oldInGenerator = isInGenerator
 		isInGenerator = this.isGenerator
 
@@ -271,7 +263,7 @@ implementMany(MsAstTypes, 'transpile', {
 
 		const lead = cat(leadStatements, opDeclareThis, opDeclareRest, argChecks)
 
-		const body = t2(this.block, lead, this.opDeclareRes)
+		const body = t2(this.block, lead, this.opReturnType)
 		const args = this.args.map(t0)
 		isInGenerator = oldInGenerator
 		const id = opMap(verifyResults.opName(this), identifier)
@@ -286,9 +278,13 @@ implementMany(MsAstTypes, 'transpile', {
 			new FunctionExpression(id, args, body, this.isGenerator)
 	},
 
-	Ignore() { return [] },
+	Ignore() {
+		return []
+	},
 
-	Lazy() { return lazyWrap(t0(this.value)) },
+	Lazy() {
+		return lazyWrap(t0(this.value))
+	},
 
 	MethodImpl(isStatic) {
 		const value = t0(this.fun)
@@ -652,19 +648,9 @@ const
 		}
 	},
 
-	transpileBlock = (returned, lines, lead, opDeclareRes, follow) => {
-		// TODO:ES6 Optional arguments
-		if (lead === undefined) lead = null
-		if (opDeclareRes === undefined) opDeclareRes = null
-		if (follow === undefined) follow = null
-		const fin = ifElse(opDeclareRes,
-			rd => {
-				const ret = maybeWrapInCheckContains(returned, rd.opType, rd.name)
-				return ifElse(follow,
-					_ => cat(declare(rd, ret), _, ReturnRes),
-					() => new ReturnStatement(ret))
-			},
-			() => cat(follow, new ReturnStatement(returned)))
+	transpileBlock = (returned, lines, lead, opReturnType) => {
+		const fin = new ReturnStatement(
+			maybeWrapInCheckContains(returned, opReturnType, 'returned value'))
 		return new BlockStatement(cat(lead, lines, fin))
 	},
 

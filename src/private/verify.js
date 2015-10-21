@@ -1,8 +1,8 @@
 import {code} from '../CompileError'
 import {check, fail, options, warn} from './context'
 import * as MsAstTypes from './MsAst'
-import {AssignDestructure, AssignSingle, BlockVal, Call, Class, Constructor, Do, ForVal, Fun,
-	ModuleExport, ObjEntry, Pattern, SuperCallDo, Yield, YieldTo} from './MsAst'
+import {AssignDestructure, AssignSingle, BlockVal, BlockValThrow, Call, Class, Constructor, Do,
+	ForVal, Fun, ModuleExport, ObjEntry, Pattern, SuperCallDo, Yield, YieldTo} from './MsAst'
 import {assert, cat, ifElse, implementMany, isEmpty, opEach, reverseIter} from './util'
 import VerifyResults from './VerifyResults'
 
@@ -190,7 +190,7 @@ const verifyLocalUse = () => {
 			warn(local.loc, `Unused local variable ${code(local.name)}.`)
 }
 const isOkToNotUse = local =>
-	local.name === 'built' || local.name === 'res' || okToNotUse.has(local)
+	local.name === 'built' || okToNotUse.has(local)
 
 implementMany(MsAstTypes, 'verify', {
 	Assert() {
@@ -354,18 +354,24 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	Fun() {
+		if (this.opReturnType !== null) {
+			check(this.block instanceof BlockVal, this.loc,
+				'Function with return type must return something.')
+			if (this.block instanceof BlockValThrow)
+				warn('Return type ignored because the block always throws.')
+		}
+
 		withBlockLocals(() => {
-			check(this.opDeclareRes === null || this.block instanceof BlockVal, this.loc,
-				'Function with return condition must return something.')
 			withInGenerator(this.isGenerator, () =>
 				withLoop(null, () => {
 					const allArgs = cat(this.opDeclareThis, this.args, this.opRestArg)
 					verifyAndPlusLocals(allArgs, () => {
 						this.block.verify()
-						opEach(this.opDeclareRes, verifyLocalDeclare)
+						verifyOp(this.opReturnType)
 					})
 				}))
 		})
+
 		// name set by AssignSingle
 	},
 
