@@ -1,4 +1,4 @@
-import {cat} from './util'
+import {cat, opIf} from './util'
 
 /**
 Any Mason AST.
@@ -577,10 +577,10 @@ export default class MsAst {
 	*/
 	export class Fun extends Val {
 		constructor(loc, args, opRestArg, block,
-			isGenerator=false, opDeclareThis=null, opReturnType=null) {
+			isGenerator=false, isThisFun=false, opReturnType=null) {
 			super(loc)
 			/** @type {?LocalDeclareThis} */
-			this.opDeclareThis = opDeclareThis
+			this.opDeclareThis = opIf(isThisFun, () => LocalDeclare.this(this.loc))
 			/** @type {boolean} */
 			this.isGenerator = isGenerator
 			/** @type {Array<LocalDeclare>} */
