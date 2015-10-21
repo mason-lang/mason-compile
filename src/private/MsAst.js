@@ -1196,7 +1196,14 @@ export default class MsAst {
 		True: 5,
 		/** `void 0` */
 		Undefined: 6,
-		// TODO: kill
+		/**
+		`name` value is the name of the nearest assigned value. In:
+
+			x = new Method
+				name.
+
+		`name` will be "x".
+		*/
 		Name: 7
 	}
 
