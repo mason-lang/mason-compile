@@ -32,7 +32,7 @@ import verify from './private/verify'
 	`result` will be `{code: string, sourceMap: string}` if `opts.includeSourceMap`.
 	Otherwise, it will just be the code (a string).
 */
-export default function compile(source, opts) {
+export default function compile(source, opts={}) {
 	type(source, String)
 	setContext(opts)
 	try {
@@ -52,7 +52,7 @@ export default function compile(source, opts) {
 Returns a {@link MsAst} rather than transpiling it to JavaScript.
 Parameters are the same as `compile`.
 */
-export function parseAst(source, opts) {
+export function parseAst(source, opts={}) {
 	type(source, String)
 	setContext(opts)
 	try {

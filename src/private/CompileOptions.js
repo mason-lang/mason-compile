@@ -1,3 +1,4 @@
+import defaultBuiltins from './defaultBuiltins'
 import {last, type} from './util'
 
 /**
@@ -42,7 +43,7 @@ export default class CompileOptions {
 		if (!(this._indent === '\t' || 2 <= this._indent && this._indent <= 8))
 			throw new Error(`opts.indent must be '\t' or a number 2-8, got: ${this._indent}`)
 
-		const builtins = opts.builtins || defaultBuiltins(this._mslPath)
+		const builtins = opts.builtins || getDefaultBuiltins(this._mslPath)
 		this.builtinNameToPath = generateBuiltinsMap(builtins)
 	}
 
@@ -69,55 +70,41 @@ export default class CompileOptions {
 	bootPath() { return `${this._mslPath}/private/boot` }
 }
 
-const
-	basename = path =>
-		last(path.split('/')),
-	extname = path =>
-		last(path.split('.')),
-	noExt = path =>
-		// - 1 for the '.'
-		path.substring(0, path.length - 1 - extname(path).length),
-	defaultBuiltins = mslPath => {
-		const builtins = {
-			global: ['Array', 'Boolean', 'Error', 'Function', 'Math', 'Number', 'Object',
-				'RegExp', 'String', 'Symbol'],
-			'msl.@.?': ['un-?'],
-			'msl.@.@': ['_', '-!', 'all?', 'count', 'empty?', 'empty!', 'iterator'],
-			'msl.@.@-Type': ['empty'],
-			'msl.@.Map.Map': ['_', 'assoc!', '?get'],
-			'msl.@.Range': ['_'],
-			'msl.@.Seq.Seq': ['_', '+>!'],
-			'msl.@.Seq.Stream': ['_'],
-			'msl.@.Set.Set': ['_'],
-			'msl.$': ['_'],
-			'msl.compare': ['=?', '<?', '<=?', '>?', '>=?', 'min', 'max'],
-			'msl.Generator': ['gen-next!'],
-			'msl.math.methods': ['+', '-', '*', '/'],
-			'msl.math.Number': ['divisible?', 'int/', 'modulo', 'neg', 'log'],
-			'msl.to-string': ['_', 'inspect'],
-			'msl.Type.Kind': ['_', 'kind!', 'self-kind!'],
-			'msl.Type.Method': ['_', 'impl!', 'impl-for', 'self-impl!'],
-			'msl.Type.Type': ['=>']
+function basename(path) {
+	return last(path.split('/'))
+}
+
+function extname(path) {
+	return last(path.split('.'))
+}
+
+function noExt(path) {
+	// - 1 for the '.'
+	return path.substring(0, path.length - 1 - extname(path).length)
+}
+
+function getDefaultBuiltins(mslPath) {
+	const builtins = Object.assign({}, defaultBuiltins)
+	if (mslPath !== 'msl')
+		for (let key in builtins) {
+			const x = builtins[key]
+			delete builtins[key]
+			builtins[key.replace(/msl/g, mslPath)] = x
 		}
-		if (mslPath !== 'msl')
-			for (let key in builtins) {
-				const x = builtins[key]
-				delete builtins[key]
-				builtins[key.replace(/msl/g, mslPath)] = x
-			}
-		return builtins
-	},
-	generateBuiltinsMap = builtins => {
-		const m = new Map()
-		for (const path in builtins) {
-			const realPath = path.replace(/\./g, '/')
-			for (let imported of builtins[path]) {
-				if (imported === '_')
-					imported = last(path.split('.'))
-				if (m.has(imported))
-					throw new Error(`Builtin ${imported} defined more than once.`)
-				m.set(imported, realPath)
-			}
+	return builtins
+}
+
+function generateBuiltinsMap(builtins) {
+	const m = new Map()
+	for (const path in builtins) {
+		const realPath = path.replace(/\./g, '/')
+		for (let imported of builtins[path]) {
+			if (imported === '_')
+				imported = last(path.split('.'))
+			if (m.has(imported))
+				throw new Error(`Builtin ${imported} defined more than once.`)
+			m.set(imported, realPath)
 		}
-		return m
 	}
+	return m
+}
