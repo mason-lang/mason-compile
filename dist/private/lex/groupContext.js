@@ -1,0 +1,159 @@
+(function (global, factory) {
+	if (typeof define === 'function' && define.amd) {
+		define(['exports', 'esast/dist/Loc', '../context', '../Token', '../util'], factory);
+	} else if (typeof exports !== 'undefined') {
+		factory(exports, require('esast/dist/Loc'), require('../context'), require('../Token'), require('../util'));
+	} else {
+		var mod = {
+			exports: {}
+		};
+		factory(mod.exports, global.Loc, global.context, global.Token, global.util);
+		global.groupContext = mod.exports;
+	}
+})(this, function (exports, _esastDistLoc, _context, _Token, _util) {
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+		value: true
+	});
+	exports.setupGroupContext = setupGroupContext;
+	exports.tearDownGroupContext = tearDownGroupContext;
+	exports.addToCurrentGroup = addToCurrentGroup;
+	exports.openGroup = openGroup;
+	exports.maybeCloseGroup = maybeCloseGroup;
+	exports.closeGroup = closeGroup;
+	exports.closeSpaceOKIfEmpty = closeSpaceOKIfEmpty;
+	exports.openParenthesis = openParenthesis;
+	exports.closeParenthesis = closeParenthesis;
+	exports.closeGroupsForDedent = closeGroupsForDedent;
+	exports.openLine = openLine;
+	exports.closeLine = closeLine;
+	exports.space = space;
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _Loc = _interopRequireDefault(_esastDistLoc);
+
+	let groupStack;
+	let curGroup;
+
+	exports.curGroup = curGroup;
+
+	function setupGroupContext() {
+		exports.curGroup = curGroup = new _Token.Group(new _Loc.default(_esastDistLoc.StartPos, null), [], _Token.Groups.Block);
+		groupStack = [];
+	}
+
+	function tearDownGroupContext(endPos) {
+		closeLine(endPos);
+		(0, _util.assert)((0, _util.isEmpty)(groupStack));
+		curGroup.loc.end = endPos;
+		const res = curGroup;
+		groupStack = exports.curGroup = curGroup = null;
+		return res;
+	}
+
+	/*
+ We only ever write to the innermost Group;
+ when we close that Group we add it to the enclosing Group and continue with that one.
+ Note that `curGroup` is conceptually the top of the stack, but is not stored in `stack`.
+ */
+
+	function addToCurrentGroup(token) {
+		curGroup.subTokens.push(token);
+	}
+
+	function dropGroup() {
+		exports.curGroup = curGroup = groupStack.pop();
+	}
+
+	// Pause writing to curGroup in favor of writing to a sub-group.
+	// When the sub-group finishes we will pop the stack and resume writing to its parent.
+
+	function openGroup(openPos, groupKind) {
+		groupStack.push(curGroup);
+		// Contents will be added to by `addToCurrentGroup`.
+		// curGroup.loc.end will be written to when closing it.
+		exports.curGroup = curGroup = new _Token.Group(new _Loc.default(openPos, null), [], groupKind);
+	}
+
+	function maybeCloseGroup(closePos, closeKind) {
+		if (curGroup.kind === closeKind) closeGroupNoCheck(closePos, closeKind);
+	}
+
+	function closeGroup(closePos, closeKind) {
+		(0, _context.check)(closeKind === curGroup.kind, closePos, () => `Trying to close ${ (0, _Token.showGroupKind)(closeKind) }, ` + `but last opened ${ (0, _Token.showGroupKind)(curGroup.kind) }`);
+		closeGroupNoCheck(closePos, closeKind);
+	}
+
+	function closeGroupNoCheck(closePos, closeKind) {
+		let justClosed = curGroup;
+		dropGroup();
+		justClosed.loc.end = closePos;
+		switch (closeKind) {
+			case _Token.Groups.Space:
+				{
+					const size = justClosed.subTokens.length;
+					if (size !== 0)
+						// Spaced should always have at least two elements.
+						addToCurrentGroup(size === 1 ? justClosed.subTokens[0] : justClosed);else (0, _context.warn)(justClosed.loc, 'Unnecessary space.');
+					break;
+				}
+			case _Token.Groups.Line:
+				// Line must have content.
+				// This can happen if there was just a comment.
+				if (!(0, _util.isEmpty)(justClosed.subTokens)) addToCurrentGroup(justClosed);
+				break;
+			case _Token.Groups.Block:
+				(0, _context.check)(!(0, _util.isEmpty)(justClosed.subTokens), closePos, 'Empty block.');
+				addToCurrentGroup(justClosed);
+				break;
+			default:
+				addToCurrentGroup(justClosed);
+		}
+	}
+
+	function closeSpaceOKIfEmpty(pos) {
+		(0, _util.assert)(curGroup.kind === _Token.Groups.Space);
+		if (curGroup.subTokens.length === 0) dropGroup();else closeGroupNoCheck(pos, _Token.Groups.Space);
+	}
+
+	function openParenthesis(loc) {
+		openGroup(loc.start, _Token.Groups.Parenthesis);
+		openGroup(loc.end, _Token.Groups.Space);
+	}
+
+	function closeParenthesis(loc) {
+		closeGroupNoCheck(loc.start, _Token.Groups.Space);
+		closeGroup(loc.end, _Token.Groups.Parenthesis);
+	}
+
+	function closeGroupsForDedent(pos) {
+		closeLine(pos);
+		closeGroup(pos, _Token.Groups.Block);
+		// It's OK to be missing a closing parenthesis if there's a block. E.g.:
+		// a (b
+		//	c | no closing paren here
+		while (curGroup.kind === _Token.Groups.Parenthesis || curGroup.kind === _Token.Groups.Space) closeGroupNoCheck(pos, curGroup.kind);
+	}
+
+	// When starting a new line, a spaced group is created implicitly.
+
+	function openLine(pos) {
+		openGroup(pos, _Token.Groups.Line);
+		openGroup(pos, _Token.Groups.Space);
+	}
+
+	function closeLine(pos) {
+		if (curGroup.kind === _Token.Groups.Space) closeSpaceOKIfEmpty();
+		closeGroup(pos, _Token.Groups.Line);
+	}
+
+	// When encountering a space, it both closes and opens a spaced group.
+
+	function space(loc) {
+		maybeCloseGroup(loc.start, _Token.Groups.Space);
+		openGroup(loc.end, _Token.Groups.Space);
+	}
+});
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9wcml2YXRlL2xleC9ncm91cENvbnRleHQuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBS0EsS0FBSSxVQUFVLENBQUE7QUFDUCxLQUFJLFFBQVEsQ0FBQTs7OztBQUVaLFVBQVMsaUJBQWlCLEdBQUc7QUFDbkMsVUFIVSxRQUFRLEdBR2xCLFFBQVEsR0FBRyxXQVBKLEtBQUssQ0FPUywrQkFUVCxRQUFRLEVBU21CLElBQUksQ0FBQyxFQUFFLEVBQUUsRUFBRSxPQVBwQyxNQUFNLENBT3FDLEtBQUssQ0FBQyxDQUFBO0FBQy9ELFlBQVUsR0FBRyxFQUFFLENBQUE7RUFDZjs7QUFFTSxVQUFTLG9CQUFvQixDQUFDLE1BQU0sRUFBRTtBQUM1QyxXQUFTLENBQUMsTUFBTSxDQUFDLENBQUE7QUFDakIsWUFaTyxNQUFNLEVBWU4sVUFaUSxPQUFPLEVBWVAsVUFBVSxDQUFDLENBQUMsQ0FBQTtBQUMzQixVQUFRLENBQUMsR0FBRyxDQUFDLEdBQUcsR0FBRyxNQUFNLENBQUE7QUFDekIsUUFBTSxHQUFHLEdBQUcsUUFBUSxDQUFBO0FBQ3BCLFlBQVUsV0FaQSxRQUFRLEdBWUwsUUFBUSxHQUFHLElBQUksQ0FBQTtBQUM1QixTQUFPLEdBQUcsQ0FBQTtFQUNWOzs7Ozs7OztBQVFNLFVBQVMsaUJBQWlCLENBQUMsS0FBSyxFQUFFO0FBQ3hDLFVBQVEsQ0FBQyxTQUFTLENBQUMsSUFBSSxDQUFDLEtBQUssQ0FBQyxDQUFBO0VBQzlCOztBQUVELFVBQVMsU0FBUyxHQUFHO0FBQ3BCLFVBM0JVLFFBQVEsR0EyQmxCLFFBQVEsR0FBRyxVQUFVLENBQUMsR0FBRyxFQUFFLENBQUE7RUFDM0I7Ozs7O0FBSU0sVUFBUyxTQUFTLENBQUMsT0FBTyxFQUFFLFNBQVMsRUFBRTtBQUM3QyxZQUFVLENBQUMsSUFBSSxDQUFDLFFBQVEsQ0FBQyxDQUFBOzs7QUFHekIsVUFwQ1UsUUFBUSxH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QyIsImZpbGUiOiJncm91cENvbnRleHQuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgTG9jLCB7U3RhcnRQb3N9IGZyb20gJ2VzYXN0L2Rpc3QvTG9jJ1xuaW1wb3J0IHtjaGVjaywgd2Fybn0gZnJvbSAnLi4vY29udGV4dCdcbmltcG9ydCB7R3JvdXAsIEdyb3Vwcywgc2hvd0dyb3VwS2luZH0gZnJvbSAnLi4vVG9rZW4nXG5pbXBvcnQge2Fzc2VydCwgaXNFbXB0eX0gZnJvbSAnLi4vdXRpbCdcblxubGV0IGdyb3VwU3RhY2tcbmV4cG9ydCBsZXQgY3VyR3JvdXBcblxuZXhwb3J0IGZ1bmN0aW9uIHNldHVwR3JvdXBDb250ZXh0KCkge1xuXHRjdXJHcm91cCA9IG5ldyBHcm91cChuZXcgTG9jKFN0YXJ0UG9zLCBudWxsKSwgW10sIEdyb3Vwcy5CbG9jaylcblx0Z3JvdXBTdGFjayA9IFtdXG59XG5cbmV4cG9ydCBmdW5jdGlvbiB0ZWFyRG93bkdyb3VwQ29udGV4dChlbmRQb3MpIHtcblx0Y2xvc2VMaW5lKGVuZFBvcylcblx0YXNzZXJ0KGlzRW1wdHkoZ3JvdXBTdGFjaykpXG5cdGN1ckdyb3VwLmxvYy5lbmQgPSBlbmRQb3Ncblx0Y29uc3QgcmVzID0gY3VyR3JvdXBcblx0Z3JvdXBTdGFjayA9IGN1ckdyb3VwID0gbnVsbFxuXHRyZXR1cm4gcmVzXG59XG5cbi8qXG5XZSBvbmx5IGV2ZXIgd3JpdGUgdG8gdGhlIGlubmVybW9zdCBHcm91cDtcbndoZW4gd2UgY2xvc2UgdGhhdCBHcm91cCB3ZSBhZGQgaXQgdG8gdGhlIGVuY2xvc2luZyBHcm91cCBhbmQgY29udGludWUgd2l0aCB0aGF0IG9uZS5cbk5vdGUgdGhhdCBgY3VyR3JvdXBgIGlzIGNvbmNlcHR1YWxseSB0aGUgdG9wIG9mIHRoZSBzdGFjaywgYnV0IGlzIG5vdCBzdG9yZWQgaW4gYHN0YWNrYC5cbiovXG5cbmV4cG9ydCBmdW5jdGlvbiBhZGRUb0N1cnJlbnRHcm91cCh0b2tlbikge1xuXHRjdXJHcm91cC5zdWJUb2tlbnMucHVzaCh0b2tlbilcbn1cblxuZnVuY3Rpb24gZHJvcEdyb3VwKCkge1xuXHRjdXJHcm91cCA9IGdyb3VwU3RhY2sucG9wKClcbn1cblxuLy8gUGF1c2Ugd3JpdGluZyB0byBjdXJHcm91cCBpbiBmYXZvciBvZiB3cml0aW5nIHRvIGEgc3ViLWdyb3VwLlxuLy8gV2hlbiB0aGUgc3ViLWdyb3VwIGZpbmlzaGVzIHdlIHdpbGwgcG9wIHRoZSBzdGFjayBhbmQgcmVzdW1lIHdyaXRpbmcgdG8gaXRzIHBhcmVudC5cbmV4cG9ydCBmdW5jdGlvbiBvcGVuR3JvdXAob3BlblBvcywgZ3JvdXBLaW5kKSB7XG5cdGdyb3VwU3RhY2sucHVzaChjdXJHcm91cClcblx0Ly8gQ29udGVudHMgd2lsbCBiZSBhZGRlZCB0byBieSBgYWRkVG9DdXJyZW50R3JvdXBgLlxuXHQvLyBjdXJHcm91cC5sb2MuZW5kIHdpbGwgYmUgd3JpdHRlbiB0byB3aGVuIGNsb3NpbmcgaXQuXG5cdGN1ckdyb3VwID0gbmV3IEdyb3VwKG5ldyBMb2Mob3BlblBvcywgbnVsbCksIFtdLCBncm91cEtpbmQpXG59XG5cbmV4cG9ydCBmdW5jdGlvbiBtYXliZUNsb3NlR3JvdXAoY2xvc2VQb3MsIGNsb3NlS2luZCkge1xuXHRpZiAoY3VyR3JvdXAua2luZCA9PT0gY2xvc2VLaW5kKVxuXHRcdGNsb3NlR3JvdXBOb0NoZWNrKGNsb3NlUG9zLCBjbG9zZUtpbmQpXG59XG5cbmV4cG9ydCBmdW5jdGlvbiBjbG9zZUdyb3VwKGNsb3NlUG9zLCBjbG9zZUtpbmQpIHtcblx0Y2hlY2soY2xvc2VLaW5kID09PSBjdXJHcm91cC5raW5kLCBjbG9zZVBvcywgKCkgPT5cblx0XHRgVHJ5aW5nIHRvIGNsb3NlICR7c2hvd0dyb3VwS2luZChjbG9zZUtpbmQpfSwgYCArXG5cdFx0YGJ1dCBsYXN0IG9wZW5lZCAke3Nob3dHcm91cEtpbmQoY3VyR3JvdXAua2luZCl9YClcblx0Y2xvc2VHcm91cE5vQ2hlY2soY2xvc2VQb3MsIGNsb3NlS2luZClcbn1cblxuZnVuY3Rpb24gY2xvc2VHcm91cE5vQ2hlY2soY2xvc2VQb3MsIGNsb3NlS2luZCkge1xuXHRsZXQganVzdENsb3NlZCA9IGN1ckdyb3VwXG5cdGRyb3BHcm91cCgpXG5cdGp1c3RDbG9zZWQubG9jLmVuZCA9IGNsb3NlUG9zXG5cdHN3aXRjaCAoY2xvc2VLaW5kKSB7XG5cdFx0Y2FzZSBHcm91cHMuU3BhY2U6IHtcblx0XHRcdGNvbnN0IHNpemUgPSBqdXN0Q2xvc2VkLnN1YlRva2Vucy5sZW5ndGhcblx0XHRcdGlmIChzaXplICE9PSAwKVxuXHRcdFx0XHQvLyBTcGFjZWQgc2hvdWxkIGFsd2F5cyBoYXZlIGF0IGxlYXN0IHR3byBlbGVtZW50cy5cblx0XHRcdFx0YWRkVG9DdXJyZW50R3JvdXAoc2l6ZSA9PT0gMSA/IGp1c3RDbG9zZWQuc3ViVG9rZW5zWzBdIDoganVzdENsb3NlZClcblx0XHRcdGVsc2Vcblx0XHRcdFx0d2FybihqdXN0Q2xvc2VkLmxvYywgJ1VubmVjZXNzYXJ5IHNwYWNlLicpXG5cdFx0XHRicmVha1xuXHRcdH1cblx0XHRjYXNlIEdyb3Vwcy5MaW5lOlxuXHRcdFx0Ly8gTGluZSBtdXN0IGhhdmUgY29udGVudC5cblx0XHRcdC8vIFRoaXMgY2FuIGhhcHBlbiBpZiB0aGVyZSB3YXMganVzdCBhIGNvbW1lbnQuXG5cdFx0XHRpZiAoIWlzRW1wdHkoanVzdENsb3NlZC5zdWJUb2tlbnMpKVxuXHRcdFx0XHRhZGRUb0N1cnJlbnRHcm91cChqdXN0Q2xvc2VkKVxuXHRcdFx0YnJlYWtcblx0XHRjYXNlIEdyb3Vwcy5CbG9jazpcblx0XHRcdGNoZWNrKCFpc0VtcHR5KGp1c3RDbG9zZWQuc3ViVG9rZW5zKSwgY2xvc2VQb3MsICdFbXB0eSBibG9jay4nKVxuXHRcdFx0YWRkVG9DdXJyZW50R3JvdXAoanVzdENsb3NlZClcblx0XHRcdGJyZWFrXG5cdFx0ZGVmYXVsdDpcblx0XHRcdGFkZFRvQ3VycmVudEdyb3VwKGp1c3RDbG9zZWQpXG5cdH1cbn1cblxuZXhwb3J0IGZ1bmN0aW9uIGNsb3NlU3BhY2VPS0lmRW1wdHkocG9zKSB7XG5cdGFzc2VydChjdXJHcm91cC5raW5kID09PSBHcm91cHMuU3BhY2UpXG5cdGlmIChjdXJHcm91cC5zdWJUb2tlbnMubGVuZ3RoID09PSAwKVxuXHRcdGRyb3BHcm91cCgpXG5cdGVsc2Vcblx0XHRjbG9zZUdyb3VwTm9DaGVjayhwb3MsIEdyb3Vwcy5TcGFjZSlcbn1cblxuZXhwb3J0IGZ1bmN0aW9uIG9wZW5QYXJlbnRoZXNpcyhsb2MpIHtcblx0b3Blbkdyb3VwKGxvYy5zdGFydCwgR3JvdXBzLlBhcmVudGhlc2lzKVxuXHRvcGVuR3JvdXAobG9jLmVuZCwgR3JvdXBzLlNwYWNlKVxufVxuXG5leHBvcnQgZnVuY3Rpb24gY2xvc2VQYXJlbnRoZXNpcyhsb2MpIHtcblx0Y2xvc2VHcm91cE5vQ2hlY2sobG9jLnN0YXJ0LCBHcm91cHMuU3BhY2UpXG5cdGNsb3NlR3JvdXAobG9jLmVuZCwgR3JvdXBzLlBhcmVudGhlc2lzKVxufVxuXG5leHBvcnQgZnVuY3Rpb24gY2xvc2VHcm91cHNGb3JEZWRlbnQocG9zKSB7XG5cdGNsb3NlTGluZShwb3MpXG5cdGNsb3NlR3JvdXAocG9zLCBHcm91cHMuQmxvY2spXG5cdC8vIEl0J3MgT0sgdG8gYmUgbWlzc2luZyBhIGNsb3NpbmcgcGFyZW50aGVzaXMgaWYgdGhlcmUncyBhIGJsb2NrLiBFLmcuOlxuXHQvLyBhIChiXG5cdC8vXHRjIHwgbm8gY2xvc2luZyBwYXJlbiBoZXJlXG5cdHdoaWxlIChjdXJHcm91cC5raW5kID09PSBHcm91cHMuUGFyZW50aGVzaXMgfHwgY3VyR3JvdXAua2luZCA9PT0gR3JvdXBzLlNwYWNlKVxuXHRcdGNsb3NlR3JvdXBOb0NoZWNrKHBvcywgY3VyR3JvdXAua2luZClcbn1cblxuLy8gV2hlbiBzdGFydGluZyBhIG5ldyBsaW5lLCBhIHNwYWNlZCBncm91cCBpcyBjcmVhdGVkIGltcGxpY2l0bHkuXG5leHBvcnQgZnVuY3Rpb24gb3BlbkxpbmUocG9zKSB7XG5cdG9wZW5Hcm91cChwb3MsIEdyb3Vwcy5MaW5lKVxuXHRvcGVuR3JvdXAocG9zLCBHcm91cHMuU3BhY2UpXG59XG5cbmV4cG9ydCBmdW5jdGlvbiBjbG9zZUxpbmUocG9zKSB7XG5cdGlmIChjdXJHcm91cC5raW5kID09PSBHcm91cHMuU3BhY2UpXG5cdFx0Y2xvc2VTcGFjZU9LSWZFbXB0eSgpXG5cdGNsb3NlR3JvdXAocG9zLCBHcm91cHMuTGluZSlcbn1cblxuLy8gV2hlbiBlbmNvdW50ZXJpbmcgYSBzcGFjZSwgaXQgYm90aCBjbG9zZXMgYW5kIG9wZW5zIGEgc3BhY2VkIGdyb3VwLlxuZXhwb3J0IGZ1bmN0aW9uIHNwYWNlKGxvYykge1xuXHRtYXliZUNsb3NlR3JvdXAobG9jLnN0YXJ0LCBHcm91cHMuU3BhY2UpXG5cdG9wZW5Hcm91cChsb2MuZW5kLCBHcm91cHMuU3BhY2UpXG59XG4iXX0=

@@ -1,6 +1,6 @@
 import CompileError from './CompileError'
 import {setContext, unsetContext, warnings} from './private/context'
-import lex from './private/lex'
+import lex from './private/lex/lex'
 import parse from './private/parse/parse'
 import render from './private/render'
 import transpile from './private/transpile/transpile'
