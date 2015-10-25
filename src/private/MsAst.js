@@ -576,7 +576,8 @@ export default class MsAst {
 		{block}```
 	*/
 	export class Fun extends Val {
-		constructor(loc, args, opRestArg, block, kind=Funs.Plain, isThisFun=false, opReturnType=null) {
+		constructor(loc,
+			args, opRestArg, block, kind=Funs.Plain, isThisFun=false, opReturnType=null) {
 			super(loc)
 			/** @type {Array<LocalDeclare>} */
 			this.args = args

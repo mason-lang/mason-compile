@@ -3,7 +3,7 @@ import {parseAst} from '../../../dist/compile'
 import {setContext} from '../../../dist/private/context'
 import render from '../../../dist/private/render'
 import transpile from '../../../dist/private/transpile/transpile'
-import verify from '../../../dist/private/verify'
+import verify from '../../../dist/private/verify/verify'
 import {last, rtail} from '../../../dist/private/util'
 import {loc} from './ast-util'
 

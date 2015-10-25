@@ -10,7 +10,7 @@ import MsAst from '../dist/private/MsAst'
 import parse from '../dist/private/parse/parse'
 import render from '../dist/private/render'
 import transpile from '../dist/private/transpile/transpile'
-import verify from '../dist/private/verify'
+import verify from '../dist/private/verify/verify'
 
 if (!module.parent)
 	doTest(argv[2] === 'perf')

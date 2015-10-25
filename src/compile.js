@@ -5,7 +5,7 @@ import parse from './private/parse/parse'
 import render from './private/render'
 import transpile from './private/transpile/transpile'
 import {type} from './private/util'
-import verify from './private/verify'
+import verify from './private/verify/verify'
 
 /**
 @param {string} source Mason source code for a single module.

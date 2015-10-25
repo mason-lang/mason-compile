@@ -1,10 +1,16 @@
-import {code} from '../CompileError'
-import {check, fail, options, warn} from './context'
-import * as MsAstTypes from './MsAst'
-import {AssignDestructure, AssignSingle, BlockVal, BlockValThrow, Call, Class, Constructor, Do,
-	ForVal, Fun, Funs, ModuleExport, ObjEntry, Pattern, SuperCallDo, Yield, YieldTo} from './MsAst'
-import {assert, cat, ifElse, implementMany, isEmpty, opEach, reverseIter} from './util'
-import VerifyResults from './VerifyResults'
+import {code} from '../../CompileError'
+import {check, options, warn} from '../context'
+import * as MsAstTypes from '../MsAst'
+import {BlockVal, BlockValThrow, Class, Constructor,
+	ForVal, Fun, Funs, Pattern, SuperCallDo} from '../MsAst'
+import {cat, ifElse, implementMany, opEach} from '../util'
+import {funKind, locals, method, okToNotUse, opLoop, results, setup, tearDown, withIIFE,
+	withInFunKind, withMethod, withLoop, withName} from './context'
+import {accessLocal, getLocalDeclare, failMissingLocal, plusLocals, setDeclareAccessed, setLocal,
+	verifyAndPlusLocal, verifyAndPlusLocals, verifyLocalDeclare, warnUnusedLocals, withBlockLocals
+	} from './locals'
+import {setName, verifyName, verifyOp} from './util'
+import verifyLines from './verifyLines'
 
 /**
 Generates information needed during transpiling, the VerifyResults.
@@ -12,185 +18,13 @@ Also checks for existence of local variables and warns for unused locals.
 @param {MsAst} msAst
 */
 export default function verify(msAst) {
-	locals = new Map()
-	pendingBlockLocals = []
-	funKind = Funs.Plain
-	okToNotUse = new Set()
-	opLoop = null
-	method = null
-	results = new VerifyResults()
-
+	setup()
 	msAst.verify()
-	verifyLocalUse()
-
+	warnUnusedLocals()
 	const res = results
-	// Release for garbage collection.
-	locals = okToNotUse = opLoop = pendingBlockLocals = method = results = null
+	tearDown()
 	return res
 }
-
-// Use a trick like in parse.js and have everything close over these mutable variables.
-let
-	// Map from names to LocalDeclares.
-	locals,
-	// Locals that don't have to be accessed.
-	okToNotUse,
-	opLoop,
-	/*
-	Locals for this block.
-	These are added to locals when entering a Function or lazy evaluation.
-	In:
-		a = |
-			b
-		b = 1
-	`b` will be a pending local.
-	However:
-		a = b
-		b = 1
-	will fail to verify, because `b` comes after `a` and is not accessed inside a function.
-	It would work for `~a is b`, though.
-	*/
-	pendingBlockLocals,
-	// Kind of function we are currently in. (Funs.Plain if not in a function.)
-	funKind,
-	// Current method we are in, or a Constructor, or null.
-	method,
-	results,
-	// Name of the closest AssignSingle
-	name
-
-const
-	verifyOp = _ => {
-		if (_ !== null)
-			_.verify()
-	},
-
-	verifyName = _ => {
-		if (typeof _ !== 'string')
-			_.verify()
-	},
-
-	deleteLocal = localDeclare =>
-		locals.delete(localDeclare.name),
-
-	setLocal = localDeclare =>
-		locals.set(localDeclare.name, localDeclare),
-
-	accessLocal = (access, name) => {
-		const declare = getLocalDeclare(name, access.loc)
-		setDeclareAccessed(declare, access)
-	},
-
-	setDeclareAccessed = (declare, access) => {
-		results.localDeclareToAccesses.get(declare).push(access)
-	},
-
-	// For expressions affecting lineNewLocals, they will be registered before being verified.
-	// So, LocalDeclare.verify just the type.
-	// For locals not affecting lineNewLocals, use this instead of just declare.verify()
-	verifyLocalDeclare = localDeclare => {
-		registerLocal(localDeclare)
-		localDeclare.verify()
-	},
-
-	registerLocal = localDeclare => {
-		results.localDeclareToAccesses.set(localDeclare, [])
-	},
-
-	setName = expr => {
-		results.names.set(expr, name)
-	}
-
-// These functions change verifier state and efficiently return to the old state when finished.
-const
-	withInFunKind = (newFunKind, action) => {
-		const oldFunKind = funKind
-		funKind = newFunKind
-		action()
-		funKind = oldFunKind
-	},
-
-	withLoop = (newLoop, action) => {
-		const oldLoop = opLoop
-		opLoop = newLoop
-		action()
-		opLoop = oldLoop
-	},
-
-	withMethod = (newMethod, action) => {
-		const oldMethod = method
-		method = newMethod
-		action()
-		method = oldMethod
-	},
-
-	withName = (newName, action) => {
-		const oldName = name
-		name = newName
-		action()
-		name = oldName
-	},
-
-	// Can't break out of loop inside of IIFE.
-	withIIFE = action => {
-		withLoop(false, action)
-	},
-
-	plusLocal = (addedLocal, action) => {
-		const shadowed = locals.get(addedLocal.name)
-		locals.set(addedLocal.name, addedLocal)
-		action()
-		if (shadowed === undefined)
-			deleteLocal(addedLocal)
-		else
-			setLocal(shadowed)
-	},
-
-	// Should have verified that addedLocals all have different names.
-	plusLocals = (addedLocals, action) => {
-		const shadowedLocals = []
-		for (const _ of addedLocals) {
-			const shadowed = locals.get(_.name)
-			if (shadowed !== undefined)
-				shadowedLocals.push(shadowed)
-			setLocal(_)
-		}
-
-		action()
-
-		addedLocals.forEach(deleteLocal)
-		shadowedLocals.forEach(setLocal)
-	},
-
-	verifyAndPlusLocal = (addedLocal, action) => {
-		verifyLocalDeclare(addedLocal)
-		plusLocal(addedLocal, action)
-	},
-
-	verifyAndPlusLocals = (addedLocals, action) => {
-		addedLocals.forEach(verifyLocalDeclare)
-		const names = new Set()
-		for (const _ of addedLocals) {
-			check(!names.has(_.name), _.loc, () => `Duplicate local ${code(_.name)}`)
-			names.add(_.name)
-		}
-		plusLocals(addedLocals, action)
-	},
-
-	withBlockLocals = action => {
-		const oldPendingBlockLocals = pendingBlockLocals
-		pendingBlockLocals = []
-		plusLocals(oldPendingBlockLocals, action)
-		pendingBlockLocals = oldPendingBlockLocals
-	}
-
-const verifyLocalUse = () => {
-	for (const [local, accesses] of results.localDeclareToAccesses)
-		if (isEmpty(accesses) && !isOkToNotUse(local))
-			warn(local.loc, `Unused local variable ${code(local.name)}.`)
-}
-const isOkToNotUse = local =>
-	local.name === 'built' || okToNotUse.has(local)
 
 implementMany(MsAstTypes, 'verify', {
 	Assert() {
@@ -652,151 +486,42 @@ function verifyImport() {
 
 // Helpers specific to certain MsAst types
 
-const
-	verifyFor = forLoop => {
-		const verifyBlock = () => withLoop(forLoop, () => forLoop.block.verify())
-		ifElse(forLoop.opIteratee,
-			({element, bag}) => {
-				bag.verify()
-				verifyAndPlusLocal(element, verifyBlock)
-			},
-			verifyBlock)
-	},
+function verifyFor(forLoop) {
+	const verifyBlock = () => withLoop(forLoop, () => forLoop.block.verify())
+	ifElse(forLoop.opIteratee,
+		({element, bag}) => {
+			bag.verify()
+			verifyAndPlusLocal(element, verifyBlock)
+		},
+		verifyBlock)
+}
 
-	verifyInLoop = loopUser =>
-		check(opLoop !== null, loopUser.loc, 'Not in a loop.'),
+function verifyInLoop(loopUser) {
+	check(opLoop !== null, loopUser.loc, 'Not in a loop.')
+}
 
-	verifyCase = _ => {
-		const doIt = () => {
-			for (const part of _.parts)
-				part.verify()
-			verifyOp(_.opElse)
-		}
-		ifElse(_.opCased,
-			_ => {
-				_.verify()
-				verifyAndPlusLocal(_.assignee, doIt)
-			},
-			doIt)
-	},
-
-	verifyMethod = (_, doVerify) => {
-		verifyName(_.symbol)
-		withMethod(_, doVerify)
-	},
-
-	verifySwitch = _ => {
-		_.switched.verify()
+function verifyCase(_) {
+	const doIt = () => {
 		for (const part of _.parts)
 			part.verify()
 		verifyOp(_.opElse)
 	}
-
-// General utilities
-
-function getLocalDeclare(name, accessLoc) {
-	const declare = locals.get(name)
-	if (declare === undefined)
-		failMissingLocal(accessLoc, name)
-	return declare
+	ifElse(_.opCased,
+		_ => {
+			_.verify()
+			verifyAndPlusLocal(_.assignee, doIt)
+		},
+		doIt)
 }
 
-function failMissingLocal(loc, name) {
-	// TODO:ES6 `Array.from(locals.keys())` should work
-	const keys = []
-	for (const key of locals.keys())
-		keys.push(key)
-	const showLocals = code(keys.join(' '))
-	fail(loc, `No such local ${code(name)}.\nLocals are:\n${showLocals}.`)
+function verifyMethod(_, doVerify) {
+	verifyName(_.symbol)
+	withMethod(_, doVerify)
 }
 
-function lineNewLocals(line) {
-	return line instanceof AssignSingle ?
-		[line.assignee] :
-		line instanceof AssignDestructure ?
-		line.assignees :
-		line instanceof ObjEntry ?
-		lineNewLocals(line.assign) :
-		line instanceof ModuleExport ?
-		lineNewLocals(line.assign) :
-		[]
-}
-
-function verifyLines(lines) {
-	/*
-	We need to get all block locals up-front because
-	Functions within lines can access locals from later lines.
-	NOTE: We push these onto pendingBlockLocals in reverse
-	so that when we iterate through lines forwards, we can pop from pendingBlockLocals
-	to remove pending locals as they become real locals.
-	It doesn't really matter what order we add locals in since it's not allowed
-	to have two locals of the same name in the same block.
-	*/
-	const newLocals = []
-
-	const getLineLocals = line => {
-		for (const _ of reverseIter(lineNewLocals(line))) {
-			// Register the local now. Can't wait until the assign is verified.
-			registerLocal(_)
-			newLocals.push(_)
-		}
-	}
-	for (const _ of reverseIter(lines))
-		getLineLocals(_)
-	pendingBlockLocals.push(...newLocals)
-
-	/*
-	Keeps track of locals which have already been added in this block.
-	Mason allows shadowing, but not within the same block.
-	So, this is allowed:
-		a = 1
-		b =
-			a = 2
-			...
-	But not:
-		a = 1
-		a = 2
-	*/
-	const thisBlockLocalNames = new Set()
-
-	// All shadowed locals for this block.
-	const shadowed = []
-
-	const verifyLine = line => {
-		verifyIsStatement(line)
-		for (const newLocal of lineNewLocals(line)) {
-			const name = newLocal.name
-			const oldLocal = locals.get(name)
-			if (oldLocal !== undefined) {
-				check(!thisBlockLocalNames.has(name), newLocal.loc,
-					() => `A local ${code(name)} is already in this block.`)
-				shadowed.push(oldLocal)
-			}
-			thisBlockLocalNames.add(name)
-			setLocal(newLocal)
-
-			// Now that it's added as a local, it's no longer pending.
-			// We added pendingBlockLocals in the right order that we can just pop them off.
-			const popped = pendingBlockLocals.pop()
-			assert(popped === newLocal)
-		}
-		line.verify()
-	}
-
-	lines.forEach(verifyLine)
-
-	newLocals.forEach(deleteLocal)
-	shadowed.forEach(setLocal)
-
-	return newLocals
-}
-
-function verifyIsStatement(line) {
-	const isStatement =
-		line instanceof Do ||
-		// Some values are also acceptable.
-		line instanceof Call ||
-		line instanceof Yield ||
-		line instanceof YieldTo
-	check(isStatement, line.loc, 'Expression in statement position.')
+function verifySwitch(_) {
+	_.switched.verify()
+	for (const part of _.parts)
+		part.verify()
+	verifyOp(_.opElse)
 }
