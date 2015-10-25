@@ -61,6 +61,7 @@ export default {
 	'msl.@.Range': ['_'],
 	'msl.@.Seq.Seq': [
 		'_',
+		'+>!',
 		'@drop',
 		'@drop~',
 		'@drop-while',
@@ -107,7 +108,7 @@ export default {
 		'max-by',
 		'same?'
 	],
-	'msl.Function': ['identity'],
+	'msl.Function': ['Action', 'identity'],
 	'msl.Generator': ['gen-next!'],
 	'msl.js': ['defined?', 'id=?'],
 	'msl.math.methods': ['+', '-', '*', '/'],
