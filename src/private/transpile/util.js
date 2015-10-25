@@ -4,7 +4,7 @@ import mangleIdentifier from 'esast/dist/mangle-identifier'
 import {loc, toStatement} from 'esast/dist/util'
 import {member} from 'esast/dist/util'
 import {options} from '../context'
-import {Quote} from '../MsAst'
+import {QuoteAbstract} from '../MsAst'
 import {assert, opIf, opMap} from '../util'
 import {GlobalError} from './ast-constants'
 import {lazyWrap, msCheckContains, msGet, msLazyGet, msUnlazy} from './ms-call'
@@ -97,7 +97,7 @@ export function getMember(astObject, gotName, isLazy, isModule) {
 }
 
 export function doThrow(thrown) {
-	return new ThrowStatement(thrown instanceof Quote ?
+	return new ThrowStatement(thrown instanceof QuoteAbstract ?
 		new NewExpression(GlobalError, [t0(thrown)]) :
 		t0(thrown))
 }

@@ -1,5 +1,5 @@
 import {check, fail} from '../context'
-import {Class, ClassDo, Constructor, Fun, Funs, MethodImpl, MethodGetter, MethodSetter, Quote
+import {Class, ClassDo, Constructor, Fun, Funs, MethodImpl, MethodGetter, MethodSetter, QuoteSimple
 	} from '../MsAst'
 import {isAnyKeyword, isKeyword, Keywords} from '../Token'
 import {opIf} from '../util'
@@ -62,16 +62,16 @@ function parseMethod(tokens) {
 
 	if (isKeyword(Keywords.Get, head)) {
 		const [before, block] = beforeAndBlock(tokens.tail())
-		return new MethodGetter(tokens.loc, parseExprOrStrLit(before), parseBlockVal(block))
+		return new MethodGetter(tokens.loc, parseExprOrQuoteSimple(before), parseBlockVal(block))
 	} else if (isKeyword(Keywords.Set, head)) {
 		const [before, block] = beforeAndBlock(tokens.tail())
-		return new MethodSetter(tokens.loc, parseExprOrStrLit(before), parseBlockDo(block))
+		return new MethodSetter(tokens.loc, parseExprOrQuoteSimple(before), parseBlockDo(block))
 	} else {
 		const baa = tokens.opSplitOnce(_ => isAnyKeyword(funKeywords, _))
 		check(baa !== null, tokens.loc, 'Expected a function keyword somewhere.')
 		const {before, at, after} = baa
 		const fun = parseFun(methodFunKind(at), after)
-		return new MethodImpl(tokens.loc, parseExprOrStrLit(before), fun)
+		return new MethodImpl(tokens.loc, parseExprOrQuoteSimple(before), fun)
 	}
 }
 
@@ -80,13 +80,10 @@ const funKeywords = new Set([
 	Keywords.FunThis, Keywords.FunThisDo, Keywords.FunThisGen, Keywords.FunThisGenDo
 ])
 
-// If symbol is just a literal string, store it as a string, which is handled specially.
-function parseExprOrStrLit(tokens) {
+// If symbol is just a quoted name, store it as a string, which is handled specially.
+function parseExprOrQuoteSimple(tokens) {
 	const expr = parseExpr(tokens)
-	const isStrLit = expr instanceof Quote &&
-		expr.parts.length === 1 &&
-		typeof expr.parts[0] === 'string'
-	return isStrLit ? expr.parts[0] : expr
+	return expr instanceof QuoteSimple ? expr.name : expr
 }
 
 function methodFunKind(funKindToken) {

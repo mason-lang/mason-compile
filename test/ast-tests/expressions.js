@@ -1,5 +1,5 @@
 import {AssignSingle, BagSimple, BlockDo, Call, LocalDeclare, LocalDeclares, Member, New, ObjPair,
-	ObjSimple, Quote, QuoteTemplate, SpecialVal, SpecialVals, Splat, With
+	ObjSimple, QuotePlain, QuoteSimple, QuoteTaggedTemplate, SpecialVal, SpecialVals, Splat, With
 	} from '../../dist/private/MsAst'
 import {aAccess, aDeclare, assignAZero, blockPass, focusAccess, focusDeclare, loc, one, two, zero
 	} from './util/ast-util'
@@ -98,9 +98,20 @@ describe('expressions', () => {
 
 	describe('Quote', () => {
 		test(
+			'\'a',
+			new QuoteSimple(loc, 'a'),
+			'"a"')
+
+		test(
 			'"a"',
-			new Quote(loc, ['a']),
-			'`a`')
+			new QuotePlain(loc, ['a']),
+			'`a`',
+			{warnings: ['Quoted text could be a simple quote {{\'a}}.']})
+
+		test(
+			'"a b"',
+			new QuotePlain(loc, ['a b']),
+			'`a b`')
 
 		test(
 			`
@@ -108,22 +119,22 @@ describe('expressions', () => {
 					a
 						b
 					c`,
-			new Quote(loc, ['a\n\tb\nc']),
+			new QuotePlain(loc, ['a\n\tb\nc']),
 			'`a\n\tb\nc`')
 
 		test(
 			'"a\\{\\n"',
-			new Quote(loc, ['a\\{\\n']),
+			new QuotePlain(loc, ['a\\{\\n']),
 			'`a\\{\\n`')
 
 		test(
 			'"a{0}b"',
-			new Quote(loc, ['a', zero, 'b']),
+			new QuotePlain(loc, ['a', zero, 'b']),
 			'`a${0}b`')
 
 		test(
 			'0"a{0}b"',
-			new QuoteTemplate(loc, zero, new Quote(loc, ['a', zero, 'b'])),
+			new QuoteTaggedTemplate(loc, zero, new QuotePlain(loc, ['a', zero, 'b'])),
 			'0`a${0}b`')
 	})
 

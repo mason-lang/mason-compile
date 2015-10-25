@@ -25,9 +25,6 @@ export default function lexPlain(isInQuote) {
 	// Does nothing if isInQuote.
 	let indent = 0
 
-	// Make closures now rather than inside the loop.
-	// This is significantly faster as of node v0.11.14.
-
 	// This is where we started lexing the current token.
 	let startColumn
 	function startPos() {
@@ -310,9 +307,14 @@ export default function lexPlain(isInQuote) {
 					keyword(Keywords.Type)
 				break
 
+			case Chars.Tick:
+				keyword(Keywords.Tick)
+				break
+
 			case Chars.Ampersand: case Chars.Backslash: case Chars.Backtick: case Chars.Caret:
 			case Chars.Comma: case Chars.Percent: case Chars.Semicolon:
 				fail(loc(), `Reserved character ${showChar(characterEaten)}`)
+
 			default:
 				handleName()
 		}

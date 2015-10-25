@@ -1,9 +1,10 @@
 import {singleCharLoc} from 'esast/dist/Loc'
-import {check} from '../context'
+import {code} from '../../CompileError'
+import {check, warn} from '../context'
 import {Groups} from '../Token'
 import {assert} from '../util'
-import {Chars} from './chars'
-import {addToCurrentGroup, closeGroup, closeParenthesis, openGroup, openParenthesis
+import {Chars, isDigit, isNameCharacter} from './chars'
+import {addToCurrentGroup, closeGroup, closeParenthesis, curGroup, openGroup, openParenthesis
 	} from './groupContext'
 import lexPlain from './lexPlain'
 import {eat, peek, pos, skipNewlines, skipWhileEquals, stepBackMany, tryEatNewline
@@ -91,5 +92,25 @@ export default function lexQuote(indent) {
 	}
 
 	maybeOutputRead()
+	warnForSimpleQuote(curGroup)
 	closeGroup(pos(), Groups.Quote)
+}
+
+function warnForSimpleQuote(quoteGroup) {
+	const tokens = quoteGroup.subTokens
+	if (tokens.length === 1) {
+		const name = tokens[0]
+		if (typeof name === 'string' && isName(name))
+			warn(pos(), `Quoted text could be a simple quote ${code(`'${name}`)}.`)
+	}
+}
+
+function isName(str) {
+	const cc0 = str.charCodeAt(0)
+	if (isDigit(cc0) || cc0 === Chars.Tilde)
+		return false
+	for (let i = 0; i < str.length; i = i + 1)
+		if (!isNameCharacter(str.charCodeAt(i)))
+			return false
+	return true
 }

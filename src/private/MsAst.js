@@ -1106,35 +1106,46 @@ export default class MsAst {
 		}
 	}
 
-	/**
-	Quoted text.
-	Mason uses template strings for all strings.
-	For tagged templates, use {@link QuoteTemplate}.
-	*/
-	export class Quote extends Val {
-		/** Quote that is just a simple string literal. */
-		static forString(loc, str) {
-			return new Quote(loc, [str])
-		}
+	/** {@link Quote} or {@link QuoteSimple}. */
+	export class QuoteAbstract extends Val {}
 
-		// parts are Strings interleaved with Vals.
-		// part Strings are raw values, meaning "\n" is two characters.
-		// Since "\{" is special to Mason, that's only one character.
+	/**
+	Quoted text. Always compiles to a template string.
+	For tagged templates, use {@link QuoteTaggedTemplate}.
+	*/
+	export class QuotePlain extends QuoteAbstract {
 		constructor(loc, parts) {
 			super(loc)
-			/** @type {Array<string | Val>} */
+			/**
+			`parts` are Strings interleaved with Vals.
+			part Strings are raw values, meaning "\n" is two characters.
+			Since "\{" is special to Mason, that's only one character.
+			@type {Array<string | Val>}
+			*/
 			this.parts = parts
 		}
 	}
 
 	/** `{tag}"{quote}"` */
-	export class QuoteTemplate extends Val {
+	export class QuoteTaggedTemplate extends Val {
 		constructor(loc, tag, quote) {
 			super(loc)
 			/** @type {Val} */
 			this.tag = tag
 			/** @type {Quote} */
 			this.quote = quote
+		}
+	}
+
+	/**
+	`'{name}`.
+	Quote consisting of a single name.
+	*/
+	export class QuoteSimple extends QuoteAbstract {
+		constructor(loc, name) {
+			super(loc)
+			/** @type {string} */
+			this.name = name
 		}
 	}
 
@@ -1153,6 +1164,18 @@ export default class MsAst {
 			this.block = block
 		}
 	}
+
+	/**
+	`'.{name}`.
+	Represends a bound function of the `this` object.
+	*/
+	export class ThisFun extends Val {
+		constructor(loc, name) {
+			super(loc)
+			this.name = name
+		}
+	}
+
 
 // Special
 	/**

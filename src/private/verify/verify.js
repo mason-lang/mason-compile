@@ -348,12 +348,14 @@ implementMany(MsAstTypes, 'verify', {
 		}
 	},
 
-	Quote() {
+	QuotePlain() {
 		for (const _ of this.parts)
 			verifyName(_)
 	},
 
-	QuoteTemplate() {
+	QuoteSimple() {},
+
+	QuoteTaggedTemplate() {
 		this.tag.verify()
 		this.quote.verify()
 	},
@@ -391,6 +393,10 @@ implementMany(MsAstTypes, 'verify', {
 		withIIFE(() => verifySwitch(this))
 	},
 	SwitchValPart: verifySwitchPart,
+
+	ThisFun() {
+		accessLocal(this, 'this')
+	},
 
 	Throw() {
 		verifyOp(this.opThrown)

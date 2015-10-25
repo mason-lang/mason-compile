@@ -32,9 +32,9 @@ describe('throw', () => {
 		new Throw(loc, null),
 		'throw new (Error)("An error occurred.")')
 	test(
-		'throw! "a"',
+		'throw! \'a',
 		new Throw(loc, strA),
-		'throw new (Error)(`a`)')
+		'throw new (Error)("a")')
 	test(
 		'throw! 0',
 		new Throw(loc, zero),

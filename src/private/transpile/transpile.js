@@ -10,7 +10,7 @@ import {functionExpressionThunk, identifier, member, propertyIdOrLiteral} from '
 import {check, options} from '../context'
 import * as MsAstTypes from '../MsAst'
 import {AssignSingle, Call, Constructor, Funs, Logics, Member, LocalDeclares, Pattern, Splat,
-	Setters, SpecialDos, SpecialVals, SwitchDoPart, Quote} from '../MsAst'
+	Setters, SpecialDos, SpecialVals, SwitchDoPart, QuoteAbstract} from '../MsAst'
 import {assert, cat, flatMap, flatOpMap, ifElse, implementMany, opIf, opMap, tail} from '../util'
 import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, DeclareLexicalThis,
 	ExportsDefault, IdArguments, IdBuilt, IdExports, IdExtract, IdFocus, IdLexicalThis, IdSuper,
@@ -386,7 +386,7 @@ implementMany(MsAstTypes, 'transpile', {
 			new Property('init', propertyIdOrLiteral(pair.key), t0(pair.value))))
 	},
 
-	Quote() {
+	QuotePlain() {
 		if (this.parts.length === 0)
 			return LitEmptyString
 		else {
@@ -414,7 +414,11 @@ implementMany(MsAstTypes, 'transpile', {
 		}
 	},
 
-	QuoteTemplate() {
+	QuoteSimple() {
+		return new Literal(this.name)
+	},
+
+	QuoteTaggedTemplate() {
 		return new TaggedTemplateExpression(t0(this.tag), t0(this.quote))
 	},
 
@@ -486,6 +490,12 @@ implementMany(MsAstTypes, 'transpile', {
 	SwitchVal() { return blockWrap(new BlockStatement([transpileSwitch(this)])) },
 	SwitchDoPart: switchPart,
 	SwitchValPart: switchPart,
+
+	ThisFun() {
+		// this.{name}.bind(this)
+		const fun = member(IdLexicalThis, this.name)
+		return new CallExpression(member(fun, 'bind'), [IdLexicalThis])
+	},
 
 	Throw() {
 		return ifElse(this.opThrown,
@@ -601,7 +611,7 @@ function methodKeyComputed(symbol) {
 	if (typeof symbol === 'string')
 		return {key: propertyIdOrLiteral(symbol), computed: false}
 	else {
-		const key = symbol instanceof Quote ? t0(symbol) : msSymbol(t0(symbol))
+		const key = symbol instanceof QuoteAbstract ? t0(symbol) : msSymbol(t0(symbol))
 		return {key, computed: true}
 	}
 }

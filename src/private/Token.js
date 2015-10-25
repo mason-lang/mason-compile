@@ -298,6 +298,7 @@ export const Keywords = {
 	Static: kw('static'),
 	SwitchDo: kw('switch!'),
 	SwitchVal: kw('switch'),
+	Tick: kwNotName('\''),
 	Throw: kw('throw!'),
 	Todo: kw('todo'),
 	True: kw('true'),

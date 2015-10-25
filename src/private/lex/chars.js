@@ -43,6 +43,7 @@ export const Chars = {
 	Semicolon: cc(';'),
 	Space: cc(' '),
 	Tab: cc('\t'),
+	Tick: cc('\''),
 	Tilde: cc('~')
 }
 
@@ -65,5 +66,5 @@ export const
 	isDigitHex = charPred('0123456789abcdef')
 
 // Anything not explicitly reserved is a valid name character.
-const reservedCharacters = '`#%^&\\\';,'
-export const isNameCharacter = charPred('()[]{}.:| \n\t"' + reservedCharacters, true)
+const reservedCharacters = '`#%^&\\;,'
+export const isNameCharacter = charPred('()[]{}\'.:| \n\t"' + reservedCharacters, true)
