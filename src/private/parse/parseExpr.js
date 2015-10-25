@@ -76,8 +76,11 @@ export function parseExprParts(tokens) {
 						return parseForBag(after)
 					case Keywords.ForVal:
 						return parseForVal(after)
-					case Keywords.Fun: case Keywords.FunDo: case Keywords.FunGen:
-					case Keywords.FunGenDo: case Keywords.FunThis: case Keywords.FunThisDo:
+					case Keywords.Fun: case Keywords.FunDo:
+					case Keywords.FunThis: case Keywords.FunThisDo:
+					case Keywords.FunAsync: case Keywords.FunAsyncDo:
+					case Keywords.FunThisAsync: case Keywords.FunThisAsyncDo:
+					case Keywords.FunGen: case Keywords.FunGenDo:
 					case Keywords.FunThisGen: case Keywords.FunThisGenDo:
 						return parseFun(at.kind, after)
 					case Keywords.IfVal: case Keywords.UnlessVal: {
@@ -115,10 +118,11 @@ export function parseExprParts(tokens) {
 const exprSplitKeywords = new Set([
 	Keywords.And, Keywords.CaseVal, Keywords.Class, Keywords.Cond, Keywords.DelVal,
 	Keywords.ExceptVal, Keywords.ForBag, Keywords.ForVal, Keywords.Fun, Keywords.FunDo,
-	Keywords.FunGen, Keywords.FunGenDo, Keywords.FunThis, Keywords.FunThisDo, Keywords.FunThisGen,
-	Keywords.FunThisGenDo, Keywords.IfVal, Keywords.New, Keywords.Not, Keywords.Or,
-	Keywords.SuperVal, Keywords.SwitchVal, Keywords.UnlessVal, Keywords.With, Keywords.Yield,
-	Keywords.YieldTo
+	Keywords.FunThis, Keywords.FunThisDo, Keywords.FunAsync, Keywords.FunAsyncDo,
+	Keywords.FunThisAsync, Keywords.FunThisAsyncDo, Keywords.FunGen, Keywords.FunGenDo,
+	Keywords.FunThisGen, Keywords.FunThisGenDo, Keywords.IfVal, Keywords.New, Keywords.Not,
+	Keywords.Or, Keywords.SuperVal, Keywords.SwitchVal, Keywords.UnlessVal, Keywords.With,
+	Keywords.Yield, Keywords.YieldTo
 ])
 
 function parseExprPlain(tokens) {

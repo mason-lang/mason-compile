@@ -9,22 +9,23 @@ import {ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryEx
 import {functionExpressionThunk, identifier, member, propertyIdOrLiteral} from 'esast/dist/util'
 import {check, options} from '../context'
 import * as MsAstTypes from '../MsAst'
-import {AssignSingle, Call, Constructor, Logics, Member, LocalDeclares, Pattern, Splat, Setters,
-	SpecialDos, SpecialVals, SwitchDoPart, Quote} from '../MsAst'
+import {AssignSingle, Call, Constructor, Funs, Logics, Member, LocalDeclares, Pattern, Splat,
+	Setters, SpecialDos, SpecialVals, SwitchDoPart, Quote} from '../MsAst'
 import {assert, cat, flatMap, flatOpMap, ifElse, implementMany, opIf, opMap, tail} from '../util'
 import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, DeclareLexicalThis,
 	ExportsDefault, IdArguments, IdBuilt, IdExports, IdExtract, IdFocus, IdLexicalThis, IdSuper,
 	GlobalError, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt, SwitchCaseNoMatch,
 	ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
 import {IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot, msAssertNotMember,
-	msExtract, msNewMutableProperty, msNewProperty, msSetLazy, msSetSub, msSome, msSymbol, MsNone
-	} from './ms-call'
+	msAsync, msExtract, msNewMutableProperty, msNewProperty, msSetLazy, msSetSub, msSome, msSymbol,
+	MsNone} from './ms-call'
 import transpileModule from './transpileModule'
 import {accessLocalDeclare, declare, doThrow, getMember, idForDeclareCached, makeDeclarator,
 	maybeWrapInCheckContains, memberStringOrVal, opTypeCheckForLocalDeclare, t0, t1, t2, t3, tLines
 	} from './util'
 
 export let verifyResults
+// isInGenerator means we are in an async or generator function.
 let isInGenerator, isInConstructor
 let nextDestructuredId
 
@@ -226,8 +227,9 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	Fun(leadStatements=null) {
+		const isGeneratorFun = this.kind !== Funs.Plain
 		const oldInGenerator = isInGenerator
-		isInGenerator = this.isGenerator
+		isInGenerator = isGeneratorFun
 
 		// TODO:ES6 use `...`f
 		const nArgs = new Literal(this.args.length)
@@ -246,14 +248,23 @@ implementMany(MsAstTypes, 'transpile', {
 		isInGenerator = oldInGenerator
 		const id = opMap(verifyResults.opName(this), identifier)
 
-		const canUseArrowFunction =
-			id === null &&
-			this.opDeclareThis === null &&
-			opDeclareRest === null &&
-			!this.isGenerator
-		return canUseArrowFunction ?
-			new ArrowFunctionExpression(args, body) :
-			new FunctionExpression(id, args, body, this.isGenerator)
+		switch (this.kind) {
+			case Funs.Plain:
+				// TODO:ES6 Should be able to use rest args in arrow function
+				if (id === null && this.opDeclareThis === null && opDeclareRest === null)
+					return new ArrowFunctionExpression(args, body)
+				else
+					return new FunctionExpression(id, args, body)
+			case Funs.Async: {
+				const newBody = new BlockStatement([
+					new ReturnStatement(msAsync(new FunctionExpression(id, [], body, true)))
+				])
+				return new FunctionExpression(id, args, newBody)
+			}
+			case Funs.Generator:
+				return new FunctionExpression(id, args, body, true)
+			default: throw new Error(this.kind)
+		}
 	},
 
 	Ignore() {

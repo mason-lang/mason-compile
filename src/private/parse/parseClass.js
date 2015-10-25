@@ -1,6 +1,6 @@
 import {check, fail} from '../context'
-import {Class, ClassDo, Constructor, Fun, LocalDeclare, MethodImpl, MethodGetter, MethodSetter,
-	Quote} from '../MsAst'
+import {Class, ClassDo, Constructor, Fun, Funs, MethodImpl, MethodGetter, MethodSetter, Quote
+	} from '../MsAst'
 import {isAnyKeyword, isKeyword, Keywords} from '../Token'
 import {opIf} from '../util'
 import {parseExpr} from './parse*'
@@ -45,9 +45,7 @@ export default function parseClass(tokens) {
 
 function parseConstructor(tokens) {
 	const {args, memberArgs, opRestArg, block} = funArgsAndBlock(tokens, true, true)
-	const _this = LocalDeclare.this(tokens.loc)
-	const isGenerator = false, opDeclareRes = null
-	const fun = new Fun(tokens.loc, args, opRestArg, block, isGenerator, _this, opDeclareRes)
+	const fun = new Fun(tokens.loc, args, opRestArg, block, Funs.Plain, true)
 	return new Constructor(tokens.loc, fun, memberArgs)
 }
 
@@ -97,14 +95,19 @@ function methodFunKind(funKindToken) {
 			return Keywords.FunThis
 		case Keywords.FunDo:
 			return Keywords.FunThisDo
+		case Keywords.FunAsync:
+			return Keywords.FunThisAsync
+		case Keywords.FunAsyncDo:
+			return Keywords.FunThisAsyncDo
 		case Keywords.FunGen:
 			return Keywords.FunThisGen
 		case Keywords.FunGenDo:
 			return Keywords.FunThisGenDo
 		case Keywords.FunThis: case Keywords.FunThisDo:
+		case Keywords.FunThisAsync: case Keywords.FunThisAsyncDo:
 		case Keywords.FunThisGen: case Keywords.FunThisGenDo:
 			fail(funKindToken.loc, 'Function `.` is implicit for methods.')
 		default:
-			fail(funKindToken.loc, `Expected function kind, got ${funKindToken}`)
+			fail(funKindToken.loc, `Expected function kind, got ${funKindToken}.`)
 	}
 }

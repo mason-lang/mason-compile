@@ -476,6 +476,15 @@ export default function lex(sourceString) {
 					else
 						handleName()
 					break
+				case Cash:
+					if (tryEat(Bang)) {
+						mustEat(Bar, '$!')
+						funKeyword(Keywords.FunAsyncDo)
+					} else if (tryEat(Bar))
+						funKeyword(Keywords.FunAsync)
+					else
+						handleName()
+					break
 				case Tilde:
 					if (tryEat(Bang)) {
 						mustEat(Bar, '~!')
@@ -675,6 +684,7 @@ const
 	Bang = cc('!'),
 	Bar = cc('|'),
 	Caret = cc('^'),
+	Cash = cc('$'),
 	CloseBrace = cc('}'),
 	CloseBracket = cc(']'),
 	CloseParenthesis = cc(')'),
@@ -708,20 +718,24 @@ const
 	Tab = cc('\t'),
 	Tilde = cc('~')
 
+function showChar(char) {
+	return code(String.fromCharCode(char))
+}
+
+function _charPred(chars, negate) {
+	let src = 'switch(ch) {\n'
+	for (let i = 0; i < chars.length; i = i + 1)
+		src = `${src}case ${chars.charCodeAt(i)}: `
+	src = `${src} return ${!negate}\ndefault: return ${negate}\n}`
+	return Function('ch', src)
+}
+
 const
-	showChar = char => code(String.fromCharCode(char)),
-	_charPred = (chars, negate) => {
-		let src = 'switch(ch) {\n'
-		for (let i = 0; i < chars.length; i = i + 1)
-			src = `${src}case ${chars.charCodeAt(i)}: `
-		src = `${src} return ${!negate}\ndefault: return ${negate}\n}`
-		return Function('ch', src)
-	},
 	isDigit = _charPred('0123456789'),
 	isDigitBinary = _charPred('01'),
 	isDigitOctal = _charPred('01234567'),
-	isDigitHex = _charPred('0123456789abcdef'),
+	isDigitHex = _charPred('0123456789abcdef')
 
-	// Anything not explicitly reserved is a valid name character.
-	reservedCharacters = '`#%^&\\\';,',
-	isNameCharacter = _charPred('()[]{}.:| \n\t"' + reservedCharacters, true)
+// Anything not explicitly reserved is a valid name character.
+const reservedCharacters = '`#%^&\\\';,'
+const isNameCharacter = _charPred('()[]{}.:| \n\t"' + reservedCharacters, true)

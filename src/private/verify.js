@@ -2,7 +2,7 @@ import {code} from '../CompileError'
 import {check, fail, options, warn} from './context'
 import * as MsAstTypes from './MsAst'
 import {AssignDestructure, AssignSingle, BlockVal, BlockValThrow, Call, Class, Constructor, Do,
-	ForVal, Fun, ModuleExport, ObjEntry, Pattern, SuperCallDo, Yield, YieldTo} from './MsAst'
+	ForVal, Fun, Funs, ModuleExport, ObjEntry, Pattern, SuperCallDo, Yield, YieldTo} from './MsAst'
 import {assert, cat, ifElse, implementMany, isEmpty, opEach, reverseIter} from './util'
 import VerifyResults from './VerifyResults'
 
@@ -14,7 +14,7 @@ Also checks for existence of local variables and warns for unused locals.
 export default function verify(msAst) {
 	locals = new Map()
 	pendingBlockLocals = []
-	isInGenerator = false
+	funKind = Funs.Plain
 	okToNotUse = new Set()
 	opLoop = null
 	method = null
@@ -51,8 +51,8 @@ let
 	It would work for `~a is b`, though.
 	*/
 	pendingBlockLocals,
-	// Whether we are currently able to yield.
-	isInGenerator,
+	// Kind of function we are currently in. (Funs.Plain if not in a function.)
+	funKind,
 	// Current method we are in, or a Constructor, or null.
 	method,
 	results,
@@ -103,11 +103,11 @@ const
 
 // These functions change verifier state and efficiently return to the old state when finished.
 const
-	withInGenerator = (newIsInGenerator, action) => {
-		const oldIsInGenerator = isInGenerator
-		isInGenerator = newIsInGenerator
+	withInFunKind = (newFunKind, action) => {
+		const oldFunKind = funKind
+		funKind = newFunKind
 		action()
-		isInGenerator = oldIsInGenerator
+		funKind = oldFunKind
 	},
 
 	withLoop = (newLoop, action) => {
@@ -362,7 +362,7 @@ implementMany(MsAstTypes, 'verify', {
 		}
 
 		withBlockLocals(() => {
-			withInGenerator(this.isGenerator, () =>
+			withInFunKind(this.kind, () =>
 				withLoop(null, () => {
 					const allArgs = cat(this.opDeclareThis, this.args, this.opRestArg)
 					verifyAndPlusLocals(allArgs, () => {
@@ -575,12 +575,12 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	Yield() {
-		check(isInGenerator, this.loc, 'Cannot yield outside of generator context')
+		check(funKind !== Funs.Plain, `Cannot ${code('<~')} outside of async/generator.`)
 		verifyOp(this.opYielded)
 	},
 
 	YieldTo() {
-		check(isInGenerator, this.loc, 'Cannot yield outside of generator context')
+		check(funKind === Funs.Generator, this.loc, `Cannot ${code('<~~')} outside of generator.`)
 		this.yieldedTo.verify()
 	}
 })

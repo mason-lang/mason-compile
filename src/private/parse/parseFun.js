@@ -1,4 +1,4 @@
-import {BlockDo, BlockValReturn, Fun, LocalDeclare, LocalDeclares} from '../MsAst'
+import {BlockDo, BlockValReturn, Fun, Funs, LocalDeclare, LocalDeclares} from '../MsAst'
 import {Groups, isAnyKeyword, isGroup, isKeyword, Keywords} from '../Token'
 import {head} from '../util'
 import {checkNonEmpty} from './checks'
@@ -16,42 +16,11 @@ Parse a function.
 @param {Slice} tokens Rest of the line after the function keyword.
 @return {Fun}
 */
-export default function parseFun(kind, tokens) {
-	let isThis = false, isDo = false, isGenerator = false
-	switch (kind) {
-		case Keywords.Fun:
-			break
-		case Keywords.FunDo:
-			isDo = true
-			break
-		case Keywords.FunGen:
-			isGenerator = true
-			break
-		case Keywords.FunGenDo:
-			isGenerator = true
-			isDo = true
-			break
-		case Keywords.FunThis:
-			isThis = true
-			break
-		case Keywords.FunThisDo:
-			isThis = true
-			isDo = true
-			break
-		case Keywords.FunThisGen:
-			isThis = true
-			isGenerator = true
-			break
-		case Keywords.FunThisGenDo:
-			isThis = true
-			isGenerator = true
-			isDo = true
-			break
-		default: throw new Error()
-	}
+export default function parseFun(keywordKind, tokens) {
+	const [isThis, isDo, kind] = funKind(keywordKind)
 	const {opReturnType, rest} = tryTakeReturnType(tokens)
 	const {args, opRestArg, block} = funArgsAndBlock(rest, isDo)
-	return new Fun(tokens.loc, args, opRestArg, block, isGenerator, isThis, opReturnType)
+	return new Fun(tokens.loc, args, opRestArg, block, kind, isThis, opReturnType)
 }
 
 /**
@@ -99,6 +68,37 @@ export function funArgsAndBlock(tokens, isDo, includeMemberArgs=false) {
 				arg.kind = LocalDeclares.Mutable
 		const block = (isDo ? parseBlockDo : parseBlockVal)(blockLines)
 		return {args, opRestArg, memberArgs, block}
+	}
+}
+
+function funKind(keywordKind) {
+	switch (keywordKind) {
+		case Keywords.Fun:
+			return [false, false, Funs.Plain]
+		case Keywords.FunDo:
+			return [false, true, Funs.Plain]
+		case Keywords.FunThis:
+			return [true, false, Funs.Plain]
+		case Keywords.FunThisDo:
+			return [true, true, Funs.Plain]
+		case Keywords.FunAsync:
+			return [false, false, Funs.Async]
+		case Keywords.FunAsyncDo:
+			return [false, true, Funs.Async]
+		case Keywords.FunThisAsync:
+			return [true, false, Funs.Async]
+		case Keywords.FunThisAsyncDo:
+			return [true, true, Funs.Async]
+		case Keywords.FunGen:
+			return [false, false, Funs.Generator]
+		case Keywords.FunGenDo:
+			return [false, true, Funs.Generator]
+		case Keywords.FunThisGen:
+			return [true, false, Funs.Generator]
+		case Keywords.FunThisGenDo:
+			return [true, true, Funs.Generator]
+		default:
+			throw new Error(keywordKind)
 	}
 }
 

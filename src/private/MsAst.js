@@ -576,22 +576,33 @@ export default class MsAst {
 		{block}```
 	*/
 	export class Fun extends Val {
-		constructor(loc, args, opRestArg, block,
-			isGenerator=false, isThisFun=false, opReturnType=null) {
+		constructor(loc, args, opRestArg, block, kind=Funs.Plain, isThisFun=false, opReturnType=null) {
 			super(loc)
-			/** @type {?LocalDeclareThis} */
-			this.opDeclareThis = opIf(isThisFun, () => LocalDeclare.this(this.loc))
-			/** @type {boolean} */
-			this.isGenerator = isGenerator
 			/** @type {Array<LocalDeclare>} */
 			this.args = args
 			/** @type {?LocalDeclare} */
 			this.opRestArg = opRestArg
 			/** @type {Block} */
 			this.block = block
+			/** @type {Funs} */
+			this.kind = kind
+			/** @type {?LocalDeclareThis} */
+			this.opDeclareThis = opIf(isThisFun, () => LocalDeclare.this(this.loc))
 			/** @type {?Val} */
 			this.opReturnType = opReturnType
 		}
+	}
+	/**
+	Kinds of {@link Fun}.
+	@enum {number}
+	*/
+	export const Funs = {
+		/** Regular function (`|`) */
+		Plain: 0,
+		/** `$|` */
+		Async: 1,
+		/** `~|` */
+		Generator: 2
 	}
 
 // Generator
