@@ -416,6 +416,8 @@ implementMany(MsAstTypes, 'verify', {
 
 	Yield() {
 		check(funKind !== Funs.Plain, `Cannot ${code('<~')} outside of async/generator.`)
+		if (funKind === Funs.Async)
+			check(this.opYielded !== null, this.loc, 'Cannot await nothing.')
 		verifyOp(this.opYielded)
 	},
 

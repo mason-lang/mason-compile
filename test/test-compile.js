@@ -3,6 +3,7 @@ import {Node} from 'esast/dist/ast'
 import {readFileSync} from 'fs'
 import numeral from 'numeral'
 import {argv} from 'process'
+import {install} from 'source-map-support'
 import compile from '../dist/compile'
 import {setContext, warnings} from '../dist/private/context'
 import lex from '../dist/private/lex/lex'
@@ -11,6 +12,7 @@ import parse from '../dist/private/parse/parse'
 import render from '../dist/private/render'
 import transpile from '../dist/private/transpile/transpile'
 import verify from '../dist/private/verify/verify'
+install()
 
 if (!module.parent)
 	doTest(argv[2] === 'perf')

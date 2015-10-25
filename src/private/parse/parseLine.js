@@ -207,14 +207,15 @@ function parseAssign(localsTokens, kind, valueTokens, loc) {
 }
 
 function parseAssignValue(kind, valueTokens) {
-	const value = parseExpr(valueTokens)
+	const value = () => parseExpr(valueTokens)
+	const opValue = () => opIf(!valueTokens.isEmpty(), value)
 	switch (kind) {
 		case Keywords.Yield:
-			return new Yield(value.loc, value)
+			return new Yield(valueTokens.loc, opValue())
 		case Keywords.YieldTo:
-			return new YieldTo(value.loc, value)
+			return new YieldTo(valueTokens.loc, opValue())
 		default:
-			return value
+			return value()
 	}
 }
 
