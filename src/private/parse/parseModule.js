@@ -1,7 +1,7 @@
 import {code} from '../../CompileError'
 import {check, options} from '../context'
 import {ImportDo, ImportGlobal, Import, LocalDeclare, LocalDeclares, Module} from '../MsAst'
-import {Groups, isGroup, isKeyword, Keywords} from '../Token'
+import {Groups, isGroup, isKeyword, Keyword, Keywords} from '../Token'
 import {checkNonEmpty, unexpected} from './checks'
 import {justBlock, parseModuleBlock} from './parseBlock'
 import {parseLocalDeclaresJustNames} from './parseLocalDeclares'
@@ -105,26 +105,22 @@ function parseRequire(token) {
 		check(isGroup(Groups.Space, token), token.loc, 'Not a valid module name.')
 		const tokens = Slice.group(token)
 
-		// Take leading dots. There can be any number, so count ellipsis as 3 dots in a row.
+		// Take leading dots.
 		let rest = tokens
 		const parts = []
-		const isDotty = _ =>
-			isKeyword(Keywords.Dot, _) || isKeyword(Keywords.Ellipsis, _)
 		const head = rest.head()
-		if (isDotty(head)) {
+		const n = tryTakeNDots(head)
+		if (n !== null) {
 			parts.push('.')
-			if (isKeyword(Keywords.Ellipsis, head)) {
+			for (let i = 1; i < n; i = i + 1)
 				parts.push('..')
-				parts.push('..')
-			}
 			rest = rest.tail()
-
-			while (!rest.isEmpty() && isDotty(rest.head())) {
-				parts.push('..')
-				if (isKeyword(Keywords.Ellipsis, rest.head())) {
+			while (!rest.isEmpty()) {
+				const n = tryTakeNDots(rest.head())
+				if (n === null)
+					break
+				for (let i = 0; i < n; i = i + 1)
 					parts.push('..')
-					parts.push('..')
-				}
 				rest = rest.tail()
 			}
 		}
@@ -145,5 +141,20 @@ function parseRequire(token) {
 		}
 
 		return {path: parts.join('/'), name: parts[parts.length - 1]}
+	}
+}
+
+function tryTakeNDots(token) {
+	if (!(token instanceof Keyword))
+		return null
+	switch (token.kind) {
+		case Keywords.Dot:
+			return 1
+		case Keywords.Dot2:
+			return 2
+		case Keywords.Dot3:
+			return 3
+		default:
+			return null
 	}
 }

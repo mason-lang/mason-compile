@@ -360,6 +360,11 @@ implementMany(MsAstTypes, 'verify', {
 		this.quote.verify()
 	},
 
+	Range() {
+		this.start.verify()
+		verifyOp(this.end)
+	},
+
 	SetSub() {
 		this.object.verify()
 		for (const _ of this.subbeds)

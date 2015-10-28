@@ -44,7 +44,7 @@ export default function parseLine(tokens) {
 				return new SpecialDo(tokens.loc, SpecialDos.Debugger)
 			case Keywords.DelDo:
 				return parseDel(rest)
-			case Keywords.Ellipsis:
+			case Keywords.Dot3:
 				return new BagEntryMany(tokens.loc, parseExpr(rest))
 			case Keywords.ForDo:
 				return parseForDo(rest)

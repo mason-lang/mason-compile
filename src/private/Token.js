@@ -164,28 +164,28 @@ const
 	keywordNameToKind = new Map(),
 	keywordKindToName = new Map(),
 	nameKeywords = new Set(),
-	reservedKeywords = new Set(),
-	// These keywords are special names.
-	// When lexing a name, a map lookup is done by keywordKindFromName.
-	kw = name => {
-		const kind = kwNotName(name)
-		nameKeywords.add(kind)
-		keywordNameToKind.set(name, kind)
-		return kind
-	},
-	// These keywords must be lexed specially.
-	kwNotName = debugName => {
-		const kind = nextKeywordKind
-		keywordKindToName.set(kind, debugName)
-		nextKeywordKind = nextKeywordKind + 1
-		return kind
-	},
-	kwReserved = name => {
-		const kind = kw(name)
-		reservedKeywords.add(kind)
-	}
+	reservedKeywords = new Set()
+// These keywords are special names.
+// When lexing a name, a map lookup is done by keywordKindFromName.
+function kw(name) {
+	const kind = kwNotName(name)
+	nameKeywords.add(kind)
+	keywordNameToKind.set(name, kind)
+	return kind
+}
+// These keywords must be lexed specially.
+function kwNotName(debugName) {
+	const kind = nextKeywordKind
+	keywordKindToName.set(kind, debugName)
+	nextKeywordKind = nextKeywordKind + 1
+	return kind
+}
+function kwReserved(name) {
+	const kind = kw(name)
+	reservedKeywords.add(kind)
+}
 
-const reserved_words = [
+const reservedWords = [
 	// JavaScript reserved words
 	'enum',
 	'implements',
@@ -197,6 +197,7 @@ const reserved_words = [
 
 	// JavaScript keywords
 	'arguments',
+	'async',
 	'await',
 	'const',
 	'delete',
@@ -210,7 +211,8 @@ const reserved_words = [
 	'void',
 	'while',
 
-	// mason reserved words
+	// Mason reserved words
+	'!',
 	'abstract',
 	'actor',
 	'await!',
@@ -222,13 +224,15 @@ const reserved_words = [
 	'meta',
 	'out',
 	'send',
+	'send!',
 	'to',
+	'type',
 	'until',
 	'until!',
 	'while!'
 ]
 
-for (const name of reserved_words)
+for (const name of reservedWords)
 	kwReserved(name)
 
 /** Kinds of {@link Keyword}. */
@@ -255,7 +259,8 @@ export const Keywords = {
 	DelVal: kw('del'),
 	Do: kw('do!'),
 	Dot: kwNotName('.'),
-	Ellipsis: kwNotName('... '),
+	Dot2: kwNotName('..'),
+	Dot3: kwNotName('... '),
 	Else: kw('else'),
 	ExceptDo: kw('except!'),
 	ExceptVal: kw('except'),

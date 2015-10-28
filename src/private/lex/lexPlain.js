@@ -68,8 +68,10 @@ export default function lexPlain(isInQuote) {
 			}
 		} else {
 			skipWhile(isDigit)
-			if (tryEat(Chars.Dot))
+			if (peek() === Chars.Dot && isDigit(peekNext())) {
+				skip()
 				skipWhile(isDigit)
+			}
 		}
 
 		const str = sourceString.slice(startIndex, index)
@@ -288,11 +290,12 @@ export default function lexPlain(isInQuote) {
 						keyword(Keywords.FunThisGen)
 					}
 					space(loc())
-				} else if (peek() === Chars.Dot && peekNext() === Chars.Dot) {
-					eat()
-					eat()
-					keyword(Keywords.Ellipsis)
-				} else
+				} else if (tryEat(Chars.Dot))
+					if (tryEat(Chars.Dot))
+						keyword(Keywords.Dot3)
+					else
+						keyword(Keywords.Dot2)
+				else
 					keyword(Keywords.Dot)
 				break
 			}

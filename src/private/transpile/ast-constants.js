@@ -5,6 +5,7 @@ import {throwErrorFromString} from './util'
 
 export const
 	GlobalError = new Identifier('Error'),
+	GlobalInfinity = new Identifier('Infinity'),
 	IdArguments = new Identifier('arguments'),
 	IdBuilt = new Identifier('built'),
 	IdError = new Identifier('Error'),

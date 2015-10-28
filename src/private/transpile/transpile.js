@@ -14,11 +14,11 @@ import {AssignSingle, Call, Constructor, Funs, Logics, Member, LocalDeclares, Pa
 import {assert, cat, flatMap, flatOpMap, ifElse, implementMany, opIf, opMap, tail} from '../util'
 import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, DeclareLexicalThis,
 	ExportsDefault, IdArguments, IdBuilt, IdExports, IdExtract, IdFocus, IdLexicalThis, IdSuper,
-	GlobalError, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt, SwitchCaseNoMatch,
-	ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
+	GlobalError, GlobalInfinity, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt,
+	SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
 import {IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot, msAssertNotMember,
-	msAsync, msExtract, msNewMutableProperty, msNewProperty, msSetLazy, msSetSub, msSome, msSymbol,
-	MsNone} from './ms-call'
+	msAsync, msExtract, msNewMutableProperty, msNewProperty, msRange, msSetLazy, msSetSub, msSome,
+	msSymbol, MsNone} from './ms-call'
 import transpileModule from './transpileModule'
 import {accessLocalDeclare, declare, doThrow, getMember, idForDeclareCached, makeDeclarator,
 	maybeWrapInCheckContains, memberStringOrVal, opTypeCheckForLocalDeclare, t0, t1, t2, t3, tLines
@@ -420,6 +420,11 @@ implementMany(MsAstTypes, 'transpile', {
 
 	QuoteTaggedTemplate() {
 		return new TaggedTemplateExpression(t0(this.tag), t0(this.quote))
+	},
+
+	Range() {
+		const end = ifElse(this.end, t0, () => GlobalInfinity)
+		return msRange(t0(this.start), end, new Literal(this.isExclusive))
 	},
 
 	SetSub() {

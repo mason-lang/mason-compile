@@ -126,7 +126,7 @@ function parseFunLocals(tokens, includeMemberArgs) {
 		const l = tokens.last()
 		if (isGroup(Groups.Space, l)) {
 			const g = Slice.group(l)
-			if (isKeyword(Keywords.Ellipsis, g.head())) {
+			if (isKeyword(Keywords.Dot3, g.head())) {
 				rest = tokens.rtail()
 				opRestArg = parseLocalDeclareFromSpaced(g.tail())
 			}

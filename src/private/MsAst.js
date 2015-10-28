@@ -1176,6 +1176,21 @@ export default class MsAst {
 		}
 	}
 
+	/** `{start}..{end}` or `{start}...{end}`. */
+	export class Range extends Val {
+		constructor(loc, start, end, isExclusive) {
+			super(loc)
+			/** @type {Val} */
+			this.start = start
+			/**
+			If null, this is an infinite Range.
+			@type {?Val}
+			*/
+			this.end = end
+			/** @type {boolean} */
+			this.isExclusive = isExclusive
+		}
+	}
 
 // Special
 	/**

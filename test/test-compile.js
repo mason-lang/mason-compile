@@ -35,7 +35,7 @@ function doTest(isPerfTest) {
 
 	try {
 		const rootToken = lex(source)
-		// console.log(`==>\n${rootToken}`)
+		// console.log(`==>\n${require('util').inspect(rootToken, {depth: null})}`)
 		const msAst = parse(rootToken)
 		// console.log(`==>\n${msAst}`)
 		const verifyResults = verify(msAst)
