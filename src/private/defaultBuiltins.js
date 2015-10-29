@@ -2,6 +2,8 @@ export default {
 	global: [
 		'Array',
 		'Boolean',
+		'console',
+		'Date',
 		'Error',
 		'Function',
 		'Math',
@@ -33,6 +35,7 @@ export default {
 		'all?',
 		'any?',
 		'count',
+		'each!',
 		'empty?',
 		'empty!',
 		'?find',

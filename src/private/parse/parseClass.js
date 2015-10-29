@@ -76,8 +76,9 @@ function parseMethod(tokens) {
 }
 
 const funKeywords = new Set([
-	Keywords.Fun, Keywords.FunDo, Keywords.FunGen, Keywords.FunGenDo,
-	Keywords.FunThis, Keywords.FunThisDo, Keywords.FunThisGen, Keywords.FunThisGenDo
+	Keywords.Fun, Keywords.FunDo, Keywords.FunThis, Keywords.FunThisDo,
+	Keywords.FunAsync, Keywords.FunAsyncDo, Keywords.FunThisAsync, Keywords.FunThisAsyncDo,
+	Keywords.FunGen, Keywords.FunGenDo, Keywords.FunThisGen, Keywords.FunThisGenDo
 ])
 
 // If symbol is just a quoted name, store it as a string, which is handled specially.

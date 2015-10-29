@@ -226,6 +226,7 @@ implementMany(MsAstTypes, 'transpile', {
 		return blockWrap(new BlockStatement([forLoop(this.opIteratee, this.block)]))
 	},
 
+	// leadStatements comes from constructor members
 	Fun(leadStatements=null) {
 		const isGeneratorFun = this.kind !== Funs.Plain
 		const oldInGenerator = isInGenerator
@@ -243,27 +244,31 @@ implementMany(MsAstTypes, 'transpile', {
 
 		const lead = cat(leadStatements, opDeclareThis, opDeclareRest, argChecks)
 
-		const body = t2(this.block, lead, this.opReturnType)
+		const body =() => t2(this.block, lead, this.opReturnType)
 		const args = this.args.map(t0)
-		isInGenerator = oldInGenerator
 		const id = opMap(verifyResults.opName(this), identifier)
 
-		switch (this.kind) {
-			case Funs.Plain:
-				// TODO:ES6 Should be able to use rest args in arrow function
-				if (id === null && this.opDeclareThis === null && opDeclareRest === null)
-					return new ArrowFunctionExpression(args, body)
-				else
-					return new FunctionExpression(id, args, body)
-			case Funs.Async: {
-				const newBody = new BlockStatement([
-					new ReturnStatement(msAsync(new FunctionExpression(id, [], body, true)))
-				])
-				return new FunctionExpression(id, args, newBody)
+		try {
+			switch (this.kind) {
+				case Funs.Plain:
+					// TODO:ES6 Should be able to use rest args in arrow function
+					if (id === null && this.opDeclareThis === null && opDeclareRest === null)
+						return new ArrowFunctionExpression(args, body())
+					else
+						return new FunctionExpression(id, args, body())
+				case Funs.Async: {
+					const plainBody = t2(this.block, null, this.opReturnType)
+					const genFunc = new FunctionExpression(id, [], plainBody, true)
+					const ret = new ReturnStatement(msAsync(genFunc))
+					return new FunctionExpression(id, args, new BlockStatement(cat(lead, ret)))
+				}
+				case Funs.Generator:
+					return new FunctionExpression(id, args, body(), true)
+				default:
+					throw new Error(this.kind)
 			}
-			case Funs.Generator:
-				return new FunctionExpression(id, args, body, true)
-			default: throw new Error(this.kind)
+		} finally {
+			isInGenerator = oldInGenerator
 		}
 	},
 
