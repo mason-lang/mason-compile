@@ -17,8 +17,8 @@ import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, Decla
 	GlobalError, GlobalInfinity, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt,
 	SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
 import {IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot, msAssertNotMember,
-	msAsync, msExtract, msNewMutableProperty, msNewProperty, msRange, msSetLazy, msSetSub, msSome,
-	msSymbol, MsNone} from './ms-call'
+	msAsync, msExtract, msMethodBound, msMethodUnbound, msNewMutableProperty, msNewProperty,
+	msRange, msSetLazy, msSetSub, msSome, msSymbol, MsNone} from './ms-call'
 import transpileModule from './transpileModule'
 import {accessLocalDeclare, declare, doThrow, getMember, idForDeclareCached, makeDeclarator,
 	maybeWrapInCheckContains, memberStringOrVal, opTypeCheckForLocalDeclare, t0, t1, t2, t3, tLines
@@ -332,6 +332,13 @@ implementMany(MsAstTypes, 'transpile', {
 		return memberStringOrVal(t0(this.object), this.name)
 	},
 
+	MemberFun() {
+		const name = typeof this.name === 'string' ? new Literal(this.name) : t0(this.name)
+		return ifElse(this.opObject,
+			_ => msMethodBound(t0(_), name),
+			() => msMethodUnbound(name))
+	},
+
 	MemberSet() {
 		const obj = t0(this.object)
 		const name = () =>
@@ -495,12 +502,6 @@ implementMany(MsAstTypes, 'transpile', {
 	SwitchVal() { return blockWrap(new BlockStatement([transpileSwitch(this)])) },
 	SwitchDoPart: switchPart,
 	SwitchValPart: switchPart,
-
-	ThisFun() {
-		// this.{name}.bind(this)
-		const fun = member(IdLexicalThis, this.name)
-		return new CallExpression(member(fun, 'bind'), [IdLexicalThis])
-	},
 
 	Throw() {
 		return ifElse(this.opThrown,

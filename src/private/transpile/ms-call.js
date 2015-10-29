@@ -1,10 +1,10 @@
 import {ArrowFunctionExpression, CallExpression, Identifier} from 'esast/dist/ast'
 import {member} from 'esast/dist/util'
 
-const ms = name => {
+function ms(name) {
 	const m = member(IdMs, name)
 	// TODO:ES6 (...args) => new CallExpression(m, args)
-	return function() { return new CallExpression(m, Array.prototype.slice.call(arguments)) }
+	return function(...args) { return new CallExpression(m, args) }
 }
 export const
 	IdMs = new Identifier('_ms'),
@@ -26,6 +26,8 @@ export const
 	msLazy = ms('lazy'),
 	msLazyGet = ms('lazyProp'),
 	msLazyGetModule = ms('lazyGetModule'),
+	msMethodBound = ms('methodBound'),
+	msMethodUnbound = ms('methodUnbound'),
 	msNewMutableProperty = ms('newMutableProperty'),
 	msNewProperty = ms('newProperty'),
 	msRange = ms('range'),

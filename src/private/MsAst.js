@@ -1165,13 +1165,13 @@ export default class MsAst {
 		}
 	}
 
-	/**
-	`'.{name}`.
-	Represends a bound function of the `this` object.
-	*/
-	export class ThisFun extends Val {
-		constructor(loc, name) {
+	/** `&{name}` or `.&{name}` or `{object}.&{name}` */
+	export class MemberFun extends Val {
+		constructor(loc, opObject, name) {
 			super(loc)
+			/** @type {?Val} */
+			this.opObject = opObject
+			/** @type {string | Val} */
 			this.name = name
 		}
 	}

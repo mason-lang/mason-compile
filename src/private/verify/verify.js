@@ -275,6 +275,11 @@ implementMany(MsAstTypes, 'verify', {
 		verifyName(this.name)
 	},
 
+	MemberFun() {
+		verifyOp(this.opObject)
+		verifyName(this.name)
+	},
+
 	MemberSet() {
 		this.object.verify()
 		verifyName(this.name)
@@ -398,10 +403,6 @@ implementMany(MsAstTypes, 'verify', {
 		withIIFE(() => verifySwitch(this))
 	},
 	SwitchValPart: verifySwitchPart,
-
-	ThisFun() {
-		accessLocal(this, 'this')
-	},
 
 	Throw() {
 		verifyOp(this.opThrown)

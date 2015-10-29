@@ -237,6 +237,7 @@ for (const name of reservedWords)
 
 /** Kinds of {@link Keyword}. */
 export const Keywords = {
+	Ampersand: kwNotName('&'),
 	And: kw('and'),
 	As: kw('as'),
 	Assert: kw('assert!'),

@@ -314,7 +314,11 @@ export default function lexPlain(isInQuote) {
 				keyword(Keywords.Tick)
 				break
 
-			case Chars.Ampersand: case Chars.Backslash: case Chars.Backtick: case Chars.Caret:
+			case Chars.Ampersand:
+				keyword(Keywords.Ampersand)
+				break
+
+			case Chars.Backslash: case Chars.Backtick: case Chars.Caret:
 			case Chars.Comma: case Chars.Percent: case Chars.Semicolon:
 				fail(loc(), `Reserved character ${showChar(characterEaten)}`)
 
