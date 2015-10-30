@@ -1176,6 +1176,15 @@ export default class MsAst {
 		}
 	}
 
+	/** `&.{name}` */
+	export class GetterFun extends Val {
+		constructor(loc, name) {
+			super(loc)
+			/** @type {string | Val} */
+			this.name = name
+		}
+	}
+
 	/** `{start}..{end}` or `{start}...{end}`. */
 	export class Range extends Val {
 		constructor(loc, start, end, isExclusive) {

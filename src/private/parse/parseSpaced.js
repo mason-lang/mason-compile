@@ -1,7 +1,7 @@
 import {code} from '../../CompileError'
 import {check, fail} from '../context'
-import {Call, Lazy, LocalAccess, Member, MemberFun, QuoteSimple, QuoteTaggedTemplate, Range, Splat,
-	SuperCall, SuperMember} from '../MsAst'
+import {Call, GetterFun, Lazy, LocalAccess, Member, MemberFun, QuoteSimple, QuoteTaggedTemplate,
+	Range, Splat, SuperCall, SuperMember} from '../MsAst'
 import {Group, Groups, isGroup, isKeyword, Keyword, Keywords} from '../Token'
 import {assert, opIf} from '../util'
 import {checkEmpty, unexpected} from './checks'
@@ -22,8 +22,15 @@ export default function parseSpaced(tokens) {
 		switch (h.kind) {
 			case Keywords.Ampersand: {
 				const h2 = rest.head()
-				const fun = new MemberFun(h2.loc, null, parseMemberName(h2))
-				return parseSpacedFold(fun, rest.tail())
+				if (isKeyword(Keywords.Dot, h2)) {
+					const tail = rest.tail()
+					const h3 = tail.head()
+					const fun = new GetterFun(h3.loc, parseMemberName(h3))
+					return parseSpacedFold(fun, tail.tail())
+				} else {
+					const fun = new MemberFun(h2.loc, null, parseMemberName(h2))
+					return parseSpacedFold(fun, rest.tail())
+				}
 			}
 			case Keywords.Dot: {
 				const h2 = rest.head()

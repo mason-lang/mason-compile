@@ -353,6 +353,10 @@ implementMany(MsAstTypes, 'verify', {
 		}
 	},
 
+	GetterFun() {
+		verifyName(this.name)
+	},
+
 	QuotePlain() {
 		for (const _ of this.parts)
 			verifyName(_)

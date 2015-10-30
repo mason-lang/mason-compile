@@ -398,6 +398,11 @@ implementMany(MsAstTypes, 'transpile', {
 			new Property('init', propertyIdOrLiteral(pair.key), t0(pair.value))))
 	},
 
+	GetterFun() {
+		// _ => _.foo
+		return new ArrowFunctionExpression([IdFocus], memberStringOrVal(IdFocus, this.name))
+	},
+
 	QuotePlain() {
 		if (this.parts.length === 0)
 			return LitEmptyString
