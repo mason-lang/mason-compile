@@ -1,7 +1,9 @@
+'use strict';
+
 (function (global, factory) {
-	if (typeof define === 'function' && define.amd) {
+	if (typeof define === "function" && define.amd) {
 		define(['exports', 'esast/dist/ast', 'esast/dist/util', './util'], factory);
-	} else if (typeof exports !== 'undefined') {
+	} else if (typeof exports !== "undefined") {
 		factory(exports, require('esast/dist/ast'), require('esast/dist/util'), require('./util'));
 	} else {
 		var mod = {
@@ -10,67 +12,37 @@
 		factory(mod.exports, global.ast, global.util, global.util);
 		global.astConstants = mod.exports;
 	}
-})(this, function (exports, _esastDistAst, _esastDistUtil, _util) {
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
+})(this, function (exports, _ast, _util, _util2) {
+	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
-	const GlobalError = new _esastDistAst.Identifier('Error'),
-	      GlobalInfinity = new _esastDistAst.Identifier('Infinity'),
-	      IdArguments = new _esastDistAst.Identifier('arguments'),
-	      IdBuilt = new _esastDistAst.Identifier('built'),
-	      IdError = new _esastDistAst.Identifier('Error'),
-	      IdExports = new _esastDistAst.Identifier('exports'),
-	      IdExtract = new _esastDistAst.Identifier('_$'),
-	      IdFocus = new _esastDistAst.Identifier('_'),
-	     
-	// TODO:ES6 Shouldn't need, just use arrow functions.
-	IdLexicalThis = new _esastDistAst.Identifier('_this'),
-	      IdSuper = new _esastDistAst.Identifier('super'),
-	      LitEmptyArray = new _esastDistAst.ArrayExpression([]),
-	      LitEmptyString = new _esastDistAst.Literal(''),
-	      LitNull = new _esastDistAst.Literal(null),
-	      LitStrThrow = new _esastDistAst.Literal('An error occurred.'),
-	      LitTrue = new _esastDistAst.Literal(true),
-	      LitZero = new _esastDistAst.Literal(0),
-	      ReturnBuilt = new _esastDistAst.ReturnStatement(IdBuilt),
-	      SwitchCaseNoMatch = new _esastDistAst.SwitchCase(undefined, [(0, _util.throwErrorFromString)('No branch of `switch` matches.')]),
-	      SymbolIterator = (0, _esastDistUtil.member)(new _esastDistAst.Identifier('Symbol'), 'iterator'),
-	      ThrowAssertFail = (0, _util.throwErrorFromString)('Assertion failed.'),
-	      ThrowNoCaseMatch = (0, _util.throwErrorFromString)('No branch of `case` matches.'),
-	      ArraySliceCall = (0, _esastDistUtil.member)((0, _esastDistUtil.member)(LitEmptyArray, 'slice'), 'call'),
-	      DeclareBuiltBag = new _esastDistAst.VariableDeclaration('const', [new _esastDistAst.VariableDeclarator(IdBuilt, LitEmptyArray)]),
-	      DeclareBuiltMap = new _esastDistAst.VariableDeclaration('const', [new _esastDistAst.VariableDeclarator(IdBuilt, new _esastDistAst.NewExpression((0, _esastDistUtil.member)(new _esastDistAst.Identifier('global'), 'Map'), []))]),
-	      DeclareBuiltObj = new _esastDistAst.VariableDeclaration('const', [new _esastDistAst.VariableDeclarator(IdBuilt, new _esastDistAst.ObjectExpression([]))]),
-	      DeclareLexicalThis = new _esastDistAst.VariableDeclaration('const', [new _esastDistAst.VariableDeclarator(IdLexicalThis, new _esastDistAst.ThisExpression())]),
-	      ExportsDefault = (0, _esastDistUtil.member)(IdExports, 'default');
-	exports.GlobalError = GlobalError;
-	exports.GlobalInfinity = GlobalInfinity;
-	exports.IdArguments = IdArguments;
-	exports.IdBuilt = IdBuilt;
-	exports.IdError = IdError;
-	exports.IdExports = IdExports;
-	exports.IdExtract = IdExtract;
-	exports.IdFocus = IdFocus;
-	exports.IdLexicalThis = IdLexicalThis;
-	exports.IdSuper = IdSuper;
-	exports.LitEmptyArray = LitEmptyArray;
-	exports.LitEmptyString = LitEmptyString;
-	exports.LitNull = LitNull;
-	exports.LitStrThrow = LitStrThrow;
-	exports.LitTrue = LitTrue;
-	exports.LitZero = LitZero;
-	exports.ReturnBuilt = ReturnBuilt;
-	exports.SwitchCaseNoMatch = SwitchCaseNoMatch;
-	exports.SymbolIterator = SymbolIterator;
-	exports.ThrowAssertFail = ThrowAssertFail;
-	exports.ThrowNoCaseMatch = ThrowNoCaseMatch;
-	exports.ArraySliceCall = ArraySliceCall;
-	exports.DeclareBuiltBag = DeclareBuiltBag;
-	exports.DeclareBuiltMap = DeclareBuiltMap;
-	exports.DeclareBuiltObj = DeclareBuiltObj;
-	exports.DeclareLexicalThis = DeclareLexicalThis;
-	exports.ExportsDefault = ExportsDefault;
+	exports.ExportsDefault = exports.DeclareLexicalThis = exports.DeclareBuiltObj = exports.DeclareBuiltMap = exports.DeclareBuiltBag = exports.ArraySliceCall = exports.ThrowNoCaseMatch = exports.ThrowAssertFail = exports.SymbolIterator = exports.SwitchCaseNoMatch = exports.ReturnBuilt = exports.LitZero = exports.LitTrue = exports.LitStrThrow = exports.LitNull = exports.LitEmptyString = exports.LitEmptyArray = exports.IdSuper = exports.IdLexicalThis = exports.IdFocus = exports.IdExtract = exports.IdExports = exports.IdError = exports.IdBuilt = exports.IdArguments = exports.GlobalInfinity = exports.GlobalError = undefined;
+	const GlobalError = exports.GlobalError = new _ast.Identifier('Error'),
+	      GlobalInfinity = exports.GlobalInfinity = new _ast.Identifier('Infinity'),
+	      IdArguments = exports.IdArguments = new _ast.Identifier('arguments'),
+	      IdBuilt = exports.IdBuilt = new _ast.Identifier('built'),
+	      IdError = exports.IdError = new _ast.Identifier('Error'),
+	      IdExports = exports.IdExports = new _ast.Identifier('exports'),
+	      IdExtract = exports.IdExtract = new _ast.Identifier('_$'),
+	      IdFocus = exports.IdFocus = new _ast.Identifier('_'),
+	      IdLexicalThis = exports.IdLexicalThis = new _ast.Identifier('_this'),
+	      IdSuper = exports.IdSuper = new _ast.Identifier('super'),
+	      LitEmptyArray = exports.LitEmptyArray = new _ast.ArrayExpression([]),
+	      LitEmptyString = exports.LitEmptyString = new _ast.Literal(''),
+	      LitNull = exports.LitNull = new _ast.Literal(null),
+	      LitStrThrow = exports.LitStrThrow = new _ast.Literal('An error occurred.'),
+	      LitTrue = exports.LitTrue = new _ast.Literal(true),
+	      LitZero = exports.LitZero = new _ast.Literal(0),
+	      ReturnBuilt = exports.ReturnBuilt = new _ast.ReturnStatement(IdBuilt),
+	      SwitchCaseNoMatch = exports.SwitchCaseNoMatch = new _ast.SwitchCase(undefined, [(0, _util2.throwErrorFromString)('No branch of `switch` matches.')]),
+	      SymbolIterator = exports.SymbolIterator = (0, _util.member)(new _ast.Identifier('Symbol'), 'iterator'),
+	      ThrowAssertFail = exports.ThrowAssertFail = (0, _util2.throwErrorFromString)('Assertion failed.'),
+	      ThrowNoCaseMatch = exports.ThrowNoCaseMatch = (0, _util2.throwErrorFromString)('No branch of `case` matches.'),
+	      ArraySliceCall = exports.ArraySliceCall = (0, _util.member)((0, _util.member)(LitEmptyArray, 'slice'), 'call'),
+	      DeclareBuiltBag = exports.DeclareBuiltBag = new _ast.VariableDeclaration('const', [new _ast.VariableDeclarator(IdBuilt, LitEmptyArray)]),
+	      DeclareBuiltMap = exports.DeclareBuiltMap = new _ast.VariableDeclaration('const', [new _ast.VariableDeclarator(IdBuilt, new _ast.NewExpression((0, _util.member)(new _ast.Identifier('global'), 'Map'), []))]),
+	      DeclareBuiltObj = exports.DeclareBuiltObj = new _ast.VariableDeclaration('const', [new _ast.VariableDeclarator(IdBuilt, new _ast.ObjectExpression([]))]),
+	      DeclareLexicalThis = exports.DeclareLexicalThis = new _ast.VariableDeclaration('const', [new _ast.VariableDeclarator(IdLexicalThis, new _ast.ThisExpression())]),
+	      ExportsDefault = exports.ExportsDefault = (0, _util.member)(IdExports, 'default');
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9wcml2YXRlL3RyYW5zcGlsZS9hc3QtY29uc3RhbnRzLmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUtPLE9BQ04sV0FBVyxHQUFHLGtCQU5VLFVBQVUsQ0FNTCxPQUFPLENBQUM7T0FDckMsY0FBYyxHQUFHLGtCQVBPLFVBQVUsQ0FPRixVQUFVLENBQUM7T0FDM0MsV0FBVyxHQUFHLGtCQVJVLFVBQVUsQ0FRTCxXQUFXLENBQUM7T0FDekMsT0FBTyxHQUFHLGtCQVRjLFVBQVUsQ0FTVCxPQUFPLENBQUM7T0FDakMsT0FBTyxHQUFHLGtCQVZjLFVBQVUsQ0FVVCxPQUFPLENBQUM7T0FDakMsU0FBUyxHQUFHLGtCQVhZLFVBQVUsQ0FXUCxTQUFTLENBQUM7T0FDckMsU0FBUyxHQUFHLGtCQVpZLFVBQVUsQ0FZUCxJQUFJLENBQUM7T0FDaEMsT0FBTyxHQUFHLGtCQWJjLFVBQVUsQ0FhVCxHQUFHLENBQUM7OztBQUU3QixjQUFhLEdBQUcsa0JBZlEsVUFBVSxDQWVILE9BQU8sQ0FBQztPQUN2QyxPQUFPLEdBQUcsa0JBaEJjLFVBQVUsQ0FnQlQsT0FBTyxDQUFDO09BQ2pDLGFBQWEsR0FBRyxrQkFqQlQsZUFBZSxDQWlCYyxFQUFFLENBQUM7T0FDdkMsY0FBYyxHQUFHLGtCQWxCbUIsT0FBTyxDQWtCZCxFQUFFLENBQUM7T0FDaEMsT0FBTyxHQUFHLGtCQW5CMEIsT0FBTyxDQW1CckIsSUFBSSxDQUFDO09BQzNCLFdBQVcsR0FBRyxrQkFwQnNCLE9BQU8sQ0FvQmpCLG9CQUFvQixDQUFDO09BQy9DLE9BQU8sR0FBRyxrQkFyQjBCLE9BQU8sQ0FxQnJCLElBQUksQ0FBQztPQUMzQixPQUFPLEdBQUcsa0JBdEIwQixPQUFPLENBc0JyQixDQUFDLENBQUM7T0FDeEIsV0FBVyxHQUFHLGtCQXZCZ0UsZUFBZSxDQXVCM0QsT0FBTyxDQUFDO09BQzFDLGlCQUFpQixHQUFHLGtCQXZCcEIsVUFBVSxDQXVCeUIsU0FBUyxFQUFFLENBQzdDLFVBdEJNLG9CQUFvQixFQXNCTCxnQ0FBZ0MsQ0FBQyxDQUFDLENBQUM7T0FDekQsY0FBYyxHQUFHLG1CQXhCVixNQUFNLEVBd0JXLGtCQTFCQSxVQUFVLENBMEJLLFFBQVEsQ0FBQyxFQUFFLFVBQVUsQ0FBQztPQUM3RCxlQUFlLEdBQUcsVUF4Qlgsb0JBQW9CLEVBd0JZLG1CQUFtQixDQUFDO09BQzNELGdCQUFnQixHQUFHLFVBekJaLG9CQUFvQixFQXlCYSw4QkFBOEIsQ0FBQztPQUV2RSxjQUFjLEdBQUcsbUJBNUJWLE1BQU0sRUE0QlcsbUJBNUJqQixNQUFNLEVBNEJrQixhQUFhLEVBQUUsT0FBTyxDQUFDLEVBQUUsTUFBTSxDQUFDO09BQy9ELGVBQWUsR0FBRyxrQkE5QlUsbUJBQW1CLENBOEJMLE9BQU8sRUFDaEQsQ0FBQyxrQkEvQitDLGtCQUFrQixDQStCMUMsT0FBTyxFQUFFLGFBQWEsQ0FBQyxDQUFDLENBQUM7T0FDbEQsZUFBZSxHQUFHLGtCQWhDVSxtQkFBbUIsQ0FnQ0wsT0FBTyxFQUFFLENBQ2xELGtCQWpDZ0Qsa0JBQWtCLENBaUMzQyxPQUFPLEVBQzdCLGtCQW5DMkMsYUFBYSxDQW1DdEMsbUJBakNiLE1BQU0sRUFpQ2Msa0JBbkNILFVBQVUsQ0FtQ1EsUUFBUSxDQUFDLEVBQUUsS0FBSyxDQUFDLEVBQUUsRUFBRSxDQUFDLENBQUMsQ0FBQyxDQUFDO09BQ25FLGVBQWUsR0FBRyxrQkFuQ1UsbUJBQW1CLENBbUNMLE9BQU8sRUFBRSxDQUNsRCxrQkFwQ2dELGtCQUFrQixDQW9DM0MsT0FBTyxFQUFFLGtCQXJDMkIsZ0JBQWdCLENBcUN0QixFQUFFLENBQUMsQ0FBQyxDQUFDLENBQUM7T0FDNUQsa0JBQWtCLEdBQUcsa0JBckNPLG1CQUFtQixDQXFDRixPQUFPLEVBQ25ELENBQUMsa0JBdEMrQyxrQkFBa0IsQ0FzQzFDLGFBQWEsRUFBRSxrQkF0QzVCLGNBQWMsRUFzQ2tDLENBQUMsQ0FBQyxDQUFDO09BQy9ELGNBQWMsR0FBRyxtQkF0Q1YsTUFBTSxFQXNDVyxTQUFTLEVBQUUsU0FBUyxDQUFDLENBQUEiLCJmaWxlIjoiYXN0LWNvbnN0YW50cy5qcyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7QXJyYXlFeHByZXNzaW9uLCBJZGVudGlmaWVyLCBMaXRlcmFsLCBOZXdFeHByZXNzaW9uLCBPYmplY3RFeHByZXNzaW9uLCBSZXR1cm5TdGF0ZW1lbnQsXG5cdFN3aXRjaENhc2UsIFRoaXNFeHByZXNzaW9uLCBWYXJpYWJsZURlY2xhcmF0aW9uLCBWYXJpYWJsZURlY2xhcmF0b3J9IGZyb20gJ2VzYXN0L2Rpc3QvYXN0J1xuaW1wb3J0IHttZW1iZXJ9IGZyb20gJ2VzYXN0L2Rpc3QvdXRpbCdcbmltcG9ydCB7dGhyb3dFcnJvckZyb21TdHJpbmd9IGZyb20gJy4vdXRpbCdcblxuZXhwb3J0IGNvbnN0XG5cdEdsb2JhbEVycm9yID0gbmV3IElkZW50aWZpZXIoJ0Vycm9yJyksXG5cdEdsb2JhbEluZmluaXR5ID0gbmV3IElkZW50aWZpZXIoJ0luZmluaXR5JyksXG5cdElkQXJndW1lbnRzID0gbmV3IElkZW50aWZpZXIoJ2FyZ3VtZW50cycpLFxuXHRJZEJ1aWx0ID0gbmV3IElkZW50aWZpZXIoJ2J1aWx0JyksXG5cdElkRXJyb3IgPSBuZXcgSWRlbnRpZmllcignRXJyb3InKSxcblx0SWRFeHBvcnRzID0gbmV3IElkZW50aWZpZXIoJ2V4cG9ydHMnKSxcblx0SWRFeHRyYWN0ID0gbmV3IElkZW50aWZpZXIoJ18kJyksXG5cdElkRm9jdXMgPSBuZXcgSWRlbnRpZmllcignXycpLFxuXHQvLyBUT0RPOkVTNiBTaG91bGRuJ3QgbmVlZCwganVzdCB1c2UgYXJyb3cgZnVuY3Rpb25zLlxuXHRJZExleGljYWxUaGlzID0gbmV3IElkZW50aWZpZXIoJ190aGlzJyksXG5cdElkU3VwZXIgPSBuZXcgSWRlbnRpZmllcignc3VwZXInKSxcblx0TGl0RW1wdHlBcnJheSA9IG5ldyBBcnJheUV4cHJlc3Npb24oW10pLFxuXHRMaXRFbXB0eVN0cmluZyA9IG5ldyBMaXRlcmFsKCcnKSxcblx0TGl0TnVsbCA9IG5ldyBMaXRlcmFsKG51bGwpLFxuXHRMaXRTdHJUaHJvdyA9IG5ldyBMaXRlcmFsKCdBbiBlcnJvciBvY2N1cnJlZC4nKSxcblx0TGl0VHJ1ZSA9IG5ldyBMaXRlcmFsKHRydWUpLFxuXHRMaXRaZXJvID0gbmV3IExpdGVyYWwoMCksXG5cdFJldHVybkJ1aWx0ID0gbmV3IFJldHVyblN0YXRlbWVudChJZEJ1aWx0KSxcblx0U3dpdGNoQ2FzZU5vTWF0Y2ggPSBuZXcgU3dpdGNoQ2FzZSh1bmRlZmluZWQsIFtcblx0XHR0aHJvd0Vycm9yRnJvbVN0cmluZygnTm8gYnJhbmNoIG9mIGBzd2l0Y2hgIG1hdGNoZXMuJyldKSxcblx0U3ltYm9sSXRlcmF0b3IgPSBtZW1iZXIobmV3IElkZW50aWZpZXIoJ1N5bWJvbCcpLCAnaXRlcmF0b3InKSxcblx0VGhyb3dBc3NlcnRGYWlsID0gdGhyb3dFcnJvckZyb21TdHJpbmcoJ0Fzc2VydGlvbiBmYWlsZWQuJyksXG5cdFRocm93Tm9DYXNlTWF0Y2ggPSB0aHJvd0Vycm9yRnJvbVN0cmluZygnTm8gYnJhbmNoIG9mIGBjYXNlYCBtYXRjaGVzLicpLFxuXG5cdEFycmF5U2xpY2VDYWxsID0gbWVtYmVyKG1lbWJlcihMaXRFbXB0eUFycmF5LCAnc2xpY2UnKSwgJ2NhbGwnKSxcblx0RGVjbGFyZUJ1aWx0QmFnID0gbmV3IFZhcmlhYmxlRGVjbGFyYXRpb24oJ2NvbnN0Jyxcblx0XHRbbmV3IFZhcmlhYmxlRGVjbGFyYXRvcihJZEJ1aWx0LCBMaXRFbXB0eUFycmF5KV0pLFxuXHREZWNsYXJlQnVpbHRNYXAgPSBuZXcgVmFyaWFibGVEZWNsYXJhdGlvbignY29uc3QnLCBbXG5cdFx0bmV3IFZhcmlhYmxlRGVjbGFyYXRvcihJZEJ1aWx0LFxuXHRcdFx0bmV3IE5ld0V4cHJlc3Npb24obWVtYmVyKG5ldyBJZGVudGlmaWVyKCdnbG9iYWwnKSwgJ01hcCcpLCBbXSkpXSksXG5cdERlY2xhcmVCdWlsdE9iaiA9IG5ldyBWYXJpYWJsZURlY2xhcmF0aW9uKCdjb25zdCcsIFtcblx0XHRuZXcgVmFyaWFibGVEZWNsYXJhdG9yKElkQnVpbHQsIG5ldyBPYmplY3RFeHByZXNzaW9uKFtdKSldKSxcblx0RGVjbGFyZUxleGljYWxUaGlzID0gbmV3IFZhcmlhYmxlRGVjbGFyYXRpb24oJ2NvbnN0Jyxcblx0XHRbbmV3IFZhcmlhYmxlRGVjbGFyYXRvcihJZExleGljYWxUaGlzLCBuZXcgVGhpc0V4cHJlc3Npb24oKSldKSxcblx0RXhwb3J0c0RlZmF1bHQgPSBtZW1iZXIoSWRFeHBvcnRzLCAnZGVmYXVsdCcpXG4iXX0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9wcml2YXRlL3RyYW5zcGlsZS9hc3QtY29uc3RhbnRzLmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7T0FNQyxXQUFXLFdBQVgsV0FBVyxHQUFHLFNBTlUsVUFBVSxDQU1MLE9BQU8sQ0FBQztPQUNyQyxjQUFjLFdBQWQsY0FBYyxHQUFHLFNBUE8sVUFBVSxDQU9GLFVBQVUsQ0FBQztPQUMzQyxXQUFXLFdBQVgsV0FBVyxHQUFHLFNBUlUsVUFBVSxDQVFMLFdBQVcsQ0FBQztPQUN6QyxPQUFPLFdBQVAsT0FBTyxHQUFHLFNBVGMsVUFBVSxDQVNULE9BQU8sQ0FBQztPQUNqQyxPQUFPLFdBQVAsT0FBTyxHQUFHLFNBVmMsVUFBVSxDQVVULE9BQU8sQ0FBQztPQUNqQyxTQUFTLFdBQVQsU0FBUyxHQUFHLFNBWFksVUFBVSxDQVdQLFNBQVMsQ0FBQztPQUNyQyxTQUFTLFdBQVQsU0FBUyxHQUFHLFNBWlksVUFBVSxDQVlQLElBQUksQ0FBQztPQUNoQyxPQUFPLFdBQVAsT0FBTyxHQUFHLFNBYmMsVUFBVSxDQWFULEdBQUcsQ0FBQztPQUU3QixhQUFhLFdBQWIsYUFBYSxHQUFHLFNBZlEsVUFBVSxDQWVILE9BQU8sQ0FBQztPQUN2QyxPQUFPLFdBQVAsT0FBTyxHQUFHLFNBaEJjLFVBQVUsQ0FnQlQsT0FBTyxDQUFDO09BQ2pDLGFBQWEsV0FBYixhQUFhLEdBQUcsU0FqQlQsZUFBZSxDQWlCYyxFQUFFLENBQUM7T0FDdkMsY0FBYyxXQUFkLGNBQWMsR0FBRyxTQWxCbUIsT0FBTyxDQWtCZCxFQUFFLENBQUM7T0FDaEMsT0FBTyxXQUFQLE9BQU8sR0FBRyxTQW5CMEIsT0FBTyxDQW1CckIsSUFBSSxDQUFDO09BQzNCLFdBQVcsV0FBWCxXQUFXLEdBQUcsU0FwQnNCLE9BQU8sQ0FvQmpCLG9CQUFvQixDQUFDO09BQy9DLE9BQU8sV0FBUCxPQUFPLEdBQUcsU0FyQjBCLE9BQU8sQ0FxQnJCLElBQUksQ0FBQztPQUMzQixPQUFPLFdBQVAsT0FBTyxHQUFHLFNBdEIwQixPQUFPLENBc0JyQixDQUFDLENBQUM7T0FDeEIsV0FBVyxXQUFYLFdBQVcsR0FBRyxTQXZCZ0UsZUFBZSxDQXVCM0QsT0FBTyxDQUFDO09BQzFDLGlCQUFpQixXQUFqQixpQkFBaUIsR0FBRyxTQXZCcEIsVUFBVSxDQXVCeUIsU0FBUyxFQUFFLENBQzdDLFdBdEJNLG9CQUFvQixFQXNCTCxnQ0FBZ0MsQ0FBQyxDQUFDLENBQUM7T0FDekQsY0FBYyxXQUFkLGNBQWMsR0FBRyxVQXhCVixNQUFNLEVBd0JXLFNBMUJBLFVBQVUsQ0EwQkssUUFBUSxDQUFDLEVBQUUsVUFBVSxDQUFDO09BQzdELGVBQWUsV0FBZixlQUFlLEdBQUcsV0F4Qlgsb0JBQW9CLEVBd0JZLG1CQUFtQixDQUFDO09BQzNELGdCQUFnQixXQUFoQixnQkFBZ0IsR0FBRyxXQXpCWixvQkFBb0IsRUF5QmEsOEJBQThCLENBQUM7T0FFdkUsY0FBYyxXQUFkLGNBQWMsR0FBRyxVQTVCVixNQUFNLEVBNEJXLFVBNUJqQixNQUFNLEVBNEJrQixhQUFhLEVBQUUsT0FBTyxDQUFDLEVBQUUsTUFBTSxDQUFDO09BQy9ELGVBQWUsV0FBZixlQUFlLEdBQUcsU0E5QlUsbUJBQW1CLENBOEJMLE9BQU8sRUFDaEQsQ0FBQyxTQS9CK0Msa0JBQWtCLENBK0IxQyxPQUFPLEVBQUUsYUFBYSxDQUFDLENBQUMsQ0FBQztPQUNsRCxlQUFlLFdBQWYsZUFBZSxHQUFHLFNBaENVLG1CQUFtQixDQWdDTCxPQUFPLEVBQUUsQ0FDbEQsU0FqQ2dELGtCQUFrQixDQWlDM0MsT0FBTyxFQUM3QixTQW5DMkMsYUFBYSxDQW1DdEMsVUFqQ2IsTUFBTSxFQWlDYyxTQW5DSCxVQUFVLENBbUNRLFFBQVEsQ0FBQyxFQUFFLEtBQUssQ0FBQyxFQUFFLEVBQUUsQ0FBQyxDQUFDLENBQUMsQ0FBQztPQUNuRSxlQUFlLFdBQWYsZUFBZSxHQUFHLFNBbkNVLG1CQUFtQixDQW1DTCxPQUFPLEVBQUUsQ0FDbEQsU0FwQ2dELGtCQUFrQixDQW9DM0MsT0FBTyxFQUFFLFNBckMyQixnQkFBZ0IsQ0FxQ3RCLEVBQUUsQ0FBQyxDQUFDLENBQUMsQ0FBQztPQUM1RCxrQkFBa0IsV0FBbEIsa0JBQWtCLEdBQUcsU0FyQ08sbUJBQW1CLENBcUNGLE9BQU8sRUFDbkQsQ0FBQyxTQXRDK0Msa0JBQWtCLENBc0MxQyxhQUFhLEVBQUUsU0F0QzVCLGNBQWMsRUFzQ2tDLENBQUMsQ0FBQyxDQUFDO09BQy9ELGNBQWMsV0FBZCxjQUFjLEdBQUcsVUF0Q1YsTUFBTSxFQXNDVyxTQUFTLEVBQUUsU0FBUyxDQUFDIiwiZmlsZSI6ImFzdC1jb25zdGFudHMuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQge0FycmF5RXhwcmVzc2lvbiwgSWRlbnRpZmllciwgTGl0ZXJhbCwgTmV3RXhwcmVzc2lvbiwgT2JqZWN0RXhwcmVzc2lvbiwgUmV0dXJuU3RhdGVtZW50LFxuXHRTd2l0Y2hDYXNlLCBUaGlzRXhwcmVzc2lvbiwgVmFyaWFibGVEZWNsYXJhdGlvbiwgVmFyaWFibGVEZWNsYXJhdG9yfSBmcm9tICdlc2FzdC9kaXN0L2FzdCdcbmltcG9ydCB7bWVtYmVyfSBmcm9tICdlc2FzdC9kaXN0L3V0aWwnXG5pbXBvcnQge3Rocm93RXJyb3JGcm9tU3RyaW5nfSBmcm9tICcuL3V0aWwnXG5cbmV4cG9ydCBjb25zdFxuXHRHbG9iYWxFcnJvciA9IG5ldyBJZGVudGlmaWVyKCdFcnJvcicpLFxuXHRHbG9iYWxJbmZpbml0eSA9IG5ldyBJZGVudGlmaWVyKCdJbmZpbml0eScpLFxuXHRJZEFyZ3VtZW50cyA9IG5ldyBJZGVudGlmaWVyKCdhcmd1bWVudHMnKSxcblx0SWRCdWlsdCA9IG5ldyBJZGVudGlmaWVyKCdidWlsdCcpLFxuXHRJZEVycm9yID0gbmV3IElkZW50aWZpZXIoJ0Vycm9yJyksXG5cdElkRXhwb3J0cyA9IG5ldyBJZGVudGlmaWVyKCdleHBvcnRzJyksXG5cdElkRXh0cmFjdCA9IG5ldyBJZGVudGlmaWVyKCdfJCcpLFxuXHRJZEZvY3VzID0gbmV3IElkZW50aWZpZXIoJ18nKSxcblx0Ly8gVE9ETzpFUzYgU2hvdWxkbid0IG5lZWQsIGp1c3QgdXNlIGFycm93IGZ1bmN0aW9ucy5cblx0SWRMZXhpY2FsVGhpcyA9IG5ldyBJZGVudGlmaWVyKCdfdGhpcycpLFxuXHRJZFN1cGVyID0gbmV3IElkZW50aWZpZXIoJ3N1cGVyJyksXG5cdExpdEVtcHR5QXJyYXkgPSBuZXcgQXJyYXlFeHByZXNzaW9uKFtdKSxcblx0TGl0RW1wdHlTdHJpbmcgPSBuZXcgTGl0ZXJhbCgnJyksXG5cdExpdE51bGwgPSBuZXcgTGl0ZXJhbChudWxsKSxcblx0TGl0U3RyVGhyb3cgPSBuZXcgTGl0ZXJhbCgnQW4gZXJyb3Igb2NjdXJyZWQuJyksXG5cdExpdFRydWUgPSBuZXcgTGl0ZXJhbCh0cnVlKSxcblx0TGl0WmVybyA9IG5ldyBMaXRlcmFsKDApLFxuXHRSZXR1cm5CdWlsdCA9IG5ldyBSZXR1cm5TdGF0ZW1lbnQoSWRCdWlsdCksXG5cdFN3aXRjaENhc2VOb01hdGNoID0gbmV3IFN3aXRjaENhc2UodW5kZWZpbmVkLCBbXG5cdFx0dGhyb3dFcnJvckZyb21TdHJpbmcoJ05vIGJyYW5jaCBvZiBgc3dpdGNoYCBtYXRjaGVzLicpXSksXG5cdFN5bWJvbEl0ZXJhdG9yID0gbWVtYmVyKG5ldyBJZGVudGlmaWVyKCdTeW1ib2wnKSwgJ2l0ZXJhdG9yJyksXG5cdFRocm93QXNzZXJ0RmFpbCA9IHRocm93RXJyb3JGcm9tU3RyaW5nKCdBc3NlcnRpb24gZmFpbGVkLicpLFxuXHRUaHJvd05vQ2FzZU1hdGNoID0gdGhyb3dFcnJvckZyb21TdHJpbmcoJ05vIGJyYW5jaCBvZiBgY2FzZWAgbWF0Y2hlcy4nKSxcblxuXHRBcnJheVNsaWNlQ2FsbCA9IG1lbWJlcihtZW1iZXIoTGl0RW1wdHlBcnJheSwgJ3NsaWNlJyksICdjYWxsJyksXG5cdERlY2xhcmVCdWlsdEJhZyA9IG5ldyBWYXJpYWJsZURlY2xhcmF0aW9uKCdjb25zdCcsXG5cdFx0W25ldyBWYXJpYWJsZURlY2xhcmF0b3IoSWRCdWlsdCwgTGl0RW1wdHlBcnJheSldKSxcblx0RGVjbGFyZUJ1aWx0TWFwID0gbmV3IFZhcmlhYmxlRGVjbGFyYXRpb24oJ2NvbnN0JywgW1xuXHRcdG5ldyBWYXJpYWJsZURlY2xhcmF0b3IoSWRCdWlsdCxcblx0XHRcdG5ldyBOZXdFeHByZXNzaW9uKG1lbWJlcihuZXcgSWRlbnRpZmllcignZ2xvYmFsJyksICdNYXAnKSwgW10pKV0pLFxuXHREZWNsYXJlQnVpbHRPYmogPSBuZXcgVmFyaWFibGVEZWNsYXJhdGlvbignY29uc3QnLCBbXG5cdFx0bmV3IFZhcmlhYmxlRGVjbGFyYXRvcihJZEJ1aWx0LCBuZXcgT2JqZWN0RXhwcmVzc2lvbihbXSkpXSksXG5cdERlY2xhcmVMZXhpY2FsVGhpcyA9IG5ldyBWYXJpYWJsZURlY2xhcmF0aW9uKCdjb25zdCcsXG5cdFx0W25ldyBWYXJpYWJsZURlY2xhcmF0b3IoSWRMZXhpY2FsVGhpcywgbmV3IFRoaXNFeHByZXNzaW9uKCkpXSksXG5cdEV4cG9ydHNEZWZhdWx0ID0gbWVtYmVyKElkRXhwb3J0cywgJ2RlZmF1bHQnKVxuIl19

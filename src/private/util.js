@@ -13,9 +13,7 @@ Combine many values into one array.
 Arrays are flattened and nulls are skipped.
 So `cat([1, 2], null, 3)` is `[1, 2, 3]`.
 */
-export function cat() {
-	// TODO:ES6 Splat
-	const parts = Array.prototype.slice.call(arguments)
+export function cat(...parts) {
 	const out = []
 	for (const _ of parts)
 		if (_ instanceof Array)

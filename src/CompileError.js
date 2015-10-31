@@ -14,10 +14,16 @@ Any problem with source code.
 Despite the name, this is used for both warnings and errors.
 */
 export class Warning {
-	constructor(loc /* Loc */, message /* String */) {
-		/** Source location of the problem. */
+	constructor(loc, message) {
+		/**
+		Source location of the problem.
+		@type {Loc}
+		*/
 		this.loc = loc
-		/** Text description of the problem. */
+		/**
+		Text description of the problem.
+		@type {string}
+		*/
 		this.message = message
 	}
 

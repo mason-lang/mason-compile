@@ -369,7 +369,7 @@ export default class MsAst {
 	See {@link BlockWrap} for the kind that appears where a Val is expected.
 	*/
 	export class Block extends MsAst {
-		constructor(loc, opComment /* Opt[String] */) {
+		constructor(loc, opComment) {
 			super(loc)
 			/** @type {?string} */
 			this.opComment = opComment
@@ -707,7 +707,7 @@ export default class MsAst {
 		{block}```
 	*/
 	export class MethodSetter extends MethodImplLike {
-		constructor(loc, symbol, block /* BlockDo */) {
+		constructor(loc, symbol, block) {
 			super(loc, symbol)
 			/** @type {BlockDo} */
 			this.block = block
@@ -734,7 +734,7 @@ export default class MsAst {
 	export class SuperCall extends Val {
 		constructor(loc, args) {
 			super(loc)
-			/** @type {Array<Val | Splat>} */
+			/** @type {Array<Val | Spread>} */
 			this.args = args
 		}
 	}
@@ -746,7 +746,7 @@ export default class MsAst {
 	export class SuperCallDo extends Do {
 		constructor(loc, args) {
 			super(loc)
-			/** @type {Array<Val | Splat>} */
+			/** @type {Array<Val | Spread>} */
 			this.args = args
 		}
 	}
@@ -782,7 +782,7 @@ export default class MsAst {
 			super(loc)
 			/** @type {Val} */
 			this.called = called
-			/** @type {Array<Val | Splat>} */
+			/** @type {Array<Val | Spread>} */
 			this.args = args
 		}
 	}
@@ -793,17 +793,17 @@ export default class MsAst {
 			super(loc)
 			/** @type {Val} */
 			this.type = type
-			/** @type {Val | Splat} */
+			/** @type {Val | Spread} */
 			this.args = args
 		}
 	}
 
-	/** `...{splatted}` */
-	export class Splat extends MsAst {
-		constructor(loc, splatted) {
+	/** `...{spreaded}` */
+	export class Spread extends MsAst {
+		constructor(loc, spreaded) {
 			super(loc)
 			/** @type {Val} */
-			this.splatted = splatted
+			this.spreaded = spreaded
 		}
 	}
 
@@ -972,7 +972,7 @@ export default class MsAst {
 
 	/** `x in y` or just `y` (where the local is implicitly `_`). */
 	export class Iteratee extends MsAst {
-		constructor(loc, element /* LocalDeclare */, bag /* Val */) {
+		constructor(loc, element, bag) {
 			super(loc)
 			/** @type {LocalDeclare} */
 			this.element = element

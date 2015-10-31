@@ -66,8 +66,9 @@ An identifier. Usually the name of some local variable or property.
 A Name is guaranteed to not be any keyword.
 */
 export class Name extends Token {
-	constructor(loc, name /* String */) {
+	constructor(loc, name) {
 		super(loc)
+		/** @type {string} */
 		this.name = name
 	}
 

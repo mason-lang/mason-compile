@@ -1,7 +1,7 @@
 import {code} from '../../CompileError'
 import {check, fail} from '../context'
 import {Call, GetterFun, Lazy, LocalAccess, Member, MemberFun, QuoteSimple, QuoteTaggedTemplate,
-	Range, Splat, SuperCall, SuperMember} from '../MsAst'
+	Range, Spread, SuperCall, SuperMember} from '../MsAst'
 import {Group, Groups, isGroup, isKeyword, Keyword, Keywords} from '../Token'
 import {assert, opIf} from '../util'
 import {checkEmpty, unexpected} from './checks'
@@ -47,7 +47,7 @@ export default function parseSpaced(tokens) {
 				}
 			}
 			case Keywords.Dot3:
-				return new Splat(tokens.loc, parseSpacedFold(parseSingle(rest.head()), rest.tail))
+				return new Spread(tokens.loc, parseSpacedFold(parseSingle(rest.head()), rest.tail))
 			case Keywords.Lazy:
 				return new Lazy(h.loc, parseSpaced(rest))
 			case Keywords.SuperVal: {

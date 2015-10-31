@@ -1,5 +1,5 @@
 import {AssignSingle, BagSimple, BlockDo, Call, LocalDeclare, LocalDeclares, Member, New, ObjPair,
-	ObjSimple, QuotePlain, QuoteSimple, QuoteTaggedTemplate, SpecialVal, SpecialVals, Splat, With
+	ObjSimple, QuotePlain, QuoteSimple, QuoteTaggedTemplate, SpecialVal, SpecialVals, Spread, With
 	} from '../../dist/private/MsAst'
 import {aAccess, aDeclare, assignAZero, blockPass, focusAccess, focusDeclare, loc, one, two, zero
 	} from './util/ast-util'
@@ -50,7 +50,7 @@ describe('expressions', () => {
 				a ...a`,
 			[
 				assignAZero,
-				new Call(loc, aAccess, [new Splat(loc, aAccess)])
+				new Call(loc, aAccess, [new Spread(loc, aAccess)])
 			],
 			`
 				const a=0;

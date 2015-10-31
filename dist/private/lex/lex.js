@@ -1,60 +1,41 @@
+'use strict';
+
 (function (global, factory) {
-	if (typeof define === 'function' && define.amd) {
-		define(['exports', 'module', './loadLex*', 'esast/dist/Loc', '../context', './groupContext', './lexPlain', './sourceContext'], factory);
-	} else if (typeof exports !== 'undefined' && typeof module !== 'undefined') {
-		factory(exports, module, require('./loadLex*'), require('esast/dist/Loc'), require('../context'), require('./groupContext'), require('./lexPlain'), require('./sourceContext'));
+	if (typeof define === "function" && define.amd) {
+		define(['exports', 'esast/dist/Loc', '../context', './groupContext', './lexPlain', './sourceContext', './loadLex*'], factory);
+	} else if (typeof exports !== "undefined") {
+		factory(exports, require('esast/dist/Loc'), require('../context'), require('./groupContext'), require('./lexPlain'), require('./sourceContext'), require('./loadLex*'));
 	} else {
 		var mod = {
 			exports: {}
 		};
-		factory(mod.exports, mod, global.loadLex, global.Loc, global.context, global.groupContext, global.lexPlain, global.sourceContext);
+		factory(mod.exports, global.Loc, global.context, global.groupContext, global.lexPlain, global.sourceContext, global.loadLex);
 		global.lex = mod.exports;
 	}
-})(this, function (exports, module, _loadLex, _esastDistLoc, _context, _groupContext, _lexPlain, _sourceContext) {
-	'use strict';
-
-	module.exports = lex;
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+})(this, function (exports, _Loc, _context, _groupContext, _lexPlain, _sourceContext) {
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = lex;
 
 	var _lexPlain2 = _interopRequireDefault(_lexPlain);
 
-	/**
- Lexes the source code into {@link Token}s.
- The Mason lexer also groups tokens as part of lexing.
- This makes writing a recursive-descent parser easy.
- See {@link Group}.
- 
- @param {string} sourceString
- @return {Group<Groups.Block>}
- 	Block token representing the whole module.
- */
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function lex(sourceString) {
-		// Algorithm requires trailing newline to close any blocks.
 		(0, _context.check)(sourceString.endsWith('\n'), () => lastCharPos(sourceString), 'Source code must end in newline.');
-
-		/*
-  Use a 0-terminated string so that we can use `0` as a switch case in lexPlain.
-  This is faster than checking whether index === length.
-  (If we check past the end of the string we get `NaN`, which can't be switched on.)
-  */
 		sourceString = `${ sourceString }\0`;
-
 		(0, _groupContext.setupGroupContext)();
 		(0, _sourceContext.setupSourceContext)(sourceString);
-
-		(0, _groupContext.openLine)(_esastDistLoc.StartPos);
-
+		(0, _groupContext.openLine)(_Loc.StartPos);
 		(0, _lexPlain2.default)(false);
-
 		const endPos = (0, _sourceContext.pos)();
 		return (0, _groupContext.tearDownGroupContext)(endPos);
 	}
 
 	function lastCharPos(str) {
 		const splits = str.split('\n');
-		return new _esastDistLoc.Pos(splits.length, splits[splits.length - 1].length);
+		return new _Loc.Pos(splits.length, splits[splits.length - 1].length);
 	}
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9wcml2YXRlL2xleC9sZXguanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7O2tCQWlCd0IsR0FBRzs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBWixVQUFTLEdBQUcsQ0FBQyxZQUFZLEVBQUU7O0FBRXpDLGVBakJPLEtBQUssRUFpQk4sWUFBWSxDQUFDLFFBQVEsQ0FBQyxJQUFJLENBQUMsRUFBRSxNQUFNLFdBQVcsQ0FBQyxZQUFZLENBQUMsRUFDakUsa0NBQWtDLENBQUMsQ0FBQTs7Ozs7OztBQU9wQyxjQUFZLEdBQUcsQ0FBQyxHQUFFLFlBQVksRUFBQyxFQUFFLENBQUMsQ0FBQTs7QUFFbEMsb0JBMUJpQixpQkFBaUIsR0EwQmYsQ0FBQTtBQUNuQixxQkF6Qlksa0JBQWtCLEVBeUJYLFlBQVksQ0FBQyxDQUFBOztBQUVoQyxvQkE3Qk8sUUFBUSxnQkFGSCxRQUFRLENBK0JGLENBQUE7O0FBRWxCLDBCQUFTLEtBQUssQ0FBQyxDQUFBOztBQUVmLFFBQU0sTUFBTSxHQUFHLG1CQS9CUixHQUFHLEdBK0JVLENBQUE7QUFDcEIsU0FBTyxrQkFsQzZCLG9CQUFvQixFQWtDNUIsTUFBTSxDQUFDLENBQUE7RUFDbkM7O0FBRUQsVUFBUyxXQUFXLENBQUMsR0FBRyxFQUFFO0FBQ3pCLFFBQU0sTUFBTSxHQUFHLEdBQUcsQ0FBQyxLQUFLLENBQUMsSUFBSSxDQUFDLENBQUE7QUFDOUIsU0FBTyxrQkF6Q0EsR0FBRyxDQTBDVCxNQUFNLENBQUMsTUFBTSxFQUNiLE1BQU0sQ0FBQyxNQUFNLENBQUMsTUFBTSxHQUFDLENBQUMsQ0FBQyxDQUFDLE1BQU0sQ0FBQyxDQUFBO0VBQ2hDIiwiZmlsZSI6ImxleC5qcyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCAnLi9sb2FkTGV4KidcbmltcG9ydCB7UG9zLCBTdGFydFBvc30gZnJvbSAnZXNhc3QvZGlzdC9Mb2MnXG5pbXBvcnQge2NoZWNrfSBmcm9tICcuLi9jb250ZXh0J1xuaW1wb3J0IHtvcGVuTGluZSwgc2V0dXBHcm91cENvbnRleHQsIHRlYXJEb3duR3JvdXBDb250ZXh0fSBmcm9tICcuL2dyb3VwQ29udGV4dCdcbmltcG9ydCBsZXhQbGFpbiBmcm9tICcuL2xleFBsYWluJ1xuaW1wb3J0IHtwb3MsIHNldHVwU291cmNlQ29udGV4dH0gZnJvbSAnLi9zb3VyY2VDb250ZXh0J1xuXG4vKipcbkxleGVzIHRoZSBzb3VyY2UgY29kZSBpbnRvIHtAbGluayBUb2tlbn1zLlxuVGhlIE1hc29uIGxleGVyIGFsc28gZ3JvdXBzIHRva2VucyBhcyBwYXJ0IG9mIGxleGluZy5cblRoaXMgbWFrZXMgd3JpdGluZyBhIHJlY3Vyc2l2ZS1kZXNjZW50IHBhcnNlciBlYXN5LlxuU2VlIHtAbGluayBHcm91cH0uXG5cbkBwYXJhbSB7c3RyaW5nfSBzb3VyY2VTdHJpbmdcbkByZXR1cm4ge0dyb3VwPEdyb3Vwcy5CbG9jaz59XG5cdEJsb2NrIHRva2VuIHJlcHJlc2VudGluZyB0aGUgd2hvbGUgbW9kdWxlLlxuKi9cbmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIGxleChzb3VyY2VTdHJpbmcpIHtcblx0Ly8gQWxnb3JpdGhtIHJlcXVpcmVzIHRyYWlsaW5nIG5ld2xpbmUgdG8gY2xvc2UgYW55IGJsb2Nrcy5cblx0Y2hlY2soc291cmNlU3RyaW5nLmVuZHNXaXRoKCdcXG4nKSwgKCkgPT4gbGFzdENoYXJQb3Moc291cmNlU3RyaW5nKSxcblx0XHQnU291cmNlIGNvZGUgbXVzdCBlbmQgaW4gbmV3bGluZS4nKVxuXG5cdC8qXG5cdFVzZSBhIDAtdGVybWluYXRlZCBzdHJpbmcgc28gdGhhdCB3ZSBjYW4gdXNlIGAwYCBhcyBhIHN3aXRjaCBjYXNlIGluIGxleFBsYWluLlxuXHRUaGlzIGlzIGZhc3RlciB0aGFuIGNoZWNraW5nIHdoZXRoZXIgaW5kZXggPT09IGxlbmd0aC5cblx0KElmIHdlIGNoZWNrIHBhc3QgdGhlIGVuZCBvZiB0aGUgc3RyaW5nIHdlIGdldCBgTmFOYCwgd2hpY2ggY2FuJ3QgYmUgc3dpdGNoZWQgb24uKVxuXHQqL1xuXHRzb3VyY2VTdHJpbmcgPSBgJHtzb3VyY2VTdHJpbmd9XFwwYFxuXG5cdHNldHVwR3JvdXBDb250ZXh0KClcblx0c2V0dXBTb3VyY2VDb250ZXh0KHNvdXJjZVN0cmluZylcblxuXHRvcGVuTGluZShTdGFydFBvcylcblxuXHRsZXhQbGFpbihmYWxzZSlcblxuXHRjb25zdCBlbmRQb3MgPSBwb3MoKVxuXHRyZXR1cm4gdGVhckRvd25Hcm91cENvbnRleHQoZW5kUG9zKVxufVxuXG5mdW5jdGlvbiBsYXN0Q2hhclBvcyhzdHIpIHtcblx0Y29uc3Qgc3BsaXRzID0gc3RyLnNwbGl0KCdcXG4nKVxuXHRyZXR1cm4gbmV3IFBvcyhcblx0XHRzcGxpdHMubGVuZ3RoLFxuXHRcdHNwbGl0c1tzcGxpdHMubGVuZ3RoLTFdLmxlbmd0aClcbn1cbiJdfQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9wcml2YXRlL2xleC9sZXguanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7O21CQWlCd0IsR0FBRzs7Ozs7O1VBQUgsR0FBRyIsImZpbGUiOiJsZXguanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgJy4vbG9hZExleConXG5pbXBvcnQge1BvcywgU3RhcnRQb3N9IGZyb20gJ2VzYXN0L2Rpc3QvTG9jJ1xuaW1wb3J0IHtjaGVja30gZnJvbSAnLi4vY29udGV4dCdcbmltcG9ydCB7b3BlbkxpbmUsIHNldHVwR3JvdXBDb250ZXh0LCB0ZWFyRG93bkdyb3VwQ29udGV4dH0gZnJvbSAnLi9ncm91cENvbnRleHQnXG5pbXBvcnQgbGV4UGxhaW4gZnJvbSAnLi9sZXhQbGFpbidcbmltcG9ydCB7cG9zLCBzZXR1cFNvdXJjZUNvbnRleHR9IGZyb20gJy4vc291cmNlQ29udGV4dCdcblxuLyoqXG5MZXhlcyB0aGUgc291cmNlIGNvZGUgaW50byB7QGxpbmsgVG9rZW59cy5cblRoZSBNYXNvbiBsZXhlciBhbHNvIGdyb3VwcyB0b2tlbnMgYXMgcGFydCBvZiBsZXhpbmcuXG5UaGlzIG1ha2VzIHdyaXRpbmcgYSByZWN1cnNpdmUtZGVzY2VudCBwYXJzZXIgZWFzeS5cblNlZSB7QGxpbmsgR3JvdXB9LlxuXG5AcGFyYW0ge3N0cmluZ30gc291cmNlU3RyaW5nXG5AcmV0dXJuIHtHcm91cDxHcm91cHMuQmxvY2s+fVxuXHRCbG9jayB0b2tlbiByZXByZXNlbnRpbmcgdGhlIHdob2xlIG1vZHVsZS5cbiovXG5leHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBsZXgoc291cmNlU3RyaW5nKSB7XG5cdC8vIEFsZ29yaXRobSByZXF1aXJlcyB0cmFpbGluZyBuZXdsaW5lIHRvIGNsb3NlIGFueSBibG9ja3MuXG5cdGNoZWNrKHNvdXJjZVN0cmluZy5lbmRzV2l0aCgnXFxuJyksICgpID0+IGxhc3RDaGFyUG9zKHNvdXJjZVN0cmluZyksXG5cdFx0J1NvdXJjZSBjb2RlIG11c3QgZW5kIGluIG5ld2xpbmUuJylcblxuXHQvKlxuXHRVc2UgYSAwLXRlcm1pbmF0ZWQgc3RyaW5nIHNvIHRoYXQgd2UgY2FuIHVzZSBgMGAgYXMgYSBzd2l0Y2ggY2FzZSBpbiBsZXhQbGFpbi5cblx0VGhpcyBpcyBmYXN0ZXIgdGhhbiBjaGVja2luZyB3aGV0aGVyIGluZGV4ID09PSBsZW5ndGguXG5cdChJZiB3ZSBjaGVjayBwYXN0IHRoZSBlbmQgb2YgdGhlIHN0cmluZyB3ZSBnZXQgYE5hTmAsIHdoaWNoIGNhbid0IGJlIHN3aXRjaGVkIG9uLilcblx0Ki9cblx0c291cmNlU3RyaW5nID0gYCR7c291cmNlU3RyaW5nfVxcMGBcblxuXHRzZXR1cEdyb3VwQ29udGV4dCgpXG5cdHNldHVwU291cmNlQ29udGV4dChzb3VyY2VTdHJpbmcpXG5cblx0b3BlbkxpbmUoU3RhcnRQb3MpXG5cblx0bGV4UGxhaW4oZmFsc2UpXG5cblx0Y29uc3QgZW5kUG9zID0gcG9zKClcblx0cmV0dXJuIHRlYXJEb3duR3JvdXBDb250ZXh0KGVuZFBvcylcbn1cblxuZnVuY3Rpb24gbGFzdENoYXJQb3Moc3RyKSB7XG5cdGNvbnN0IHNwbGl0cyA9IHN0ci5zcGxpdCgnXFxuJylcblx0cmV0dXJuIG5ldyBQb3MoXG5cdFx0c3BsaXRzLmxlbmd0aCxcblx0XHRzcGxpdHNbc3BsaXRzLmxlbmd0aC0xXS5sZW5ndGgpXG59XG4iXX0=

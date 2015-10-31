@@ -7,10 +7,10 @@ import {ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryEx
 	ThrowStatement, TryStatement, VariableDeclaration, UnaryExpression, VariableDeclarator,
 	YieldExpression} from 'esast/dist/ast'
 import {functionExpressionThunk, identifier, member, propertyIdOrLiteral} from 'esast/dist/util'
-import {check, options} from '../context'
+import {options} from '../context'
 import * as MsAstTypes from '../MsAst'
-import {AssignSingle, Call, Constructor, Funs, Logics, Member, LocalDeclares, Pattern, Splat,
-	Setters, SpecialDos, SpecialVals, SwitchDoPart, QuoteAbstract} from '../MsAst'
+import {AssignSingle, Call, Constructor, Funs, Logics, Member, LocalDeclares, Pattern, Setters,
+	SpecialDos, SpecialVals, SwitchDoPart, QuoteAbstract} from '../MsAst'
 import {assert, cat, flatMap, flatOpMap, ifElse, implementMany, opIf, opMap, tail} from '../util'
 import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, DeclareLexicalThis,
 	ExportsDefault, IdArguments, IdBuilt, IdExports, IdExtract, IdFocus, IdLexicalThis, IdSuper,
@@ -372,8 +372,6 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	New() {
-		const anySplat = this.args.some(_ => _ instanceof Splat)
-		check(!anySplat, this.loc, 'TODO: Splat params for new')
 		return new NewExpression(t0(this.type), this.args.map(t0))
 	},
 
@@ -498,8 +496,8 @@ implementMany(MsAstTypes, 'transpile', {
 		}
 	},
 
-	Splat() {
-		return new SpreadElement(t0(this.splatted))
+	Spread() {
+		return new SpreadElement(t0(this.spreaded))
 	},
 
 	SuperCall: superCall,

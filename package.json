@@ -16,20 +16,27 @@
 		"esast": "mason-lang/esast"
 	},
 	"devDependencies": {
-		"babel": "5.8.29",
+		"babel-cli": "6.0.14",
+		"babel-plugin-transform-es2015-destructuring": "6.0.14",
+		"babel-plugin-transform-es2015-modules-umd": "6.0.14",
+		"babel-plugin-transform-es2015-parameters": "6.0.14",
+		"babel-plugin-transform-strict-mode": "6.0.14",
 		"benchmark": "1.0.0",
 			"microtime": "2.0.0",
 		"esdoc": "0.4.1",
-		"eslint": "1.7.3",
+		"eslint": "1.8.0",
 		"mocha": "2.3.3",
 		"numeral": "1.5.3",
 		"source-map-support": "0.3.3"
 	},
 	"repository": "mason-lang/mason-compile",
 	"babel": {
-		"modules": "umd",
-		"whitelist":
-			["es6.destructuring", "es6.modules", "es6.parameters", "es6.spread", "strict"]
+		"plugins": [
+			"transform-es2015-destructuring",
+			"transform-es2015-modules-umd",
+			"transform-es2015-parameters",
+			"transform-strict-mode"
+		]
 	},
 	"eslintConfig": {
 		"ecmaFeatures": {

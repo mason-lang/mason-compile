@@ -388,8 +388,8 @@ implementMany(MsAstTypes, 'verify', {
 		setName(this)
 	},
 
-	Splat() {
-		this.splatted.verify()
+	Spread() {
+		this.spreaded.verify()
 	},
 
 	SuperCall: verifySuperCall,
