@@ -1,4 +1,4 @@
-import {assert} from './util'
+import {check} from './context'
 
 /**
 Results of {@link verify}.
@@ -41,7 +41,8 @@ export default class VerifyResults {
 	/** Get closest assignment name to an expression. */
 	name(expr) {
 		const name = this.names.get(expr)
-		assert(name !== undefined)
+		check(name !== undefined, expr.loc,
+			'Expression must be placed in a position where name can be determined.')
 		return name
 	}
 

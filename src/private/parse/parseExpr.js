@@ -12,6 +12,7 @@ import parseCase from './parseCase'
 import parseDel from './parseDel'
 import {parseForBag, parseForVal} from './parseFor'
 import parseFun from './parseFun'
+import parseKind from './parseKind'
 import {parseLocalDeclare} from './parseLocalDeclares'
 
 /** Parse a {@link Val}. */
@@ -90,6 +91,8 @@ export function parseExprParts(tokens) {
 							parseBlockVal(block),
 							at.kind === Keywords.UnlessVal)
 					}
+					case Keywords.Kind:
+						return parseKind(after)
 					case Keywords.New: {
 						const parts = parseExprParts(after)
 						return new New(at.loc, parts[0], tail(parts))
@@ -120,9 +123,9 @@ const exprSplitKeywords = new Set([
 	Keywords.ExceptVal, Keywords.ForBag, Keywords.ForVal, Keywords.Fun, Keywords.FunDo,
 	Keywords.FunThis, Keywords.FunThisDo, Keywords.FunAsync, Keywords.FunAsyncDo,
 	Keywords.FunThisAsync, Keywords.FunThisAsyncDo, Keywords.FunGen, Keywords.FunGenDo,
-	Keywords.FunThisGen, Keywords.FunThisGenDo, Keywords.IfVal, Keywords.New, Keywords.Not,
-	Keywords.Or, Keywords.SuperVal, Keywords.SwitchVal, Keywords.UnlessVal, Keywords.With,
-	Keywords.Yield, Keywords.YieldTo
+	Keywords.FunThisGen, Keywords.FunThisGenDo, Keywords.IfVal, Keywords.Kind, Keywords.New,
+	Keywords.Not, Keywords.Or, Keywords.SuperVal, Keywords.SwitchVal, Keywords.UnlessVal,
+	Keywords.With, Keywords.Yield, Keywords.YieldTo
 ])
 
 function parseExprPlain(tokens) {

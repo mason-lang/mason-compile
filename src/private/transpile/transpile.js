@@ -10,13 +10,14 @@ import {identifier, member, propertyIdOrLiteral} from 'esast/dist/util'
 import {options} from '../context'
 import * as MsAstTypes from '../MsAst'
 import {AssignSingle, Call, Constructor, Funs, Logics, Member, LocalDeclares, Pattern, Setters,
-	SpecialDos, SpecialVals, SwitchDoPart, QuoteAbstract} from '../MsAst'
+	SpecialDos, SpecialVals, SwitchDoPart} from '../MsAst'
 import {assert, cat, flatMap, flatOpMap, ifElse, implementMany, isEmpty, opIf, opMap, tail
 	} from '../util'
 import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, DeclareLexicalThis,
 	ExportsDefault, IdArguments, IdBuilt, IdExports, IdExtract, IdFocus, IdLexicalThis, IdSuper,
 	GlobalError, GlobalInfinity, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt,
 	ReturnFocus, SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
+import {transpileMethodToDefinition, transpileMethodToProperty} from './transpileMethod'
 import transpileModule from './transpileModule'
 import {accessLocalDeclare, declare, doThrow, getMember, idForDeclareCached, lazyWrap,
 	makeDeclarator, maybeWrapInCheckContains, memberStringOrVal, msCall, msMember,
@@ -151,14 +152,16 @@ implementMany(MsAstTypes, 'transpile', {
 
 	Class() {
 		const methods = cat(
-			this.statics.map(_ => t1(_, true)),
+			this.statics.map(_ => transpileMethodToDefinition(_, true)),
 			opMap(this.opConstructor, t0),
-			this.methods.map(_ => t1(_, false)))
+			this.methods.map(_ => transpileMethodToDefinition(_, false)))
 		const opName = opMap(verifyResults.opName(this), identifier)
-		const classExpr =
-			new ClassExpression(opName, opMap(this.opSuperClass, t0), new ClassBody(methods))
+		const classExpr = new ClassExpression(opName,
+			opMap(this.opSuperClass, t0), new ClassBody(methods))
 
-		if (this.opDo !== null || !isEmpty(this.kinds)) {
+		if (this.opDo === null && isEmpty(this.kinds))
+			return classExpr
+		else {
 			const lead = cat(
 				new VariableDeclaration('const', [
 					new VariableDeclarator(IdFocus, classExpr)]),
@@ -167,8 +170,7 @@ implementMany(MsAstTypes, 'transpile', {
 				_ => t3(_.block, lead, null, ReturnFocus),
 				() => new BlockStatement(cat(lead, ReturnFocus)))
 			return blockWrap(block)
-		} else
-			return classExpr
+		}
 	},
 
 	Cond() {
@@ -275,28 +277,24 @@ implementMany(MsAstTypes, 'transpile', {
 		return []
 	},
 
+	Kind() {
+		const name = new Literal(verifyResults.name(this))
+		const supers = new ArrayExpression(this.superKinds.map(t0))
+		const methods = _ =>
+			new ObjectExpression(_.map(transpileMethodToProperty))
+		const kind = msCall('kind', name, supers, methods(this.statics), methods(this.methods))
+
+		if (this.opDo === null)
+			return kind
+		else {
+			const lead = new VariableDeclaration('const',
+				[new VariableDeclarator(IdFocus, kind)])
+			return blockWrap(t3(this.opDo.block, lead, null, ReturnFocus))
+		}
+	},
+
 	Lazy() {
 		return lazyWrap(t0(this.value))
-	},
-
-	MethodImpl(isStatic) {
-		const value = t0(this.fun)
-		assert(value.id == null)
-		// Since the Fun should have opDeclareThis, it will never be an ArrowFunctionExpression.
-		assert(value instanceof FunctionExpression)
-
-		const {key, computed} = methodKeyComputed(this.symbol)
-		return new MethodDefinition(key, value, 'method', isStatic, computed)
-	},
-	MethodGetter(isStatic) {
-		const value = new FunctionExpression(null, [], t1(this.block, DeclareLexicalThis))
-		const {key, computed} = methodKeyComputed(this.symbol)
-		return new MethodDefinition(key, value, 'get', isStatic, computed)
-	},
-	MethodSetter(isStatic) {
-		const value = new FunctionExpression(null, [IdFocus], t1(this.block, DeclareLexicalThis))
-		const {key, computed} = methodKeyComputed(this.symbol)
-		return new MethodDefinition(key, value, 'set', isStatic, computed)
 	},
 
 	NumberLiteral() {
@@ -620,15 +618,6 @@ function forLoop(opIteratee, block) {
 			return new ForOfStatement(declare, t0(bag), t0(block))
 		},
 		() => new ForStatement(null, null, null, t0(block)))
-}
-
-function methodKeyComputed(symbol) {
-	if (typeof symbol === 'string')
-		return {key: propertyIdOrLiteral(symbol), computed: false}
-	else {
-		const key = symbol instanceof QuoteAbstract ? t0(symbol) : msCall('symbol', t0(symbol))
-		return {key, computed: true}
-	}
 }
 
 function transpileBlock(returned, lines, lead, opReturnType) {

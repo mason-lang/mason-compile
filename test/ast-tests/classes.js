@@ -8,5 +8,6 @@ describe('class', () => {
 	// get, set!
 	// super
 	// methods with `this`
-	// empty class)
+	// empty class
+	// test `kind` too
 })

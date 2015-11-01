@@ -2,7 +2,7 @@ import {code} from '../../CompileError'
 import {check, options, warn} from '../context'
 import * as MsAstTypes from '../MsAst'
 import {BlockVal, BlockValThrow, Class, Constructor,
-	ForVal, Fun, Funs, Pattern, SuperCallDo} from '../MsAst'
+	ForVal, Fun, Funs, Kind, Pattern, SuperCallDo} from '../MsAst'
 import {cat, ifElse, implementMany, opEach} from '../util'
 import {funKind, locals, method, okToNotUse, opLoop, results, setup, tearDown, withIIFE,
 	withInFunKind, withMethod, withLoop, withName} from './context'
@@ -39,7 +39,9 @@ implementMany(MsAstTypes, 'verify', {
 				Fun and Class only get name if they are immediately after the assignment.
 				so in `x = $after-time 1000 |` the function is not named.
 				*/
-				if (this.value instanceof Class || this.value instanceof Fun)
+				if (this.value instanceof Class ||
+					this.value instanceof Fun ||
+					this.value instanceof Kind)
 					setName(this.value)
 
 				// Assignee registered by verifyLines.
@@ -138,7 +140,7 @@ implementMany(MsAstTypes, 'verify', {
 		// name set by AssignSingle
 	},
 
-	ClassDo() {
+	ClassKindDo() {
 		verifyAndPlusLocal(this.declareFocus, () => this.block.verify())
 	},
 
@@ -214,6 +216,17 @@ implementMany(MsAstTypes, 'verify', {
 	Ignore() {
 		for (const _ of this.ignoredNames)
 			accessLocal(this, _)
+	},
+
+	Kind() {
+		for (const _ of this.superKinds)
+			_.verify()
+		verifyOp(this.opDo)
+		for (const _ of this.statics)
+			_.verify()
+		for (const _ of this.methods)
+			_.verify()
+		// name set by AssignSingle
 	},
 
 	Lazy() {

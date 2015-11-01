@@ -632,6 +632,22 @@ export default class MsAst {
 	}
 
 // Class
+	export class Kind extends Val {
+		constructor(loc, superKinds, opComment=null, opDo=null, statics=[], methods=[]) {
+			super(loc)
+			/** @type {Array<Val>} */
+			this.superKinds = superKinds
+			/** @type {?string} */
+			this.opComment = opComment
+			/** @type {?ClassKindDo} */
+			this.opDo = opDo
+			/** @type {Array<MethodImplLike>} */
+			this.statics = statics
+			/** @type {Array<MethodImplLike>} */
+			this.methods = methods
+		}
+	}
+
 	/**
 	```class {opSuperClass}
 		{opComment}
@@ -653,7 +669,7 @@ export default class MsAst {
 			this.kinds = kinds
 			/** @type {?string} */
 			this.opComment = opComment
-			/** @type {?ClassDo} */
+			/** @type {?ClassKindDo} */
 			this.opDo = opDo
 			/** @type {Array<MethodImplLike>} */
 			this.statics = statics
@@ -664,8 +680,8 @@ export default class MsAst {
 		}
 	}
 
-	/** `do!` part of {@link Class}. */
-	export class ClassDo extends MsAst {
+	/** `do!` part of {@link Class} or {@link Kind}. */
+	export class ClassKindDo extends MsAst {
 		constructor(loc, block) {
 			super(loc)
 			/** @type {BlockDo} */
