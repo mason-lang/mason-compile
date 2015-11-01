@@ -5,7 +5,7 @@ import {AssignSingle, BagEntry, BlockBag, BlockDo, BlockObj, BlockMap, BlockValR
 	ObjEntry, ObjEntryAssign, Throw, Val} from '../MsAst'
 import {Groups, isGroup, keywordName} from '../Token'
 import {isEmpty, last, rtail} from '../util'
-import {checkEmpty, checkNonEmpty} from './checks'
+import {checkEmpty} from './checks'
 import parseLine, {parseLineOrLines} from './parseLine'
 import tryTakeComment from './tryTakeComment'
 import Slice from './Slice'
@@ -15,10 +15,18 @@ Tokens on the line before a block, and tokens for the block itself.
 @return {[Slice, Slice]}
 */
 export function beforeAndBlock(tokens) {
-	checkNonEmpty(tokens, 'Expected an indented block.')
-	const block = tokens.last()
-	check(isGroup(Groups.Block, block), block.loc, 'Expected an indented block.')
-	return [tokens.rtail(), Slice.group(block)]
+	const [before, opBlock] = beforeAndOpBlock(tokens)
+	check(opBlock !== null, opBlock.loc, 'Expected an indented block at the end.')
+	return [before, opBlock]
+}
+
+export function beforeAndOpBlock(tokens) {
+	if (tokens.isEmpty())
+		return [tokens, null]
+	else {
+		const block = tokens.last()
+		return isGroup(Groups.Block, block) ? [tokens.rtail(), Slice.group(block)] : [tokens, null]
+	}
 }
 
 /** Parse a Block as a single value. */

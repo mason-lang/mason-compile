@@ -643,10 +643,14 @@ export default class MsAst {
 		{methods}```
 	*/
 	export class Class extends Val {
-		constructor(loc, opSuperClass, opComment, opDo, statics, opConstructor, methods) {
+		constructor(
+			loc, opSuperClass, kinds,
+			opComment=null, opDo=null, statics=[], opConstructor=null, methods=[]) {
 			super(loc)
 			/** @type {?Val} */
 			this.opSuperClass = opSuperClass
+			/** @type {Array<Val>} */
+			this.kinds = kinds
 			/** @type {?string} */
 			this.opComment = opComment
 			/** @type {?ClassDo} */
@@ -657,6 +661,17 @@ export default class MsAst {
 			this.opConstructor = opConstructor
 			/** @type {Array<MethodImplLike>} */
 			this.methods = methods
+		}
+	}
+
+	/** `do!` part of {@link Class}. */
+	export class ClassDo extends MsAst {
+		constructor(loc, block) {
+			super(loc)
+			/** @type {BlockDo} */
+			this.block = block
+			/** @type {LocalDeclareFocus} */
+			this.declareFocus = LocalDeclare.focus(loc)
 		}
 	}
 
@@ -712,17 +727,6 @@ export default class MsAst {
 			/** @type {BlockDo} */
 			this.block = block
 			this.declareThis = LocalDeclare.this(loc)
-			this.declareFocus = LocalDeclare.focus(loc)
-		}
-	}
-
-	/** `do!` part of {@link Class}. */
-	export class ClassDo extends MsAst {
-		constructor(loc, block) {
-			super(loc)
-			/** @type {BlockDo} */
-			this.block = block
-			/** @type {LocalDeclareFocus} */
 			this.declareFocus = LocalDeclare.focus(loc)
 		}
 	}

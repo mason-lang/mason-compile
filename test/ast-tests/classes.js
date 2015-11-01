@@ -1,5 +1,6 @@
 describe('class', () => {
 	// TODO:
+	// super class, kinds (`class Foo kind Bar Baz`)
 	// do!
 	// static
 	// construct!

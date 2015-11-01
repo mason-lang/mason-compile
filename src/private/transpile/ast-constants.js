@@ -22,6 +22,7 @@ export const
 	LitTrue = new Literal(true),
 	LitZero = new Literal(0),
 	ReturnBuilt = new ReturnStatement(IdBuilt),
+	ReturnFocus = new ReturnStatement(IdFocus),
 	SwitchCaseNoMatch = new SwitchCase(undefined, [
 		throwErrorFromString('No branch of `switch` matches.')]),
 	SymbolIterator = member(new Identifier('Symbol'), 'iterator'),

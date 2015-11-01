@@ -2,45 +2,63 @@ import {check, fail} from '../context'
 import {Class, ClassDo, Constructor, Fun, Funs, MethodImpl, MethodGetter, MethodSetter, QuoteSimple
 	} from '../MsAst'
 import {isAnyKeyword, isKeyword, Keywords} from '../Token'
-import {opIf} from '../util'
-import {parseExpr} from './parse*'
-import {beforeAndBlock, justBlock, parseJustBlockDo, parseBlockDo, parseBlockVal
+import {ifElse, opIf} from '../util'
+import {parseExpr, parseExprParts} from './parse*'
+import {beforeAndBlock, beforeAndOpBlock, justBlock, parseJustBlockDo, parseBlockDo, parseBlockVal
 	} from './parseBlock'
 import parseFun, {funArgsAndBlock} from './parseFun'
 import tryTakeComment from './tryTakeComment'
 
 /** Parse a {@link Class}. */
 export default function parseClass(tokens) {
-	const [before, block] = beforeAndBlock(tokens)
-	const opExtended = opIf(!before.isEmpty(), () => parseExpr(before))
+	const [before, opBlock] = beforeAndOpBlock(tokens)
+	const {opSuperClass, kinds} = parseClassHeader(before)
 
-	let opDo = null, statics = [], opConstructor = null, methods = []
+	if (opBlock === null)
+		return new Class(tokens.loc, opSuperClass, kinds)
+	else {
+		let [opComment, rest] = tryTakeComment(opBlock)
 
-	let [opComment, rest] = tryTakeComment(block)
+		if (rest.isEmpty())
+			return new Class(tokens.loc, opSuperClass, kinds, opComment)
+		else {
+			let opDo = null, statics = [], opConstructor = null, methods = []
 
-	const line1 = rest.headSlice()
-	if (isKeyword(Keywords.Do, line1.head())) {
-		const done = parseJustBlockDo(Keywords.Do, line1.tail())
-		opDo = new ClassDo(line1.loc, done)
-		rest = rest.tail()
-	}
-	if (!rest.isEmpty()) {
-		const line2 = rest.headSlice()
-		if (isKeyword(Keywords.Static, line2.head())) {
-			statics = parseStatics(line2.tail())
-			rest = rest.tail()
-		}
-		if (!rest.isEmpty()) {
-			const line3 = rest.headSlice()
-			if (isKeyword(Keywords.Construct, line3.head())) {
-				opConstructor = parseConstructor(line3.tail())
+			const line1 = rest.headSlice()
+			if (isKeyword(Keywords.Do, line1.head())) {
+				const done = parseJustBlockDo(Keywords.Do, line1.tail())
+				opDo = new ClassDo(line1.loc, done)
 				rest = rest.tail()
 			}
-			methods = parseMethods(rest)
+			if (!rest.isEmpty()) {
+				const line2 = rest.headSlice()
+				if (isKeyword(Keywords.Static, line2.head())) {
+					statics = parseStatics(line2.tail())
+					rest = rest.tail()
+				}
+				if (!rest.isEmpty()) {
+					const line3 = rest.headSlice()
+					if (isKeyword(Keywords.Construct, line3.head())) {
+						opConstructor = parseConstructor(line3.tail())
+						rest = rest.tail()
+					}
+					methods = parseMethods(rest)
+				}
+			}
+
+			return new Class(tokens.loc,
+				opSuperClass, kinds, opComment, opDo, statics, opConstructor, methods)
 		}
 	}
+}
 
-	return new Class(tokens.loc, opExtended, opComment, opDo, statics, opConstructor, methods)
+function parseClassHeader(tokens) {
+	const [extendedTokens, kinds] =
+		ifElse(tokens.opSplitOnce(_ => isKeyword(Keywords.Kind, _)),
+			({before, after}) => [before, parseExprParts(after)],
+			() => [tokens, []])
+	const opSuperClass = opIf(!extendedTokens.isEmpty(), () => parseExpr(extendedTokens))
+	return {opSuperClass, kinds}
 }
 
 function parseConstructor(tokens) {

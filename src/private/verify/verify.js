@@ -126,6 +126,8 @@ implementMany(MsAstTypes, 'verify', {
 
 	Class() {
 		verifyOp(this.opSuperClass)
+		for (const _ of this.kinds)
+			_.verify()
 		verifyOp(this.opDo)
 		for (const _ of this.statics)
 			_.verify()

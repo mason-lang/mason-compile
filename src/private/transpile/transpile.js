@@ -11,11 +11,12 @@ import {options} from '../context'
 import * as MsAstTypes from '../MsAst'
 import {AssignSingle, Call, Constructor, Funs, Logics, Member, LocalDeclares, Pattern, Setters,
 	SpecialDos, SpecialVals, SwitchDoPart, QuoteAbstract} from '../MsAst'
-import {assert, cat, flatMap, flatOpMap, ifElse, implementMany, opIf, opMap, tail} from '../util'
+import {assert, cat, flatMap, flatOpMap, ifElse, implementMany, isEmpty, opIf, opMap, tail
+	} from '../util'
 import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, DeclareLexicalThis,
 	ExportsDefault, IdArguments, IdBuilt, IdExports, IdExtract, IdFocus, IdLexicalThis, IdSuper,
 	GlobalError, GlobalInfinity, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt,
-	SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
+	ReturnFocus, SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
 import transpileModule from './transpileModule'
 import {accessLocalDeclare, declare, doThrow, getMember, idForDeclareCached, lazyWrap,
 	makeDeclarator, maybeWrapInCheckContains, memberStringOrVal, msCall, msMember,
@@ -154,19 +155,20 @@ implementMany(MsAstTypes, 'transpile', {
 			opMap(this.opConstructor, t0),
 			this.methods.map(_ => t1(_, false)))
 		const opName = opMap(verifyResults.opName(this), identifier)
-		const classExpr = new ClassExpression(
-			opName,
-			opMap(this.opSuperClass, t0), new ClassBody(methods))
+		const classExpr =
+			new ClassExpression(opName, opMap(this.opSuperClass, t0), new ClassBody(methods))
 
-		return ifElse(this.opDo, _ => t1(_, classExpr), () => classExpr)
-	},
-
-	ClassDo(classExpr) {
-		const lead = new VariableDeclaration('const', [
-			new VariableDeclarator(t0(this.declareFocus), classExpr)])
-		const ret = new ReturnStatement(t0(this.declareFocus))
-		const block = t3(this.block, lead, null, ret)
-		return blockWrap(block)
+		if (this.opDo !== null || !isEmpty(this.kinds)) {
+			const lead = cat(
+				new VariableDeclaration('const', [
+					new VariableDeclarator(IdFocus, classExpr)]),
+				this.kinds.map(_ => msCall('kindDo', IdFocus, t0(_))))
+			const block = ifElse(this.opDo,
+				_ => t3(_.block, lead, null, ReturnFocus),
+				() => new BlockStatement(cat(lead, ReturnFocus)))
+			return blockWrap(block)
+		} else
+			return classExpr
 	},
 
 	Cond() {
