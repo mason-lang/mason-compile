@@ -6,7 +6,7 @@ import {ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryEx
 	SwitchStatement, TaggedTemplateExpression, TemplateElement, TemplateLiteral, ThisExpression,
 	ThrowStatement, TryStatement, VariableDeclaration, UnaryExpression, VariableDeclarator,
 	YieldExpression} from 'esast/dist/ast'
-import {functionExpressionThunk, identifier, member, propertyIdOrLiteral} from 'esast/dist/util'
+import {identifier, member, propertyIdOrLiteral} from 'esast/dist/util'
 import {options} from '../context'
 import * as MsAstTypes from '../MsAst'
 import {AssignSingle, Call, Constructor, Funs, Logics, Member, LocalDeclares, Pattern, Setters,
@@ -591,7 +591,10 @@ function switchPart() {
 
 // Wraps a block (with `return` statements in it) in an IIFE.
 function blockWrap(block) {
-	const invoke = new CallExpression(functionExpressionThunk(block, isInGenerator), [])
+	const thunk = isInGenerator ?
+		new FunctionExpression(null, [], block, true) :
+		new ArrowFunctionExpression([], block)
+	const invoke = new CallExpression(thunk, [])
 	return isInGenerator ? new YieldExpression(invoke, true) : invoke
 }
 
