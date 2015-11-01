@@ -16,13 +16,10 @@ import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, Decla
 	ExportsDefault, IdArguments, IdBuilt, IdExports, IdExtract, IdFocus, IdLexicalThis, IdSuper,
 	GlobalError, GlobalInfinity, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt,
 	SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
-import {IdMs, lazyWrap, msAdd, msAddMany, msAssert, msAssertMember, msAssertNot, msAssertNotMember,
-	msAsync, msExtract, msMethodBound, msMethodUnbound, msNewMutableProperty, msNewProperty,
-	msRange, msSetLazy, msSetSub, msSome, msSymbol, MsNone} from './ms-call'
 import transpileModule from './transpileModule'
-import {accessLocalDeclare, declare, doThrow, getMember, idForDeclareCached, makeDeclarator,
-	maybeWrapInCheckContains, memberStringOrVal, opTypeCheckForLocalDeclare, t0, t1, t2, t3, tLines
-	} from './util'
+import {accessLocalDeclare, declare, doThrow, getMember, idForDeclareCached, lazyWrap,
+	makeDeclarator, maybeWrapInCheckContains, memberStringOrVal, msCall, msMember, opTypeCheckForLocalDeclare, t0,
+	t1, t2, t3, tLines} from './util'
 
 export let verifyResults
 // isInGenerator means we are in an async or generator function.
@@ -56,11 +53,11 @@ implementMany(MsAstTypes, 'transpile', {
 					const called = call.called
 					const args = call.args.map(t0)
 					if (called instanceof Member) {
-						const ass = this.negate ? msAssertNotMember : msAssertMember
-						return ass(t0(called.object), new Literal(called.name), ...args)
+						const ass = this.negate ? 'assertNotMember' : 'assertMember'
+						return msCall(ass, t0(called.object), new Literal(called.name), ...args)
 					} else {
-						const ass = this.negate ? msAssertNot : msAssert
-						return ass(t0(called), ...args)
+						const ass = this.negate ? 'assertNot' : 'assert'
+						return msCall(ass, t0(called), ...args)
 					}
 				} else
 					return new IfStatement(failCond(), ThrowAssertFail)
@@ -83,9 +80,9 @@ implementMany(MsAstTypes, 'transpile', {
 				false))
 	},
 
-	BagEntry() { return msAdd(IdBuilt, t0(this.value)) },
+	BagEntry() { return msCall('add', IdBuilt, t0(this.value)) },
 
-	BagEntryMany() { return msAddMany(IdBuilt, t0(this.value)) },
+	BagEntryMany() { return msCall('addMany', IdBuilt, t0(this.value)) },
 
 	BagSimple() { return new ArrayExpression(this.parts.map(t0)) },
 
@@ -185,10 +182,10 @@ implementMany(MsAstTypes, 'transpile', {
 
 	ConditionalVal() {
 		const test = t0(this.test)
-		const result = msSome(blockWrap(t0(this.result)))
+		const result = msCall('some', blockWrap(t0(this.result)))
 		return this.isUnless ?
-			new ConditionalExpression(test, MsNone, result) :
-			new ConditionalExpression(test, result, MsNone)
+			new ConditionalExpression(test, msMember('None'), result) :
+			new ConditionalExpression(test, result, msMember('None'))
 	},
 
 	Constructor() {
@@ -259,7 +256,7 @@ implementMany(MsAstTypes, 'transpile', {
 				case Funs.Async: {
 					const plainBody = t2(this.block, null, this.opReturnType)
 					const genFunc = new FunctionExpression(id, [], plainBody, true)
-					const ret = new ReturnStatement(msAsync(genFunc))
+					const ret = new ReturnStatement(msCall('async', genFunc))
 					return new FunctionExpression(id, args, new BlockStatement(cat(lead, ret)))
 				}
 				case Funs.Generator:
@@ -331,7 +328,7 @@ implementMany(MsAstTypes, 'transpile', {
 			new LogicalExpression(op, a, t0(b)), t0(this.args[0]))
 	},
 
-	MapEntry() { return msSetSub(IdBuilt, t0(this.key), t0(this.val)) },
+	MapEntry() { return msCall('setSub', IdBuilt, t0(this.key), t0(this.val)) },
 
 	Member() {
 		return memberStringOrVal(t0(this.object), this.name)
@@ -340,8 +337,8 @@ implementMany(MsAstTypes, 'transpile', {
 	MemberFun() {
 		const name = typeof this.name === 'string' ? new Literal(this.name) : t0(this.name)
 		return ifElse(this.opObject,
-			_ => msMethodBound(t0(_), name),
-			() => msMethodUnbound(name))
+			_ => msCall('methodBound', t0(_), name),
+			() => msCall('methodUnbound', name))
 	},
 
 	MemberSet() {
@@ -351,9 +348,9 @@ implementMany(MsAstTypes, 'transpile', {
 		const val = maybeWrapInCheckContains(t0(this.value), this.opType, this.name)
 		switch (this.kind) {
 			case Setters.Init:
-				return msNewProperty(obj, name(), val)
+				return msCall('newProperty', obj, name(), val)
 			case Setters.InitMutable:
-				return msNewMutableProperty(obj, name(), val)
+				return msCall('newMutableProperty', obj, name(), val)
 			case Setters.Mutate:
 				return new AssignmentExpression('=', memberStringOrVal(obj, this.name), val)
 			default: throw new Error()
@@ -384,7 +381,7 @@ implementMany(MsAstTypes, 'transpile', {
 			cat(
 				t0(this.assign),
 				this.assign.allAssignees().map(_ =>
-					msSetLazy(IdBuilt, new Literal(_.name), idForDeclareCached(_))))
+					msCall('setLazy', IdBuilt, new Literal(_.name), idForDeclareCached(_))))
 	},
 
 	ObjEntryPlain() {
@@ -439,7 +436,7 @@ implementMany(MsAstTypes, 'transpile', {
 
 	Range() {
 		const end = ifElse(this.end, t0, () => GlobalInfinity)
-		return msRange(t0(this.start), end, new Literal(this.isExclusive))
+		return msCall('range', t0(this.start), end, new Literal(this.isExclusive))
 	},
 
 	SetSub() {
@@ -456,7 +453,8 @@ implementMany(MsAstTypes, 'transpile', {
 			}
 		}
 		const kind = getKind()
-		return msSetSub(
+		return msCall(
+			'setSub',
 			t0(this.object),
 			this.subbeds.length === 1 ? t0(this.subbeds[0]) : this.subbeds.map(t0),
 			maybeWrapInCheckContains(t0(this.value), this.opType, 'value'),
@@ -474,9 +472,9 @@ implementMany(MsAstTypes, 'transpile', {
 		// Make new objects because we will assign `loc` to them.
 		switch (this.kind) {
 			case SpecialVals.Contains:
-				return member(IdMs, 'contains')
+				return msMember('contains')
 			case SpecialVals.DelSub:
-				return member(IdMs, 'delSub')
+				return msMember('delSub')
 			case SpecialVals.False:
 				return new Literal(false)
 			case SpecialVals.Name:
@@ -484,9 +482,9 @@ implementMany(MsAstTypes, 'transpile', {
 			case SpecialVals.Null:
 				return new Literal(null)
 			case SpecialVals.SetSub:
-				return member(IdMs, 'setSub')
+				return msMember('setSub')
 			case SpecialVals.Sub:
-				return member(IdMs, 'sub')
+				return msMember('sub')
 			case SpecialVals.True:
 				return new Literal(true)
 			case SpecialVals.Undefined:
@@ -538,7 +536,7 @@ function casePart(alternate) {
 	if (this.test instanceof Pattern) {
 		const {type, patterned, locals} = this.test
 		const decl = new VariableDeclaration('const', [
-			new VariableDeclarator(IdExtract, msExtract(t0(type), t0(patterned)))])
+			new VariableDeclarator(IdExtract, msCall('extract', t0(type), t0(patterned)))])
 		const test = new BinaryExpression('!==', IdExtract, LitNull)
 		const extract = new VariableDeclaration('const', locals.map((_, idx) =>
 			new VariableDeclarator(
@@ -608,7 +606,7 @@ function caseBody(parts, opElse) {
 
 function constructorSetMembers(constructor) {
 	return constructor.memberArgs.map(_ =>
-		msNewProperty(new ThisExpression(), new Literal(_.name), idForDeclareCached(_)))
+		msCall('newProperty', new ThisExpression(), new Literal(_.name), idForDeclareCached(_)))
 }
 
 function forLoop(opIteratee, block) {
@@ -625,7 +623,7 @@ function methodKeyComputed(symbol) {
 	if (typeof symbol === 'string')
 		return {key: propertyIdOrLiteral(symbol), computed: false}
 	else {
-		const key = symbol instanceof QuoteAbstract ? t0(symbol) : msSymbol(t0(symbol))
+		const key = symbol instanceof QuoteAbstract ? t0(symbol) : msCall('symbol', t0(symbol))
 		return {key, computed: true}
 	}
 }

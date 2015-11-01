@@ -2,15 +2,14 @@ import {ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryEx
 	BlockStatement, CallExpression, ExpressionStatement, Identifier, IfStatement, Literal, Program,
 	VariableDeclaration, VariableDeclarator, ReturnStatement, UnaryExpression
 	} from 'esast/dist/ast'
-import {functionExpressionThunk, identifier, loc, member, toStatement} from 'esast/dist/util'
+import {identifier, loc, member, toStatement} from 'esast/dist/util'
 import {options} from '../context'
 import manglePath from '../manglePath'
 import {Import, LocalDeclare} from '../MsAst'
 import {cat, flatMap, isEmpty, last, opIf, opMap} from '../util'
 import {IdExports} from './ast-constants'
-import {lazyWrap, msGetDefaultExport, msGetModule, msLazy, msLazyGetModule} from './ms-call'
 import {makeDestructureDeclarators, verifyResults} from './transpile'
-import {idForDeclareCached, tLines} from './util'
+import {idForDeclareCached, lazyWrap, msCall, tLines} from './util'
 
 export default function transpileModule() {
 	const body = tLines(this.lines)
@@ -61,10 +60,11 @@ function amdWrapModule(doImports, imports, body) {
 
 	const importArgs = cat(opIf(shouldImportBoot, () => IdBoot), IdExports, importIdentifiers)
 
-	const doBoot = opIf(shouldImportBoot, () => new ExpressionStatement(msGetModule(IdBoot)))
+	const doBoot = opIf(shouldImportBoot, () =>
+		new ExpressionStatement(msCall('getModule', IdBoot)))
 
 	const importDos = doImports.map(_ =>
-		loc(new ExpressionStatement(msGetModule(importToIdentifier.get(_))), _.loc))
+		loc(new ExpressionStatement(msCall('getModule', importToIdentifier.get(_))), _.loc))
 
 	// Extracts imported values from the modules.
 	const opDeclareImportedLocals = opIf(!isEmpty(imports),
@@ -78,7 +78,7 @@ function amdWrapModule(doImports, imports, body) {
 		options.lazyModule() ?
 			new BlockStatement([new ExpressionStatement(
 				new AssignmentExpression('=', ExportsGet,
-					msLazy(functionExpressionThunk(fullBody))))]) :
+					msCall('lazy', new ArrowFunctionExpression([], fullBody))))]) :
 			fullBody
 
 	return new CallExpression(IdDefine,
@@ -92,10 +92,10 @@ function pathBaseName(path) {
 function importDeclarators({imported, opImportDefault}, moduleIdentifier) {
 	// TODO: Could be neater about this
 	const isLazy = (isEmpty(imported) ? opImportDefault : imported[0]).isLazy()
-	const value = (isLazy ? msLazyGetModule : msGetModule)(moduleIdentifier)
+	const value = msCall(isLazy ? 'lazyGetModule' : 'getModule', moduleIdentifier)
 
 	const importedDefault = opMap(opImportDefault, def => {
-		const defexp = msGetDefaultExport(moduleIdentifier)
+		const defexp = msCall('getDefaultExport', moduleIdentifier)
 		const val = isLazy ? lazyWrap(defexp) : defexp
 		return loc(new VariableDeclarator(idForDeclareCached(def), val), def.loc)
 	})

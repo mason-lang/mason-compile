@@ -1,5 +1,6 @@
-import {ExpressionStatement, Identifier, Literal, MemberExpression, NewExpression, ThrowStatement,
-	VariableDeclarator, VariableDeclaration} from 'esast/dist/ast'
+import {ArrowFunctionExpression, CallExpression, ExpressionStatement, Identifier, Literal,
+	MemberExpression, NewExpression, ThrowStatement, VariableDeclarator, VariableDeclaration
+	} from 'esast/dist/ast'
 import mangleIdentifier from 'esast/dist/mangle-identifier'
 import {loc, toStatement} from 'esast/dist/util'
 import {member} from 'esast/dist/util'
@@ -7,7 +8,6 @@ import {options} from '../context'
 import {QuoteAbstract} from '../MsAst'
 import {assert, opIf, opMap} from '../util'
 import {GlobalError} from './ast-constants'
-import {lazyWrap, msCheckContains, msGet, msLazyGet, msUnlazy} from './ms-call'
 
 export function t0(expr) {
 	return loc(expr.transpile(), expr.loc)
@@ -37,7 +37,7 @@ export function tLines(exprs) {
 
 export function accessLocalDeclare(localDeclare) {
 	const id = idForDeclareCached(localDeclare)
-	return localDeclare.isLazy() ? msUnlazy(id) : new Identifier(id.name)
+	return localDeclare.isLazy() ? msCall('unlazy', id) : new Identifier(id.name)
 }
 
 export function declare(localDeclare, val) {
@@ -59,7 +59,8 @@ export function opTypeCheckForLocalDeclare(localDeclare) {
 	// TODO: Way to typecheck lazies
 	return opIf(!localDeclare.isLazy(), () =>
 		opMap(localDeclare.opType, type =>
-			new ExpressionStatement(msCheckContains(
+			new ExpressionStatement(msCall(
+				'checkContains',
 				t0(type),
 				accessLocalDeclare(localDeclare),
 				new Literal(localDeclare.name)))))
@@ -84,15 +85,15 @@ export function makeDeclarator(assignee, value, valueIsAlreadyLazy) {
 
 export function maybeWrapInCheckContains(ast, opType, name) {
 	return options.includeChecks() && opType !== null ?
-		msCheckContains(t0(opType), ast, new Literal(name)) :
+		msCall('checkContains', t0(opType), ast, new Literal(name)) :
 		ast
 }
 
 export function getMember(astObject, gotName, isLazy, isModule) {
 	return isLazy ?
-		msLazyGet(astObject, new Literal(gotName)) :
+		msCall('lazyProp', astObject, new Literal(gotName)) :
 		isModule && options.includeChecks() ?
-		msGet(astObject, new Literal(gotName)) :
+		msCall('get', astObject, new Literal(gotName)) :
 		member(astObject, gotName)
 }
 
@@ -106,4 +107,17 @@ export function memberStringOrVal(object, memberName) {
 	return typeof memberName === 'string' ?
 		member(object, memberName) :
 		new MemberExpression(object, t0(memberName))
+}
+
+export function lazyWrap(value) {
+	return msCall('lazy', new ArrowFunctionExpression([], value))
+}
+
+const IdMs = new Identifier('_ms')
+export function msCall(name, ...args) {
+	return new CallExpression(member(IdMs, name), args)
+}
+
+export function msMember(name) {
+	return member(IdMs, name)
 }
