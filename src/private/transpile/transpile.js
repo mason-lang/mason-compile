@@ -18,8 +18,8 @@ import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, Decla
 	SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
 import transpileModule from './transpileModule'
 import {accessLocalDeclare, declare, doThrow, getMember, idForDeclareCached, lazyWrap,
-	makeDeclarator, maybeWrapInCheckContains, memberStringOrVal, msCall, msMember, opTypeCheckForLocalDeclare, t0,
-	t1, t2, t3, tLines} from './util'
+	makeDeclarator, maybeWrapInCheckContains, memberStringOrVal, msCall, msMember,
+	opTypeCheckForLocalDeclare, t0, t1, t2, t3, tLines, transpileName} from './util'
 
 export let verifyResults
 // isInGenerator means we are in an async or generator function.
@@ -54,7 +54,7 @@ implementMany(MsAstTypes, 'transpile', {
 					const args = call.args.map(t0)
 					if (called instanceof Member) {
 						const ass = this.negate ? 'assertNotMember' : 'assertMember'
-						return msCall(ass, t0(called.object), new Literal(called.name), ...args)
+						return msCall(ass, t0(called.object), transpileName(called.name), ...args)
 					} else {
 						const ass = this.negate ? 'assertNot' : 'assert'
 						return msCall(ass, t0(called), ...args)
@@ -335,7 +335,7 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	MemberFun() {
-		const name = typeof this.name === 'string' ? new Literal(this.name) : t0(this.name)
+		const name = transpileName(this.name)
 		return ifElse(this.opObject,
 			_ => msCall('methodBound', t0(_), name),
 			() => msCall('methodUnbound', name))
@@ -343,14 +343,12 @@ implementMany(MsAstTypes, 'transpile', {
 
 	MemberSet() {
 		const obj = t0(this.object)
-		const name = () =>
-			typeof this.name === 'string' ? new Literal(this.name) : t0(this.name)
 		const val = maybeWrapInCheckContains(t0(this.value), this.opType, this.name)
 		switch (this.kind) {
 			case Setters.Init:
-				return msCall('newProperty', obj, name(), val)
+				return msCall('newProperty', obj, transpileName(this.name), val)
 			case Setters.InitMutable:
-				return msCall('newMutableProperty', obj, name(), val)
+				return msCall('newMutableProperty', obj, transpileName(this.name), val)
 			case Setters.Mutate:
 				return new AssignmentExpression('=', memberStringOrVal(obj, this.name), val)
 			default: throw new Error()

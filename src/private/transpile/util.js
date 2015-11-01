@@ -103,6 +103,10 @@ export function doThrow(thrown) {
 		t0(thrown))
 }
 
+export function transpileName(name) {
+	return typeof name === 'string' ? new Literal(name) : t0(name)
+}
+
 export function memberStringOrVal(object, memberName) {
 	return typeof memberName === 'string' ?
 		member(object, memberName) :
