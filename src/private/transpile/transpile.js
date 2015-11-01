@@ -17,26 +17,19 @@ import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, Decla
 	ExportsDefault, IdArguments, IdBuilt, IdExports, IdExtract, IdFocus, IdLexicalThis, IdSuper,
 	GlobalError, GlobalInfinity, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt,
 	ReturnFocus, SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
+import {isInConstructor, isInGenerator, setup, tearDown, verifyResults, withInConstructor,
+	withInGenerator} from './context'
 import {transpileMethodToDefinition, transpileMethodToProperty} from './transpileMethod'
 import transpileModule from './transpileModule'
-import {accessLocalDeclare, declare, doThrow, getMember, idForDeclareCached, lazyWrap,
-	makeDeclarator, maybeWrapInCheckContains, memberStringOrVal, msCall, msMember,
+import {accessLocalDeclare, declare, doThrow, idForDeclareCached, lazyWrap, makeDeclarator,
+	makeDestructureDeclarators, maybeWrapInCheckContains, memberStringOrVal, msCall, msMember,
 	opTypeCheckForLocalDeclare, t0, t1, t2, t3, tLines, transpileName} from './util'
 
-export let verifyResults
-// isInGenerator means we are in an async or generator function.
-let isInGenerator, isInConstructor
-let nextDestructuredId
-
 /** Transform a {@link MsAst} into an esast. **/
-export default function transpile(moduleExpression, _verifyResults) {
-	verifyResults = _verifyResults
-	isInGenerator = false
-	isInConstructor = false
-	nextDestructuredId = 0
+export default function transpile(moduleExpression, verifyResults) {
+	setup(verifyResults)
 	const res = t0(moduleExpression)
-	// Release for garbage collection.
-	verifyResults = null
+	tearDown()
 	return res
 }
 
@@ -193,17 +186,16 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	Constructor() {
-		isInConstructor = true
+		return withInConstructor(() => {
+			// If there is a `super!`, `this` will not be defined until then,
+			// so must wait until then.
+			// Otherwise, do it at the beginning.
+			const body = verifyResults.constructorToSuper.has(this) ?
+				t0(this.fun) :
+				t1(this.fun, constructorSetMembers(this))
 
-		// If there is a `super!`, `this` will not be defined until then, so must wait until then.
-		// Otherwise, do it at the beginning.
-		const body = verifyResults.constructorToSuper.has(this) ?
-			t0(this.fun) :
-			t1(this.fun, constructorSetMembers(this))
-
-		const res = MethodDefinition.constructor(body)
-		isInConstructor = false
-		return res
+			return MethodDefinition.constructor(body)
+		})
 	},
 
 	Catch() {
@@ -230,26 +222,23 @@ implementMany(MsAstTypes, 'transpile', {
 	// leadStatements comes from constructor members
 	Fun(leadStatements=null) {
 		const isGeneratorFun = this.kind !== Funs.Plain
-		const oldInGenerator = isInGenerator
-		isInGenerator = isGeneratorFun
+		return withInGenerator(isGeneratorFun, () => {
+			// TODO:ES6 use `...`f
+			const nArgs = new Literal(this.args.length)
+			const opDeclareRest = opMap(this.opRestArg, rest =>
+				declare(rest, new CallExpression(ArraySliceCall, [IdArguments, nArgs])))
+			const argChecks = opIf(options.includeChecks(), () =>
+				flatOpMap(this.args, opTypeCheckForLocalDeclare))
 
-		// TODO:ES6 use `...`f
-		const nArgs = new Literal(this.args.length)
-		const opDeclareRest = opMap(this.opRestArg, rest =>
-			declare(rest, new CallExpression(ArraySliceCall, [IdArguments, nArgs])))
-		const argChecks = opIf(options.includeChecks(), () =>
-			flatOpMap(this.args, opTypeCheckForLocalDeclare))
+			const opDeclareThis =
+				opIf(!isInConstructor && this.opDeclareThis != null, () => DeclareLexicalThis)
 
-		const opDeclareThis =
-			opIf(!isInConstructor && this.opDeclareThis != null, () => DeclareLexicalThis)
+			const lead = cat(leadStatements, opDeclareThis, opDeclareRest, argChecks)
 
-		const lead = cat(leadStatements, opDeclareThis, opDeclareRest, argChecks)
+			const body =() => t2(this.block, lead, this.opReturnType)
+			const args = this.args.map(t0)
+			const id = opMap(verifyResults.opName(this), identifier)
 
-		const body =() => t2(this.block, lead, this.opReturnType)
-		const args = this.args.map(t0)
-		const id = opMap(verifyResults.opName(this), identifier)
-
-		try {
 			switch (this.kind) {
 				case Funs.Plain:
 					// TODO:ES6 Should be able to use rest args in arrow function
@@ -268,9 +257,7 @@ implementMany(MsAstTypes, 'transpile', {
 				default:
 					throw new Error(this.kind)
 			}
-		} finally {
-			isInGenerator = oldInGenerator
-		}
+		})
 	},
 
 	Ignore() {
@@ -639,18 +626,4 @@ function transpileSwitch(_) {
 		_ => new SwitchCase(undefined, t0(_).body),
 		() => SwitchCaseNoMatch))
 	return new SwitchStatement(t0(_.switched), parts)
-}
-
-export function makeDestructureDeclarators(assignees, isLazy, value, isModule) {
-	const destructuredName = `_$${nextDestructuredId}`
-	nextDestructuredId = nextDestructuredId + 1
-	const idDestructured = new Identifier(destructuredName)
-	const declarators = assignees.map(assignee => {
-		// TODO: Don't compile it if it's never accessed
-		const get = getMember(idDestructured, assignee.name, isLazy, isModule)
-		return makeDeclarator(assignee, get, isLazy)
-	})
-	// Getting lazy module is done by ms.lazyGetModule.
-	const val = isLazy && !isModule ? lazyWrap(value) : value
-	return cat(new VariableDeclarator(idDestructured, val), declarators)
 }

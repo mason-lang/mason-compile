@@ -6,8 +6,9 @@ import {loc, toStatement} from 'esast/dist/util'
 import {member} from 'esast/dist/util'
 import {options} from '../context'
 import {QuoteAbstract} from '../MsAst'
-import {assert, opIf, opMap} from '../util'
+import {assert, cat, opIf, opMap} from '../util'
 import {GlobalError} from './ast-constants'
+import {getDestructuredId} from './context'
 
 export function t0(expr) {
 	return loc(expr.transpile(), expr.loc)
@@ -89,14 +90,6 @@ export function maybeWrapInCheckContains(ast, opType, name) {
 		ast
 }
 
-export function getMember(astObject, gotName, isLazy, isModule) {
-	return isLazy ?
-		msCall('lazyProp', astObject, new Literal(gotName)) :
-		isModule && options.includeChecks() ?
-		msCall('get', astObject, new Literal(gotName)) :
-		member(astObject, gotName)
-}
-
 export function doThrow(thrown) {
 	return new ThrowStatement(thrown instanceof QuoteAbstract ?
 		new NewExpression(GlobalError, [t0(thrown)]) :
@@ -124,4 +117,24 @@ export function msCall(name, ...args) {
 
 export function msMember(name) {
 	return member(IdMs, name)
+}
+
+export function makeDestructureDeclarators(assignees, isLazy, value, isModule) {
+	const id = getDestructuredId()
+	const destructuredName = `_$${id}`
+	const idDestructured = new Identifier(destructuredName)
+	const declarators = assignees.map(assignee => {
+		const get = getMember(idDestructured, assignee.name, isLazy, isModule)
+		return makeDeclarator(assignee, get, isLazy)
+	})
+	// Getting lazy module is done by ms.lazyGetModule.
+	const val = isLazy && !isModule ? lazyWrap(value) : value
+	return cat(new VariableDeclarator(idDestructured, val), declarators)
+}
+function getMember(astObject, gotName, isLazy, isModule) {
+	return isLazy ?
+		msCall('lazyProp', astObject, new Literal(gotName)) :
+		isModule && options.includeChecks() ?
+		msCall('get', astObject, new Literal(gotName)) :
+		member(astObject, gotName)
 }

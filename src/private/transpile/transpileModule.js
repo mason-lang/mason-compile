@@ -8,8 +8,8 @@ import manglePath from '../manglePath'
 import {Import, LocalDeclare} from '../MsAst'
 import {cat, flatMap, isEmpty, last, opIf, opMap} from '../util'
 import {IdExports} from './ast-constants'
-import {makeDestructureDeclarators, verifyResults} from './transpile'
-import {idForDeclareCached, lazyWrap, msCall, tLines} from './util'
+import {verifyResults} from './context'
+import {idForDeclareCached, lazyWrap, makeDestructureDeclarators, msCall, tLines} from './util'
 
 export default function transpileModule() {
 	const body = tLines(this.lines)
