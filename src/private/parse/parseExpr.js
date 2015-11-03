@@ -1,7 +1,7 @@
 import Loc from 'esast/dist/Loc'
 import {code} from '../../CompileError'
 import {check, fail} from '../context'
-import {Call, Cond, ConditionalVal, LocalDeclare, Logic, Logics, New, Not, ObjPair, ObjSimple,
+import {Call, Cond, Conditional, LocalDeclare, Logic, Logics, New, Not, ObjPair, ObjSimple,
 	SuperCall, With, Yield, YieldTo} from '../MsAst'
 import {isAnyKeyword, isKeyword, Keywords, Name} from '../Token'
 import {cat, head, ifElse, opIf, tail} from '../util'
@@ -10,7 +10,7 @@ import {parseClass, parseExcept, parseSingle, parseSwitch} from './parse*'
 import {beforeAndBlock, parseBlockDo, parseBlockVal} from './parseBlock'
 import parseCase from './parseCase'
 import parseDel from './parseDel'
-import {parseForBag, parseForVal} from './parseFor'
+import {parseFor, parseForBag} from './parseFor'
 import parseFun from './parseFun'
 import parseKind from './parseKind'
 import {parseLocalDeclare} from './parseLocalDeclares'
@@ -47,6 +47,10 @@ export default function parseExpr(tokens) {
 		() => parseExprPlain(tokens))
 }
 
+export function opParseExpr(tokens) {
+	return opIf(!tokens.isEmpty(), () => parseExpr(tokens))
+}
+
 /**
 Treating tokens separately, parse {@link Val}s.
 This is called for e.g. the contents of an array (`[a b c]`).
@@ -63,20 +67,20 @@ export function parseExprParts(tokens) {
 						const kind = at.kind === Keywords.And ? Logics.And : Logics.Or
 						return new Logic(at.loc, kind, parseExprParts(after))
 					}
-					case Keywords.CaseVal:
+					case Keywords.Case:
 						return parseCase(true, false, after)
 					case Keywords.Class:
 						return parseClass(after)
 					case Keywords.Cond:
 						return parseCond(after)
-					case Keywords.DelVal:
+					case Keywords.Del:
 						return parseDel(after)
-					case Keywords.ExceptVal:
-						return parseExcept(Keywords.ExceptVal, after)
+					case Keywords.Except:
+						return parseExcept(true, after)
 					case Keywords.ForBag:
 						return parseForBag(after)
-					case Keywords.ForVal:
-						return parseForVal(after)
+					case Keywords.For:
+						return parseFor(true, after)
 					case Keywords.Fun: case Keywords.FunDo:
 					case Keywords.FunThis: case Keywords.FunThisDo:
 					case Keywords.FunAsync: case Keywords.FunAsyncDo:
@@ -84,24 +88,24 @@ export function parseExprParts(tokens) {
 					case Keywords.FunGen: case Keywords.FunGenDo:
 					case Keywords.FunThisGen: case Keywords.FunThisGenDo:
 						return parseFun(at.kind, after)
-					case Keywords.IfVal: case Keywords.UnlessVal: {
+					case Keywords.If: case Keywords.Unless: {
 						const [before, block] = beforeAndBlock(after)
-						return new ConditionalVal(tokens.loc,
+						return new Conditional(tokens.loc,
 							parseExprPlain(before),
 							parseBlockVal(block),
-							at.kind === Keywords.UnlessVal)
+							at.kind === Keywords.Unless)
 					}
 					case Keywords.Kind:
 						return parseKind(after)
 					case Keywords.New: {
 						const parts = parseExprParts(after)
-						return new New(at.loc, parts[0], tail(parts))
+						return new New(at.loc, head(parts), tail(parts))
 					}
 					case Keywords.Not:
 						return new Not(at.loc, parseExprPlain(after))
-					case Keywords.SuperVal:
-						return new SuperCall(at.loc, parseExprParts(after))
-					case Keywords.SwitchVal:
+					case Keywords.Super:
+						return new SuperCall(at.loc, parseExprParts(after), true)
+					case Keywords.Switch:
 						return parseSwitch(true, false, after)
 					case Keywords.With:
 						return parseWith(after)
@@ -119,13 +123,13 @@ export function parseExprParts(tokens) {
 }
 
 const exprSplitKeywords = new Set([
-	Keywords.And, Keywords.CaseVal, Keywords.Class, Keywords.Cond, Keywords.DelVal,
-	Keywords.ExceptVal, Keywords.ForBag, Keywords.ForVal, Keywords.Fun, Keywords.FunDo,
-	Keywords.FunThis, Keywords.FunThisDo, Keywords.FunAsync, Keywords.FunAsyncDo,
-	Keywords.FunThisAsync, Keywords.FunThisAsyncDo, Keywords.FunGen, Keywords.FunGenDo,
-	Keywords.FunThisGen, Keywords.FunThisGenDo, Keywords.IfVal, Keywords.Kind, Keywords.New,
-	Keywords.Not, Keywords.Or, Keywords.SuperVal, Keywords.SwitchVal, Keywords.UnlessVal,
-	Keywords.With, Keywords.Yield, Keywords.YieldTo
+	Keywords.And, Keywords.Case, Keywords.Class, Keywords.Cond, Keywords.Del, Keywords.Except,
+	Keywords.ForBag, Keywords.For, Keywords.Fun, Keywords.FunDo, Keywords.FunThis,
+	Keywords.FunThisDo, Keywords.FunAsync, Keywords.FunAsyncDo, Keywords.FunThisAsync,
+	Keywords.FunThisAsyncDo, Keywords.FunGen, Keywords.FunGenDo, Keywords.FunThisGen,
+	Keywords.FunThisGenDo, Keywords.If, Keywords.Kind, Keywords.New, Keywords.Not, Keywords.Or,
+	Keywords.Super, Keywords.Switch, Keywords.Unless, Keywords.With, Keywords.Yield,
+	Keywords.YieldTo
 ])
 
 function parseExprPlain(tokens) {

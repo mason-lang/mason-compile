@@ -1,12 +1,13 @@
-import {code} from '../../CompileError'
 import {check, options} from '../context'
-import {AssignSingle, BagEntry, BlockBag, BlockDo, BlockObj, BlockMap, BlockValReturn,
-	BlockValThrow, BlockWrap, LocalDeclare, MapEntry, ModuleExportDefault, ModuleExportNamed,
+import {AssignSingle, BagEntry, BagEntryMany, BlockBag, BlockDo, BlockObj, BlockMap,
+	BlockValReturn, BlockValThrow, BlockWrap, MapEntry, ModuleExportDefault, ModuleExportNamed,
 	ObjEntry, ObjEntryAssign, Throw, Val} from '../MsAst'
-import {Groups, isGroup, keywordName} from '../Token'
-import {isEmpty, last, rtail} from '../util'
-import {checkEmpty} from './checks'
-import parseLine, {parseLineOrLines} from './parseLine'
+import {Groups, isGroup, isAnyKeyword, Keyword, Keywords, showKeyword} from '../Token'
+import {ifElse} from '../util'
+import {checkEmpty, checkNonEmpty} from './checks'
+import {parseExpr} from './parse*'
+import parseLine, {parseBagEntry, parseBagEntryMany, parseMapEntry, parseObjEntry, parseThrow,
+	parseLineOrLines} from './parseLine'
 import tryTakeComment from './tryTakeComment'
 import Slice from './Slice'
 
@@ -46,8 +47,16 @@ Parse a block, throwing an error if there's anything before the block.
 export function justBlock(keywordKind, tokens) {
 	const [before, block] = beforeAndBlock(tokens)
 	checkEmpty(before, () =>
-		`Did not expect anything between ${code(keywordName(keywordKind))} and block.`)
+		`Did not expect anything between ${showKeyword(keywordKind)} and block.`)
 	return block
+}
+
+/**
+Parse a {@link BlockVal} if `isVal`, else a {@link BlockDo},
+failing if there's something preciding it.
+*/
+export function parseJustBlockDoOrVal(isVal, keyword, tokens) {
+	return (isVal ? parseJustBlockVal : parseJustBlockDo)(keyword, tokens)
 }
 
 /** Parse a {@link BlockDo}, failing if there's something preceding it. */
@@ -56,7 +65,7 @@ export function parseJustBlockDo(keyword, tokens) {
 }
 
 /** Parse a {@link BlockVal}, failing if there's something preceding it. */
-export function parseJustBlockVal(keyword, tokens) {
+function parseJustBlockVal(keyword, tokens) {
 	return parseBlockVal(justBlock(keyword, tokens))
 }
 
@@ -77,6 +86,11 @@ export function parseLinesFromBlock(tokens) {
 	return lines
 }
 
+/** Parse a {@link BlockVal} if `isVal`, else a {@link BlockDo}. */
+export function parseBlockDoOrVal(isVal, tokens) {
+	return (isVal ? parseBlockVal : parseBlockDo)(tokens)
+}
+
 /** Parse a {@link BlockDo}. */
 export function parseBlockDo(tokens) {
 	const [opComment, rest] = tryTakeComment(tokens)
@@ -87,25 +101,14 @@ export function parseBlockDo(tokens) {
 /** Parse a {@link BlockVal}. */
 export function parseBlockVal(tokens) {
 	const [opComment, rest] = tryTakeComment(tokens)
-	const {lines, returnKind} = parseBlockLines(rest)
-	switch (returnKind) {
-		case Returns.Bag:
-			return new BlockBag(tokens.loc, opComment, lines)
-		case Returns.Map:
-			return new BlockMap(tokens.loc, opComment, lines)
-		case Returns.Obj:
-			return new BlockObj(tokens.loc, opComment, lines)
-		default: {
-			check(!isEmpty(lines), tokens.loc, 'Value block must end in a value.')
-			const val = last(lines)
-			if (val instanceof Throw)
-				return new BlockValThrow(tokens.loc, opComment, rtail(lines), val)
-			else {
-				check(val instanceof Val, val.loc, 'Value block must end in a value.')
-				return new BlockValReturn(tokens.loc, opComment, rtail(lines), val)
-			}
-		}
-	}
+	checkNonEmpty(rest, 'Value block needs at least one line.')
+	const {kind, lines, lastLine} = parseBlockKind(rest)
+
+	if (kind === Blocks.Plain) {
+		const ctr = lastLine instanceof Throw ? BlockValThrow : BlockValReturn
+		return new ctr(tokens.loc, opComment, lines, lastLine)
+	} else
+		return new (blockConstructor(kind))(tokens.loc, opComment, lines)
 }
 
 /**
@@ -113,105 +116,137 @@ Parse the body of a module.
 @return {Array<MsAst>}
 */
 export function parseModuleBlock(tokens) {
-	const {lines, returnKind} = parseBlockLines(tokens, true)
-	const opComment = null
-	const loc = tokens.loc
-	switch (returnKind) {
-		case Returns.Bag: case Returns.Map: {
-			const cls = returnKind === Returns.Bag ? BlockBag : BlockMap
-			const block = new cls(loc, opComment, lines)
-			const val = new BlockWrap(loc, block)
-			const assignee = LocalDeclare.plain(loc, options.moduleName())
-			const assign = new AssignSingle(loc, assignee, val)
-			return [new ModuleExportDefault(loc, assign)]
-		}
-		case Returns.Obj: {
-			const moduleName = options.moduleName()
+	if (tokens.isEmpty())
+		return []
 
-			// Module exports look like a BlockObj,  but are really different.
-			// In ES6, module exports must be completely static.
-			// So we keep an array of exports attached directly to the Module ast.
-			// If you write:
-			//	if! cond
-			//		a. b
-			// in a module context, it will be an error. (The module creates no `built` local.)
-			const convertToExports = line => {
+	const loc = tokens.loc
+	const name = options.moduleName()
+	const {kind, lines, lastLine} = parseBlockKind(tokens, true)
+	switch (kind) {
+		case Blocks.Bag: case Blocks.Map: {
+			const val = new BlockWrap(loc, new (blockConstructor(kind))(loc, null, lines))
+			return [ModuleExportDefault.forVal(loc, name, val)]
+		}
+		case Blocks.Obj:
+			return lines.map(line => {
 				if (line instanceof ObjEntry) {
 					check(line instanceof ObjEntryAssign, line.loc,
 						'Module exports can not be computed.')
 					check(line.assign instanceof AssignSingle, line.loc,
 						'Export AssignDestructure not yet supported.')
-					return line.assign.assignee.name === moduleName ?
+					return line.assign.assignee.name === name ?
 						new ModuleExportDefault(line.loc, line.assign) :
 						new ModuleExportNamed(line.loc, line.assign)
-				}
-				// TODO: If Region, line.lines = line.lines.map(convertToExports)
-				return line
-			}
-
-			return lines.map(convertToExports)
-		}
-		default: {
-			const [moduleLines, opDefaultExport] = tryTakeLastVal(lines)
-			if (opDefaultExport !== null) {
-				const _ = opDefaultExport
-				moduleLines.push(new ModuleExportDefault(_.loc,
-					new AssignSingle(_.loc,
-						LocalDeclare.plain(opDefaultExport.loc, options.moduleName()),
-						_)))
-			}
-			return moduleLines
-		}
+				} else
+					// TODO: If Region, line.lines = line.lines.map(convertToExports)
+					return line
+			})
+		case Blocks.Plain:
+			if (lastLine instanceof Val)
+				lines.push(ModuleExportDefault.forVal(loc, name, lastLine))
+			else
+				lines.push(lastLine)
+			return lines
+		default:
+			throw new Error(kind)
 	}
-}
-
-function tryTakeLastVal(lines) {
-	return !isEmpty(lines) && last(lines) instanceof Val ?
-		[rtail(lines), last(lines)] :
-		[lines, null]
 }
 
 function plainBlockLines(lineTokens) {
 	const lines = []
-	const addLine = line => {
-		if (line instanceof Array)
-			for (const _ of line)
-				addLine(_)
-		else
-			lines.push(line)
-	}
 	for (const _ of lineTokens.slices())
-		addLine(parseLine(_))
+		addLine(lines, parseLine(_))
 	return lines
 }
 
-const Returns = {
-	Plain: 0,
-	Obj: 1,
-	Bag: 2,
-	Map: 3
+function addLine(lines, line) {
+	if (line instanceof Array)
+		for (const _ of line)
+			addLine(lines, _)
+	else
+		lines.push(line)
 }
 
-function parseBlockLines(lineTokens) {
-		let isBag = false, isMap = false, isObj = false
+const Blocks = {
+	Bag: 0,
+	Map: 1,
+	Obj: 2,
+	Plain: 3
+}
+
+function blockConstructor(kind) {
+	switch (kind) {
+		case Blocks.Bag:
+			return BlockBag
+		case Blocks.Map:
+			return BlockMap
+		case Blocks.Obj:
+			return BlockObj
+		default:
+			throw new Error(kind)
+	}
+}
+
+function parseBlockKind(tokens, allowLastStatement) {
+	const lines = plainBlockLines(tokens.rtail())
+	const last = Slice.group(tokens.last())
+	let isBag = false, isMap = false, isObj = false
 	const checkLine = line => {
 		// TODO: if Region, loop over its lines
-		if (line instanceof BagEntry)
+		if (line instanceof BagEntry || line instanceof BagEntryMany)
 			isBag = true
 		else if (line instanceof MapEntry)
 			isMap = true
 		else if (line instanceof ObjEntry)
 			isObj = true
 	}
-	const lines = plainBlockLines(lineTokens)
 	for (const _ of lines)
 		checkLine(_)
+
+	const lastLine = allowLastStatement || isObj || isBag || isMap ?
+		parseLine(last) :
+		parseBuilderOrVal(last)
+	checkLine(lastLine)
 
 	check(!(isObj && isBag), lines.loc, 'Block has both Bag and Obj lines.')
 	check(!(isObj && isMap), lines.loc, 'Block has both Obj and Map lines.')
 	check(!(isBag && isMap), lines.loc, 'Block has both Bag and Map lines.')
 
-	const returnKind =
-		isObj ? Returns.Obj : isBag ? Returns.Bag : isMap ? Returns.Map : Returns.Plain
-	return {lines, returnKind}
+	const kind = isBag ? Blocks.Bag : isMap ? Blocks.Map : isObj ? Blocks.Obj : Blocks.Plain
+
+	if (kind !== Blocks.Plain) {
+		addLine(lines, lastLine)
+		return {kind, lines}
+	} else
+		return {kind, lines, lastLine}
 }
+
+/*
+Gets value or builder statement.
+Does not get e.g. if statement; gets if value instead
+*/
+function parseBuilderOrVal(tokens) {
+	const loc = tokens.loc
+	const head = tokens.head()
+	const rest = () => tokens.tail()
+
+	if (head instanceof Keyword)
+		switch (head.kind) {
+			case Keywords.Dot3:
+				return parseBagEntryMany(rest(), loc)
+			case Keywords.ObjAssign:
+				return parseBagEntry(rest(), loc)
+			case Keywords.Throw:
+				return parseThrow(rest(), loc)
+			default:
+				// fall through
+		}
+
+	return ifElse(tokens.opSplitOnce(_ => isAnyKeyword(builderSplitKeywords, _)),
+		({before, at, after}) =>
+			(at.kind === Keywords.MapEntry ? parseMapEntry : parseObjEntry)(before, after, loc),
+		() => parseExpr(tokens))
+}
+
+const builderSplitKeywords = new Set([Keywords.MapEntry, Keywords.ObjAssign])
+

@@ -1,6 +1,6 @@
-import {ArrowFunctionExpression, CallExpression, ExpressionStatement, Identifier, Literal,
-	MemberExpression, NewExpression, ThrowStatement, VariableDeclarator, VariableDeclaration
-	} from 'esast/dist/ast'
+import {ArrowFunctionExpression, BlockStatement, CallExpression, ExpressionStatement,
+	FunctionExpression, Identifier, Literal, MemberExpression, NewExpression, ThrowStatement,
+	VariableDeclarator, VariableDeclaration, YieldExpression} from 'esast/dist/ast'
 import mangleIdentifier from 'esast/dist/mangle-identifier'
 import {loc, toStatement} from 'esast/dist/util'
 import {member} from 'esast/dist/util'
@@ -8,7 +8,7 @@ import {options} from '../context'
 import {QuoteAbstract} from '../MsAst'
 import {assert, cat, opIf, opMap} from '../util'
 import {GlobalError} from './ast-constants'
-import {getDestructuredId} from './context'
+import {getDestructuredId, isInGenerator} from './context'
 
 export function t0(expr) {
 	return loc(expr.transpile(), expr.loc)
@@ -137,4 +137,17 @@ function getMember(astObject, gotName, isLazy, isModule) {
 		isModule && options.includeChecks() ?
 		msCall('get', astObject, new Literal(gotName)) :
 		member(astObject, gotName)
+}
+
+/** Wraps a block (with `return` statements in it) in an IIFE. */
+export function blockWrap(block) {
+	const thunk = isInGenerator ?
+		new FunctionExpression(null, [], block, true) :
+		new ArrowFunctionExpression([], block)
+	const invoke = new CallExpression(thunk, [])
+	return isInGenerator ? new YieldExpression(invoke, true) : invoke
+}
+/** Wraps a statement in an IIFE is `isVal`. */
+export function blockWrapIfVal(isVal, statement) {
+	return isVal ? blockWrap(new BlockStatement([statement])) : statement
 }

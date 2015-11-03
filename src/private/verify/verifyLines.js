@@ -1,7 +1,6 @@
 import {code} from '../../CompileError'
 import {check, warn} from '../context'
-import {AssignDestructure, AssignSingle, Call, Do, ModuleExport, ObjEntry, Yield, YieldTo
-	} from '../MsAst'
+import {AssignDestructure, AssignSingle, ModuleExport, ObjEntry} from '../MsAst'
 import {assert, reverseIter} from '../util'
 import {locals, pendingBlockLocals} from './context'
 import {deleteLocal, registerLocal, setLocal} from './locals'
@@ -51,7 +50,8 @@ export default function verifyLines(lines) {
 	const shadowed = []
 
 	const verifyLine = line => {
-		verifyIsStatement(line)
+		if (!line.canBeStatement())
+			warn(line.loc, 'Expression in statement position.')
 		for (const newLocal of lineNewLocals(line)) {
 			const name = newLocal.name
 			const oldLocal = locals.get(name)
@@ -92,11 +92,4 @@ function lineNewLocals(line) {
 		line instanceof ModuleExport ?
 		lineNewLocals(line.assign) :
 		[]
-}
-
-/** Warn if a line makes no sense as a statement. */
-function verifyIsStatement(line) {
-	if (!(line instanceof Do ||
-		line instanceof Call || line instanceof Yield || line instanceof YieldTo))
-		warn(line.loc, 'Expression in statement position.')
 }

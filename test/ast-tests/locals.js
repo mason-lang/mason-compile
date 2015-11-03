@@ -9,7 +9,7 @@ describe('locals', () => {
 	test(
 		`
 			ze-ro = 0
-			throw! ze-ro`,
+			throw ze-ro`,
 		[
 			new AssignSingle(loc, LocalDeclare.plain(loc, 'ze-ro'), zero),
 			new Throw(loc, new LocalAccess(loc, 'ze-ro'))

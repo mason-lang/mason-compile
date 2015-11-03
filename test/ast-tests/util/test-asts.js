@@ -7,10 +7,7 @@ import verify from '../../../dist/private/verify/verify'
 import {last, rtail} from '../../../dist/private/util'
 import {loc} from './ast-util'
 
-export const test = (ms, ast, js, opts) => {
-	// TODO:ES6 Optional arguments
-	opts = opts || {}
-
+export function test(ms, ast, js, opts={}) {
 	const isMultiLineTest = ast instanceof Array
 	ast = isMultiLineTest ?
 		last(ast) instanceof Val ?
@@ -70,7 +67,7 @@ const compileOptions = {
 	useStrict: false
 }
 
-const equalAsts = (a, b) => {
+function equalAsts(a, b) {
 	if (a === b)
 		return true
 
@@ -93,25 +90,26 @@ const equalAsts = (a, b) => {
 	return true
 }
 
-const
-	// multi-line string literals like:
-	// `
-	//	a
-	//		b
-	//	c`
-	// have too much indentation.
-	// This will change it to "a\n\tb\nc" by detecting the first line's indentation.
-	dedent = str => {
-		if (str[0] !== '\n')
-			return str
+/*
+multi-line string literals like:
+`
+	a
+		b
+	c`
+have too much indentation.
+This will change it to "a\n\tb\nc" by detecting the first line's indentation.
+*/
+function dedent(str) {
+	if (str[0] !== '\n')
+		return str
 
-		str = str.slice(1)
+	str = str.slice(1)
 
-		let indent
-		for (indent = 0; indent < str.length; indent = indent + 1)
-			if (str[indent] !== '\t')
-				break
+	let indent
+	for (indent = 0; indent < str.length; indent = indent + 1)
+		if (str[indent] !== '\t')
+			break
 
-		const dedentedLines = str.split('\n').map(line => line.slice(indent))
-		return dedentedLines.join('\n')
-	}
+	const dedentedLines = str.split('\n').map(line => line.slice(indent))
+	return dedentedLines.join('\n')
+}

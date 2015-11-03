@@ -16,13 +16,22 @@ export default class MsAst {
 	Any valid part of a Block.
 	Note that some {@link Val}s will still cause warnings if they appear as a line.
 	*/
-	export class LineContent extends MsAst { }
+	export class LineContent extends MsAst {
+		canBeStatement() {
+			return true
+		}
+	}
 
 	/** Can only appear as lines in a Block. */
-	export class Do extends LineContent { }
+	export class Do extends LineContent {}
 
 	/** Can appear in any expression. */
-	export class Val extends LineContent { }
+	export class Val extends LineContent {
+		// overridable
+		canBeStatement() {
+			return false
+		}
+	}
 
 // Module
 	/** Whole source file. */
@@ -58,7 +67,13 @@ export default class MsAst {
 	/** Created with an ObjAssign in root. */
 	export class ModuleExportNamed extends ModuleExport { }
 	/** Created by assigning to the module's name. */
-	export class ModuleExportDefault extends ModuleExport { }
+	export class ModuleExportDefault extends ModuleExport {
+		static forVal(loc, name, value) {
+			const assignee = LocalDeclare.plain(loc, name)
+			const assign = new AssignSingle(loc, assignee, value)
+			return new ModuleExportDefault(loc, assign)
+		}
+	}
 
 	/** Single import in an `import!` block. */
 	export class ImportDo extends MsAst {
@@ -308,44 +323,27 @@ export default class MsAst {
 	}
 
 	/**
-	```except!
-		try!
+	```except
+		try
 			{try}
-		catch!
+		catch
 			{catch}
-		finally!
+		finally
 			{finally}```
 	*/
-	export class ExceptDo extends Do {
+	export class Except extends LineContent {
 		constructor(loc, _try, _catch, _finally) {
 			super(loc)
-			/** @type {BlockDo} */
+			/** @type {Block} */
 			this.try = _try
 			/** @type {?Catch} */
 			this.catch = _catch
 			/** @type {?BlockDo} */
 			this.finally = _finally
 		}
-	}
 
-	/**
-	```except
-		try
-			{try}
-		catch
-			{catch}
-		finally!
-			{finally}```
-	*/
-	export class ExceptVal extends Val {
-		constructor(loc, _try, _catch, _finally) {
-			super(loc)
-			/** @type {BlockVal} */
-			this.try = _try
-			/** @type {?Catch} */
-			this.catch = _catch
-			/** @type {BlockDo} */
-			this.finally = _finally
+		get isVal() {
+			return this.try instanceof BlockVal
 		}
 	}
 
@@ -526,34 +524,22 @@ export default class MsAst {
 
 // Conditionals
 	/**
-	```if!/unless! {test}
+	```if/unless {test}
 		{result}```
 	*/
-	export class ConditionalDo extends Do {
+	export class Conditional extends LineContent {
 		constructor(loc, test, result, isUnless) {
 			super(loc)
 			/** @type {Val} */
 			this.test = test
-			/** @type {BlockDo} */
+			/** @type {Block} */
 			this.result = result
 			/** @type {boolean} */
 			this.isUnless = isUnless
 		}
-	}
 
-	/**
-	```if/unless {test}
-		{result}```
-	*/
-	export class ConditionalVal extends Val {
-		constructor(loc, test, result, isUnless) {
-			super(loc)
-			/** @type {Val} */
-			this.test = test
-			/** @type {BlockVal} */
-			this.result = result
-			/** @type {boolean} */
-			this.isUnless = isUnless
+		get isVal() {
+			return this.result instanceof BlockVal
 		}
 	}
 
@@ -617,6 +603,10 @@ export default class MsAst {
 			/** @type {?Val} */
 			this.opYielded = opYielded
 		}
+
+		canBeStatement() {
+			return true
+		}
 	}
 
 	/**
@@ -628,6 +618,10 @@ export default class MsAst {
 			super(loc)
 			/** @type {Val} */
 			this.yieldedTo = yieldedTo
+		}
+
+		canBeStatement() {
+			return true
 		}
 	}
 
@@ -751,23 +745,13 @@ export default class MsAst {
 	`super {args}`.
 	Never a {@link SuperMember}.
 	*/
-	export class SuperCall extends Val {
-		constructor(loc, args) {
+	export class SuperCall extends LineContent {
+		constructor(loc, args, isVal) {
 			super(loc)
 			/** @type {Array<Val | Spread>} */
 			this.args = args
-		}
-	}
-
-	/**
-	`super! {args}`
-	Never a {@link SuperMember}.
-	*/
-	export class SuperCallDo extends Do {
-		constructor(loc, args) {
-			super(loc)
-			/** @type {Array<Val | Spread>} */
-			this.args = args
+			/** @type {boolean} */
+			this.isVal = isVal
 		}
 	}
 
@@ -805,6 +789,10 @@ export default class MsAst {
 			/** @type {Array<Val | Spread>} */
 			this.args = args
 		}
+
+		canBeStatement() {
+			return true
+		}
 	}
 
 	/** `new {type} {args}` */
@@ -837,8 +825,8 @@ export default class MsAst {
 	}
 
 // Case
-	/** `case!` statement. */
-	export class CaseDo extends Do {
+	/** `case` */
+	export class Case extends LineContent {
 		constructor(loc, opCased, parts, opElse) {
 			super(loc)
 			/**
@@ -846,43 +834,28 @@ export default class MsAst {
 			@type {?AssignSingle}
 			*/
 			this.opCased = opCased
-			/** @type {Array<CaseDoPart>} */
+			/** @type {Array<CasePart>} */
 			this.parts = parts
-			/** @type {?BlockDo} */
+			/** @type {?Block} */
 			this.opElse = opElse
 		}
-	}
-	/** Single case in a {@link CaseDo}. */
-	export class CaseDoPart extends MsAst {
-		constructor(loc, test, result) {
-			super(loc)
-			/** @type {Val | Pattern} */
-			this.test = test
-			/** @type {BlockDo} */
-			this.result = result
-		}
-	}
 
-	/** `case` expression. */
-	export class CaseVal extends Val {
-		constructor(loc, opCased, parts, opElse) {
-			super(loc)
-			/** @type {?AssignSingle} */
-			this.opCased = opCased
-			/** @type {Array<CaseValPart>} */
-			this.parts = parts
-			/** @type {?BlockVal} */
-			this.opElse = opElse
+		get isVal() {
+			return this.parts[0].isVal
 		}
 	}
-	/** Single case in a {@link CaseVal}. */
-	export class CaseValPart extends MsAst {
+	/** Single case in a {@link Case}. */
+	export class CasePart extends MsAst {
 		constructor(loc, test, result) {
 			super(loc)
 			/** @type {Val | Pattern} */
 			this.test = test
-			/** @type {BlockVal} */
+			/** @type {Block} */
 			this.result = result
+		}
+
+		get isVal() {
+			return this.result instanceof BlockVal
 		}
 	}
 
@@ -900,78 +873,51 @@ export default class MsAst {
 	}
 
 // Switch
-	/** `switch!` statement. */
-	export class SwitchDo extends Do {
+	/** `switch` */
+	export class Switch extends LineContent {
 		constructor(loc, switched, parts, opElse) {
 			super(loc)
 			/** @type {Val} */
 			this.switched = switched
-			/** @type {Array<SwitchDoPart>} */
+			/** @type {Array<SwitchPart>} */
 			this.parts =  parts
-			/** @type {?BlockDo} */
+			/** @type {?Block} */
 			this.opElse = opElse
 		}
-	}
-	/**
-	Single case in a {@link SwitchDo}.
-	Multiple values are specified with `or`.
-	*/
-	export class SwitchDoPart extends MsAst {
-		constructor(loc, values, result) {
-			super(loc)
-			/** @type {Array<Val>} */
-			this.values = values
-			/** @type {BlockDo} */
-			this.result = result
-		}
-	}
 
-	/** `switch` expression. */
-	export class SwitchVal extends Val {
-		constructor(loc, switched, parts, opElse) {
-			super(loc)
-			/** @type {Val} */
-			this.switched = switched
-			/** @type {Array<SwitchValPart>} */
-			this.parts = parts
-			/** @type {?BlockVal} */
-			this.opElse = opElse
+		get isVal() {
+			return this.parts[0].isVal
 		}
 	}
 	/**
-	Single case in a {@link SwitchVal}.
+	Single case in a {@link Switch}.
 	Multiple values are specified with `or`.
 	*/
-	export class SwitchValPart extends MsAst {
+	export class SwitchPart extends MsAst {
 		constructor(loc, values, result) {
 			super(loc)
 			/** @type {Array<Val>} */
 			this.values = values
-			/** @type {BlockVal} */
+			/** @type {Block} */
 			this.result = result
+		}
+
+		get isVal() {
+			return this.result instanceof BlockVal
 		}
 	}
 
 // For
-	/** `for! */
-	export class ForDo extends Do {
-		constructor(loc, opIteratee, block) {
-			super(loc)
-			/** @type {?Iteratee} */
-			this.opIteratee = opIteratee
-			/** @type {BlockDo} */
-			this.block = block
-		}
-	}
-
 	/** `for` */
-	export class ForVal extends Val {
-		constructor(loc, opIteratee, block) {
+	export class For extends Do {
+		constructor(loc, opIteratee, block, isVal) {
 			super(loc)
 			/** @type {?Iteratee} */
 			this.opIteratee = opIteratee
 			/** @type {BlockDo} */
 			this.block = block
+			/** @type {boolean} */
+			this.isVal = isVal
 		}
 	}
 
@@ -1001,7 +947,7 @@ export default class MsAst {
 		}
 	}
 
-	/** `break!` */
+	/** `break` */
 	export class Break extends Do { }
 
 	/** `break {val}` */

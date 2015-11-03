@@ -1,46 +1,35 @@
-import {code} from '../../CompileError'
 import {check} from '../context'
-import {Catch, ExceptDo, ExceptVal, LocalDeclare} from '../MsAst'
+import {Catch, Except, LocalDeclare} from '../MsAst'
 import {opIf} from '../util'
-import {isKeyword, keywordName, Keywords} from '../Token'
+import {isKeyword, Keywords, showKeyword} from '../Token'
 import {checkNonEmpty} from './checks'
-import {beforeAndBlock, parseBlockVal, parseBlockDo, justBlock, parseJustBlockDo, parseJustBlockVal
+import {beforeAndBlock, parseBlockDoOrVal, justBlock, parseJustBlockDoOrVal, parseJustBlockDo
 	} from './parseBlock'
 import parseLocalDeclares from './parseLocalDeclares'
 
-/** Parse an {@link ExceptDo} or {@link ExceptVal}. */
-export default function parseExcept(kwExcept, tokens) {
-	const
-		isVal = kwExcept === Keywords.ExceptVal,
-		justDoValBlock = isVal ? parseJustBlockVal : parseJustBlockDo,
-		parseBlock = isVal ? parseBlockVal : parseBlockDo,
-		Except = isVal ? ExceptVal : ExceptDo,
-		kwTry = isVal ? Keywords.TryVal : Keywords.TryDo,
-		kwCatch = isVal ? Keywords.CatchVal : Keywords.CatchDo,
-		nameTry = () => code(keywordName(kwTry)),
-		nameCatch = () => code(keywordName(kwCatch)),
-		nameFinally = () => code(keywordName(Keywords.Finally))
-
-	const lines = justBlock(kwExcept, tokens)
+/** Parse an {@link Except}. */
+export default function parseExcept(isVal, tokens) {
+	const lines = justBlock(Keywords.Except, tokens)
 
 	// `try` *must* come first.
 	const firstLine = lines.headSlice()
 	const tokenTry = firstLine.head()
-	check(isKeyword(kwTry, tokenTry), tokenTry.loc, () =>
-		`Must start with ${nameTry()}`)
-	const _try = justDoValBlock(kwTry, firstLine.tail())
+	check(isKeyword(Keywords.Try, tokenTry), tokenTry.loc, () =>
+		`Must start with ${showKeyword(Keywords.Try)}`)
+	const _try = parseJustBlockDoOrVal(isVal, Keywords.Try, firstLine.tail())
 
 	const restLines = lines.tail()
 	checkNonEmpty(restLines, () =>
-		`Must have at least one of ${nameCatch()} or ${nameFinally()}`)
+		'Must have at least one of ' +
+		`${showKeyword(Keywords.Catch)} or ${showKeyword(Keywords.Finally)}`)
 
 	const handleFinally = restLines => {
 		const line = restLines.headSlice()
 		const tokenFinally = line.head()
 		check(isKeyword(Keywords.Finally, tokenFinally), tokenFinally.loc, () =>
-			`Expected ${nameFinally()}`)
+			`Expected ${showKeyword(Keywords.Finally)}`)
 		check(restLines.size() === 1, restLines.loc, () =>
-			`Nothing is allowed to come after ${nameFinally()}.`)
+			`Nothing is allowed to come after ${showKeyword(Keywords.Finally)}.`)
 		return parseJustBlockDo(Keywords.Finally, line.tail())
 	}
 
@@ -48,10 +37,10 @@ export default function parseExcept(kwExcept, tokens) {
 
 	const line2 = restLines.headSlice()
 	const head2 = line2.head()
-	if (isKeyword(kwCatch, head2)) {
+	if (isKeyword(Keywords.Catch, head2)) {
 		const [before2, block2] = beforeAndBlock(line2.tail())
 		const caught = parseOneLocalDeclareOrFocus(before2)
-		_catch = new Catch(line2.loc, caught, parseBlock(block2))
+		_catch = new Catch(line2.loc, caught, parseBlockDoOrVal(isVal, block2))
 		_finally = opIf(restLines.size() > 1, () => handleFinally(restLines.tail()))
 	} else {
 		_catch = null

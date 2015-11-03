@@ -4,7 +4,7 @@ import {test} from './util/test-asts'
 
 describe('statements', () => {
 	test(
-		'debugger!',
+		'debugger',
 		new SpecialDo(loc, SpecialDos.Debugger),
 		'debugger')
 

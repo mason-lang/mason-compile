@@ -50,7 +50,7 @@ export default function parseSpaced(tokens) {
 				return new Spread(tokens.loc, parseSpacedFold(parseSingle(rest.head()), rest.tail))
 			case Keywords.Lazy:
 				return new Lazy(h.loc, parseSpaced(rest))
-			case Keywords.SuperVal: {
+			case Keywords.Super: {
 				// TODO: handle sub here as well
 				const h2 = rest.head()
 				if (isKeyword(Keywords.Dot, h2)) {
@@ -58,7 +58,7 @@ export default function parseSpaced(tokens) {
 					const sup = new SuperMember(h2.loc, parseMemberName(tail.head()))
 					return parseSpacedFold(sup, tail.tail())
 				} else if (isGroup(Groups.Parenthesis, h2) && Slice.group(h2).isEmpty()) {
-					const x = new SuperCall(h2.loc, [])
+					const x = new SuperCall(h2.loc, [], true)
 					return parseSpacedFold(x, rest.tail())
 				} else
 					fail(`Expected ${code('.')} or ${code('()')} after ${code('super')}`)

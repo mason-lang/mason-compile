@@ -77,8 +77,15 @@ export function withName(newName, action) {
 }
 
 // Can't break out of loop inside of IIFE.
-export function withIIFE(action) {
-	withLoop(false, action)
+export function withIife(action) {
+	withLoop(null, action)
+}
+
+export function withIifeIf(isVal, action) {
+	if (isVal)
+		withIife(action)
+	else
+		action()
 }
 
 // TODO:ES6 Shouldn't need this

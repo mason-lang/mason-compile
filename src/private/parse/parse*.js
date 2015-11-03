@@ -1,5 +1,6 @@
 // TODO:ES6 Recursive modules should work, so this should not be necessary.
 
+export let opParseExpr
 export let parseClass
 export let parseExcept
 export let parseExpr
@@ -9,6 +10,7 @@ export let parseSpaced
 export let parseSwitch
 
 export function load(_) {
+	opParseExpr = _.opParseExpr
 	parseClass = _.parseClass
 	parseExcept = _.parseExcept
 	parseExpr = _.parseExpr

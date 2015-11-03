@@ -57,7 +57,7 @@ export class Keyword extends Token {
 	}
 
 	toString() {
-		return code(keywordKindToName.get(this.kind))
+		return showKeyword(this.kind)
 	}
 }
 
@@ -241,37 +241,31 @@ export const Keywords = {
 	Ampersand: kwNotName('&'),
 	And: kw('and'),
 	As: kw('as'),
-	Assert: kw('assert!'),
-	AssertNot: kw('forbid!'),
+	Assert: kw('assert'),
+	AssertNot: kw('forbid'),
 	Assign: kw('='),
 	AssignMutable: kwNotName('::='),
 	LocalMutate: kwNotName(':='),
-	Break: kw('break!'),
-	BreakWithVal: kw('break'),
+	Break: kw('break'),
 	Built: kw('built'),
-	CaseDo: kw('case!'),
-	CaseVal: kw('case'),
-	CatchDo: kw('catch!'),
-	CatchVal: kw('catch'),
+	Case: kw('case'),
+	Catch: kw('catch'),
 	Cond: kw('cond'),
 	Class: kw('class'),
-	Construct: kw('construct!'),
-	Debugger: kw('debugger!'),
-	DelDo: kw('del!'),
-	DelVal: kw('del'),
-	Do: kw('do!'),
+	Construct: kw('construct'),
+	Debugger: kw('debugger'),
+	Del: kw('del'),
+	Do: kw('do'),
 	Dot: kwNotName('.'),
 	Dot2: kwNotName('..'),
 	Dot3: kwNotName('... '),
 	Else: kw('else'),
-	ExceptDo: kw('except!'),
-	ExceptVal: kw('except'),
+	Except: kw('except'),
 	False: kw('false'),
-	Finally: kw('finally!'),
+	Finally: kw('finally'),
 	Focus: kw('_'),
 	ForBag: kw('@for'),
-	ForDo: kw('for!'),
-	ForVal: kw('for'),
+	For: kw('for'),
 	Fun: kwNotName('|'),
 	FunDo: kwNotName('!|'),
 	FunThis: kwNotName('.|'),
@@ -285,8 +279,7 @@ export const Keywords = {
 	FunThisGen: kwNotName('.~|'),
 	FunThisGenDo: kwNotName('.~!|'),
 	Get: kw('get'),
-	IfVal: kw('if'),
-	IfDo: kw('if!'),
+	If: kw('if'),
 	Ignore: kw('ignore'),
 	Kind: kw('kind'),
 	Lazy: kwNotName('~'),
@@ -302,22 +295,18 @@ export const Keywords = {
 	Or: kw('or'),
 	Pass: kw('pass'),
 	Region: kw('region'),
-	Set: kw('set!'),
-	SuperDo: kw('super!'),
-	SuperVal: kw('super'),
+	Set: kw('set'),
+	Super: kw('super'),
 	Static: kw('static'),
-	SwitchDo: kw('switch!'),
-	SwitchVal: kw('switch'),
+	Switch: kw('switch'),
 	Tick: kwNotName('\''),
-	Throw: kw('throw!'),
+	Throw: kw('throw'),
 	Todo: kw('todo'),
 	True: kw('true'),
-	TryDo: kw('try!'),
-	TryVal: kw('try'),
+	Try: kw('try'),
 	Type: kwNotName(':'),
 	Undefined: kw('undefined'),
-	UnlessVal: kw('unless'),
-	UnlessDo: kw('unless!'),
+	Unless: kw('unless'),
 	Import: kw('import'),
 	ImportDo: kw('import!'),
 	ImportLazy: kw('import~'),
@@ -333,6 +322,10 @@ Name of a keyword.
 */
 export function keywordName(kind) {
 	return keywordKindToName.get(kind)
+}
+
+export function showKeyword(kind) {
+	return code(keywordName(kind))
 }
 
 /**

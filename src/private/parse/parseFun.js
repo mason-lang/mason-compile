@@ -2,7 +2,7 @@ import {BlockDo, BlockValReturn, Fun, Funs, LocalDeclare, LocalDeclares} from '.
 import {Groups, isAnyKeyword, isGroup, isKeyword, Keywords} from '../Token'
 import {head} from '../util'
 import {checkNonEmpty} from './checks'
-import {beforeAndBlock, parseBlockDo, parseBlockVal} from './parseBlock'
+import {beforeAndBlock, parseBlockDoOrVal} from './parseBlock'
 import parseCase from './parseCase'
 import parseLocalDeclares, {parseLocalDeclareFromSpaced, parseLocalDeclaresAndMemberArgs
 	} from './parseLocalDeclares'
@@ -12,14 +12,14 @@ import Slice from './Slice'
 
 /**
 Parse a function.
-@param kind {Keywords} A function keyword.
+@param keywordKind {Keywords} A function keyword.
 @param {Slice} tokens Rest of the line after the function keyword.
 @return {Fun}
 */
 export default function parseFun(keywordKind, tokens) {
 	const [isThis, isDo, kind] = funKind(keywordKind)
 	const {opReturnType, rest} = tryTakeReturnType(tokens)
-	const {args, opRestArg, block} = funArgsAndBlock(rest, isDo)
+	const {args, opRestArg, block} = funArgsAndBlock(rest, !isDo)
 	return new Fun(tokens.loc, args, opRestArg, block, kind, isThis, opReturnType)
 }
 
@@ -27,8 +27,8 @@ export default function parseFun(keywordKind, tokens) {
 Parse function arguments and body.
 This also handles the `|case` and `|switch` forms.
 @param {Slice} tokens
-@param {boolean} isDo Whether this is a `!|`
-@param {includeMemberArgs}
+@param {boolean} isVal Whether this is a `|` as opposed to a `!|`
+@param [includeMemberArgs]
 	This is for constructors.
 	If true, output will include `memberArgs`.
 	This is the subset of `args` whose names are prefixed with `.`.
@@ -40,16 +40,14 @@ This also handles the `|case` and `|switch` forms.
 	block: Block
 }
 */
-export function funArgsAndBlock(tokens, isDo, includeMemberArgs=false) {
+export function funArgsAndBlock(tokens, isVal, includeMemberArgs=false) {
 	checkNonEmpty(tokens, 'Expected an indented block.')
 	const h = tokens.head()
 
-	// Might be `|case` (or `|case!`, `|switch`, `|switch!`)
+	// Might be `|case` or `|switch`
 	if (isAnyKeyword(funFocusKeywords, h)) {
-		const isVal = h.kind === Keywords.CaseVal || h.kind === Keywords.SwitchVal
-		const isCase = h.kind === Keywords.CaseVal || h.kind === Keywords.CaseDo
+		const isCase = h.kind === Keywords.Case
 		const expr = (isCase ? parseCase : parseSwitch)(isVal, true, tokens.tail())
-
 		const args = [LocalDeclare.focus(h.loc)]
 		return isVal ?
 			{
@@ -66,10 +64,12 @@ export function funArgsAndBlock(tokens, isDo, includeMemberArgs=false) {
 		for (const arg of args)
 			if (!arg.isLazy())
 				arg.kind = LocalDeclares.Mutable
-		const block = (isDo ? parseBlockDo : parseBlockVal)(blockLines)
+		const block = parseBlockDoOrVal(isVal, blockLines)
 		return {args, opRestArg, memberArgs, block}
 	}
 }
+
+const funFocusKeywords = new Set([Keywords.Case, Keywords.Switch])
 
 function funKind(keywordKind) {
 	switch (keywordKind) {
@@ -113,10 +113,6 @@ function tryTakeReturnType(tokens) {
 	}
 	return {opReturnType: null, rest: tokens}
 }
-
-const funFocusKeywords = new Set([
-	Keywords.CaseVal, Keywords.CaseDo, Keywords.SwitchVal, Keywords.SwitchDo
-])
 
 function parseFunLocals(tokens, includeMemberArgs) {
 	if (tokens.isEmpty())

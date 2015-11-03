@@ -10,7 +10,7 @@ import {identifier, member, propertyIdOrLiteral} from 'esast/dist/util'
 import {options} from '../context'
 import * as MsAstTypes from '../MsAst'
 import {AssignSingle, Call, Constructor, Funs, Logics, Member, LocalDeclares, Pattern, Setters,
-	SpecialDos, SpecialVals, SwitchDoPart} from '../MsAst'
+	SpecialDos, SpecialVals} from '../MsAst'
 import {assert, cat, flatMap, flatOpMap, ifElse, implementMany, isEmpty, opIf, opMap, tail
 	} from '../util'
 import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, DeclareLexicalThis,
@@ -21,9 +21,10 @@ import {isInConstructor, isInGenerator, setup, tearDown, verifyResults, withInCo
 	withInGenerator} from './context'
 import {transpileMethodToDefinition, transpileMethodToProperty} from './transpileMethod'
 import transpileModule from './transpileModule'
-import {accessLocalDeclare, declare, doThrow, idForDeclareCached, lazyWrap, makeDeclarator,
-	makeDestructureDeclarators, maybeWrapInCheckContains, memberStringOrVal, msCall, msMember,
-	opTypeCheckForLocalDeclare, t0, t1, t2, t3, tLines, transpileName} from './util'
+import {accessLocalDeclare, blockWrap, blockWrapIfVal, declare, doThrow, idForDeclareCached,
+	lazyWrap, makeDeclarator, makeDestructureDeclarators, maybeWrapInCheckContains,
+	memberStringOrVal, msCall, msMember, opTypeCheckForLocalDeclare, t0, t1, t2, t3, tLines,
+	transpileName} from './util'
 
 /** Transform a {@link MsAst} into an esast. **/
 export default function transpile(moduleExpression, verifyResults) {
@@ -131,17 +132,31 @@ implementMany(MsAstTypes, 'transpile', {
 		return new CallExpression(t0(this.called), this.args.map(t0))
 	},
 
-	CaseDo() {
+	Case() {
 		const body = caseBody(this.parts, this.opElse)
-		return ifElse(this.opCased, _ => new BlockStatement([t0(_), body]), () => body)
+		if (this.isVal) {
+			const block = ifElse(this.opCased, _ => [t0(_), body], () => [body])
+			return blockWrap(new BlockStatement(block))
+		} else
+			return ifElse(this.opCased, _ => new BlockStatement([t0(_), body]), () => body)
 	},
-	CaseVal() {
-		const body = caseBody(this.parts, this.opElse)
-		const block = ifElse(this.opCased, _ => [t0(_), body], () => [body])
-		return blockWrap(new BlockStatement(block))
+
+	CasePart(alternate) {
+		if (this.test instanceof Pattern) {
+			const {type, patterned, locals} = this.test
+			const decl = new VariableDeclaration('const', [
+				new VariableDeclarator(IdExtract, msCall('extract', t0(type), t0(patterned)))])
+			const test = new BinaryExpression('!==', IdExtract, LitNull)
+			const extract = new VariableDeclaration('const', locals.map((_, idx) =>
+				new VariableDeclarator(
+					idForDeclareCached(_),
+					new MemberExpression(IdExtract, new Literal(idx)))))
+			const res = t1(this.result, extract)
+			return new BlockStatement([decl, new IfStatement(test, res, alternate)])
+		} else
+			// alternate written to by `caseBody`.
+			return new IfStatement(t0(this.test), t0(this.result), alternate)
 	},
-	CaseDoPart: casePart,
-	CaseValPart: casePart,
 
 	Class() {
 		const methods = cat(
@@ -170,19 +185,16 @@ implementMany(MsAstTypes, 'transpile', {
 		return new ConditionalExpression(t0(this.test), t0(this.ifTrue), t0(this.ifFalse))
 	},
 
-	ConditionalDo() {
+	Conditional() {
 		const test = t0(this.test)
-		return new IfStatement(
-			this.isUnless ? new UnaryExpression('!', test) : test,
-			t0(this.result))
-	},
-
-	ConditionalVal() {
-		const test = t0(this.test)
-		const result = msCall('some', blockWrap(t0(this.result)))
-		return this.isUnless ?
-			new ConditionalExpression(test, msMember('None'), result) :
-			new ConditionalExpression(test, result, msMember('None'))
+		const res = t0(this.result)
+		if (this.isVal) {
+			const result = msCall('some', blockWrap(res))
+			const none = msMember('None')
+			const [then, _else] = this.isUnless ? [none, result] : [result, none]
+			return new ConditionalExpression(test, then, _else)
+		} else
+			return new IfStatement(this.isUnless ? new UnaryExpression('!', test) : test, res)
 	},
 
 	Constructor() {
@@ -202,10 +214,16 @@ implementMany(MsAstTypes, 'transpile', {
 		return new CatchClause(t0(this.caught), t0(this.block))
 	},
 
-	ExceptDo() { return transpileExcept(this) },
-	ExceptVal() { return blockWrap(new BlockStatement([transpileExcept(this)])) },
+	Except() {
+		return blockWrapIfVal(this.isVal, new TryStatement(
+			t0(this.try),
+			opMap(this.catch, t0),
+			opMap(this.finally, t0)))
+	},
 
-	ForDo() { return forLoop(this.opIteratee, this.block) },
+	For() {
+		return blockWrapIfVal(this.isVal, forLoop(this.opIteratee, this.block))
+	},
 
 	ForBag() {
 		return blockWrap(new BlockStatement([
@@ -213,10 +231,6 @@ implementMany(MsAstTypes, 'transpile', {
 			forLoop(this.opIteratee, this.block),
 			ReturnBuilt
 		]))
-	},
-
-	ForVal() {
-		return blockWrap(new BlockStatement([forLoop(this.opIteratee, this.block)]))
 	},
 
 	// leadStatements comes from constructor members
@@ -483,16 +497,57 @@ implementMany(MsAstTypes, 'transpile', {
 		return new SpreadElement(t0(this.spreaded))
 	},
 
-	SuperCall: superCall,
-	SuperCallDo: superCall,
+	SuperCall() {
+		const args = this.args.map(t0)
+		const method = verifyResults.superCallToMethod.get(this)
+
+		if (method instanceof Constructor) {
+			const call = new CallExpression(IdSuper, args)
+			const memberSets = constructorSetMembers(method)
+			return cat(call, memberSets)
+		} else
+			return new CallExpression(memberStringOrVal(IdSuper, method.symbol), args)
+	},
+
 	SuperMember() {
 		return memberStringOrVal(IdSuper, this.name)
 	},
 
-	SwitchDo() { return transpileSwitch(this) },
-	SwitchVal() { return blockWrap(new BlockStatement([transpileSwitch(this)])) },
-	SwitchDoPart: switchPart,
-	SwitchValPart: switchPart,
+	Switch() {
+		const parts = flatMap(this.parts, t0)
+		parts.push(ifElse(this.opElse,
+			_ => new SwitchCase(undefined, t0(_).body),
+			() => SwitchCaseNoMatch))
+		return blockWrapIfVal(this.isVal, new SwitchStatement(t0(this.switched), parts))
+	},
+
+	SwitchPart() {
+		const follow = opIf(!this.isVal, () => new BreakStatement)
+		/*
+		We could just pass block.body for the switch lines, but instead
+		enclose the body of the switch case in curly braces to ensure a new scope.
+		That way this code works:
+			switch (0) {
+				case 0: {
+					const a = 0
+					return a
+				}
+				default: {
+					// Without curly braces this would conflict with the other `a`.
+					const a = 1
+					a
+				}
+			}
+		*/
+		const block = t3(this.result, null, null, follow)
+		// If switch has multiple values, build up a statement like: `case 1: case 2: { doBlock() }`
+		const x = []
+		for (let i = 0; i < this.values.length - 1; i = i + 1)
+			// These cases fallthrough to the one at the end.
+			x.push(new SwitchCase(t0(this.values[i]), []))
+		x.push(new SwitchCase(t0(this.values[this.values.length - 1]), [block]))
+		return x
+	},
 
 	Throw() {
 		return ifElse(this.opThrown,
@@ -515,75 +570,7 @@ implementMany(MsAstTypes, 'transpile', {
 	YieldTo() { return new YieldExpression(t0(this.yieldedTo), true) }
 })
 
-// Shared implementations
-
-function casePart(alternate) {
-	if (this.test instanceof Pattern) {
-		const {type, patterned, locals} = this.test
-		const decl = new VariableDeclaration('const', [
-			new VariableDeclarator(IdExtract, msCall('extract', t0(type), t0(patterned)))])
-		const test = new BinaryExpression('!==', IdExtract, LitNull)
-		const extract = new VariableDeclaration('const', locals.map((_, idx) =>
-			new VariableDeclarator(
-				idForDeclareCached(_),
-				new MemberExpression(IdExtract, new Literal(idx)))))
-		const res = t1(this.result, extract)
-		return new BlockStatement([decl, new IfStatement(test, res, alternate)])
-	} else
-		// alternate written to by `caseBody`.
-		return new IfStatement(t0(this.test), t0(this.result), alternate)
-}
-
-function superCall() {
-	const args = this.args.map(t0)
-	const method = verifyResults.superCallToMethod.get(this)
-
-	if (method instanceof Constructor) {
-		const call = new CallExpression(IdSuper, args)
-		const memberSets = constructorSetMembers(method)
-		return cat(call, memberSets)
-	} else
-		return new CallExpression(memberStringOrVal(IdSuper, method.symbol), args)
-}
-
-function switchPart() {
-	const follow = opIf(this instanceof SwitchDoPart, () => new BreakStatement)
-	/*
-	We could just pass block.body for the switch lines, but instead
-	enclose the body of the switch case in curly braces to ensure a new scope.
-	That way this code works:
-		switch (0) {
-			case 0: {
-				const a = 0
-				return a
-			}
-			default: {
-				// Without curly braces this would conflict with the other `a`.
-				const a = 1
-				a
-			}
-		}
-	*/
-	const block = t3(this.result, null, null, follow)
-	// If switch has multiple values, build up a statement like: `case 1: case 2: { doBlock() }`
-	const x = []
-	for (let i = 0; i < this.values.length - 1; i = i + 1)
-		// These cases fallthrough to the one at the end.
-		x.push(new SwitchCase(t0(this.values[i]), []))
-	x.push(new SwitchCase(t0(this.values[this.values.length - 1]), [block]))
-	return x
-}
-
 // Functions specific to certain expressions
-
-// Wraps a block (with `return` statements in it) in an IIFE.
-function blockWrap(block) {
-	const thunk = isInGenerator ?
-		new FunctionExpression(null, [], block, true) :
-		new ArrowFunctionExpression([], block)
-	const invoke = new CallExpression(thunk, [])
-	return isInGenerator ? new YieldExpression(invoke, true) : invoke
-}
 
 function caseBody(parts, opElse) {
 	let acc = ifElse(opElse, t0, () => ThrowNoCaseMatch)
@@ -611,19 +598,4 @@ function transpileBlock(returned, lines, lead, opReturnType) {
 	const fin = new ReturnStatement(
 		maybeWrapInCheckContains(returned, opReturnType, 'returned value'))
 	return new BlockStatement(cat(lead, lines, fin))
-}
-
-function transpileExcept(except) {
-	return new TryStatement(
-		t0(except.try),
-		opMap(except.catch, t0),
-		opMap(except.finally, t0))
-}
-
-function transpileSwitch(_) {
-	const parts = flatMap(_.parts, t0)
-	parts.push(ifElse(_.opElse,
-		_ => new SwitchCase(undefined, t0(_).body),
-		() => SwitchCaseNoMatch))
-	return new SwitchStatement(t0(_.switched), parts)
 }

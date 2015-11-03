@@ -1,7 +1,7 @@
 import {Class, ClassKindDo, Constructor, Fun, Funs} from '../MsAst'
 import {isKeyword, Keywords} from '../Token'
-import {ifElse, opIf} from '../util'
-import {parseExpr, parseExprParts} from './parse*'
+import {ifElse} from '../util'
+import {opParseExpr, parseExprParts} from './parse*'
 import {beforeAndOpBlock, parseJustBlockDo} from './parseBlock'
 import {funArgsAndBlock} from './parseFun'
 import parseMethods, {parseStatics} from './parseMethods'
@@ -59,12 +59,12 @@ function parseClassHeader(tokens) {
 		ifElse(tokens.opSplitOnce(_ => isKeyword(Keywords.Kind, _)),
 			({before, after}) => [before, parseExprParts(after)],
 			() => [tokens, []])
-	const opSuperClass = opIf(!extendedTokens.isEmpty(), () => parseExpr(extendedTokens))
+	const opSuperClass = opParseExpr(extendedTokens)
 	return {opSuperClass, kinds}
 }
 
 function parseConstructor(tokens) {
-	const {args, memberArgs, opRestArg, block} = funArgsAndBlock(tokens, true, true)
+	const {args, memberArgs, opRestArg, block} = funArgsAndBlock(tokens, false, true)
 	const fun = new Fun(tokens.loc, args, opRestArg, block, Funs.Plain, true)
 	return new Constructor(tokens.loc, fun, memberArgs)
 }

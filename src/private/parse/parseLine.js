@@ -1,107 +1,131 @@
 import {check} from '../context'
 import {Assert, AssignSingle, AssignDestructure, BagEntry, BagEntryMany, Break, BreakWithVal, Call,
-	ConditionalDo, Ignore, LocalAccess, LocalDeclares, LocalMutate, MapEntry, MemberSet,
+	Conditional, Ignore, LocalAccess, LocalDeclares, LocalMutate, MapEntry, MemberSet,
 	ObjEntryAssign, ObjEntryPlain, SetSub, Setters, SpecialDo, SpecialDos, SpecialVal, SpecialVals,
-	SuperCallDo, Throw, Yield, YieldTo} from '../MsAst'
-import {Groups, isGroup, isAnyKeyword, isKeyword, Keyword, keywordName, Keywords} from '../Token'
-import {ifElse, isEmpty, opIf, tail} from '../util'
+	SuperCall, Throw, Yield, YieldTo} from '../MsAst'
+import {Groups, isGroup, isAnyKeyword, isKeyword, Keyword, Keywords, showKeyword} from '../Token'
+import {ifElse, isEmpty, tail} from '../util'
 import {checkEmpty, checkNonEmpty, unexpected} from './checks'
 import {beforeAndBlock, parseBlockDo, parseLinesFromBlock} from './parseBlock'
 import parseCase from './parseCase'
 import parseDel from './parseDel'
 import parseExcept from './parseExcept'
-import {parseForDo} from './parseFor'
+import {parseFor} from './parseFor'
 import parseLocalDeclares, {parseLocalDeclaresJustNames, parseLocalName} from './parseLocalDeclares'
 import parseMemberName from './parseMemberName'
 import parseQuote from './parseQuote'
-import {parseExpr, parseExprParts, parseSpaced, parseSwitch} from './parse*'
+import {opParseExpr, parseExpr, parseExprParts, parseSpaced, parseSwitch} from './parse*'
 import Slice from './Slice'
 
 /** Parse the content of a line. */
 export default function parseLine(tokens) {
+	const loc = tokens.loc
 	const head = tokens.head()
-	const rest = tokens.tail()
+	const rest = () => tokens.tail()
 
-	const noRest = () =>
-		checkEmpty(rest, () => `Did not expect anything after ${head}.`)
+	const noRest = () => {
+		checkEmpty(rest(), () => `Did not expect anything after ${head}.`)
+	}
 
 	// We only deal with mutable expressions here, otherwise we fall back to parseExpr.
 	if (head instanceof Keyword)
 		switch (head.kind) {
 			case Keywords.Assert: case Keywords.AssertNot:
-				return parseAssert(head.kind === Keywords.AssertNot, rest)
-			case Keywords.ExceptDo:
-				return parseExcept(Keywords.ExceptDo, rest)
+				return parseAssert(head.kind === Keywords.AssertNot, rest())
+			case Keywords.Except:
+				return parseExcept(false, rest())
 			case Keywords.Break:
-				noRest()
-				return new Break(tokens.loc)
-			case Keywords.BreakWithVal:
-				return new BreakWithVal(tokens.loc, parseExpr(rest))
-			case Keywords.CaseDo:
-				return parseCase(false, false, rest)
+				return ifElse(opParseExpr(rest()),
+					_ => new BreakWithVal(loc, _),
+					() => new Break(loc))
+			case Keywords.Case:
+				return parseCase(false, false, rest())
 			case Keywords.Debugger:
 				noRest()
-				return new SpecialDo(tokens.loc, SpecialDos.Debugger)
-			case Keywords.DelDo:
-				return parseDel(rest)
+				return new SpecialDo(loc, SpecialDos.Debugger)
+			case Keywords.Del:
+				return parseDel(rest())
 			case Keywords.Dot3:
-				return new BagEntryMany(tokens.loc, parseExpr(rest))
-			case Keywords.ForDo:
-				return parseForDo(rest)
+				return parseBagEntryMany(rest(), loc)
+			case Keywords.For:
+				return parseFor(false, rest())
 			case Keywords.Ignore:
-				return new Ignore(tokens.loc, rest.map(parseLocalName))
-			case Keywords.IfDo: case Keywords.UnlessDo: {
-				const [before, block] = beforeAndBlock(rest)
-				return new ConditionalDo(tokens.loc,
+				return new Ignore(loc, rest().map(parseLocalName))
+			case Keywords.If: case Keywords.Unless: {
+				const [before, block] = beforeAndBlock(rest())
+				return new Conditional(loc,
 					parseExpr(before),
 					parseBlockDo(block),
-					head.kind === Keywords.UnlessDo)
+					head.kind === Keywords.Unless)
 			}
 			case Keywords.ObjAssign:
-				return new BagEntry(tokens.loc, parseExpr(rest))
+				return parseBagEntry(rest(), loc)
 			case Keywords.Pass:
 				noRest()
 				return []
 			case Keywords.Region:
 				return parseLinesFromBlock(tokens)
-			case Keywords.SuperDo:
-				return new SuperCallDo(tokens.loc, parseExprParts(rest))
-			case Keywords.SwitchDo:
-				return parseSwitch(false, false, rest)
+			case Keywords.Super:
+				return new SuperCall(loc, parseExprParts(rest()), false)
+			case Keywords.Switch:
+				return parseSwitch(false, false, rest())
 			case Keywords.Throw:
-				return new Throw(tokens.loc, opIf(!rest.isEmpty(), () => parseExpr(rest)))
-			case Keywords.Name:
-				if (isKeyword(Keywords.ObjAssign, rest.head())) {
-					const r = rest.tail()
-					const val = r.isEmpty() ?
-						new SpecialVal(tokens.loc, SpecialVals.Name) :
-						parseExpr(r)
-					return ObjEntryPlain.name(tokens.loc, val)
-				}
-				// else fall through
+				return parseThrow(rest(), loc)
 			default:
 				// fall through
 		}
 
 	return ifElse(tokens.opSplitOnce(_ => isAnyKeyword(lineSplitKeywords, _)),
-		({before, at, after}) => parseAssignLike(before, at, after, tokens.loc),
+		({before, at, after}) => parseAssignLike(before, at, after, loc),
 		() => parseExpr(tokens))
 }
+const lineSplitKeywords = new Set([
+	Keywords.Assign, Keywords.AssignMutable, Keywords.LocalMutate, Keywords.MapEntry,
+	Keywords.ObjAssign, Keywords.Yield, Keywords.YieldTo
+])
 
 export const parseLineOrLines = tokens => {
 	const _ = parseLine(tokens)
 	return _ instanceof Array ? _ : [_]
 }
 
-const lineSplitKeywords = new Set([
-	Keywords.Assign, Keywords.AssignMutable, Keywords.LocalMutate, Keywords.MapEntry,
-	Keywords.ObjAssign, Keywords.Yield, Keywords.YieldTo
-])
+// Exported so parsing the last line of a value block can handle these cases specially.
+export function parseBagEntry(tokens, loc) {
+	return new BagEntry(loc, parseExpr(tokens))
+}
+export function parseBagEntryMany(tokens, loc) {
+	return new BagEntryMany(loc, parseExpr(tokens))
+}
+export function parseMapEntry(before, after, loc) {
+	return new MapEntry(loc, parseExpr(before), parseExpr(after))
+}
+export function parseObjEntry(before, after, loc) {
+	if (before.size() === 1) {
+		const token = before.head()
+		// `"1". 1`
+		if (isGroup(Groups.Quote, token))
+			return new ObjEntryPlain(loc, parseQuote(Slice.group(token)), parseExpr(after))
+
+		if (isKeyword(Keywords.Name, token)) {
+			const val = after.isEmpty() ?
+				new SpecialVal(loc, SpecialVals.Name) :
+				parseExpr(after)
+			return ObjEntryPlain.name(loc, val)
+		}
+	}
+
+	return parseAssign(before, Keywords.ObjAssign, after, loc)
+}
+export function parseThrow(tokens, loc) {
+	return new Throw(loc, opParseExpr(tokens))
+}
 
 function parseAssignLike(before, at, after, loc) {
 	const kind = at.kind
 	if (kind === Keywords.MapEntry)
-		return new MapEntry(loc, parseExpr(before), parseExpr(after))
+		return parseMapEntry(before, after, loc)
+	else if (kind === Keywords.ObjAssign)
+		return parseObjEntry(before, after, loc)
 
 	if (before.size() === 1) {
 		const token = before.head()
@@ -124,9 +148,7 @@ function parseAssignLike(before, at, after, loc) {
 				const set = object(value.rtail())
 				return parseSubSet(set, Slice.group(last), opType, at, after, loc)
 			}
-		// `"1". 1`
-		} else if (isGroup(Groups.Quote, token) && kind === Keywords.ObjAssign)
-			return new ObjEntryPlain(loc, parseQuote(Slice.group(token)), parseExpr(after))
+		}
 	}
 
 	return kind === Keywords.LocalMutate ?
@@ -208,7 +230,7 @@ function parseAssign(localsTokens, kind, valueTokens, loc) {
 
 function parseAssignValue(kind, valueTokens) {
 	const value = () => parseExpr(valueTokens)
-	const opValue = () => opIf(!valueTokens.isEmpty(), value)
+	const opValue = () => opParseExpr(valueTokens)
 	switch (kind) {
 		case Keywords.Yield:
 			return new Yield(valueTokens.loc, opValue())
@@ -220,7 +242,7 @@ function parseAssignValue(kind, valueTokens) {
 }
 
 function parseAssert(negate, tokens) {
-	checkNonEmpty(tokens, () => `Expected something after ${keywordName(Keywords.Assert)}.`)
+	checkNonEmpty(tokens, () => `Expected something after ${showKeyword(Keywords.Assert)}.`)
 
 	const [condTokens, opThrown] =
 		ifElse(tokens.opSplitOnce(_ => isKeyword(Keywords.Throw, _)),

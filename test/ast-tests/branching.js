@@ -1,6 +1,5 @@
-import {BlockDo, BlockValReturn, CaseDo, CaseDoPart, CaseVal, CaseValPart, ConditionalDo,
-	ConditionalVal, Fun, Pattern, SwitchDo, SwitchDoPart, SwitchVal, SwitchValPart
-	} from '../../dist/private/MsAst'
+import {BlockDo, BlockValReturn, Case, CasePart, Conditional, Fun, Pattern, Switch, SwitchPart,
+	Throw} from '../../dist/private/MsAst'
 import {aAccess, assignAZero, assignFocusZero, bDeclare, bAccess, blockDbg, blockOne, blockTwo,
 	blockPass, focusAccess, focusDeclare, loc, one, zero} from './util/ast-util'
 import {test} from './util/test-asts'
@@ -8,18 +7,18 @@ import {test} from './util/test-asts'
 describe('conditionals', () => {
 	test(
 		`
-			if! 0
-				debugger!`,
-		new ConditionalDo(loc, zero, blockDbg, false),
+			if 0
+				debugger`,
+		new Conditional(loc, zero, blockDbg, false),
 		`
 			if(0){
 				debugger
 			}`)
 	test(
 		`
-			unless! 0
-				debugger!`,
-		new ConditionalDo(loc, zero, blockDbg, true),
+			unless 0
+				debugger`,
+		new Conditional(loc, zero, blockDbg, true),
 		`
 			if(! 0){
 				debugger
@@ -27,11 +26,11 @@ describe('conditionals', () => {
 		)
 	test(
 		`
-			if 0
+			throw if 0
 				1`,
-		new ConditionalVal(loc, zero, blockOne, false),
+		new Throw(loc, new Conditional(loc, zero, blockOne, false)),
 		`
-			(0?_ms.some((()=>{
+			throw (0?_ms.some((()=>{
 				return 1
 			})()):_ms.None)`)
 })
@@ -39,22 +38,22 @@ describe('conditionals', () => {
 describe('case', () => {
 	test(
 		`
-			case!
+			case
 				0
-					debugger!`,
-		new CaseDo(loc, null, [new CaseDoPart(loc, zero, blockDbg)], null),
+					debugger`,
+		new Case(loc, null, [new CasePart(loc, zero, blockDbg)], null),
 		`
 			if(0){
 				debugger
 			} else throw new (Error)("No branch of \`case\` matches.")`)
 	test(
 		`
-			case! 0
+			case 0
 				_
 					pass`,
-		new CaseDo(loc,
+		new Case(loc,
 			assignFocusZero,
-			[new CaseDoPart(loc, focusAccess, blockPass)],
+			[new CasePart(loc, focusAccess, blockPass)],
 			null),
 		`
 			{
@@ -63,13 +62,13 @@ describe('case', () => {
 			}`)
 	test(
 		`
-			case!
+			case
 				0
-					debugger!
+					debugger
 				else
 					pass`,
-		new CaseDo(loc, null,
-			[new CaseDoPart(loc, zero, blockDbg)],
+		new Case(loc, null,
+			[new CasePart(loc, zero, blockDbg)],
 			blockPass),
 		`
 			if(0){
@@ -78,16 +77,17 @@ describe('case', () => {
 		)
 	test(
 		`
-			case
+			throw case
 				0
 					1
 				else
 					2`,
-		new CaseVal(loc, null,
-			[new CaseValPart(loc, zero, blockOne)],
-			blockTwo),
+		new Throw(loc,
+			new Case(loc, null,
+				[new CasePart(loc, zero, blockOne)],
+				blockTwo)),
 		`
-			(()=>{
+			throw (()=>{
 				if(0){
 					return 1
 				} else {
@@ -97,24 +97,25 @@ describe('case', () => {
 	test(
 		`
 			a = 0
-			case 0
+			throw case 0
 				:a b
 					b
 				else
 					1`,
 		[
 			assignAZero,
-			new CaseVal(loc, assignFocusZero,
-				[
-					new CaseValPart(loc,
-						new Pattern(loc, aAccess, [bDeclare]),
-						new BlockValReturn(loc, null, [], bAccess))
-				],
-				blockOne)
+			new Throw(loc,
+				new Case(loc, assignFocusZero,
+					[
+						new CasePart(loc,
+							new Pattern(loc, aAccess, [bDeclare]),
+							new BlockValReturn(loc, null, [], bAccess))
+					],
+					blockOne))
 		],
 		`
 			const a=0;
-			return (()=>{
+			throw (()=>{
 				const _=0;
 				{
 					const _$=_ms.extract(a,_);
@@ -136,8 +137,8 @@ describe('case', () => {
 			[focusDeclare],
 			null,
 			new BlockValReturn(loc, null, [],
-				new CaseVal(loc, null,
-					[new CaseValPart(loc, focusAccess, blockOne)],
+				new Case(loc, null,
+					[new CasePart(loc, focusAccess, blockOne)],
 					null))),
 		`
 			_=>{
@@ -149,7 +150,7 @@ describe('case', () => {
 			}`)
 	test(
 		`
-			|case!
+			!|case
 				_
 					pass`,
 		new Fun(
@@ -157,8 +158,8 @@ describe('case', () => {
 			[focusDeclare],
 			null,
 			new BlockDo(loc, null, [
-				new CaseDo(loc, null,
-					[new CaseDoPart(loc, focusAccess, blockPass)],
+				new Case(loc, null,
+					[new CasePart(loc, focusAccess, blockPass)],
 					null)])),
 		`
 			_=>{
@@ -169,11 +170,11 @@ describe('case', () => {
 describe('switch', () => {
 	test(
 		`
-			switch! 0
+			switch 0
 				1
 					pass`,
-		new SwitchDo(loc, zero,
-			[new SwitchDoPart(loc, [one], blockPass)],
+		new Switch(loc, zero,
+			[new SwitchPart(loc, [one], blockPass)],
 			null),
 		`
 			switch(0){
@@ -184,19 +185,20 @@ describe('switch', () => {
 			}`)
 	test(
 		`
-			switch 0
+			throw switch 0
 				1
 					a = 0
 					a
 				else
 					1`,
-		new SwitchVal(loc, zero,
-			[new SwitchValPart(loc,
-				[one],
-				new BlockValReturn(loc, null, [assignAZero], aAccess))],
-			blockOne),
+		new Throw(loc,
+			new Switch(loc, zero,
+				[new SwitchPart(loc,
+					[one],
+					new BlockValReturn(loc, null, [assignAZero], aAccess))],
+				blockOne)),
 		`
-			(()=>{
+			throw (()=>{
 				switch(0){
 					case 1:{
 						const a=0;
@@ -207,11 +209,11 @@ describe('switch', () => {
 			})()`)
 	test(
 		`
-			switch! 0
+			switch 0
 				or 0 1
 					pass`,
-		new SwitchDo(loc, zero,
-			[new SwitchDoPart(loc, [zero, one], blockPass)],
+		new Switch(loc, zero,
+			[new SwitchPart(loc, [zero, one], blockPass)],
 			null),
 		`
 			switch(0){
@@ -231,8 +233,8 @@ describe('switch', () => {
 			[focusDeclare],
 			null,
 			new BlockValReturn(loc, null, [],
-				new SwitchVal(loc, focusAccess,
-					[new SwitchValPart(loc, [zero], blockOne)],
+				new Switch(loc, focusAccess,
+					[new SwitchPart(loc, [zero], blockOne)],
 					null))),
 		`
 			_=>{
@@ -247,7 +249,7 @@ describe('switch', () => {
 			}`)
 	test(
 		`
-			|switch!
+			!|switch
 				0
 					pass`,
 		new Fun(
@@ -255,8 +257,8 @@ describe('switch', () => {
 			[focusDeclare],
 			null,
 			new BlockDo(loc, null, [
-				new SwitchDo(loc, focusAccess,
-					[new SwitchDoPart(loc, [zero], blockPass)],
+				new Switch(loc, focusAccess,
+					[new SwitchPart(loc, [zero], blockPass)],
 					null)])),
 		`
 			_=>{

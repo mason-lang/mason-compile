@@ -1,10 +1,9 @@
 import {code} from '../../CompileError'
 import {check, options, warn} from '../context'
 import * as MsAstTypes from '../MsAst'
-import {BlockVal, BlockValThrow, Class, Constructor,
-	ForVal, Fun, Funs, Kind, Pattern, SuperCallDo} from '../MsAst'
+import {BlockVal, BlockValThrow, Class, Constructor, Fun, Funs, Kind, Pattern} from '../MsAst'
 import {cat, ifElse, implementMany, opEach} from '../util'
-import {funKind, locals, method, okToNotUse, opLoop, results, setup, tearDown, withIIFE,
+import {funKind, locals, method, okToNotUse, opLoop, results, setup, tearDown, withIife, withIifeIf,
 	withInFunKind, withMethod, withLoop, withName} from './context'
 import {accessLocal, getLocalDeclare, failMissingLocal, plusLocals, setDeclareAccessed, setLocal,
 	verifyAndPlusLocal, verifyAndPlusLocals, verifyLocalDeclare, warnUnusedLocals, withBlockLocals
@@ -90,19 +89,19 @@ implementMany(MsAstTypes, 'verify', {
 	BlockMap: verifyBlockBuild,
 
 	BlockWrap() {
-		withIIFE(() => this.block.verify())
+		withIife(() => this.block.verify())
 	},
 
 	Break() {
 		verifyInLoop(this)
-		check(!(opLoop instanceof ForVal), this.loc, () =>
-			`${code('for')} must break with a value.`)
+		check(!opLoop.isVal, this.loc, () =>
+			`${code('for')} in expression position must break with a value.`)
 	},
 
 	BreakWithVal() {
 		verifyInLoop(this)
-		check(opLoop instanceof ForVal, this.loc, () =>
-			`${code('break')} only valid inside ${code('for')}`)
+		check(opLoop.isVal, this.loc, () =>
+			`${code('break')} only valid inside ${code('for')} in expression position.`)
 		this.value.verify()
 	},
 
@@ -112,14 +111,32 @@ implementMany(MsAstTypes, 'verify', {
 			_.verify()
 	},
 
-	CaseDo() {
-		verifyCase(this)
+	Case() {
+		withIifeIf(this.isVal, () => {
+			const doIt = () => {
+				for (const part of this.parts)
+					part.verify()
+				verifyOp(this.opElse)
+			}
+			ifElse(this.opCased,
+				_ => {
+					_.verify()
+					verifyAndPlusLocal(_.assignee, doIt)
+				},
+				doIt)
+		})
 	},
-	CaseDoPart: verifyCasePart,
-	CaseVal() {
-		withIIFE(() => verifyCase(this))
+
+	CasePart() {
+		if (this.test instanceof Pattern) {
+			this.test.type.verify()
+			this.test.patterned.verify()
+			verifyAndPlusLocals(this.test.locals, () => this.result.verify())
+		} else {
+			this.test.verify()
+			this.result.verify()
+		}
 	},
-	CaseValPart: verifyCasePart,
 
 	Catch() {
 		check(this.caught.opType === null, this.caught.loc, 'TODO: Caught types')
@@ -150,13 +167,9 @@ implementMany(MsAstTypes, 'verify', {
 		this.ifFalse.verify()
 	},
 
-	ConditionalDo() {
+	Conditional() {
 		this.test.verify()
-		this.result.verify()
-	},
-	ConditionalVal() {
-		this.test.verify()
-		withIIFE(() => this.result.verify())
+		withIifeIf(this.isVal, () => this.result.verify())
 	},
 
 	Constructor(classHasSuper) {
@@ -176,18 +189,17 @@ implementMany(MsAstTypes, 'verify', {
 			setDeclareAccessed(_, this)
 	},
 
-	ExceptDo: verifyExcept,
-	ExceptVal: verifyExcept,
+	Except() {
+		this.try.verify()
+		verifyOp(this.catch)
+		verifyOp(this.finally)
+	},
 
 	ForBag() {
 		verifyAndPlusLocal(this.built, () => verifyFor(this))
 	},
 
-	ForDo() {
-		verifyFor(this)
-	},
-
-	ForVal() {
+	For() {
 		verifyFor(this)
 	},
 
@@ -407,21 +419,39 @@ implementMany(MsAstTypes, 'verify', {
 		this.spreaded.verify()
 	},
 
-	SuperCall: verifySuperCall,
-	SuperCallDo: verifySuperCall,
+	SuperCall() {
+		check(method !== null, this.loc, 'Must be in a method.')
+		results.superCallToMethod.set(this, method)
+
+		if (method instanceof Constructor) {
+			check(!this.isVal, this.loc, () =>
+				`${code('super')} in constructor must appear as a statement.'`)
+			results.constructorToSuper.set(method, this)
+		}
+
+		for (const _ of this.args)
+			_.verify()
+	},
+
 	SuperMember() {
 		check(method !== null, this.loc, 'Must be in method.')
 		verifyName(this.name)
 	},
 
-	SwitchDo() {
-		verifySwitch(this)
+	Switch() {
+		withIifeIf(this.isVal, () => {
+			this.switched.verify()
+			for (const part of this.parts)
+				part.verify()
+			verifyOp(this.opElse)
+		})
 	},
-	SwitchDoPart: verifySwitchPart,
-	SwitchVal() {
-		withIIFE(() => verifySwitch(this))
+
+	SwitchPart() {
+		for (const _ of this.values)
+			_.verify()
+		this.result.verify()
 	},
-	SwitchValPart: verifySwitchPart,
 
 	Throw() {
 		verifyOp(this.opThrown)
@@ -432,7 +462,7 @@ implementMany(MsAstTypes, 'verify', {
 
 	With() {
 		this.value.verify()
-		withIIFE(() => {
+		withIife(() => {
 			if (this.declare.name === '_')
 				okToNotUse.add(this.declare)
 			verifyAndPlusLocal(this.declare, () => { this.block.verify() })
@@ -463,43 +493,6 @@ function verifyBlockBuild() {
 	verifyAndPlusLocal(this.built, () => {
 		verifyLines(this.lines)
 	})
-}
-
-function verifyCasePart() {
-	if (this.test instanceof Pattern) {
-		this.test.type.verify()
-		this.test.patterned.verify()
-		verifyAndPlusLocals(this.test.locals, () => this.result.verify())
-	} else {
-		this.test.verify()
-		this.result.verify()
-	}
-}
-
-function verifySwitchPart() {
-	for (const _ of this.values)
-		_.verify()
-	this.result.verify()
-}
-
-function verifyExcept() {
-	this.try.verify()
-	verifyOp(this.catch)
-	verifyOp(this.finally)
-}
-
-function verifySuperCall() {
-	check(method !== null, this.loc, 'Must be in a method.')
-	results.superCallToMethod.set(this, method)
-
-	if (method instanceof Constructor) {
-		check(this instanceof SuperCallDo, this.loc, () =>
-			`${code('super')} not supported in constructor; use ${code('super!')}`)
-		results.constructorToSuper.set(method, this)
-	}
-
-	for (const _ of this.args)
-		_.verify()
 }
 
 function verifyImport() {
@@ -533,28 +526,7 @@ function verifyInLoop(loopUser) {
 	check(opLoop !== null, loopUser.loc, 'Not in a loop.')
 }
 
-function verifyCase(_) {
-	const doIt = () => {
-		for (const part of _.parts)
-			part.verify()
-		verifyOp(_.opElse)
-	}
-	ifElse(_.opCased,
-		_ => {
-			_.verify()
-			verifyAndPlusLocal(_.assignee, doIt)
-		},
-		doIt)
-}
-
 function verifyMethod(_, doVerify) {
 	verifyName(_.symbol)
 	withMethod(_, doVerify)
-}
-
-function verifySwitch(_) {
-	_.switched.verify()
-	for (const part of _.parts)
-		part.verify()
-	verifyOp(_.opElse)
 }

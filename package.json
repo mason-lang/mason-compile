@@ -8,6 +8,7 @@
 		"doc": "esdoc -c esdoc.json",
 		"lint": "eslint src test",
 		"compile-test": "babel test --out-dir compiled-test --source-maps inline",
+		"watch-compile-test": "babel test --out-dir compiled-test --source-maps inline --watch",
 		"test": "npm run compile-test && mocha compiled-test/*.js compiled-test/*/*.js",
 		"test-compile": "npm run compile-test && node compiled-test/test-compile",
 		"perf-test-compile": "npm run compile-test && node compiled-test/test-compile perf"
@@ -16,14 +17,14 @@
 		"esast": "mason-lang/esast"
 	},
 	"devDependencies": {
-		"babel-cli": "6.0.14",
-		"babel-plugin-transform-es2015-destructuring": "6.0.14",
-		"babel-plugin-transform-es2015-modules-umd": "6.0.14",
-		"babel-plugin-transform-es2015-parameters": "6.0.14",
-		"babel-plugin-transform-strict-mode": "6.0.14",
+		"babel-cli": "6.0.15",
+		"babel-plugin-transform-es2015-destructuring": "6.0.18",
+		"babel-plugin-transform-es2015-modules-umd": "6.0.15",
+		"babel-plugin-transform-es2015-parameters": "6.0.18",
+		"babel-plugin-transform-strict-mode": "6.0.15",
 		"benchmark": "1.0.0",
 			"microtime": "2.0.0",
-		"esdoc": "0.4.1",
+		"esdoc": "0.4.3",
 		"eslint": "1.8.0",
 		"mocha": "2.3.3",
 		"numeral": "1.5.3",
