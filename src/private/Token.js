@@ -214,23 +214,24 @@ const reservedWords = [
 
 	// Mason reserved words
 	'!',
+	'<',
+	'>',
 	'abstract',
 	'actor',
-	'await!',
 	'data',
 	'del?',
-	'else!',
+	'do-while',
+	'do-until',
 	'final',
 	'is',
 	'meta',
+	'method',
 	'out',
+	'override',
 	'send',
-	'send!',
 	'to',
 	'type',
-	'until',
-	'until!',
-	'while!'
+	'until'
 ]
 
 for (const name of reservedWords)

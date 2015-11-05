@@ -1,6 +1,5 @@
 import './loadLex*'
 import {Pos, StartPos} from 'esast/dist/Loc'
-import {check} from '../context'
 import {openLine, setupGroupContext, tearDownGroupContext} from './groupContext'
 import lexPlain from './lexPlain'
 import {pos, setupSourceContext} from './sourceContext'
@@ -17,8 +16,8 @@ See {@link Group}.
 */
 export default function lex(sourceString) {
 	// Algorithm requires trailing newline to close any blocks.
-	check(sourceString.endsWith('\n'), () => lastCharPos(sourceString),
-		'Source code must end in newline.')
+	if (!sourceString.endsWith('\n'))
+		sourceString = `${sourceString}\n`
 
 	/*
 	Use a 0-terminated string so that we can use `0` as a switch case in lexPlain.
@@ -36,11 +35,4 @@ export default function lex(sourceString) {
 
 	const endPos = pos()
 	return tearDownGroupContext(endPos)
-}
-
-function lastCharPos(str) {
-	const splits = str.split('\n')
-	return new Pos(
-		splits.length,
-		splits[splits.length-1].length)
 }

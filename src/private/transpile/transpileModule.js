@@ -45,8 +45,8 @@ function amdWrapModule(doImports, imports, body) {
 	const allImportPaths = allImports.map(_ => manglePath(_.path))
 
 	const arrImportPaths = new ArrayExpression(cat(
-		opIf(shouldImportBoot, () => new Literal(options.bootPath())),
 		LitStrExports,
+		opIf(shouldImportBoot, () => new Literal(options.bootPath())),
 		allImportPaths.map(_ => new Literal(_))))
 
 	const importToIdentifier = new Map()
@@ -58,7 +58,7 @@ function amdWrapModule(doImports, imports, body) {
 		importToIdentifier.set(_, id)
 	}
 
-	const importArgs = cat(opIf(shouldImportBoot, () => IdBoot), IdExports, importIdentifiers)
+	const importArgs = cat(IdExports, opIf(shouldImportBoot, () => IdBoot), importIdentifiers)
 
 	const doBoot = opIf(shouldImportBoot, () =>
 		new ExpressionStatement(msCall('getModule', IdBoot)))
