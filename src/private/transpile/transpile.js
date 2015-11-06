@@ -480,8 +480,6 @@ implementMany(MsAstTypes, 'transpile', {
 				return new Literal(verifyResults.name(this))
 			case SpecialVals.Null:
 				return new Literal(null)
-			case SpecialVals.SetSub:
-				return msMember('setSub')
 			case SpecialVals.Sub:
 				return msMember('sub')
 			case SpecialVals.True:

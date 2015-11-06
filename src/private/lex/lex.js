@@ -1,5 +1,5 @@
 import './loadLex*'
-import {Pos, StartPos} from 'esast/dist/Loc'
+import {StartPos} from 'esast/dist/Loc'
 import {openLine, setupGroupContext, tearDownGroupContext} from './groupContext'
 import lexPlain from './lexPlain'
 import {pos, setupSourceContext} from './sourceContext'

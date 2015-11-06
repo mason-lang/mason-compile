@@ -1,9 +1,10 @@
 import {check} from '../context'
 import {Assert, AssignSingle, AssignDestructure, BagEntry, BagEntryMany, Break, BreakWithVal, Call,
 	Conditional, Ignore, LocalAccess, LocalDeclares, LocalMutate, MapEntry, MemberSet,
-	ObjEntryAssign, ObjEntryPlain, SetSub, Setters, SpecialDo, SpecialDos, SpecialVal, SpecialVals,
-	SuperCall, Throw, Yield, YieldTo} from '../MsAst'
-import {Groups, isGroup, isAnyKeyword, isKeyword, Keyword, Keywords, showKeyword} from '../Token'
+	ObjEntryAssign, ObjEntryPlain, QuoteSimple, SetSub, Setters, SpecialDo, SpecialDos, SpecialVal,
+	SpecialVals, SuperCall, Throw, Yield, YieldTo} from '../MsAst'
+import {Groups, isGroup, isAnyKeyword, isKeyword, Keyword, keywordName, Keywords, showKeyword
+	} from '../Token'
 import {ifElse, isEmpty, tail} from '../util'
 import {checkEmpty, checkNonEmpty, unexpected} from './checks'
 import {beforeAndBlock, parseBlockDo, parseLinesFromBlock} from './parseBlock'
@@ -13,6 +14,7 @@ import parseExcept from './parseExcept'
 import {parseFor} from './parseFor'
 import parseLocalDeclares, {parseLocalDeclaresJustNames, parseLocalName} from './parseLocalDeclares'
 import parseMemberName from './parseMemberName'
+import parseName from './parseName'
 import parseQuote from './parseQuote'
 import {opParseExpr, parseExpr, parseExprParts, parseSpaced, parseSwitch} from './parse*'
 import Slice from './Slice'
@@ -102,19 +104,32 @@ export function parseMapEntry(before, after, loc) {
 export function parseObjEntry(before, after, loc) {
 	if (before.size() === 1) {
 		const token = before.head()
-		// `"1". 1`
-		if (isGroup(Groups.Quote, token))
-			return new ObjEntryPlain(loc, parseQuote(Slice.group(token)), parseExpr(after))
+		const isName = isKeyword(Keywords.Name, token)
+		const value = () => parseExpr(after)
 
-		if (isKeyword(Keywords.Name, token)) {
-			const val = after.isEmpty() ?
-				new SpecialVal(loc, SpecialVals.Name) :
-				parseExpr(after)
-			return ObjEntryPlain.name(loc, val)
+		// Handle `a.` which moves an outer local into an ObjEntry.
+		if (after.isEmpty())
+			if (isName)
+				return ObjEntryPlain.name(loc, new SpecialVal(loc, SpecialVals.Name))
+			else
+				return ObjEntryPlain.access(loc, parseLocalName(token))
+		else if (token instanceof Keyword)
+			return new ObjEntryPlain(loc, keywordName(token.kind), value())
+		// `"1". 1`
+		else if (isGroup(Groups.Quote, token))
+			return new ObjEntryPlain(loc, parseQuote(Slice.group(token)), value())
+		// 'foo. 1
+		else if (isGroup(Groups.Space, token)) {
+			const slice = Slice.group(token)
+			if (slice.size() === 2 && isKeyword(Keywords.Tick, slice.head())) {
+				const name = new QuoteSimple(loc, parseName(slice.second()))
+				return new ObjEntryPlain(loc, name, value())
+			}
 		}
 	}
 
-	return parseAssign(before, Keywords.ObjAssign, after, loc)
+	const assign = parseAssign(before, Keywords.ObjAssign, after, loc)
+	return new ObjEntryAssign(loc, assign)
 }
 export function parseThrow(tokens, loc) {
 	return new Throw(loc, opParseExpr(tokens))
@@ -184,15 +199,6 @@ function parseLocalMutate(localsTokens, valueTokens, loc) {
 
 function parseAssign(localsTokens, kind, valueTokens, loc) {
 	const locals = parseLocalDeclares(localsTokens)
-
-	// Handle `a.` which moves an outer local into an ObjEntry.
-	if (kind === Keywords.ObjAssign && valueTokens.isEmpty() && locals.length === 1) {
-		const local = locals[0]
-		check(local.opType === null, local.loc, () =>
-			`Type declaration should go with initial declaration of ${local.name}.`)
-		return ObjEntryPlain.access(loc, local.name)
-	}
-
 	const value = parseAssignValue(kind, valueTokens)
 
 	const isYield = kind === Keywords.Yield || kind === Keywords.YieldTo
@@ -204,26 +210,20 @@ function parseAssign(localsTokens, kind, valueTokens, loc) {
 			for (const _ of locals)
 				check(!_.isLazy(), _.loc, 'Can not yield to lazy variable.')
 
-		const isObjAssign = kind === Keywords.ObjAssign
-
 		if (kind === Keywords.AssignMutable)
 			for (let _ of locals) {
 				check(!_.isLazy(), _.loc, 'Lazy local can not be mutable.')
 				_.kind = LocalDeclares.Mutable
 			}
 
-		const wrap = _ => isObjAssign ? new ObjEntryAssign(loc, _) : _
-
-		if (locals.length === 1) {
-			const assignee = locals[0]
-			const assign = new AssignSingle(loc, assignee, value)
-			return wrap(assign)
-		} else {
+		if (locals.length === 1)
+			return new AssignSingle(loc, locals[0], value)
+		else {
 			const kind = locals[0].kind
 			for (const _ of locals)
 				check(_.kind === kind, _.loc,
 					'All locals of destructuring assignment must be of the same kind.')
-			return wrap(new AssignDestructure(loc, locals, value, kind))
+			return new AssignDestructure(loc, locals, value, kind)
 		}
 	}
 }

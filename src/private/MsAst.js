@@ -1210,14 +1210,6 @@ export default class MsAst {
 		DelSub: 1,
 		/** `false` literal */
 		False: 2,
-		/** `null` literal */
-		Null: 3,
-		/** `_ms.sub` used for {@link Call.sub} */
-		Sub: 4,
-		/** `true` literal */
-		True: 5,
-		/** `void 0` */
-		Undefined: 6,
 		/**
 		`name` value is the name of the nearest assigned value. In:
 
@@ -1226,7 +1218,15 @@ export default class MsAst {
 
 		`name` will be "x".
 		*/
-		Name: 7
+		Name: 3,
+		/** `null` literal */
+		Null: 4,
+		/** `_ms.sub` used for {@link Call.sub} */
+		Sub: 5,
+		/** `true` literal */
+		True: 6,
+		/** `void 0` */
+		Undefined: 7
 	}
 
 	/**
