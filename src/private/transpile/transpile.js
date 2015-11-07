@@ -9,7 +9,7 @@ import {ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryEx
 import {identifier, member, propertyIdOrLiteral} from 'esast/dist/util'
 import {options} from '../context'
 import * as MsAstTypes from '../MsAst'
-import {AssignSingle, Call, Constructor, Funs, Logics, Member, LocalDeclares, Pattern, Setters,
+import {AssignSingle, Call, Constructor, Fun, Funs, Logics, Member, LocalDeclares, Pattern, Setters,
 	SpecialDos, SpecialVals} from '../MsAst'
 import {assert, cat, flatMap, flatOpMap, ifElse, implementMany, isEmpty, opIf, opMap, tail
 	} from '../util'
@@ -354,6 +354,26 @@ implementMany(MsAstTypes, 'transpile', {
 				return new AssignmentExpression('=', memberStringOrVal(obj, this.name), val)
 			default: throw new Error()
 		}
+	},
+
+	Method() {
+		const name = new Literal(verifyResults.name(this))
+
+		let args
+		if (this.fun.opRestArg !== null)
+			// TODO: do something better for rest arg
+			args = new UnaryExpression('void', new Literal(0))
+		else
+			args = new ArrayExpression(this.fun.args.map(arg => {
+				const name = new Literal(arg.name)
+				const opType = opMap(arg.opType, t0)
+				return ifElse(opType,
+					_ => new ArrayExpression([name, _]),
+					() => name)
+			}))
+
+		const impl = this.fun instanceof Fun ? [t0(this.fun)] : []
+		return msCall('method', name, args, ...impl)
 	},
 
 	Module: transpileModule,

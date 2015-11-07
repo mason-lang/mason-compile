@@ -2,7 +2,7 @@ import {ClassKindDo, Kind} from '../MsAst'
 import {isKeyword, Keywords} from '../Token'
 import {parseExprParts} from './parse*'
 import {beforeAndOpBlock, parseJustBlockDo} from './parseBlock'
-import parseMethods, {parseStatics} from './parseMethods'
+import parseMethodImpls, {parseStatics} from './parseMethodImpls'
 import tryTakeComment from './tryTakeComment'
 
 /** Parse a {@link Kind}. */
@@ -42,7 +42,7 @@ export default function parseKind(tokens) {
 	if (rest.isEmpty())
 		return finish()
 
-	methods = parseMethods(rest)
+	methods = parseMethodImpls(rest)
 
 	return finish()
 }

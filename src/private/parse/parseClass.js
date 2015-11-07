@@ -4,7 +4,7 @@ import {ifElse} from '../util'
 import {opParseExpr, parseExprParts} from './parse*'
 import {beforeAndOpBlock, parseJustBlockDo} from './parseBlock'
 import {funArgsAndBlock} from './parseFun'
-import parseMethods, {parseStatics} from './parseMethods'
+import parseMethodImpls, {parseStatics} from './parseMethodImpls'
 import tryTakeComment from './tryTakeComment'
 
 /** Parse a {@link Class}. */
@@ -49,7 +49,7 @@ export default function parseClass(tokens) {
 		opConstructor = parseConstructor(line3.tail())
 		rest = rest.tail()
 	}
-	methods = parseMethods(rest)
+	methods = parseMethodImpls(rest)
 
 	return finish()
 }

@@ -1,4 +1,5 @@
-import {BlockDo, BlockValReturn, Fun, Funs, LocalDeclare, LocalDeclares} from '../MsAst'
+import {BlockDo, BlockValReturn, Fun, FunAbstract, Funs, LocalDeclare, LocalDeclares
+	} from '../MsAst'
 import {Groups, isAnyKeyword, isGroup, isKeyword, Keywords} from '../Token'
 import {head} from '../util'
 import {checkNonEmpty} from './checks'
@@ -9,16 +10,35 @@ import parseLocalDeclares, {parseLocalDeclareFromSpaced, parseLocalDeclaresAndMe
 import parseSpaced from './parseSpaced'
 import parseSwitch from './parseSwitch'
 import Slice from './Slice'
+import tryTakeComment from './tryTakeComment'
 
 /**
-Parse a function.
+Parse a {@link Fun}.
 @param keywordKind {Keywords} A function keyword.
 @param {Slice} tokens Rest of the line after the function keyword.
-@return {Fun}
 */
 export default function parseFun(keywordKind, tokens) {
 	const [isThis, isDo, kind] = funKind(keywordKind)
 	const {opReturnType, rest} = tryTakeReturnType(tokens)
+	const {args, opRestArg, block} = funArgsAndBlock(rest, !isDo)
+	return new Fun(tokens.loc, args, opRestArg, block, kind, isThis, opReturnType)
+}
+
+/** Parse a {@link FunLike}. */
+export function parseFunLike(keywordKind, tokens) {
+	const [isThis, isDo, kind] = funKind(keywordKind)
+	const {opReturnType, rest} = tryTakeReturnType(tokens)
+	const [before, blockLines] = beforeAndBlock(rest)
+	const [opComment, restLines] = tryTakeComment(blockLines)
+
+	if (restLines.size() === 1) {
+		const h = restLines.headSlice()
+		if (h.size() === 1 && isKeyword(Keywords.Abstract, h.head())) {
+			const {args, opRestArg} = parseFunLocals(before)
+			return new FunAbstract(tokens.loc, args, opRestArg, opReturnType, opComment)
+		}
+	}
+
 	const {args, opRestArg, block} = funArgsAndBlock(rest, !isDo)
 	return new Fun(tokens.loc, args, opRestArg, block, kind, isThis, opReturnType)
 }
@@ -61,9 +81,6 @@ export function funArgsAndBlock(tokens, isVal, includeMemberArgs=false) {
 	} else {
 		const [before, blockLines] = beforeAndBlock(tokens)
 		const {args, opRestArg, memberArgs} = parseFunLocals(before, includeMemberArgs)
-		for (const arg of args)
-			if (!arg.isLazy())
-				arg.kind = LocalDeclares.Mutable
 		const block = parseBlockDoOrVal(isVal, blockLines)
 		return {args, opRestArg, memberArgs, block}
 	}
@@ -129,8 +146,15 @@ function parseFunLocals(tokens, includeMemberArgs) {
 		}
 		if (includeMemberArgs) {
 			const {declares: args, memberArgs} = parseLocalDeclaresAndMemberArgs(rest)
-			return {args, memberArgs, opRestArg}
+			return {args: mutableArgs(args), memberArgs, opRestArg}
 		} else
-			return {args: parseLocalDeclares(rest), opRestArg}
+			return {args: mutableArgs(parseLocalDeclares(rest)), opRestArg}
 	}
+}
+
+function mutableArgs(args) {
+	for (const _ of args)
+		if (!_.isLazy())
+			_.kind = LocalDeclares.Mutable
+	return args
 }

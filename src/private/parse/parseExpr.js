@@ -12,6 +12,7 @@ import parseCase from './parseCase'
 import parseDel from './parseDel'
 import {parseFor, parseForBag} from './parseFor'
 import parseFun from './parseFun'
+import parseMethod from './parseMethod'
 import parseKind from './parseKind'
 import {parseLocalDeclare} from './parseLocalDeclares'
 
@@ -97,6 +98,8 @@ export function parseExprParts(tokens) {
 					}
 					case Keywords.Kind:
 						return parseKind(after)
+					case Keywords.Method:
+						return parseMethod(after)
 					case Keywords.New: {
 						const parts = parseExprParts(after)
 						return new New(at.loc, head(parts), tail(parts))
@@ -114,7 +117,8 @@ export function parseExprParts(tokens) {
 							opIf(!after.isEmpty(), () => parseExprPlain(after)))
 					case Keywords.YieldTo:
 						return new YieldTo(at.loc, parseExprPlain(after))
-					default: throw new Error(at.kind)
+					default:
+						throw new Error(at.kind)
 				}
 			}
 			return cat(before.map(parseSingle), getLast())
@@ -127,8 +131,8 @@ const exprSplitKeywords = new Set([
 	Keywords.ForBag, Keywords.For, Keywords.Fun, Keywords.FunDo, Keywords.FunThis,
 	Keywords.FunThisDo, Keywords.FunAsync, Keywords.FunAsyncDo, Keywords.FunThisAsync,
 	Keywords.FunThisAsyncDo, Keywords.FunGen, Keywords.FunGenDo, Keywords.FunThisGen,
-	Keywords.FunThisGenDo, Keywords.If, Keywords.Kind, Keywords.New, Keywords.Not, Keywords.Or,
-	Keywords.Super, Keywords.Switch, Keywords.Unless, Keywords.With, Keywords.Yield,
+	Keywords.FunThisGenDo, Keywords.If, Keywords.Kind, Keywords.Method, Keywords.New, Keywords.Not,
+	Keywords.Or, Keywords.Super, Keywords.Switch, Keywords.Unless, Keywords.With, Keywords.Yield,
 	Keywords.YieldTo
 ])
 

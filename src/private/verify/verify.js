@@ -1,7 +1,8 @@
 import {code} from '../../CompileError'
 import {check, options, warn} from '../context'
 import * as MsAstTypes from '../MsAst'
-import {BlockVal, BlockValThrow, Class, Constructor, Fun, Funs, Kind, Pattern} from '../MsAst'
+import {BlockVal, BlockValThrow, Class, Constructor, Fun, Funs, Kind, Method, Pattern
+	} from '../MsAst'
 import {cat, ifElse, implementMany, opEach} from '../util'
 import {funKind, locals, method, okToNotUse, opLoop, results, setup, tearDown, withIife, withIifeIf,
 	withInFunKind, withMethod, withLoop, withName} from './context'
@@ -40,6 +41,7 @@ implementMany(MsAstTypes, 'verify', {
 				*/
 				if (this.value instanceof Class ||
 					this.value instanceof Fun ||
+					this.value instanceof Method ||
 					this.value instanceof Kind)
 					setName(this.value)
 
@@ -225,6 +227,13 @@ implementMany(MsAstTypes, 'verify', {
 		// name set by AssignSingle
 	},
 
+	FunAbstract() {
+		for (const _ of this.args)
+			_.verify()
+		verifyOp(this.opRestArg)
+		verifyOp(this.opReturnType)
+	},
+
 	Ignore() {
 		for (const _ of this.ignoredNames)
 			accessLocal(this, _)
@@ -314,20 +323,31 @@ implementMany(MsAstTypes, 'verify', {
 		this.value.verify()
 	},
 
+	Method() {
+		okToNotUse.add(this.fun.opDeclareThis)
+		for (const _ of this.fun.args)
+			okToNotUse.add(_)
+		opEach(this.fun.opRestArg, _ => okToNotUse.add(_))
+		this.fun.verify()
+		// name set by AssignSingle
+	},
+
 	MethodImpl() {
-		verifyMethod(this, () => {
+		verifyMethodImpl(this, () => {
 			okToNotUse.add(this.fun.opDeclareThis)
 			this.fun.verify()
 		})
 	},
 	MethodGetter() {
-		verifyMethod(this, () => {
+		verifyMethodImpl(this, () => {
 			okToNotUse.add(this.declareThis)
-			verifyAndPlusLocals([this.declareThis], () => { this.block.verify() })
+			verifyAndPlusLocals([this.declareThis], () => {
+				this.block.verify()
+			})
 		})
 	},
 	MethodSetter() {
-		verifyMethod(this, () => {
+		verifyMethodImpl(this, () => {
 			verifyAndPlusLocals([this.declareThis, this.declareFocus], () => {
 				this.block.verify()
 			})
@@ -526,7 +546,7 @@ function verifyInLoop(loopUser) {
 	check(opLoop !== null, loopUser.loc, 'Not in a loop.')
 }
 
-function verifyMethod(_, doVerify) {
+function verifyMethodImpl(_, doVerify) {
 	verifyName(_.symbol)
 	withMethod(_, doVerify)
 }

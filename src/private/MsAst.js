@@ -557,18 +557,25 @@ export default class MsAst {
 	}
 
 // Fun
-	/**
-	```|:{opDeclareRes} {args} ...{opRestArg}
-		{block}```
-	*/
-	export class Fun extends Val {
-		constructor(loc,
-			args, opRestArg, block, kind=Funs.Plain, isThisFun=false, opReturnType=null) {
+	export class FunLike extends Val {
+		constructor(loc, args, opRestArg) {
 			super(loc)
 			/** @type {Array<LocalDeclare>} */
 			this.args = args
 			/** @type {?LocalDeclare} */
 			this.opRestArg = opRestArg
+			// TODO: opReturnType should be common too
+		}
+	}
+
+	/**
+	```|:{opDeclareRes} {args} ...{opRestArg}
+		{block}```
+	*/
+	export class Fun extends FunLike {
+		constructor(loc,
+			args, opRestArg, block, kind=Funs.Plain, isThisFun=false, opReturnType=null) {
+			super(loc, args, opRestArg)
 			/** @type {Block} */
 			this.block = block
 			/** @type {Funs} */
@@ -590,6 +597,24 @@ export default class MsAst {
 		Async: 1,
 		/** `~|` */
 		Generator: 2
+	}
+
+	export class FunAbstract extends FunLike {
+		constructor(loc, args, opRestArg, opReturnType, opComment) {
+			super(loc, args, opRestArg)
+			/** @type {?Val} */
+			this.opReturnType = opReturnType
+			/** @type {?string} */
+			this.opComment = opComment
+		}
+	}
+
+	export class Method extends Val {
+		constructor(loc, fun) {
+			super(loc)
+			/** @type {FunLike} */
+			this.fun = fun
+		}
 	}
 
 // Generator

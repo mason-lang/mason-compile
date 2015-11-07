@@ -216,7 +216,6 @@ const reservedWords = [
 	'!',
 	'<',
 	'>',
-	'abstract',
 	'actor',
 	'data',
 	'del?',
@@ -225,7 +224,6 @@ const reservedWords = [
 	'final',
 	'is',
 	'meta',
-	'method',
 	'out',
 	'override',
 	'send',
@@ -239,6 +237,7 @@ for (const name of reservedWords)
 
 /** Kinds of {@link Keyword}. */
 export const Keywords = {
+	Abstract: kw('abstract'),
 	Ampersand: kwNotName('&'),
 	And: kw('and'),
 	As: kw('as'),
@@ -284,9 +283,8 @@ export const Keywords = {
 	Ignore: kw('ignore'),
 	Kind: kw('kind'),
 	Lazy: kwNotName('~'),
-	Less: kw('<'),
 	MapEntry: kw('->'),
-	More: kw('>'),
+	Method: kw('method'),
 	Name: kw('name'),
 	New: kw('new'),
 	Not: kw('not'),

@@ -178,3 +178,4 @@ describe('expressions', () => {
 // Range (`a..b`, `a...b`, `a...`)
 // MemberFun
 // GetterFun
+// Method
