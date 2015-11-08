@@ -16,22 +16,13 @@ export default class MsAst {
 	Any valid part of a Block.
 	Note that some {@link Val}s will still cause warnings if they appear as a line.
 	*/
-	export class LineContent extends MsAst {
-		canBeStatement() {
-			return true
-		}
-	}
+	export class LineContent extends MsAst {}
 
 	/** Can only appear as lines in a Block. */
 	export class Do extends LineContent {}
 
 	/** Can appear in any expression. */
-	export class Val extends LineContent {
-		// overridable
-		canBeStatement() {
-			return false
-		}
-	}
+	export class Val extends LineContent {}
 
 // Module
 	/** Whole source file. */
@@ -56,24 +47,25 @@ export default class MsAst {
 		}
 	}
 
-	/** Single export. */
+	/*
+	//Single export.
 	export class ModuleExport extends Do {
 		constructor(loc, assign) {
 			super(loc)
-			/** @type {AssignSingle} */
+			//@type {AssignSingle}
 			this.assign = assign
 		}
 	}
-	/** Created with an ObjAssign in root. */
+	//Created with an ObjAssign in root.
 	export class ModuleExportNamed extends ModuleExport { }
-	/** Created by assigning to the module's name. */
+	//Created by assigning to the module's name.
 	export class ModuleExportDefault extends ModuleExport {
 		static forVal(loc, name, value) {
 			const assignee = LocalDeclare.plain(loc, name)
 			const assign = new AssignSingle(loc, assignee, value)
 			return new ModuleExportDefault(loc, assign)
 		}
-	}
+	}*/
 
 	/** Single import in an `import!` block. */
 	export class ImportDo extends MsAst {
@@ -332,18 +324,14 @@ export default class MsAst {
 			{finally}```
 	*/
 	export class Except extends LineContent {
-		constructor(loc, _try, _catch, _finally) {
+		constructor(loc, _try, opCatch, opFinally) {
 			super(loc)
 			/** @type {Block} */
 			this.try = _try
 			/** @type {?Catch} */
-			this.catch = _catch
-			/** @type {?BlockDo} */
-			this.finally = _finally
-		}
-
-		get isVal() {
-			return this.try instanceof BlockVal
+			this.opCatch = opCatch
+			/** @type {?Block} */
+			this.opFinally = opFinally
 		}
 	}
 
@@ -362,71 +350,22 @@ export default class MsAst {
 	}
 
 // Block
-	/**
-	Code in an indented block.
-	See {@link BlockWrap} for the kind that appears where a Val is expected.
-	*/
+	/** Lines in an indented block. */
 	export class Block extends MsAst {
-		constructor(loc, opComment) {
+		constructor(loc, opComment, lines) {
 			super(loc)
 			/** @type {?string} */
 			this.opComment = opComment
-		}
-	}
-
-	/** Block that just performs actions and doesn't have any value. */
-	export class BlockDo extends Block {
-		constructor(loc, opComment, lines) {
-			super(loc, opComment)
 			/** @type {Array<LineContent>} */
 			this.lines = lines
 		}
 	}
 
-	/** Block having a value. */
-	export class BlockVal extends Block { }
+	/** Part of a builder. */
+	export class BuildEntry extends MsAst {}
 
-	/**
-	BlockVal that actually returns a value at the end.
-	(The most common kind by far.)
-	*/
-	export class BlockValReturn extends BlockVal {
-		constructor(loc, opComment, lines, returned) {
-			super(loc, opComment)
-			/** @type {Array<LineContent>} */
-			this.lines = lines
-			/** @type {Val} */
-			this.returned = returned
-		}
-	}
-
-	/** Takes the place of a BlockVal, but doesn't actually return a value — throws. */
-	export class BlockValThrow extends BlockVal {
-		constructor(loc, opComment, lines, _throw) {
-			super(loc, opComment)
-			/** @type {Array<LineContent>} */
-			this.lines = lines
-			/** @type {Throw} */
-			this.throw = _throw
-		}
-	}
-
-	// TODO: BlockBag, BlockMap, BlockObj => BlockBuild(kind, ...)
-	/**
-	Block returning an Object.
-	Contains many {@link ObjEntry}.
-	*/
-	export class BlockObj extends BlockVal {
-		constructor(loc, opComment, lines) {
-			super(loc, opComment)
-			this.built = LocalDeclare.built(loc)
-			/** @type {Array<LineContent | ObjEntry>} */
-			this.lines = lines
-		}
-	}
-
-	/** Part of a {@link BlockObj */
-	export class ObjEntry extends Do {
+	/** Part of a {@link BlockObj}. */
+	export class ObjEntry extends BuildEntry {
 		constructor(loc) {
 			super(loc)
 		}
@@ -467,52 +406,19 @@ export default class MsAst {
 		}
 	}
 
-	/**
-	Bag-building block.
-	Contains many {@link BagEntry} and {@link BagEntryMany}.
-	*/
-	export class BlockBag extends BlockVal {
-		constructor(loc, opComment, lines) {
-			super(loc, opComment)
-			this.built = LocalDeclare.built(loc)
-			/** @type {Array<LineContent | BagEntry>} */
-			this.lines = lines
-		}
-	}
-
-	/** `. {value}` */
-	export class BagEntry extends Do {
-		constructor(loc, value) {
+	/** `. {value}` or `... {value}` */
+	export class BagEntry extends BuildEntry {
+		constructor(loc, value, isMany) {
 			super(loc)
 			/** @type {Val} */
 			this.value = value
-		}
-	}
-
-	/** `... {value}` */
-	export class BagEntryMany extends Do {
-		constructor(loc, value) {
-			super(loc)
-			/** @type {Val} */
-			this.value = value
-		}
-	}
-
-	/**
-	Map-building block.
-	Contains many {@link MapEntry}.
-	*/
-	export class BlockMap extends BlockVal {
-		constructor(loc, opComment, lines) {
-			super(loc, opComment)
-			this.built = LocalDeclare.built(loc)
-			/** @type {LineContent | MapEntry} */
-			this.lines = lines
+			/** @type {boolean} */
+			this.isMany = isMany
 		}
 	}
 
 	/** `key` -> `val` */
-	export class MapEntry extends Do {
+	export class MapEntry extends BuildEntry {
 		constructor(loc, key, val) {
 			super(loc)
 			/** @type {Val} */
@@ -536,10 +442,6 @@ export default class MsAst {
 			this.result = result
 			/** @type {boolean} */
 			this.isUnless = isUnless
-		}
-
-		get isVal() {
-			return this.result instanceof BlockVal
 		}
 	}
 
@@ -573,17 +475,18 @@ export default class MsAst {
 		{block}```
 	*/
 	export class Fun extends FunLike {
-		constructor(loc,
-			args, opRestArg, block, kind=Funs.Plain, isThisFun=false, opReturnType=null) {
+		constructor(loc, args, opRestArg, block, opts={}) {
 			super(loc, args, opRestArg)
 			/** @type {Block} */
 			this.block = block
 			/** @type {Funs} */
-			this.kind = kind
+			this.kind = opts.kind || Funs.Plain
 			/** @type {?LocalDeclareThis} */
-			this.opDeclareThis = opIf(isThisFun, () => LocalDeclare.this(this.loc))
+			this.opDeclareThis = opIf(opts.isThisFun, () => LocalDeclare.this(this.loc))
+			/** @type {boolean} */
+			this.isDo = opts.isDo || false
 			/** @type {?Val} */
-			this.opReturnType = opReturnType
+			this.opReturnType = opts.opReturnType || null
 		}
 	}
 	/**
@@ -628,10 +531,6 @@ export default class MsAst {
 			/** @type {?Val} */
 			this.opYielded = opYielded
 		}
-
-		canBeStatement() {
-			return true
-		}
 	}
 
 	/**
@@ -643,10 +542,6 @@ export default class MsAst {
 			super(loc)
 			/** @type {Val} */
 			this.yieldedTo = yieldedTo
-		}
-
-		canBeStatement() {
-			return true
 		}
 	}
 
@@ -703,7 +598,7 @@ export default class MsAst {
 	export class ClassKindDo extends MsAst {
 		constructor(loc, block) {
 			super(loc)
-			/** @type {BlockDo} */
+			/** @type {Block} */
 			this.block = block
 			/** @type {LocalDeclareFocus} */
 			this.declareFocus = LocalDeclare.focus(loc)
@@ -714,10 +609,7 @@ export default class MsAst {
 	export class Constructor extends MsAst {
 		constructor(loc, fun, memberArgs) {
 			super(loc)
-			/**
-			This will always have a {@link BlockDo}.
-			@type {Fun}
-			*/
+			/** @type {Fun} */
 			this.fun = fun
 			/** @type {Array<LocalDeclare>} */
 			this.memberArgs = memberArgs
@@ -747,7 +639,7 @@ export default class MsAst {
 	export class MethodGetter extends MethodImplLike {
 		constructor(loc, symbol, block) {
 			super(loc, symbol)
-			/** @type {BlockVal} */
+			/** @type {Block} */
 			this.block = block
 			this.declareThis = LocalDeclare.this(loc)
 		}
@@ -759,7 +651,7 @@ export default class MsAst {
 	export class MethodSetter extends MethodImplLike {
 		constructor(loc, symbol, block) {
 			super(loc, symbol)
-			/** @type {BlockDo} */
+			/** @type {Block} */
 			this.block = block
 			this.declareThis = LocalDeclare.this(loc)
 			this.declareFocus = LocalDeclare.focus(loc)
@@ -771,12 +663,10 @@ export default class MsAst {
 	Never a {@link SuperMember}.
 	*/
 	export class SuperCall extends LineContent {
-		constructor(loc, args, isVal) {
+		constructor(loc, args) {
 			super(loc)
 			/** @type {Array<Val | Spread>} */
 			this.args = args
-			/** @type {boolean} */
-			this.isVal = isVal
 		}
 	}
 
@@ -813,10 +703,6 @@ export default class MsAst {
 			this.called = called
 			/** @type {Array<Val | Spread>} */
 			this.args = args
-		}
-
-		canBeStatement() {
-			return true
 		}
 	}
 
@@ -864,10 +750,6 @@ export default class MsAst {
 			/** @type {?Block} */
 			this.opElse = opElse
 		}
-
-		get isVal() {
-			return this.parts[0].isVal
-		}
 	}
 	/** Single case in a {@link Case}. */
 	export class CasePart extends MsAst {
@@ -877,10 +759,6 @@ export default class MsAst {
 			this.test = test
 			/** @type {Block} */
 			this.result = result
-		}
-
-		get isVal() {
-			return this.result instanceof BlockVal
 		}
 	}
 
@@ -909,10 +787,6 @@ export default class MsAst {
 			/** @type {?Block} */
 			this.opElse = opElse
 		}
-
-		get isVal() {
-			return this.parts[0].isVal
-		}
 	}
 	/**
 	Single case in a {@link Switch}.
@@ -926,23 +800,18 @@ export default class MsAst {
 			/** @type {Block} */
 			this.result = result
 		}
-
-		get isVal() {
-			return this.result instanceof BlockVal
-		}
 	}
 
 // For
 	/** `for` */
 	export class For extends Do {
-		constructor(loc, opIteratee, block, isVal) {
+		constructor(loc, opIteratee, block) {
 			super(loc)
 			/** @type {?Iteratee} */
 			this.opIteratee = opIteratee
-			/** @type {BlockDo} */
+			/** @type {Block} */
 			this.block = block
 			/** @type {boolean} */
-			this.isVal = isVal
 		}
 	}
 
@@ -955,7 +824,7 @@ export default class MsAst {
 			super(loc)
 			/** @type {?Iteratee} */
 			this.opIteratee = opIteratee
-			/** @type {BlockDo} */
+			/** @type {Block} */
 			this.block = block
 			this.built = LocalDeclare.built(loc)
 		}
@@ -973,14 +842,11 @@ export default class MsAst {
 	}
 
 	/** `break` */
-	export class Break extends Do { }
-
-	/** `break {val}` */
-	export class BreakWithVal extends Do {
-		constructor(loc, value) {
+	export class Break extends Do {
+		constructor(loc, opValue=null) {
 			super(loc)
-			/** @type {Val} */
-			this.value = value
+			/** @type {?Val} */
+			this.opValue = opValue
 		}
 	}
 
@@ -997,7 +863,7 @@ export default class MsAst {
 	export class BlockWrap extends Val {
 		constructor(loc, block) {
 			super(loc)
-			/** @type {BlockVal} */
+			/** @type {Block} */
 			this.block = block
 		}
 	}
@@ -1151,7 +1017,7 @@ export default class MsAst {
 			this.declare = declare
 			/** @type {Val} */
 			this.value = value
-			/** @type {BlockDo} */
+			/** @type {Block} */
 			this.block = block
 		}
 	}

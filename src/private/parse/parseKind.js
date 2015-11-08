@@ -1,7 +1,7 @@
 import {ClassKindDo, Kind} from '../MsAst'
 import {isKeyword, Keywords} from '../Token'
 import {parseExprParts} from './parse*'
-import {beforeAndOpBlock, parseJustBlockDo} from './parseBlock'
+import {beforeAndOpBlock, parseJustBlock} from './parseBlock'
 import parseMethodImpls, {parseStatics} from './parseMethodImpls'
 import tryTakeComment from './tryTakeComment'
 
@@ -25,7 +25,7 @@ export default function parseKind(tokens) {
 
 	const line1 = rest.headSlice()
 	if (isKeyword(Keywords.Do, line1.head())) {
-		const done = parseJustBlockDo(Keywords.Do, line1.tail())
+		const done = parseJustBlock(Keywords.Do, line1.tail())
 		opDo = new ClassKindDo(line1.loc, done)
 		rest = rest.tail()
 	}

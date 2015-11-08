@@ -1,16 +1,17 @@
 import {code} from '../../CompileError'
 import {check, options, warn} from '../context'
 import * as MsAstTypes from '../MsAst'
-import {BlockVal, BlockValThrow, Class, Constructor, Fun, Funs, Kind, Method, Pattern
-	} from '../MsAst'
+import {Class, Constructor, Fun, Funs, Kind, Method, Pattern} from '../MsAst'
+import {showKeyword, Keywords} from '../Token'
 import {cat, ifElse, implementMany, opEach} from '../util'
-import {funKind, locals, method, okToNotUse, opLoop, results, setup, tearDown, withIife, withIifeIf,
-	withInFunKind, withMethod, withLoop, withName} from './context'
-import {accessLocal, getLocalDeclare, failMissingLocal, plusLocals, setDeclareAccessed, setLocal,
+import {funKind, locals, method, okToNotUse, opLoop, results, setup, tearDown, withIife,
+	withIifeIfVal, withInFunKind, withMethod, withLoop, withName} from './context'
+import {accessLocal, getLocalDeclare, failMissingLocal, setDeclareAccessed, setLocal,
 	verifyAndPlusLocal, verifyAndPlusLocals, verifyLocalDeclare, warnUnusedLocals, withBlockLocals
 	} from './locals'
+import SK,{checkDo, checkVal, markStatement} from './SK'
 import {setName, verifyName, verifyOp} from './util'
-import verifyLines from './verifyLines'
+import verifyBlock, {verifyModuleLines} from './verifyBlock'
 
 /**
 Generates information needed during transpiling, the VerifyResults.
@@ -27,12 +28,14 @@ export default function verify(msAst) {
 }
 
 implementMany(MsAstTypes, 'verify', {
-	Assert() {
-		this.condition.verify()
-		verifyOp(this.opThrown)
+	Assert(sk) {
+		checkDo(this, sk)
+		this.condition.verify(SK.Val)
+		verifyOp(this.opThrown, SK.Val)
 	},
 
-	AssignSingle() {
+	AssignSingle(sk) {
+		checkDo(this, sk)
 		withName(this.assignee.name, () => {
 			const doV = () => {
 				/*
@@ -47,7 +50,7 @@ implementMany(MsAstTypes, 'verify', {
 
 				// Assignee registered by verifyLines.
 				this.assignee.verify()
-				this.value.verify()
+				this.value.verify(SK.Val)
 			}
 			if (this.assignee.isLazy())
 				withBlockLocals(doV)
@@ -56,99 +59,88 @@ implementMany(MsAstTypes, 'verify', {
 		})
 	},
 
-	AssignDestructure() {
+	AssignDestructure(sk) {
+		checkDo(this, sk)
 		// Assignees registered by verifyLines.
 		for (const _ of this.assignees)
 			_.verify()
-		this.value.verify()
+		this.value.verify(SK.Val)
 	},
 
-	BagEntry: verifyBagEntry,
-	BagEntryMany: verifyBagEntry,
+	BagEntry(sk) {
+		checkDo(this, sk)
+		accessLocal(this, 'built')
+		this.value.verify(SK.Val)
+	},
 
-	BagSimple() {
+	BagSimple(sk) {
+		checkVal(this, sk)
 		for (const _ of this.parts)
-			_.verify()
+			_.verify(SK.Val)
 	},
 
-	BlockDo() {
-		verifyLines(this.lines)
+	Block: verifyBlock,
+
+	BlockWrap(sk) {
+		checkVal(this, sk)
+		withIife(() => this.block.verify(sk))
 	},
 
-	BlockValThrow() {
-		const newLocals = verifyLines(this.lines)
-		plusLocals(newLocals, () => this.throw.verify())
-	},
-
-	BlockValReturn() {
-		const newLocals = verifyLines(this.lines)
-		plusLocals(newLocals, () => this.returned.verify())
-	},
-
-
-	BlockObj: verifyBlockBuild,
-	BlockBag: verifyBlockBuild,
-	BlockMap: verifyBlockBuild,
-
-	BlockWrap() {
-		withIife(() => this.block.verify())
-	},
-
-	Break() {
+	Break(sk) {
+		checkDo(this, sk)
 		verifyInLoop(this)
-		check(!opLoop.isVal, this.loc, () =>
-			`${code('for')} in expression position must break with a value.`)
+		verifyOp(this.opValue, SK.Val)
+		check(results.isStatement(opLoop) === (this.opValue === null), this.loc, () =>
+			this.opValue === null ?
+				`${showKeyword(Keywords.For)} in expression position must break with a value.` :
+				`${showKeyword(Keywords.Break)} with value is only valid in ` +
+				`${showKeyword(Keywords.For)} in expression position.`)
 	},
 
-	BreakWithVal() {
-		verifyInLoop(this)
-		check(opLoop.isVal, this.loc, () =>
-			`${code('break')} only valid inside ${code('for')} in expression position.`)
-		this.value.verify()
-	},
-
-	Call() {
-		this.called.verify()
+	Call(_sk) {
+		this.called.verify(SK.Val)
 		for (const _ of this.args)
-			_.verify()
+			_.verify(SK.Val)
 	},
 
-	Case() {
-		withIifeIf(this.isVal, () => {
+	Case(sk) {
+		markStatement(this, sk)
+		withIifeIfVal(sk, () => {
 			const doIt = () => {
 				for (const part of this.parts)
-					part.verify()
-				verifyOp(this.opElse)
+					part.verify(sk)
+				verifyOp(this.opElse, sk)
 			}
 			ifElse(this.opCased,
 				_ => {
-					_.verify()
+					_.verify(SK.Do)
 					verifyAndPlusLocal(_.assignee, doIt)
 				},
 				doIt)
 		})
 	},
 
-	CasePart() {
+	CasePart(sk) {
 		if (this.test instanceof Pattern) {
-			this.test.type.verify()
-			this.test.patterned.verify()
-			verifyAndPlusLocals(this.test.locals, () => this.result.verify())
+			this.test.type.verify(SK.Val)
+			this.test.patterned.verify(SK.Val)
+			verifyAndPlusLocals(this.test.locals, () => this.result.verify(sk))
 		} else {
-			this.test.verify()
-			this.result.verify()
+			this.test.verify(SK.Val)
+			this.result.verify(sk)
 		}
 	},
 
-	Catch() {
+	Catch(sk) {
 		check(this.caught.opType === null, this.caught.loc, 'TODO: Caught types')
-		verifyAndPlusLocal(this.caught, () => this.block.verify())
+		verifyAndPlusLocal(this.caught, () => this.block.verify(sk))
 	},
 
-	Class() {
-		verifyOp(this.opSuperClass)
+	Class(sk) {
+		checkVal(this, sk)
+		verifyOp(this.opSuperClass, SK.Val)
 		for (const _ of this.kinds)
-			_.verify()
+			_.verify(SK.Val)
 		verifyOp(this.opDo)
 		for (const _ of this.statics)
 			_.verify()
@@ -160,23 +152,27 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	ClassKindDo() {
-		verifyAndPlusLocal(this.declareFocus, () => this.block.verify())
+		verifyAndPlusLocal(this.declareFocus, () => this.block.verify(SK.Do))
 	},
 
-	Cond() {
-		this.test.verify()
-		this.ifTrue.verify()
-		this.ifFalse.verify()
+	Cond(sk) {
+		checkVal(this, sk)
+		this.test.verify(SK.Val)
+		this.ifTrue.verify(SK.Val)
+		this.ifFalse.verify(SK.Val)
 	},
 
-	Conditional() {
-		this.test.verify()
-		withIifeIf(this.isVal, () => this.result.verify())
+	Conditional(sk) {
+		markStatement(this, sk)
+		this.test.verify(SK.Val)
+		withIifeIfVal(sk, () => {
+			this.result.verify(sk)
+		})
 	},
 
 	Constructor(classHasSuper) {
 		okToNotUse.add(this.fun.opDeclareThis)
-		withMethod(this, () => { this.fun.verify() })
+		withMethod(this, () => { this.fun.verify(SK.Val) })
 
 		const superCall = results.constructorToSuper.get(this)
 
@@ -191,39 +187,37 @@ implementMany(MsAstTypes, 'verify', {
 			setDeclareAccessed(_, this)
 	},
 
-	Except() {
-		this.try.verify()
-		verifyOp(this.catch)
-		verifyOp(this.finally)
+	Except(sk) {
+		markStatement(this, sk)
+		this.try.verify(sk)
+		verifyOp(this.opCatch, sk)
+		verifyOp(this.opFinally, SK.Do)
 	},
 
-	ForBag() {
+	ForBag(sk) {
+		checkVal(this, sk)
 		verifyAndPlusLocal(this.built, () => verifyFor(this))
 	},
 
-	For() {
+	For(sk) {
+		markStatement(this, sk)
 		verifyFor(this)
 	},
 
-	Fun() {
-		if (this.opReturnType !== null) {
-			check(this.block instanceof BlockVal, this.loc,
-				'Function with return type must return something.')
-			if (this.block instanceof BlockValThrow)
-				warn('Return type ignored because the block always throws.')
-		}
-
+	Fun(sk) {
+		checkVal(this, sk)
+		check(this.opReturnType === null || !this.isDo, this.loc,
+			'Function with return type must return something.')
 		withBlockLocals(() => {
 			withInFunKind(this.kind, () =>
 				withLoop(null, () => {
 					const allArgs = cat(this.opDeclareThis, this.args, this.opRestArg)
 					verifyAndPlusLocals(allArgs, () => {
-						this.block.verify()
-						verifyOp(this.opReturnType)
+						this.block.verify(this.isDo ? SK.Do : SK.Val)
+						verifyOp(this.opReturnType, SK.Val)
 					})
 				}))
 		})
-
 		// name set by AssignSingle
 	},
 
@@ -231,18 +225,20 @@ implementMany(MsAstTypes, 'verify', {
 		for (const _ of this.args)
 			_.verify()
 		verifyOp(this.opRestArg)
-		verifyOp(this.opReturnType)
+		verifyOp(this.opReturnType, SK.Val)
 	},
 
-	Ignore() {
+	Ignore(sk) {
+		checkDo(this, sk)
 		for (const _ of this.ignoredNames)
 			accessLocal(this, _)
 	},
 
-	Kind() {
+	Kind(sk) {
+		checkVal(this, sk)
 		for (const _ of this.superKinds)
-			_.verify()
-		verifyOp(this.opDo)
+			_.verify(SK.Val)
+		verifyOp(this.opDo, SK.Do)
 		for (const _ of this.statics)
 			_.verify()
 		for (const _ of this.methods)
@@ -250,11 +246,13 @@ implementMany(MsAstTypes, 'verify', {
 		// name set by AssignSingle
 	},
 
-	Lazy() {
-		withBlockLocals(() => this.value.verify())
+	Lazy(sk) {
+		checkVal(this, sk)
+		withBlockLocals(() => this.value.verify(SK.Val))
 	},
 
-	LocalAccess() {
+	LocalAccess(sk) {
+		checkVal(this, sk)
 		const declare = locals.get(this.name)
 		if (declare === undefined) {
 			const builtinPath = options.builtinNameToPath.get(this.name)
@@ -278,78 +276,88 @@ implementMany(MsAstTypes, 'verify', {
 		const builtinPath = options.builtinNameToPath.get(this.name)
 		if (builtinPath !== undefined)
 			warn(this.loc, `Local ${code(this.name)} overrides builtin from ${code(builtinPath)}.`)
-		verifyOp(this.opType)
+		verifyOp(this.opType, SK.Val)
 	},
 
-	LocalMutate() {
+	LocalMutate(sk) {
+		checkDo(this, sk)
 		const declare = getLocalDeclare(this.name, this.loc)
 		check(declare.isMutable(), this.loc, () => `${code(this.name)} is not mutable.`)
 		// TODO: Track mutations. Mutable local must be mutated somewhere.
-		this.value.verify()
+		this.value.verify(SK.Val)
 	},
 
-	Logic() {
+	Logic(sk) {
+		checkVal(this, sk)
 		check(this.args.length > 1, 'Logic expression needs at least 2 arguments.')
 		for (const _ of this.args)
-			_.verify()
+			_.verify(SK.Val)
 	},
 
-	Not() {
-		this.arg.verify()
+	Not(sk) {
+		checkVal(this, sk)
+		this.arg.verify(SK.Val)
 	},
 
-	NumberLiteral() { },
+	NumberLiteral(sk) {
+		checkVal(this, sk)
+	},
 
-	MapEntry() {
+	MapEntry(sk) {
+		checkDo(this, sk)
 		accessLocal(this, 'built')
-		this.key.verify()
-		this.val.verify()
+		this.key.verify(SK.Val)
+		this.val.verify(SK.Val)
 	},
 
-	Member() {
-		this.object.verify()
+	Member(sk) {
+		checkVal(this, sk)
+		this.object.verify(SK.Val)
 		verifyName(this.name)
 	},
 
-	MemberFun() {
-		verifyOp(this.opObject)
+	MemberFun(sk) {
+		checkVal(this, sk)
+		verifyOp(this.opObject, SK.Val)
 		verifyName(this.name)
 	},
 
-	MemberSet() {
-		this.object.verify()
+	MemberSet(sk) {
+		checkDo(this, sk)
+		this.object.verify(SK.Val)
 		verifyName(this.name)
-		verifyOp(this.opType)
-		this.value.verify()
+		verifyOp(this.opType, SK.Val)
+		this.value.verify(SK.Val)
 	},
 
-	Method() {
+	Method(sk) {
+		checkVal(this, sk)
 		okToNotUse.add(this.fun.opDeclareThis)
 		for (const _ of this.fun.args)
 			okToNotUse.add(_)
 		opEach(this.fun.opRestArg, _ => okToNotUse.add(_))
-		this.fun.verify()
+		this.fun.verify(SK.Val)
 		// name set by AssignSingle
 	},
 
 	MethodImpl() {
 		verifyMethodImpl(this, () => {
 			okToNotUse.add(this.fun.opDeclareThis)
-			this.fun.verify()
+			this.fun.verify(SK.Val)
 		})
 	},
 	MethodGetter() {
 		verifyMethodImpl(this, () => {
 			okToNotUse.add(this.declareThis)
 			verifyAndPlusLocals([this.declareThis], () => {
-				this.block.verify()
+				this.block.verify(SK.Val)
 			})
 		})
 	},
 	MethodSetter() {
 		verifyMethodImpl(this, () => {
 			verifyAndPlusLocals([this.declareThis, this.declareFocus], () => {
-				this.block.verify()
+				this.block.verify(SK.Do)
 			})
 		})
 	},
@@ -361,159 +369,163 @@ implementMany(MsAstTypes, 'verify', {
 		verifyOp(this.opImportGlobal)
 
 		withName(options.moduleName(), () => {
-			verifyLines(this.lines)
+			verifyModuleLines(this.lines, this.loc)
 		})
 	},
 
-	ModuleExport() {
-		this.assign.verify()
-		for (const _ of this.assign.allAssignees())
-			setDeclareAccessed(_, this)
-	},
-
-	New() {
-		this.type.verify()
+	New(sk) {
+		checkVal(this, sk)
+		this.type.verify(SK.Val)
 		for (const _ of this.args)
-			_.verify()
+			_.verify(SK.Val)
 	},
 
-	ObjEntryAssign() {
-		accessLocal(this, 'built')
-		this.assign.verify()
+	ObjEntryAssign(sk) {
+		checkDo(this, sk)
+		if (!results.isObjEntryExport(this))
+			accessLocal(this, 'built')
+		this.assign.verify(SK.Do)
 		for (const _ of this.assign.allAssignees())
 			setDeclareAccessed(_, this)
 	},
 
-	ObjEntryPlain() {
+	ObjEntryPlain(sk) {
+		checkDo(this, sk)
 		accessLocal(this, 'built')
 		verifyName(this.name)
-		this.value.verify()
+		this.value.verify(SK.Val)
 	},
 
-	ObjSimple() {
+	ObjSimple(sk) {
+		checkVal(this, sk)
 		const keys = new Set()
 		for (const pair of this.pairs) {
 			const {key, value} = pair
 			check(!keys.has(key), pair.loc, () => `Duplicate key ${key}`)
 			keys.add(key)
-			value.verify()
+			value.verify(SK.Val)
 		}
 	},
 
-	GetterFun() {
+	GetterFun(sk) {
+		checkVal(this, sk)
 		verifyName(this.name)
 	},
 
-	QuotePlain() {
+	QuotePlain(sk) {
+		checkVal(this, sk)
 		for (const _ of this.parts)
 			verifyName(_)
 	},
 
-	QuoteSimple() {},
-
-	QuoteTaggedTemplate() {
-		this.tag.verify()
-		this.quote.verify()
+	QuoteSimple(sk) {
+		checkVal(this, sk)
 	},
 
-	Range() {
-		this.start.verify()
-		verifyOp(this.end)
+	QuoteTaggedTemplate(sk) {
+		checkVal(this, sk)
+		this.tag.verify(SK.Val)
+		this.quote.verify(SK.Val)
 	},
 
-	SetSub() {
-		this.object.verify()
+	Range(sk) {
+		checkVal(this, sk)
+		this.start.verify(SK.Val)
+		verifyOp(this.end, SK.Val)
+	},
+
+	SetSub(sk) {
+		checkDo(this, sk)
+		this.object.verify(SK.Val)
 		for (const _ of this.subbeds)
-			_.verify()
-		verifyOp(this.opType)
-		this.value.verify()
+			_.verify(SK.Val)
+		verifyOp(this.opType, SK.Val)
+		this.value.verify(SK.Val)
 	},
 
-	SpecialDo() { },
+	SpecialDo(sk) {
+		checkDo(this, sk)
+	},
 
-	SpecialVal() {
+	SpecialVal(sk) {
+		checkVal(this, sk)
 		setName(this)
 	},
 
 	Spread() {
-		this.spreaded.verify()
+		this.spreaded.verify(SK.Val)
 	},
 
-	SuperCall() {
+	SuperCall(sk) {
 		check(method !== null, this.loc, 'Must be in a method.')
 		results.superCallToMethod.set(this, method)
 
 		if (method instanceof Constructor) {
-			check(!this.isVal, this.loc, () =>
+			check(sk === SK.Do, this.loc, () =>
 				`${code('super')} in constructor must appear as a statement.'`)
 			results.constructorToSuper.set(method, this)
 		}
 
 		for (const _ of this.args)
-			_.verify()
+			_.verify(SK.Val)
 	},
 
-	SuperMember() {
+	SuperMember(sk) {
+		checkVal(this, sk)
 		check(method !== null, this.loc, 'Must be in method.')
 		verifyName(this.name)
 	},
 
-	Switch() {
-		withIifeIf(this.isVal, () => {
-			this.switched.verify()
+	Switch(sk) {
+		markStatement(this, sk)
+		withIifeIfVal(sk, () => {
+			this.switched.verify(SK.Val)
 			for (const part of this.parts)
-				part.verify()
-			verifyOp(this.opElse)
+				part.verify(sk)
+			verifyOp(this.opElse, sk)
 		})
 	},
 
-	SwitchPart() {
+	SwitchPart(sk) {
+		markStatement(this, sk)
 		for (const _ of this.values)
-			_.verify()
-		this.result.verify()
+			_.verify(SK.Val)
+		this.result.verify(sk)
 	},
 
 	Throw() {
-		verifyOp(this.opThrown)
+		verifyOp(this.opThrown, SK.Val)
 	},
 
 	Import: verifyImport,
 	ImportGlobal: verifyImport,
 
-	With() {
-		this.value.verify()
-		withIife(() => {
-			if (this.declare.name === '_')
+	With(sk) {
+		markStatement(this, sk)
+		this.value.verify(SK.Val)
+		withIifeIfVal(sk, () => {
+			if (sk === SK.Val && this.declare.name === '_')
 				okToNotUse.add(this.declare)
-			verifyAndPlusLocal(this.declare, () => { this.block.verify() })
+			verifyAndPlusLocal(this.declare, () => {
+				this.block.verify(SK.Do)
+			})
 		})
 	},
 
-	Yield() {
+	Yield(_sk) {
 		check(funKind !== Funs.Plain, `Cannot ${code('<~')} outside of async/generator.`)
 		if (funKind === Funs.Async)
 			check(this.opYielded !== null, this.loc, 'Cannot await nothing.')
-		verifyOp(this.opYielded)
+		verifyOp(this.opYielded, SK.Val)
 	},
 
-	YieldTo() {
+	YieldTo(_sk) {
 		check(funKind === Funs.Generator, this.loc, `Cannot ${code('<~~')} outside of generator.`)
-		this.yieldedTo.verify()
+		this.yieldedTo.verify(SK.Val)
 	}
 })
 
 // Shared implementations
-
-function verifyBagEntry() {
-	accessLocal(this, 'built')
-	this.value.verify()
-}
-
-function verifyBlockBuild() {
-	verifyAndPlusLocal(this.built, () => {
-		verifyLines(this.lines)
-	})
-}
 
 function verifyImport() {
 	// Since Uses are always in the outermost scope, don't have to worry about shadowing.
@@ -533,10 +545,12 @@ function verifyImport() {
 // Helpers specific to certain MsAst types
 
 function verifyFor(forLoop) {
-	const verifyBlock = () => withLoop(forLoop, () => forLoop.block.verify())
+	const verifyBlock = () => withLoop(forLoop, () => {
+		forLoop.block.verify(SK.Do)
+	})
 	ifElse(forLoop.opIteratee,
 		({element, bag}) => {
-			bag.verify()
+			bag.verify(SK.Val)
 			verifyAndPlusLocal(element, verifyBlock)
 		},
 		verifyBlock)

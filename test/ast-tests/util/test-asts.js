@@ -1,43 +1,33 @@
-import {BlockDo, BlockValReturn, ModuleExportDefault, Val} from '../../../dist/private/MsAst'
+import {Module} from '../../../dist/private/MsAst'
 import {parseAst} from '../../../dist/compile'
 import {setContext} from '../../../dist/private/context'
 import render from '../../../dist/private/render'
 import transpile from '../../../dist/private/transpile/transpile'
 import verify from '../../../dist/private/verify/verify'
-import {last, rtail} from '../../../dist/private/util'
 import {loc} from './ast-util'
 
 export function test(ms, ast, js, opts={}) {
 	const isMultiLineTest = ast instanceof Array
-	ast = isMultiLineTest ?
-		last(ast) instanceof Val ?
-			new BlockValReturn(loc, null, rtail(ast), last(ast)) :
-			new BlockDo(loc, null, ast) :
-		ast
+	ast = new Module(loc, 'test-compile', null, [], [], null, isMultiLineTest ? ast : [ast])
 	ms = dedent(ms) + '\n'
 	js = dedent(js)
 	const expectedWarnings = opts.warnings || []
 	const name = opts.name || `\`${ms.replace(/\n\t+/g, '; ')}\``
 
 	it(name, () => {
-		const {warnings: actualWarnings, result: moduleAst} = parseAst(ms, compileOptions)
+		const {warnings: actualWarnings, result: parsedAst} = parseAst(ms, compileOptions)
 
-		if (moduleAst instanceof Error)
-			throw moduleAst
+		if (parsedAst instanceof Error)
+			throw parsedAst
 
-		// This mirrors getting `ast`. Convert lines to block.
-		const lines = moduleAst.lines
-		let parsedAst = lines.length === 1 ?
-			lines[0] instanceof ModuleExportDefault ? lines[0].assign.value : lines[0] :
-			last(lines) instanceof ModuleExportDefault ?
-			new BlockValReturn(loc, null, rtail(lines), last(lines).assign.value) :
-			new BlockDo(loc, null, lines)
-
+		const toJSON = _ => JSON.stringify(_, null, '\t')
 		if (!equalAsts(ast, parsedAst))
-			throw new Error(`Different AST.\nExpected: ${ast}\nParsed: ${parsedAst}`)
+			throw new Error(
+				`Different AST.\nExpected: ${toJSON(ast)}\nParsed: ${toJSON(parsedAst)}`)
 
 		setContext(compileOptions)
-		let rendered = render(transpile(ast, verify(ast)))
+		let renderAst = ast.lines[0]
+		let rendered = render(transpile(renderAst, verify(ast)))
 		if (rendered instanceof Error)
 			throw rendered
 

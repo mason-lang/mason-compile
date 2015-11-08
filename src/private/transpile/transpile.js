@@ -11,16 +11,17 @@ import {options} from '../context'
 import * as MsAstTypes from '../MsAst'
 import {AssignSingle, Call, Constructor, Fun, Funs, Logics, Member, LocalDeclares, Pattern, Setters,
 	SpecialDos, SpecialVals} from '../MsAst'
-import {assert, cat, flatMap, flatOpMap, ifElse, implementMany, isEmpty, opIf, opMap, tail
-	} from '../util'
+import {assert, cat, flatMap, flatOpMap, ifElse, implementMany, isEmpty, last, opIf, opMap, rtail,
+	tail} from '../util'
+import {Blocks} from '../VerifyResults'
 import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, DeclareLexicalThis,
-	ExportsDefault, IdArguments, IdBuilt, IdExports, IdExtract, IdFocus, IdLexicalThis, IdSuper,
-	GlobalError, GlobalInfinity, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt,
-	ReturnFocus, SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
-import {isInConstructor, isInGenerator, setup, tearDown, verifyResults, withInConstructor,
-	withInGenerator} from './context'
+	IdArguments, IdBuilt, IdExtract, IdFocus, IdLexicalThis, IdSuper, GlobalError, GlobalInfinity,
+	LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt, ReturnFocus, SwitchCaseNoMatch,
+	ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
+import {isInConstructor, setup, tearDown, verifyResults, withInConstructor, withInGenerator
+	} from './context'
 import {transpileMethodToDefinition, transpileMethodToProperty} from './transpileMethod'
-import transpileModule from './transpileModule'
+import transpileModule, {exportNamedOrDefault} from './transpileModule'
 import {accessLocalDeclare, blockWrap, blockWrapIfVal, declare, doThrow, idForDeclareCached,
 	lazyWrap, makeDeclarator, makeDestructureDeclarators, maybeWrapInCheckContains,
 	memberStringOrVal, msCall, msMember, opTypeCheckForLocalDeclare, t0, t1, t2, t3, tLines,
@@ -76,44 +77,36 @@ implementMany(MsAstTypes, 'transpile', {
 				false))
 	},
 
-	BagEntry() { return msCall('add', IdBuilt, t0(this.value)) },
-
-	BagEntryMany() { return msCall('addMany', IdBuilt, t0(this.value)) },
-
-	BagSimple() { return new ArrayExpression(this.parts.map(t0)) },
-
-	BlockDo(lead=null, opReturnType=null, follow=null) {
-		assert(opReturnType === null)
-		return new BlockStatement(cat(lead, tLines(this.lines), follow))
+	BagEntry() {
+		return msCall(this.isMany ? 'addMany' : 'add', IdBuilt, t0(this.value))
 	},
 
-	BlockValThrow(lead=null, _opReturnType) {
-		return new BlockStatement(cat(lead, tLines(this.lines), t0(this.throw)))
+	BagSimple() {
+		return new ArrayExpression(this.parts.map(t0))
 	},
 
-	BlockValReturn(lead=null, opReturnType=null) {
-		return transpileBlock(t0(this.returned), tLines(this.lines), lead, opReturnType)
-	},
-
-	BlockBag(lead=null, opReturnType=null) {
-		return transpileBlock(
-			IdBuilt,
-			cat(DeclareBuiltBag, tLines(this.lines)),
-			lead, opReturnType)
-	},
-
-	BlockObj(lead=null, opReturnType=null) {
-		return transpileBlock(
-			IdBuilt,
-			cat(DeclareBuiltObj, tLines(this.lines)),
-			lead, opReturnType)
-	},
-
-	BlockMap(lead=null, opReturnType=null) {
-		return transpileBlock(
-			IdBuilt,
-			cat(DeclareBuiltMap, tLines(this.lines)),
-			lead, opReturnType)
+	Block(lead=null, opReturnType=null, follow=null) {
+		const kind = verifyResults.blockKind(this)
+		switch (kind) {
+			case Blocks.Do:
+				assert(opReturnType === null)
+				return new BlockStatement(cat(lead, tLines(this.lines), follow))
+			case Blocks.Throw:
+				return new BlockStatement(
+					cat(lead, tLines(rtail(this.lines)), t0(last(this.lines))))
+			case Blocks.Return:
+				return transpileBlockReturn(
+					t0(last(this.lines)), tLines(rtail(this.lines)), lead, opReturnType)
+			case Blocks.Bag: case Blocks.Map: case Blocks.Obj: {
+				const declare = kind === Blocks.Bag ?
+					DeclareBuiltBag :
+					kind === Blocks.Map ? DeclareBuiltMap : DeclareBuiltObj
+				const body = cat(declare, tLines(this.lines))
+				return transpileBlockReturn(IdBuilt, body, lead, opReturnType)
+			}
+			default:
+				throw new Error(kind)
+		}
 	},
 
 	BlockWrap() {
@@ -121,11 +114,9 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	Break() {
-		return new BreakStatement()
-	},
-
-	BreakWithVal() {
-		return new ReturnStatement(t0(this.value))
+		return ifElse(this.opValue,
+			_ => new ReturnStatement(t0(_)),
+			() => new BreakStatement())
 	},
 
 	Call() {
@@ -134,11 +125,12 @@ implementMany(MsAstTypes, 'transpile', {
 
 	Case() {
 		const body = caseBody(this.parts, this.opElse)
-		if (this.isVal) {
+		if (verifyResults.isStatement(this))
+			return ifElse(this.opCased, _ => new BlockStatement([t0(_), body]), () => body)
+		else {
 			const block = ifElse(this.opCased, _ => [t0(_), body], () => [body])
 			return blockWrap(new BlockStatement(block))
-		} else
-			return ifElse(this.opCased, _ => new BlockStatement([t0(_), body]), () => body)
+		}
 	},
 
 	CasePart(alternate) {
@@ -188,13 +180,14 @@ implementMany(MsAstTypes, 'transpile', {
 	Conditional() {
 		const test = t0(this.test)
 		const res = t0(this.result)
-		if (this.isVal) {
+		if (verifyResults.isStatement(this))
+			return new IfStatement(this.isUnless ? new UnaryExpression('!', test) : test, res)
+		else {
 			const result = msCall('some', blockWrap(res))
 			const none = msMember('None')
 			const [then, _else] = this.isUnless ? [none, result] : [result, none]
 			return new ConditionalExpression(test, then, _else)
-		} else
-			return new IfStatement(this.isUnless ? new UnaryExpression('!', test) : test, res)
+		}
 	},
 
 	Constructor() {
@@ -215,14 +208,12 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	Except() {
-		return blockWrapIfVal(this.isVal, new TryStatement(
-			t0(this.try),
-			opMap(this.catch, t0),
-			opMap(this.finally, t0)))
+		return blockWrapIfVal(this,
+			new TryStatement(t0(this.try), opMap(this.opCatch, t0), opMap(this.opFinally, t0)))
 	},
 
 	For() {
-		return blockWrapIfVal(this.isVal, forLoop(this.opIteratee, this.block))
+		return blockWrapIfVal(this, forLoop(this.opIteratee, this.block))
 	},
 
 	ForBag() {
@@ -378,15 +369,6 @@ implementMany(MsAstTypes, 'transpile', {
 
 	Module: transpileModule,
 
-	ModuleExportNamed() {
-		return t1(this.assign, val =>
-			new AssignmentExpression('=', member(IdExports, this.assign.assignee.name), val))
-	},
-
-	ModuleExportDefault() {
-		return t1(this.assign, val => new AssignmentExpression('=', ExportsDefault, val))
-	},
-
 	New() {
 		return new NewExpression(t0(this.type), this.args.map(t0))
 	},
@@ -394,13 +376,17 @@ implementMany(MsAstTypes, 'transpile', {
 	Not() { return new UnaryExpression('!', t0(this.arg)) },
 
 	ObjEntryAssign() {
-		return this.assign instanceof AssignSingle && !this.assign.assignee.isLazy() ?
-			t1(this.assign, val =>
-				new AssignmentExpression('=', member(IdBuilt, this.assign.assignee.name), val)) :
-			cat(
-				t0(this.assign),
-				this.assign.allAssignees().map(_ =>
-					msCall('setLazy', IdBuilt, new Literal(_.name), idForDeclareCached(_))))
+		if (this.assign instanceof AssignSingle && !this.assign.assignee.isLazy()) {
+			const name = this.assign.assignee.name
+			return t1(this.assign, val =>
+				verifyResults.isObjEntryExport(this) ?
+					exportNamedOrDefault(val, name) :
+					new AssignmentExpression('=', member(IdBuilt, name), val))
+		} else {
+			const assigns = this.assign.allAssignees().map(_ =>
+				msCall('setLazy', IdBuilt, new Literal(_.name), idForDeclareCached(_)))
+			return cat(t0(this.assign), assigns)
+		}
 	},
 
 	ObjEntryPlain() {
@@ -536,11 +522,11 @@ implementMany(MsAstTypes, 'transpile', {
 		parts.push(ifElse(this.opElse,
 			_ => new SwitchCase(undefined, t0(_).body),
 			() => SwitchCaseNoMatch))
-		return blockWrapIfVal(this.isVal, new SwitchStatement(t0(this.switched), parts))
+		return blockWrapIfVal(this, new SwitchStatement(t0(this.switched), parts))
 	},
 
 	SwitchPart() {
-		const follow = opIf(!this.isVal, () => new BreakStatement)
+		const follow = opIf(verifyResults.isStatement(this), () => new BreakStatement)
 		/*
 		We could just pass block.body for the switch lines, but instead
 		enclose the body of the switch case in curly braces to ensure a new scope.
@@ -575,17 +561,20 @@ implementMany(MsAstTypes, 'transpile', {
 
 	With() {
 		const idDeclare = idForDeclareCached(this.declare)
-		const block = t3(this.block, null, null, new ReturnStatement(idDeclare))
-		const fun = isInGenerator ?
-			new FunctionExpression(null, [idDeclare], block, true) :
-			new ArrowFunctionExpression([idDeclare], block)
-		const call = new CallExpression(fun, [t0(this.value)])
-		return isInGenerator ? new YieldExpression(call, true) : call
+		const val = t0(this.value)
+		const lead = new VariableDeclaration('const', [new VariableDeclarator(idDeclare, val)])
+		return verifyResults.isStatement(this) ?
+			t1(this.block, lead) :
+			blockWrap(t3(this.block, lead, null, new ReturnStatement(idDeclare)))
 	},
 
-	Yield() { return new YieldExpression(opMap(this.opYielded, t0), false) },
+	Yield() {
+		return new YieldExpression(opMap(this.opYielded, t0), false)
+	},
 
-	YieldTo() { return new YieldExpression(t0(this.yieldedTo), true) }
+	YieldTo() {
+		return new YieldExpression(t0(this.yieldedTo), true)
+	}
 })
 
 // Functions specific to certain expressions
@@ -612,8 +601,8 @@ function forLoop(opIteratee, block) {
 		() => new ForStatement(null, null, null, t0(block)))
 }
 
-function transpileBlock(returned, lines, lead, opReturnType) {
-	const fin = new ReturnStatement(
+function transpileBlockReturn(returned, lines, lead, opReturnType) {
+	const ret = new ReturnStatement(
 		maybeWrapInCheckContains(returned, opReturnType, 'returned value'))
-	return new BlockStatement(cat(lead, lines, fin))
+	return new BlockStatement(cat(lead, lines, ret))
 }

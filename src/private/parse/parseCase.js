@@ -5,13 +5,13 @@ import {Groups, isGroup, isKeyword, Keywords} from '../Token'
 import {opMap} from '../util'
 import {checkEmpty} from './checks'
 import {opParseExpr, parseExpr} from './parse*'
-import {beforeAndBlock, parseBlockDoOrVal, parseJustBlockDoOrVal} from './parseBlock'
+import parseBlock, {beforeAndBlock, parseJustBlock} from './parseBlock'
 import parseLocalDeclares from './parseLocalDeclares'
 import parseSpaced from './parseSpaced'
 import Slice from './Slice'
 
 /** Parse a {@link Case}. */
-export default function parseCase(isVal, casedFromFun, tokens) {
+export default function parseCase(casedFromFun, tokens) {
 	const [before, block] = beforeAndBlock(tokens)
 
 	let opCased
@@ -23,21 +23,17 @@ export default function parseCase(isVal, casedFromFun, tokens) {
 
 	const lastLine = Slice.group(block.last())
 	const [partLines, opElse] = isKeyword(Keywords.Else, lastLine.head()) ?
-		[block.rtail(), parseJustBlockDoOrVal(isVal, Keywords.Else, lastLine.tail())] :
+		[block.rtail(), parseJustBlock(Keywords.Else, lastLine.tail())] :
 		[block, null]
 
-	const parts = partLines.mapSlices(line => parseCaseLine(isVal, line))
+	const parts = partLines.mapSlices(line => {
+		const [before, block] = beforeAndBlock(line)
+		return new CasePart(line.loc, parseCaseTest(before), parseBlock(block))
+	})
 	check(parts.length > 0, tokens.loc, () =>
 		`Must have at least 1 non-${code('else')} test.`)
 
 	return new Case(tokens.loc, opCased, parts, opElse)
-}
-
-function parseCaseLine(isVal, line) {
-	const [before, block] = beforeAndBlock(line)
-	const test = parseCaseTest(before)
-	const result = parseBlockDoOrVal(isVal, block)
-	return new CasePart(line.loc, test, result)
 }
 
 function parseCaseTest(tokens) {

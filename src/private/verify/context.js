@@ -1,5 +1,6 @@
 import {Funs} from '../MsAst'
 import VerifyResults from '../VerifyResults'
+import SK from './SK'
 
 /** Map from names to LocalDeclares. */
 export let locals
@@ -76,13 +77,14 @@ export function withName(newName, action) {
 	name = oldName
 }
 
-// Can't break out of loop inside of IIFE.
+/** Can't break out of loop inside of IIFE. */
 export function withIife(action) {
 	withLoop(null, action)
 }
 
-export function withIifeIf(isVal, action) {
-	if (isVal)
+/** The value form of some expressions need to be wrapped in an IIFE. */
+export function withIifeIfVal(sk, action) {
+	if (sk === SK.Val)
 		withIife(action)
 	else
 		action()

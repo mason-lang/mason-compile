@@ -32,8 +32,21 @@ export default class VerifyResults {
 		this.superCallToMethod = new Map()
 		/** Links a constructor to its super! call. */
 		this.constructorToSuper = new Map()
+		/** Stores verified block kind (see verifyBlock.js) */
+		this.blockToKind = new Map()
+		/**
+		Set of MsAsts that have been marked as being statements.
+		Those which are always statements (like Throw) are not marked.
+		Use a set of statements because there are usually many more vals than statements.
+		*/
+		this.statements = new Set()
+		/** ObjEntry_s that are module exports */
+		this.objEntryExports = new Set()
+		/** @type {Modules} */
+		this.moduleKind = null
 	}
 
+	/** Gets the LocalDeclare that was verified to be the one accessed. */
 	localDeclareForAccess(localAccess) {
 		return this.localAccessToDeclare.get(localAccess)
 	}
@@ -54,4 +67,38 @@ export default class VerifyResults {
 		const x = this.names.get(expr)
 		return x === undefined ? null : x
 	}
+
+	/** Certain expressions (such as `if`) are marked if they are statements. */
+	isStatement(expr) {
+		return this.statements.has(expr)
+	}
+
+	/** What kind of block the verifier determined this to be. */
+	blockKind(block) {
+		return this.blockToKind.get(block)
+	}
+
+	/** Whether an ObjEntry is a module export. */
+	isObjEntryExport(objEntry) {
+		return this.objEntryExports.has(objEntry)
+	}
+}
+
+/** Kinds of {@link Block}. */
+export const Blocks = {
+	Do: 0,
+	Throw: 1,
+	Return: 2,
+	Bag: 3,
+	Map: 4,
+	Obj: 5
+}
+
+/** Kinds of {@link Module}. */
+export const Modules = {
+	Do: 0,
+	Val: 1,
+	Exports: 2,
+	Bag: 3,
+	Map: 4,
 }

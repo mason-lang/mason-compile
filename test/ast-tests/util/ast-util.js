@@ -1,5 +1,5 @@
 import Loc, {StartPos} from 'esast/dist/Loc'
-import {AssignSingle, BlockDo, BlockValReturn, Fun, LocalAccess, LocalDeclare, NumberLiteral,
+import {AssignSingle, Block, Fun, LocalAccess, LocalDeclare, NumberLiteral,
 	QuoteSimple, SpecialDo, SpecialDos} from '../../../dist/private/MsAst'
 
 export const
@@ -21,14 +21,15 @@ export const
 	assignAZero = new AssignSingle(loc, aDeclare, zero),
 	assignFocusZero = new AssignSingle(loc, focusDeclare, zero),
 
-	blockDbg = new BlockDo(loc, null, [new SpecialDo(loc, SpecialDos.Debugger)]),
-	blockOne = new BlockValReturn(loc, null, [], one),
-	blockTwo = new BlockValReturn(loc, null, [], two),
-	blockPass = new BlockDo(loc, null, []),
+	blockDbg = new Block(loc, null, [new SpecialDo(loc, SpecialDos.Debugger)]),
+	blockOne = new Block(loc, null, [one]),
+	blockTwo = new Block(loc, null, [two]),
+	blockPass = new Block(loc, null, []),
 
 	funDo = lines =>
 		new Fun(
 			loc,
 			[],
 			null,
-			new BlockDo(loc, null, lines))
+			new Block(loc, null, lines),
+			{isDo: true})

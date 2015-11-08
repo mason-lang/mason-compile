@@ -1,15 +1,16 @@
 import {name, results} from './context'
+import SK from './SK'
 
 /** Verify if it exists. */
-export function verifyOp(_) {
+export function verifyOp(_, sk) {
 	if (_ !== null)
-		_.verify()
+		_.verify(sk)
 }
 
 /** Verify if it's not a string. */
 export function verifyName(_) {
 	if (typeof _ !== 'string')
-		_.verify()
+		_.verify(SK.Val)
 }
 
 export function setName(expr) {

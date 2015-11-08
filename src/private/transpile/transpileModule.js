@@ -6,13 +6,14 @@ import {identifier, loc, member, toStatement} from 'esast/dist/util'
 import {options} from '../context'
 import manglePath from '../manglePath'
 import {Import, LocalDeclare} from '../MsAst'
-import {cat, flatMap, isEmpty, last, opIf, opMap} from '../util'
-import {IdExports} from './ast-constants'
+import {cat, flatMap, isEmpty, last, opIf, opMap, rtail} from '../util'
+import {Modules} from '../VerifyResults'
+import {DeclareBuiltBag, DeclareBuiltMap, ExportsDefault, IdBuilt, IdExports} from './ast-constants'
 import {verifyResults} from './context'
-import {idForDeclareCached, lazyWrap, makeDestructureDeclarators, msCall, tLines} from './util'
+import {idForDeclareCached, lazyWrap, makeDestructureDeclarators, msCall, t0, tLines} from './util'
 
 export default function transpileModule() {
-	const body = tLines(this.lines)
+	const body = moduleBody(verifyResults.moduleKind, this.lines)
 
 	verifyResults.builtinPathToNames.forEach((imported, path) => {
 		if (path !== 'global') {
@@ -37,6 +38,39 @@ export default function transpileModule() {
 		opIf(options.includeAmdefine(), () => AmdefineHeader),
 		toStatement(amd)))
 }
+
+function moduleBody(kind, lines) {
+	switch (kind) {
+		case Modules.Do: case Modules.Exports:
+			return tLines(lines)
+		case Modules.Val: {
+			const a = tLines(rtail(lines))
+			const b = t0(last(lines))
+			return cat(a, exportDefault(b))
+		}
+		case Modules.Bag: case Modules.Map: {
+			const declare = kind === Modules.Bag ? DeclareBuiltBag : DeclareBuiltMap
+			return cat(declare, tLines(lines), exportDefault(IdBuilt))
+		}
+		default:
+			throw new Error(verifyResults.moduleKind)
+	}
+}
+
+export function exportNamedOrDefault(val, name) {
+	if (name === options.moduleName())
+		return exportDefault(val)
+	else
+		return exportNamed(val, name)
+}
+
+function exportNamed(val, name) {
+	return new AssignmentExpression('=', member(IdExports, name), val)
+}
+function exportDefault(val) {
+	return new AssignmentExpression('=', ExportsDefault, val)
+}
+
 
 function amdWrapModule(doImports, imports, body) {
 	const shouldImportBoot = options.importBoot()

@@ -1,8 +1,8 @@
-import {Class, ClassKindDo, Constructor, Fun, Funs} from '../MsAst'
+import {Class, ClassKindDo, Constructor, Fun} from '../MsAst'
 import {isKeyword, Keywords} from '../Token'
 import {ifElse} from '../util'
 import {opParseExpr, parseExprParts} from './parse*'
-import {beforeAndOpBlock, parseJustBlockDo} from './parseBlock'
+import {beforeAndOpBlock, parseJustBlock} from './parseBlock'
 import {funArgsAndBlock} from './parseFun'
 import parseMethodImpls, {parseStatics} from './parseMethodImpls'
 import tryTakeComment from './tryTakeComment'
@@ -27,7 +27,7 @@ export default function parseClass(tokens) {
 
 	const line1 = rest.headSlice()
 	if (isKeyword(Keywords.Do, line1.head())) {
-		const done = parseJustBlockDo(Keywords.Do, line1.tail())
+		const done = parseJustBlock(Keywords.Do, line1.tail())
 		opDo = new ClassKindDo(line1.loc, done)
 		rest = rest.tail()
 	}
@@ -65,6 +65,6 @@ function parseClassHeader(tokens) {
 
 function parseConstructor(tokens) {
 	const {args, memberArgs, opRestArg, block} = funArgsAndBlock(tokens, false, true)
-	const fun = new Fun(tokens.loc, args, opRestArg, block, Funs.Plain, true)
+	const fun = new Fun(tokens.loc, args, opRestArg, block, {isThisFun: true, isDo: true})
 	return new Constructor(tokens.loc, fun, memberArgs)
 }

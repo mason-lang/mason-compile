@@ -1,7 +1,7 @@
 import {MethodImpl, MethodGetter, MethodSetter, QuoteSimple} from '../MsAst'
 import {isKeyword, Keywords} from '../Token'
 import {parseExpr} from './parse*'
-import {beforeAndBlock, justBlock, parseBlockDo, parseBlockVal} from './parseBlock'
+import parseBlock, {beforeAndBlock, justBlock} from './parseBlock'
 import parseFun from './parseFun'
 import parseMethodSplit from './parseMethodSplit'
 
@@ -18,10 +18,10 @@ function parseMethodImpl(tokens) {
 
 	if (isKeyword(Keywords.Get, head)) {
 		const [before, block] = beforeAndBlock(tokens.tail())
-		return new MethodGetter(tokens.loc, parseExprOrQuoteSimple(before), parseBlockVal(block))
+		return new MethodGetter(tokens.loc, parseExprOrQuoteSimple(before), parseBlock(block))
 	} else if (isKeyword(Keywords.Set, head)) {
 		const [before, block] = beforeAndBlock(tokens.tail())
-		return new MethodSetter(tokens.loc, parseExprOrQuoteSimple(before), parseBlockDo(block))
+		return new MethodSetter(tokens.loc, parseExprOrQuoteSimple(before), parseBlock(block))
 	} else {
 		const {before, kind, after} = parseMethodSplit(tokens)
 		const fun = parseFun(kind, after)

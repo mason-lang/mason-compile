@@ -7,7 +7,7 @@ import {isAnyKeyword, isKeyword, Keywords, Name} from '../Token'
 import {cat, head, ifElse, opIf, tail} from '../util'
 import {checkNonEmpty} from './checks'
 import {parseClass, parseExcept, parseSingle, parseSwitch} from './parse*'
-import {beforeAndBlock, parseBlockDo, parseBlockVal} from './parseBlock'
+import parseBlock, {beforeAndBlock} from './parseBlock'
 import parseCase from './parseCase'
 import parseDel from './parseDel'
 import {parseFor, parseForBag} from './parseFor'
@@ -69,7 +69,7 @@ export function parseExprParts(tokens) {
 						return new Logic(at.loc, kind, parseExprParts(after))
 					}
 					case Keywords.Case:
-						return parseCase(true, false, after)
+						return parseCase(false, after)
 					case Keywords.Class:
 						return parseClass(after)
 					case Keywords.Cond:
@@ -77,11 +77,11 @@ export function parseExprParts(tokens) {
 					case Keywords.Del:
 						return parseDel(after)
 					case Keywords.Except:
-						return parseExcept(true, after)
+						return parseExcept(after)
 					case Keywords.ForBag:
 						return parseForBag(after)
 					case Keywords.For:
-						return parseFor(true, after)
+						return parseFor(after)
 					case Keywords.Fun: case Keywords.FunDo:
 					case Keywords.FunThis: case Keywords.FunThisDo:
 					case Keywords.FunAsync: case Keywords.FunAsyncDo:
@@ -93,7 +93,7 @@ export function parseExprParts(tokens) {
 						const [before, block] = beforeAndBlock(after)
 						return new Conditional(tokens.loc,
 							parseExprPlain(before),
-							parseBlockVal(block),
+							parseBlock(block),
 							at.kind === Keywords.Unless)
 					}
 					case Keywords.Kind:
@@ -107,9 +107,9 @@ export function parseExprParts(tokens) {
 					case Keywords.Not:
 						return new Not(at.loc, parseExprPlain(after))
 					case Keywords.Super:
-						return new SuperCall(at.loc, parseExprParts(after), true)
+						return new SuperCall(at.loc, parseExprParts(after))
 					case Keywords.Switch:
-						return parseSwitch(true, false, after)
+						return parseSwitch(false, after)
 					case Keywords.With:
 						return parseWith(after)
 					case Keywords.Yield:
@@ -165,5 +165,5 @@ function parseWith(tokens) {
 		},
 		() => [parseExprPlain(before), LocalDeclare.focus(tokens.loc)])
 
-	return new With(tokens.loc, declare, val, parseBlockDo(block))
+	return new With(tokens.loc, declare, val, parseBlock(block))
 }

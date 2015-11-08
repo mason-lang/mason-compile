@@ -3,7 +3,8 @@ import {check, options} from '../context'
 import {ImportDo, ImportGlobal, Import, LocalDeclare, LocalDeclares, Module} from '../MsAst'
 import {Groups, isGroup, isKeyword, Keyword, Keywords} from '../Token'
 import {checkNonEmpty, unexpected} from './checks'
-import {justBlock, parseModuleBlock} from './parseBlock'
+import {justBlock} from './parseBlock'
+import {parseLines} from './parseLine'
 import {parseLocalDeclaresJustNames} from './parseLocalDeclares'
 import parseName, {tryParseName} from './parseName'
 import Slice from './Slice'
@@ -22,9 +23,7 @@ export default function parseModule(tokens) {
 	const {imports: plainImports, opImportGlobal, rest: rest2} =
 		tryParseImports(Keywords.Import, rest1)
 	const {imports: lazyImports, rest: rest3} = tryParseImports(Keywords.ImportLazy, rest2)
-
-	const lines = parseModuleBlock(rest3)
-
+	const lines = parseLines(rest3)
 	const imports = plainImports.concat(lazyImports)
 	return new Module(
 		tokens.loc, options.moduleName(), opComment, doImports, imports, opImportGlobal, lines)

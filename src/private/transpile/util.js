@@ -8,7 +8,7 @@ import {options} from '../context'
 import {QuoteAbstract} from '../MsAst'
 import {assert, cat, opIf, opMap} from '../util'
 import {GlobalError} from './ast-constants'
-import {getDestructuredId, isInGenerator} from './context'
+import {getDestructuredId, isInGenerator, verifyResults} from './context'
 
 export function t0(expr) {
 	return loc(expr.transpile(), expr.loc)
@@ -147,7 +147,8 @@ export function blockWrap(block) {
 	const invoke = new CallExpression(thunk, [])
 	return isInGenerator ? new YieldExpression(invoke, true) : invoke
 }
-/** Wraps a statement in an IIFE is `isVal`. */
-export function blockWrapIfVal(isVal, statement) {
-	return isVal ? blockWrap(new BlockStatement([statement])) : statement
+
+/** Wraps a statement in an IIFE if its MsAst is a value. */
+export function blockWrapIfVal(ast, statement) {
+	return verifyResults.isStatement(ast) ? statement : blockWrap(new BlockStatement([statement]))
 }

@@ -1,9 +1,8 @@
-import {BlockDo, BlockValReturn, Fun, FunAbstract, Funs, LocalDeclare, LocalDeclares
-	} from '../MsAst'
+import {Block, Fun, FunAbstract, Funs, LocalDeclare, LocalDeclares} from '../MsAst'
 import {Groups, isAnyKeyword, isGroup, isKeyword, Keywords} from '../Token'
 import {head} from '../util'
 import {checkNonEmpty} from './checks'
-import {beforeAndBlock, parseBlockDoOrVal} from './parseBlock'
+import parseBlock, {beforeAndBlock} from './parseBlock'
 import parseCase from './parseCase'
 import parseLocalDeclares, {parseLocalDeclareFromSpaced, parseLocalDeclaresAndMemberArgs
 	} from './parseLocalDeclares'
@@ -18,15 +17,15 @@ Parse a {@link Fun}.
 @param {Slice} tokens Rest of the line after the function keyword.
 */
 export default function parseFun(keywordKind, tokens) {
-	const [isThis, isDo, kind] = funKind(keywordKind)
+	const [isThisFun, isDo, kind] = funKind(keywordKind)
 	const {opReturnType, rest} = tryTakeReturnType(tokens)
 	const {args, opRestArg, block} = funArgsAndBlock(rest, !isDo)
-	return new Fun(tokens.loc, args, opRestArg, block, kind, isThis, opReturnType)
+	return new Fun(tokens.loc, args, opRestArg, block, {kind, isThisFun, isDo, opReturnType})
 }
 
 /** Parse a {@link FunLike}. */
 export function parseFunLike(keywordKind, tokens) {
-	const [isThis, isDo, kind] = funKind(keywordKind)
+	const [isThisFun, isDo, kind] = funKind(keywordKind)
 	const {opReturnType, rest} = tryTakeReturnType(tokens)
 	const [before, blockLines] = beforeAndBlock(rest)
 	const [opComment, restLines] = tryTakeComment(blockLines)
@@ -40,7 +39,7 @@ export function parseFunLike(keywordKind, tokens) {
 	}
 
 	const {args, opRestArg, block} = funArgsAndBlock(rest, !isDo)
-	return new Fun(tokens.loc, args, opRestArg, block, kind, isThis, opReturnType)
+	return new Fun(tokens.loc, args, opRestArg, block, {kind, isThisFun, isDo, opReturnType})
 }
 
 /**
@@ -66,22 +65,13 @@ export function funArgsAndBlock(tokens, isVal, includeMemberArgs=false) {
 
 	// Might be `|case` or `|switch`
 	if (isAnyKeyword(funFocusKeywords, h)) {
-		const isCase = h.kind === Keywords.Case
-		const expr = (isCase ? parseCase : parseSwitch)(isVal, true, tokens.tail())
+		const expr = (h.kind === Keywords.Case ? parseCase : parseSwitch)(true, tokens.tail())
 		const args = [LocalDeclare.focus(h.loc)]
-		return isVal ?
-			{
-				args, opRestArg: null, memberArgs: [],
-				block: new BlockValReturn(tokens.loc, null, [], expr)
-			} :
-			{
-				args, opRestArg: null, memberArgs: [],
-				block: new BlockDo(tokens.loc, null, [expr])
-			}
+		return {args, opRestArg: null, memberArgs: [], block: new Block(tokens.loc, null, [expr])}
 	} else {
 		const [before, blockLines] = beforeAndBlock(tokens)
 		const {args, opRestArg, memberArgs} = parseFunLocals(before, includeMemberArgs)
-		const block = parseBlockDoOrVal(isVal, blockLines)
+		const block = parseBlock(blockLines)
 		return {args, opRestArg, memberArgs, block}
 	}
 }

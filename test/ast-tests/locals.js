@@ -1,11 +1,13 @@
-import {AssignDestructure, AssignSingle, LocalAccess, LocalDeclare, LocalDeclares, LocalMutate,
-	Throw} from '../../dist/private/MsAst'
-import {aDeclare, assignAZero, bDeclare, loc, one, zero} from './util/ast-util'
+import {AssignDestructure, AssignSingle, LocalDeclare, LocalDeclares
+	} from '../../dist/private/MsAst'
+import {aDeclare, assignAZero, bDeclare, loc, zero} from './util/ast-util'
 import {test} from './util/test-asts'
 
 describe('locals', () => {
 	// TODO: Lazy
 
+	// TODO: multi-line test
+	/*
 	test(
 		`
 			ze-ro = 0
@@ -18,6 +20,7 @@ describe('locals', () => {
 			const ze_45ro=0;
 			throw ze_45ro`,
 		{name: 'LocalAccess'})
+	*/
 
 	describe('AssignSingle', () => {
 		test(
@@ -43,6 +46,8 @@ describe('locals', () => {
 		'const _$0=0,a=_$0.a,b=_$0.b',
 		{warnings: ['Unused local variable {{b}}.', 'Unused local variable {{a}}.']})
 
+	// TODO: multi-line test
+	/*
 	test(
 		`
 			a ::= 0
@@ -57,4 +62,5 @@ describe('locals', () => {
 		{
 			warnings: ['Unused local variable {{a}}.']
 		})
+	*/
 })

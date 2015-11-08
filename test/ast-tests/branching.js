@@ -1,5 +1,5 @@
-import {BlockDo, BlockValReturn, Case, CasePart, Conditional, Fun, Pattern, Switch, SwitchPart,
-	Throw} from '../../dist/private/MsAst'
+import {Block, Case, CasePart, Conditional, Fun, Pattern, Switch, SwitchPart
+	} from '../../dist/private/MsAst'
 import {aAccess, assignAZero, assignFocusZero, bDeclare, bAccess, blockDbg, blockOne, blockTwo,
 	blockPass, focusAccess, focusDeclare, loc, one, zero} from './util/ast-util'
 import {test} from './util/test-asts'
@@ -26,11 +26,11 @@ describe('conditionals', () => {
 		)
 	test(
 		`
-			throw if 0
+			if 0
 				1`,
-		new Throw(loc, new Conditional(loc, zero, blockOne, false)),
+		new Conditional(loc, zero, blockOne, false),
 		`
-			throw (0?_ms.some((()=>{
+			(0?_ms.some((()=>{
 				return 1
 			})()):_ms.None)`)
 })
@@ -77,17 +77,16 @@ describe('case', () => {
 		)
 	test(
 		`
-			throw case
+			case
 				0
 					1
 				else
 					2`,
-		new Throw(loc,
-			new Case(loc, null,
-				[new CasePart(loc, zero, blockOne)],
-				blockTwo)),
+		new Case(loc, null,
+			[new CasePart(loc, zero, blockOne)],
+			blockTwo),
 		`
-			throw (()=>{
+			(()=>{
 				if(0){
 					return 1
 				} else {
@@ -96,34 +95,28 @@ describe('case', () => {
 			})()`)
 	test(
 		`
-			a = 0
-			throw case 0
-				:a b
+			case 0
+				:1 b
 					b
 				else
-					1`,
-		[
-			assignAZero,
-			new Throw(loc,
-				new Case(loc, assignFocusZero,
-					[
-						new CasePart(loc,
-							new Pattern(loc, aAccess, [bDeclare]),
-							new BlockValReturn(loc, null, [], bAccess))
-					],
-					blockOne))
-		],
+					2`,
+		new Case(loc, assignFocusZero,
+			[
+				new CasePart(loc,
+					new Pattern(loc, one, [bDeclare]),
+					new Block(loc, null, [bAccess]))
+			],
+			blockTwo),
 		`
-			const a=0;
-			throw (()=>{
+			(()=>{
 				const _=0;
 				{
-					const _$=_ms.extract(a,_);
+					const _$=_ms.extract(1,_);
 					if((_$!==null)){
 						const b=_$[0];
 						return b
 					} else {
-						return 1
+						return 2
 					}
 				}
 			})()`)
@@ -136,10 +129,10 @@ describe('case', () => {
 			loc,
 			[focusDeclare],
 			null,
-			new BlockValReturn(loc, null, [],
+			new Block(loc, null, [
 				new Case(loc, null,
 					[new CasePart(loc, focusAccess, blockOne)],
-					null))),
+					null)])),
 		`
 			_=>{
 				return (()=>{
@@ -157,10 +150,11 @@ describe('case', () => {
 			loc,
 			[focusDeclare],
 			null,
-			new BlockDo(loc, null, [
+			new Block(loc, null, [
 				new Case(loc, null,
 					[new CasePart(loc, focusAccess, blockPass)],
-					null)])),
+					null)]),
+			{isDo: true}),
 		`
 			_=>{
 				if(_){} else throw new (Error)("No branch of \`case\` matches.")
@@ -185,20 +179,19 @@ describe('switch', () => {
 			}`)
 	test(
 		`
-			throw switch 0
+			switch 0
 				1
 					a = 0
 					a
 				else
 					1`,
-		new Throw(loc,
-			new Switch(loc, zero,
-				[new SwitchPart(loc,
-					[one],
-					new BlockValReturn(loc, null, [assignAZero], aAccess))],
-				blockOne)),
+		new Switch(loc, zero,
+			[new SwitchPart(loc,
+				[one],
+				new Block(loc, null, [assignAZero, aAccess]))],
+			blockOne),
 		`
-			throw (()=>{
+			(()=>{
 				switch(0){
 					case 1:{
 						const a=0;
@@ -232,10 +225,10 @@ describe('switch', () => {
 			loc,
 			[focusDeclare],
 			null,
-			new BlockValReturn(loc, null, [],
+			new Block(loc, null, [
 				new Switch(loc, focusAccess,
 					[new SwitchPart(loc, [zero], blockOne)],
-					null))),
+					null)])),
 		`
 			_=>{
 				return (()=>{
@@ -256,10 +249,11 @@ describe('switch', () => {
 			loc,
 			[focusDeclare],
 			null,
-			new BlockDo(loc, null, [
+			new Block(loc, null, [
 				new Switch(loc, focusAccess,
 					[new SwitchPart(loc, [zero], blockPass)],
-					null)])),
+					null)]),
+			{isDo: true}),
 		`
 			_=>{
 				switch(_){

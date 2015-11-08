@@ -1,8 +1,6 @@
-import {AssignSingle, BagSimple, BlockDo, Call, LocalDeclare, LocalDeclares, Member, New, ObjPair,
-	ObjSimple, QuotePlain, QuoteSimple, QuoteTaggedTemplate, SpecialVal, SpecialVals, Spread, With
-	} from '../../dist/private/MsAst'
-import {aAccess, aDeclare, assignAZero, blockPass, focusAccess, focusDeclare, loc, one, two, zero
-	} from './util/ast-util'
+import {BagSimple, Block, Call, Member, New, ObjPair, ObjSimple, QuotePlain, QuoteSimple,
+	QuoteTaggedTemplate, SpecialVal, SpecialVals, Spread, With} from '../../dist/private/MsAst'
+import {aDeclare, blockPass, focusAccess, focusDeclare, loc, one, two, zero} from './util/ast-util'
 import {test} from './util/test-asts'
 
 describe('expressions', () => {
@@ -45,16 +43,9 @@ describe('expressions', () => {
 			'0()')
 
 		test(
-			`
-				a = 0
-				a ...a`,
-			[
-				assignAZero,
-				new Call(loc, aAccess, [new Spread(loc, aAccess)])
-			],
-			`
-				const a=0;
-				return a(...a)`)
+			'0 ...1',
+			new Call(loc, zero, [new Spread(loc, one)]),
+			'0(...1)')
 
 		test(
 			'0[1 2]',
@@ -75,25 +66,14 @@ describe('expressions', () => {
 	describe('SpecialVal', () => {
 		// TODO: Move to types test?
 		test(
-			`
-				a = 0
-				_ = 0
-				:a`,
-			[
-				assignAZero,
-				// TODO: assignFocusZero (but that uses LocalDeclareFocus, not a plain LocalDeclare)
-				new AssignSingle(loc, new LocalDeclare(loc, '_', null, LocalDeclares.Const), zero),
-				Call.contains(loc, aAccess, focusAccess)
-			],
-			`
-				const a=0;
-				const _=0;
-				return _ms.contains(a,_)`)
-
+			`0:1`,
+			Call.contains(loc, one, zero),
+			'_ms.contains(1,0)')
 		test('false', new SpecialVal(loc, SpecialVals.False), 'false')
 		test('null', new SpecialVal(loc, SpecialVals.Null), 'null')
 		test('true', new SpecialVal(loc, SpecialVals.True), 'true')
 		test('undefined', new SpecialVal(loc, SpecialVals.Undefined), 'void 0')
+		// todo: other special vals
 	})
 
 	describe('Quote', () => {
@@ -146,30 +126,33 @@ describe('expressions', () => {
 					pass`,
 			new With(loc, focusDeclare, zero, blockPass),
 			`
-				(_=>{
+				(()=>{
+					const _=0;
 					return _
-				})(0)`)
+				})()`)
 		test(
 			`
 				with 0 as a
 					pass`,
 			new With(loc, aDeclare, zero, blockPass),
 			`
-				(a=>{
+				(()=>{
+					const a=0;
 					return a
-				})(0)`,
+				})()`,
 			{warnings: ['Unused local variable {{a}}.']})
 		test(
 			`
 				with 0
 					_ _`,
 			new With(loc, focusDeclare, zero,
-				new BlockDo(loc, null, [new Call(loc, focusAccess, [focusAccess])])),
+				new Block(loc, null, [new Call(loc, focusAccess, [focusAccess])])),
 			`
-				(_=>{
+				(()=>{
+					const _=0;
 					_(_);
 					return _
-				})(0)`)
+				})()`)
 	})
 })
 

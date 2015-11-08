@@ -1,9 +1,10 @@
 import {code} from '../../CompileError'
-import {check, warn} from '../context'
-import {AssignDestructure, AssignSingle, ModuleExport, ObjEntry} from '../MsAst'
+import {check} from '../context'
+import {AssignDestructure, AssignSingle, ObjEntry} from '../MsAst'
 import {assert, reverseIter} from '../util'
 import {locals, pendingBlockLocals} from './context'
 import {deleteLocal, registerLocal, setLocal} from './locals'
+import SK from './SK'
 
 /**
 Verifies each line, accumulating locals.
@@ -49,9 +50,7 @@ export default function verifyLines(lines) {
 	// All shadowed locals for this block.
 	const shadowed = []
 
-	const verifyLine = line => {
-		if (!line.canBeStatement())
-			warn(line.loc, 'Expression in statement position.')
+	function verifyLine(line) {
 		for (const newLocal of lineNewLocals(line)) {
 			const name = newLocal.name
 			const oldLocal = locals.get(name)
@@ -68,7 +67,7 @@ export default function verifyLines(lines) {
 			const popped = pendingBlockLocals.pop()
 			assert(popped === newLocal)
 		}
-		line.verify()
+		line.verify(SK.Do)
 	}
 
 	for (const _ of lines)
@@ -88,8 +87,6 @@ function lineNewLocals(line) {
 		line instanceof AssignDestructure ?
 		line.assignees :
 		line instanceof ObjEntry ?
-		lineNewLocals(line.assign) :
-		line instanceof ModuleExport ?
 		lineNewLocals(line.assign) :
 		[]
 }
