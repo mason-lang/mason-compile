@@ -2,7 +2,7 @@ import {code} from '../../CompileError'
 import {check, options, warn} from '../context'
 import * as MsAstTypes from '../MsAst'
 import {Class, Constructor, Fun, Funs, Kind, Method, Pattern} from '../MsAst'
-import {showKeyword, Keywords} from '../Token'
+import {Keywords, showKeyword} from '../Token'
 import {cat, ifElse, implementMany, opEach} from '../util'
 import {funKind, locals, method, okToNotUse, opLoop, results, setup, tearDown, withIife,
 	withIifeIfVal, withInFunKind, withMethod, withLoop, withName} from './context'
@@ -178,10 +178,10 @@ implementMany(MsAstTypes, 'verify', {
 
 		if (classHasSuper)
 			check(superCall !== undefined, this.loc, () =>
-				`Constructor must contain ${code('super!')}`)
+				`Constructor must contain ${showKeyword(Keywords.Super)}`)
 		else
 			check(superCall === undefined, () => superCall.loc, () =>
-				`Class has no superclass, so ${code('super!')} is not allowed.`)
+				`Class has no superclass, so ${showKeyword(Keywords.Super)} is not allowed.`)
 
 		for (const _ of this.memberArgs)
 			setDeclareAccessed(_, this)
@@ -462,7 +462,7 @@ implementMany(MsAstTypes, 'verify', {
 
 		if (method instanceof Constructor) {
 			check(sk === SK.Do, this.loc, () =>
-				`${code('super')} in constructor must appear as a statement.'`)
+				`${showKeyword(Keywords.Super)} in constructor must appear as a statement.'`)
 			results.constructorToSuper.set(method, this)
 		}
 
@@ -513,14 +513,16 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	Yield(_sk) {
-		check(funKind !== Funs.Plain, `Cannot ${code('<~')} outside of async/generator.`)
+		check(funKind !== Funs.Plain, () =>
+			`Cannot ${showKeyword(Keywords.Yield)} outside of async/generator.`)
 		if (funKind === Funs.Async)
 			check(this.opYielded !== null, this.loc, 'Cannot await nothing.')
 		verifyOp(this.opYielded, SK.Val)
 	},
 
 	YieldTo(_sk) {
-		check(funKind === Funs.Generator, this.loc, `Cannot ${code('<~~')} outside of generator.`)
+		check(funKind === Funs.Generator, this.loc, () =>
+			`Cannot ${showKeyword(Keywords.YieldTo)} outside of generator.`)
 		this.yieldedTo.verify(SK.Val)
 	}
 })

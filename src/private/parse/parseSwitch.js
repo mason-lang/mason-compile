@@ -1,7 +1,6 @@
-import {code} from '../../CompileError'
 import {check} from '../context'
 import {LocalAccess, Switch, SwitchPart} from '../MsAst'
-import {isKeyword, Keywords} from '../Token'
+import {isKeyword, Keywords, showKeyword} from '../Token'
 import {checkEmpty} from './checks'
 import {parseExpr} from './parse*'
 import parseBlock, {beforeAndBlock, parseJustBlock} from './parseBlock'
@@ -22,7 +21,8 @@ export default function parseSwitch(switchedFromFun, tokens) {
 		[block, null]
 
 	const parts = partLines.mapSlices(line => parseSwitchLine(line))
-	check(parts.length > 0, tokens.loc, () => `Must have at least 1 non-${code('else')} test.`)
+	check(parts.length > 0, tokens.loc, () =>
+		`Must have at least 1 non-${showKeyword(Keywords.Else)} test.`)
 
 	return new Switch(tokens.loc, switched, parts, opElse)
 }

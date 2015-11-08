@@ -1,14 +1,13 @@
-import {code} from '../../CompileError'
 import {check} from '../context'
 import {Call} from '../MsAst'
 import {unexpected} from './checks'
-import {Groups, isGroup} from '../Token'
+import {Groups, isGroup, Keywords, showKeyword} from '../Token'
 import {parseExprParts, parseSpaced} from './parse*'
 import Slice from './Slice'
 
 export default function parseDel(tokens) {
 	check(tokens.size() === 1, tokens.loc, () =>
-		`${code('del')} takes only one argument.`)
+		`${showKeyword(Keywords.Del)} takes only one argument.`)
 	const spaced = tokens.head()
 	if (!isGroup(Groups.Space, spaced))
 		unexpected(spaced)

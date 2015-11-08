@@ -1,7 +1,6 @@
-import {code} from '../../CompileError'
 import {check, options} from '../context'
 import {ImportDo, ImportGlobal, Import, LocalDeclare, LocalDeclares, Module} from '../MsAst'
-import {Groups, isGroup, isKeyword, Keyword, Keywords} from '../Token'
+import {Groups, isGroup, isKeyword, Keyword, Keywords, showKeyword} from '../Token'
 import {checkNonEmpty, unexpected} from './checks'
 import {justBlock} from './parseBlock'
 import {parseLines} from './parseLine'
@@ -87,7 +86,8 @@ function parseThingsImported(name, isLazy, tokens) {
 			[importDefault(), tokens.tail()] :
 			[null, tokens]
 		const imported = parseLocalDeclaresJustNames(rest).map(l => {
-			check(l.name !== '_', l.pos, () => `${code('_')} not allowed as import name.`)
+			check(l.name !== '_', l.pos, () =>
+				`${showKeyword(Keywords.Focus)} not allowed as import name.`)
 			if (isLazy)
 				l.kind = LocalDeclares.Lazy
 			return l

@@ -2,7 +2,7 @@ import {code} from '../../CompileError'
 import {check, fail} from '../context'
 import {Call, GetterFun, Lazy, LocalAccess, Member, MemberFun, QuoteSimple, QuoteTaggedTemplate,
 	Range, Spread, SuperCall, SuperMember} from '../MsAst'
-import {Group, Groups, isGroup, isKeyword, Keyword, Keywords} from '../Token'
+import {Group, Groups, isGroup, isKeyword, Keyword, Keywords, showKeyword} from '../Token'
 import {assert, opIf} from '../util'
 import {checkEmpty, unexpected} from './checks'
 import {parseExprParts} from './parse*'
@@ -61,7 +61,8 @@ export default function parseSpaced(tokens) {
 					const x = new SuperCall(h2.loc, [], true)
 					return parseSpacedFold(x, rest.tail())
 				} else
-					fail(`Expected ${code('.')} or ${code('()')} after ${code('super')}`)
+					fail(`Expected ${showKeyword(Keywords.Dot)} or ${code('()')} ` +
+						`after ${showKeyword(Keywords.Super)}`)
 			}
 			case Keywords.Tick: {
 				const h2 = rest.head()
@@ -103,7 +104,7 @@ function parseSpacedFold(start, rest) {
 				}
 				case Keywords.Dot2:
 					check(i < rest._end - 1, token.loc, () =>
-						`Use ${code('...')} for infinite ranges.`)
+						`Use ${showKeyword(Keywords.Dot3)} for infinite ranges.`)
 					return new Range(token.loc, acc, restVal(), false)
 				case Keywords.Dot3:
 					return new Range(token.loc, acc, opIf(i < rest._end - 1, restVal), true)

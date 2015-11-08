@@ -1,9 +1,8 @@
 import Loc from 'esast/dist/Loc'
-import {code} from '../../CompileError'
 import {check, fail} from '../context'
 import {Call, Cond, Conditional, LocalDeclare, Logic, Logics, New, Not, ObjPair, ObjSimple,
 	SuperCall, With, Yield, YieldTo} from '../MsAst'
-import {isAnyKeyword, isKeyword, Keywords, Name} from '../Token'
+import {isAnyKeyword, isKeyword, Keywords, Name, showKeyword} from '../Token'
 import {cat, head, ifElse, opIf, tail} from '../util'
 import {checkNonEmpty} from './checks'
 import {parseClass, parseExcept, parseSingle, parseSwitch} from './parse*'
@@ -150,8 +149,9 @@ function parseExprPlain(tokens) {
 
 function parseCond(tokens) {
 	const parts = parseExprParts(tokens)
-	check(parts.length === 3, tokens.loc, () => `${code('cond')} takes exactly 3 arguments.`)
-	return new Cond(tokens.loc, parts[0], parts[1], parts[2])
+	check(parts.length === 3, tokens.loc, () =>
+		`${showKeyword(Keywords.Cond)} takes exactly 3 arguments.`)
+	return new Cond(tokens.loc, ...parts)
 }
 
 function parseWith(tokens) {
@@ -160,7 +160,7 @@ function parseWith(tokens) {
 	const [val, declare] = ifElse(before.opSplitOnce(_ => isKeyword(Keywords.As, _)),
 		({before, after}) => {
 			check(after.size() === 1, () =>
-				`Expected only 1 token after ${code('as')}.`)
+				`Expected only 1 token after ${showKeyword(Keywords.As)}.`)
 			return [parseExprPlain(before), parseLocalDeclare(after.head())]
 		},
 		() => [parseExprPlain(before), LocalDeclare.focus(tokens.loc)])

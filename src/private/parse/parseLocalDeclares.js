@@ -1,7 +1,6 @@
-import {code} from '../../CompileError'
 import {check} from '../context'
 import {LocalDeclare, LocalDeclares} from '../MsAst'
-import {Groups, isGroup, isKeyword, Keywords, Name} from '../Token'
+import {Groups, isGroup, isKeyword, Keywords, Name, showKeyword} from '../Token'
 import {opIf} from '../util'
 import {checkNonEmpty} from './checks'
 import {parseSpaced} from './parse*'
@@ -84,7 +83,8 @@ function _parseLocalDeclareFromSpaced(tokens, orMember=false) {
 	const rest2 = rest.tail()
 	const opType = opIf(!rest2.isEmpty(), () => {
 		const colon = rest2.head()
-		check(isKeyword(Keywords.Type, colon), colon.loc, () => `Expected ${code(':')}`)
+		check(isKeyword(Keywords.Type, colon), colon.loc, () =>
+			`Expected ${showKeyword(Keywords.Type)}`)
 		const tokensType = rest2.tail()
 		checkNonEmpty(tokensType, () => `Expected something after ${colon}`)
 		return parseSpaced(tokensType)
