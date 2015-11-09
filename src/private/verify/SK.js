@@ -58,7 +58,8 @@ implementMany(MsAstTypes, 'opGetSK', {
 	},
 	Conditional() { return this.result.opGetSK() },
 	Except() {
-		return compositeSK(this.loc, exceptParts(this))
+		// Don't look at opFinally because that's always a Do
+		return compositeSK(this.loc, cat(this.try, opMap(this.opCatch, _ => _.block)))
 	},
 	For() {
 		// If opForSK is null, there are no breaks, so this is an infinite loop.
@@ -81,7 +82,9 @@ implementMany(MsAstTypes, 'opForSK',{
 	Conditional() { return this.result.opForSK() },
 	Case: caseSwitchForSK,
 	Except() {
-		return compositeForSK(this.loc, exceptParts(this))
+		// Do look at opFinally for break statements.
+		return compositeForSK(this.loc,
+			cat(this.try, opMap(this.opCatch, _ => _.block), this.opFinally))
 	},
 	Switch: caseSwitchForSK
 })
@@ -92,10 +95,6 @@ function caseSwitchForSK() {
 
 function caseSwitchParts(_) {
 	return cat(_.parts.map(_ => _.result), _.opElse)
-}
-
-function exceptParts(_) {
-	return cat(_.try, opMap(_.opCatch, _ => _.block), _.opFinally)
 }
 
 function compositeSK(loc, parts) {
