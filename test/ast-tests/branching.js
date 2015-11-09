@@ -203,7 +203,7 @@ describe('switch', () => {
 	test(
 		`
 			switch 0
-				or 0 1
+				0 1
 					pass`,
 		new Switch(loc, zero,
 			[new SwitchPart(loc, [zero, one], blockPass)],

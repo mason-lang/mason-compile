@@ -2,9 +2,8 @@ import {check} from '../context'
 import {LocalAccess, Switch, SwitchPart} from '../MsAst'
 import {isKeyword, Keywords, showKeyword} from '../Token'
 import {checkEmpty} from './checks'
-import {parseExpr} from './parse*'
+import {parseExpr, parseExprParts} from './parse*'
 import parseBlock, {beforeAndBlock, parseJustBlock} from './parseBlock'
-import parseSingle from './parseSingle'
 import Slice from './Slice'
 
 /** Parse a {@link Switch}. */
@@ -20,17 +19,11 @@ export default function parseSwitch(switchedFromFun, tokens) {
 		[block.rtail(), parseJustBlock(Keywords.Else, lastLine.tail())] :
 		[block, null]
 
-	const parts = partLines.mapSlices(line => parseSwitchLine(line))
+	const parts = partLines.mapSlices(line => {
+		const [before, block] = beforeAndBlock(line)
+		return new SwitchPart(line.loc, parseExprParts(before), parseBlock(block))
+	})
 	check(parts.length > 0, tokens.loc, () =>
 		`Must have at least 1 non-${showKeyword(Keywords.Else)} test.`)
-
 	return new Switch(tokens.loc, switched, parts, opElse)
-}
-
-function parseSwitchLine(line) {
-	const [before, block] = beforeAndBlock(line)
-	const values = isKeyword(Keywords.Or, before.head()) ?
-		before.tail().map(parseSingle) :
-		[parseExpr(before)]
-	return new SwitchPart(line.loc, values, parseBlock(block))
 }
