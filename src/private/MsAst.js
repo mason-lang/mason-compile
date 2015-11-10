@@ -1042,6 +1042,15 @@ export default class MsAst {
 		}
 	}
 
+	/** `&({value})` */
+	export class SimpleFun extends Val {
+		constructor(loc, value) {
+			super(loc)
+			/** @type {Val} */
+			this.value = value
+		}
+	}
+
 	/** `{start}..{end}` or `{start}...{end}`. */
 	export class Range extends Val {
 		constructor(loc, start, end, isExclusive) {

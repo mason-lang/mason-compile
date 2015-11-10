@@ -1,11 +1,11 @@
 import {code} from '../../CompileError'
 import {check, fail} from '../context'
 import {Call, GetterFun, Lazy, LocalAccess, Member, MemberFun, QuoteSimple, QuoteTaggedTemplate,
-	Range, Spread, SuperCall, SuperMember} from '../MsAst'
+	Range, SimpleFun, Spread, SuperCall, SuperMember} from '../MsAst'
 import {Group, Groups, isGroup, isKeyword, Keyword, Keywords, showKeyword} from '../Token'
 import {assert, opIf} from '../util'
 import {checkEmpty, unexpected} from './checks'
-import {parseExprParts} from './parse*'
+import {parseExpr, parseExprParts} from './parse*'
 import parseMemberName from './parseMemberName'
 import parseName from './parseName'
 import parseQuote from './parseQuote'
@@ -22,7 +22,9 @@ export default function parseSpaced(tokens) {
 		switch (h.kind) {
 			case Keywords.Ampersand: {
 				const h2 = rest.head()
-				if (isKeyword(Keywords.Dot, h2)) {
+				if (isGroup(Groups.Parenthesis, h2))
+					return new SimpleFun(tokens.loc, parseExpr(Slice.group(h2)))
+				else if (isKeyword(Keywords.Dot, h2)) {
 					const tail = rest.tail()
 					const h3 = tail.head()
 					const fun = new GetterFun(h3.loc, parseMemberName(h3))

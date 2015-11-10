@@ -466,6 +466,10 @@ implementMany(MsAstTypes, 'transpile', {
 			new Literal(kind))
 	},
 
+	SimpleFun() {
+		return new ArrowFunctionExpression([IdFocus], t0(this.value))
+	},
+
 	SpecialDo() {
 		switch (this.kind) {
 			case SpecialDos.Debugger: return new DebuggerStatement()

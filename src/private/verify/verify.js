@@ -1,7 +1,7 @@
 import {code} from '../../CompileError'
 import {check, options, warn} from '../context'
 import * as MsAstTypes from '../MsAst'
-import {Class, Constructor, Fun, Funs, Kind, Method, Pattern} from '../MsAst'
+import {Class, Constructor, Fun, Funs, Kind, LocalDeclare, Method, Pattern} from '../MsAst'
 import {Keywords, showKeyword} from '../Token'
 import {cat, ifElse, implementMany, opEach} from '../util'
 import {funKind, locals, method, okToNotUse, opLoop, results, setup, tearDown, withIife,
@@ -289,7 +289,7 @@ implementMany(MsAstTypes, 'verify', {
 
 	Logic(sk) {
 		checkVal(this, sk)
-		check(this.args.length > 1, 'Logic expression needs at least 2 arguments.')
+		check(this.args.length > 1, this.loc, 'Logic expression needs at least 2 arguments.')
 		for (const _ of this.args)
 			_.verify(SK.Val)
 	},
@@ -441,6 +441,13 @@ implementMany(MsAstTypes, 'verify', {
 			_.verify(SK.Val)
 		verifyOp(this.opType, SK.Val)
 		this.value.verify(SK.Val)
+	},
+
+	SimpleFun(sk) {
+		checkVal(this, sk)
+		verifyAndPlusLocal(LocalDeclare.focus(this.loc), () => {
+			this.value.verify()
+		})
 	},
 
 	SpecialDo(sk) {
