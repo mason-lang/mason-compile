@@ -156,10 +156,10 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	Cond(sk) {
-		checkVal(this, sk)
+		// Could be a statement if both results are.
 		this.test.verify(SK.Val)
-		this.ifTrue.verify(SK.Val)
-		this.ifFalse.verify(SK.Val)
+		this.ifTrue.verify(sk)
+		this.ifFalse.verify(sk)
 	},
 
 	Conditional(sk) {
