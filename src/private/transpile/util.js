@@ -5,7 +5,7 @@ import mangleIdentifier from 'esast/dist/mangle-identifier'
 import {loc, toStatement} from 'esast/dist/util'
 import {member} from 'esast/dist/util'
 import {options} from '../context'
-import {QuoteAbstract} from '../MsAst'
+import {Block, QuoteAbstract} from '../MsAst'
 import {assert, cat, opIf, opMap} from '../util'
 import {GlobalError} from './ast-constants'
 import {getDestructuredId, isInGenerator, verifyResults} from './context'
@@ -146,6 +146,11 @@ export function blockWrap(block) {
 		new ArrowFunctionExpression([], block)
 	const invoke = new CallExpression(thunk, [])
 	return isInGenerator ? new YieldExpression(invoke, true) : invoke
+}
+
+export function blockWrapIfBlock(value) {
+	const ast = t0(value)
+	return value instanceof Block ? blockWrap(ast) : ast
 }
 
 /** Wraps a statement in an IIFE if its MsAst is a value. */

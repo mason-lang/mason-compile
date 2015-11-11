@@ -22,10 +22,10 @@ import {isInConstructor, setup, tearDown, verifyResults, withInConstructor, with
 	} from './context'
 import {transpileMethodToDefinition, transpileMethodToProperty} from './transpileMethod'
 import transpileModule, {exportNamedOrDefault} from './transpileModule'
-import {accessLocalDeclare, blockWrap, blockWrapIfVal, declare, doThrow, idForDeclareCached,
-	lazyWrap, makeDeclarator, makeDestructureDeclarators, maybeWrapInCheckContains,
-	memberStringOrVal, msCall, msMember, opTypeCheckForLocalDeclare, t0, t1, t2, t3, tLines,
-	transpileName} from './util'
+import {accessLocalDeclare, blockWrap, blockWrapIfBlock, blockWrapIfVal, declare, doThrow,
+	idForDeclareCached, lazyWrap, makeDeclarator, makeDestructureDeclarators,
+	maybeWrapInCheckContains, memberStringOrVal, msCall, msMember, opTypeCheckForLocalDeclare, t0,
+	t1, t2, t3, tLines, transpileName} from './util'
 
 /** Transform a {@link MsAst} into an esast. **/
 export default function transpile(moduleExpression, verifyResults) {
@@ -179,11 +179,11 @@ implementMany(MsAstTypes, 'transpile', {
 
 	Conditional() {
 		const test = t0(this.test)
-		const res = t0(this.result)
 		if (verifyResults.isStatement(this))
-			return new IfStatement(this.isUnless ? new UnaryExpression('!', test) : test, res)
+			return new IfStatement(
+				this.isUnless ? new UnaryExpression('!', test) : test, t0(this.result))
 		else {
-			const result = msCall('some', blockWrap(res))
+			const result = msCall('some', blockWrapIfBlock(this.result))
 			const none = msMember('None')
 			const [then, _else] = this.isUnless ? [none, result] : [result, none]
 			return new ConditionalExpression(test, then, _else)

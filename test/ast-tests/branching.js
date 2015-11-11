@@ -33,6 +33,10 @@ describe('conditionals', () => {
 			(0?_ms.some((()=>{
 				return 1
 			})()):_ms.None)`)
+	test(
+		`if 0 1`,
+		new Conditional(loc, zero, one, false),
+		`(0?_ms.some(1):_ms.None)`)
 })
 
 describe('case', () => {

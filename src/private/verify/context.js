@@ -82,12 +82,16 @@ export function withIife(action) {
 	withLoop(null, action)
 }
 
-/** The value form of some expressions need to be wrapped in an IIFE. */
-export function withIifeIfVal(sk, action) {
-	if (sk === SK.Val)
+export function withIifeIf(cond, action) {
+	if (cond)
 		withIife(action)
 	else
 		action()
+}
+
+/** The value form of some expressions need to be wrapped in an IIFE. */
+export function withIifeIfVal(sk, action) {
+	withIifeIf(sk === SK.Val, action)
 }
 
 // TODO:ES6 Shouldn't need this

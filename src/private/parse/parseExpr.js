@@ -6,7 +6,7 @@ import {isAnyKeyword, isKeyword, Keywords, Name, showKeyword} from '../Token'
 import {cat, head, ifElse, opIf, tail} from '../util'
 import {checkNonEmpty} from './checks'
 import {parseClass, parseExcept, parseSingle, parseSwitch} from './parse*'
-import parseBlock, {beforeAndBlock} from './parseBlock'
+import parseBlock, {beforeAndBlock, beforeAndOpBlock} from './parseBlock'
 import parseCase from './parseCase'
 import parseDel from './parseDel'
 import {parseFor, parseForBag} from './parseFor'
@@ -88,13 +88,8 @@ export function parseExprParts(tokens) {
 					case Keywords.FunGen: case Keywords.FunGenDo:
 					case Keywords.FunThisGen: case Keywords.FunThisGenDo:
 						return parseFun(at.kind, after)
-					case Keywords.If: case Keywords.Unless: {
-						const [before, block] = beforeAndBlock(after)
-						return new Conditional(tokens.loc,
-							parseExprPlain(before),
-							parseBlock(block),
-							at.kind === Keywords.Unless)
-					}
+					case Keywords.If: case Keywords.Unless:
+						return parseConditional(at.kind, after)
 					case Keywords.Kind:
 						return parseKind(after)
 					case Keywords.Method:
@@ -152,6 +147,19 @@ function parseCond(tokens) {
 	check(parts.length === 3, tokens.loc, () =>
 		`${showKeyword(Keywords.Cond)} takes exactly 3 arguments.`)
 	return new Cond(tokens.loc, ...parts)
+}
+
+function parseConditional(kind, tokens) {
+	const [before, opBlock] = beforeAndOpBlock(tokens)
+	const [condition, result] = ifElse(opBlock,
+		_ => [parseExprPlain(before), parseBlock(_)],
+		() => {
+			const parts = parseExprParts(before)
+			check(parts.length === 2, tokens.loc, () =>
+				`${showKeyword(kind)} with no block takes exactly 2 arguments.`)
+			return parts
+		})
+	return new Conditional(tokens.loc, condition, result, kind === Keywords.Unless)
 }
 
 function parseWith(tokens) {

@@ -438,7 +438,7 @@ export default class MsAst {
 			super(loc)
 			/** @type {Val} */
 			this.test = test
-			/** @type {Block} */
+			/** @type {Block|Val} */
 			this.result = result
 			/** @type {boolean} */
 			this.isUnless = isUnless

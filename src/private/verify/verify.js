@@ -1,11 +1,11 @@
 import {code} from '../../CompileError'
 import {check, options, warn} from '../context'
 import * as MsAstTypes from '../MsAst'
-import {Class, Constructor, Fun, Funs, Kind, LocalDeclare, Method, Pattern} from '../MsAst'
+import {Block, Class, Constructor, Fun, Funs, Kind, LocalDeclare, Method, Pattern} from '../MsAst'
 import {Keywords, showKeyword} from '../Token'
 import {cat, ifElse, implementMany, opEach} from '../util'
 import {funKind, locals, method, okToNotUse, opLoop, results, setup, tearDown, withIife,
-	withIifeIfVal, withInFunKind, withMethod, withLoop, withName} from './context'
+	withIifeIf, withIifeIfVal, withInFunKind, withMethod, withLoop, withName} from './context'
 import {accessLocal, getLocalDeclare, failMissingLocal, setDeclareAccessed, setLocal,
 	verifyAndPlusLocal, verifyAndPlusLocals, verifyLocalDeclare, warnUnusedLocals, withBlockLocals
 	} from './locals'
@@ -165,7 +165,7 @@ implementMany(MsAstTypes, 'verify', {
 	Conditional(sk) {
 		markStatement(this, sk)
 		this.test.verify(SK.Val)
-		withIifeIfVal(sk, () => {
+		withIifeIf(this.result instanceof Block && sk === SK.Val, () => {
 			this.result.verify(sk)
 		})
 	},
@@ -520,7 +520,7 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	Yield(_sk) {
-		check(funKind !== Funs.Plain, () =>
+		check(funKind !== Funs.Plain, this.loc, () =>
 			`Cannot ${showKeyword(Keywords.Yield)} outside of async/generator.`)
 		if (funKind === Funs.Async)
 			check(this.opYielded !== null, this.loc, 'Cannot await nothing.')
