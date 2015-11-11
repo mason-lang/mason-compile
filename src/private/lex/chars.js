@@ -42,6 +42,7 @@ export const Chars = {
 	Quote: cc('"'),
 	Semicolon: cc(';'),
 	Space: cc(' '),
+	Star: cc('*'),
 	Tab: cc('\t'),
 	Tick: cc('\''),
 	Tilde: cc('~')

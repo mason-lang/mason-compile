@@ -11,9 +11,9 @@ import {addToCurrentGroup, closeGroup, closeGroupsForDedent, closeLine,
 	closeParenthesis, closeSpaceOKIfEmpty, curGroup, openGroup, openLine, openParenthesis, space
 	} from './groupContext'
 import {lexQuote} from './lex*'
-import {column, eat, eatRestOfLine, index, mustEat, line, peek, peekPrev, peekNext, peek2Before,
-	pos, sourceString, skip, skipNewlines, skipRestOfLine, skipWhile, skipWhileEquals,
-	takeWhileWithPrev, tryEat} from './sourceContext'
+import {column, eat, eatRestOfLine, index, mustEat, line, peek, pos, sourceString, skip,
+	skipNewlines, skipRestOfLine, skipWhile, skipWhileEquals, takeWhileWithPrev, tryEat, tryEat2,
+	tryEat3} from './sourceContext'
 
 /*
 In the case of quote interpolation ("a{b}c") we'll recurse back into here.
@@ -45,7 +45,7 @@ export default function lexPlain(isInQuote) {
 		const startIndex = index - 1
 
 		tryEat(Chars.Hyphen)
-		if (peekPrev() === Chars.N0) {
+		if (peek(-1) === Chars.N0) {
 			const p = peek()
 			switch (p) {
 				case Chars.LetterB: case Chars.LetterO: case Chars.LetterX:
@@ -59,7 +59,7 @@ export default function lexPlain(isInQuote) {
 					skipWhile(isDigitSpecial)
 					break
 				case Chars.Dot:
-					if (isDigit(peekNext())) {
+					if (isDigit(peek(1))) {
 						skip()
 						skipWhile(isDigit)
 					}
@@ -68,7 +68,7 @@ export default function lexPlain(isInQuote) {
 			}
 		} else {
 			skipWhile(isDigit)
-			if (peek() === Chars.Dot && isDigit(peekNext())) {
+			if (peek() === Chars.Dot && isDigit(peek(1))) {
 				skip()
 				skipWhile(isDigit)
 			}
@@ -93,8 +93,8 @@ export default function lexPlain(isInQuote) {
 
 
 	function handleName() {
-		check(isNameCharacter(peekPrev()), loc(), () =>
-			`Reserved character ${showChar(peekPrev())}`)
+		check(isNameCharacter(peek(-1)), loc(), () =>
+			`Reserved character ${showChar(peek(-1))}`)
 
 		// All other characters should be handled in a case above.
 		const name = takeWhileWithPrev(isNameCharacter)
@@ -170,7 +170,7 @@ export default function lexPlain(isInQuote) {
 				break
 			case Chars.Newline: {
 				check(!isInQuote, loc, 'Quote interpolation cannot contain newline')
-				if (peek2Before() === Chars.Space)
+				if (peek(-2) === Chars.Space)
 					warn(pos, 'Line ends in a space.')
 
 				// Skip any blank lines.
@@ -214,22 +214,20 @@ export default function lexPlain(isInQuote) {
 					handleName()
 				break
 			case Chars.Cash:
-				if (tryEat(Chars.Bang)) {
-					mustEat(Chars.Bar, '$!')
+				if (tryEat2(Chars.Bang, Chars.Bar))
 					funKeyword(Keywords.FunAsyncDo)
-				} else if (tryEat(Chars.Bar))
+				else if (tryEat(Chars.Bar))
 					funKeyword(Keywords.FunAsync)
 				else
 					handleName()
 				break
-			case Chars.Tilde:
-				if (tryEat(Chars.Bang)) {
-					mustEat(Chars.Bar, '~!')
+			case Chars.Star:
+				if (tryEat2(Chars.Bang, Chars.Bar))
 					funKeyword(Keywords.FunGenDo)
-				} else if (tryEat(Chars.Bar))
+				else if (tryEat(Chars.Bar))
 					funKeyword(Keywords.FunGen)
 				else
-					keyword(Keywords.Lazy)
+					handleName()
 				break
 			case Chars.Bar:
 				if (tryEat(Chars.Space) || tryEat(Chars.Tab)) {
@@ -264,33 +262,21 @@ export default function lexPlain(isInQuote) {
 			// OTHER
 
 			case Chars.Dot: {
-				const next = peek()
-				if (next === Chars.Space || next === Chars.Newline) {
-					// ObjLit assign in its own spaced group.
+				if (peek() === Chars.Space || peek() === Chars.Newline) {
+					// Keywords.ObjEntry in its own spaced group.
 					// We can't just create a new Group here because we want to
 					// ensure it's not part of the preceding or following spaced group.
 					closeSpaceOKIfEmpty(startPos())
 					keyword(Keywords.ObjAssign)
-				} else if (next === Chars.Bar) {
-					skip()
-					keyword(Keywords.FunThis)
-					space(loc())
-				} else if (next === Chars.Bang && peekNext() === Chars.Bar) {
-					skip()
-					skip()
-					keyword(Keywords.FunThisDo)
-					space(loc())
-				} else if (next === Chars.Tilde) {
-					skip()
-					if (tryEat(Chars.Bang)) {
-						mustEat(Chars.Bar, '.~!')
-						keyword(Keywords.FunThisGenDo)
-					} else {
-						mustEat(Chars.Bar, '.~')
-						keyword(Keywords.FunThisGen)
-					}
-					space(loc())
-				} else if (tryEat(Chars.Dot))
+				} else if (tryEat(Chars.Bar))
+					funKeyword(Keywords.FunThis)
+				else if (tryEat2(Chars.Bang, Chars.Bar))
+					funKeyword(Keywords.FunThisDo)
+				else if (tryEat2(Chars.Star, Chars.Bar))
+					funKeyword(Keywords.FunThisGen)
+				else if (tryEat3(Chars.Star, Chars.Bang, Chars.Bar))
+					funKeyword(Keywords.FunThisGenDo)
+				else if (tryEat(Chars.Dot))
 					if (tryEat(Chars.Dot))
 						keyword(Keywords.Dot3)
 					else
@@ -312,6 +298,10 @@ export default function lexPlain(isInQuote) {
 
 			case Chars.Tick:
 				keyword(Keywords.Tick)
+				break
+
+			case Chars.Tilde:
+				keyword(Keywords.Lazy)
 				break
 
 			case Chars.Ampersand:

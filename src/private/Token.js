@@ -274,10 +274,10 @@ export const Keywords = {
 	FunAsyncDo: kwNotName('$!|'),
 	FunThisAsync: kwNotName('.$|'),
 	FunThisAsyncDo: kwNotName('.$!|'),
-	FunGen: kwNotName('~|'),
-	FunGenDo: kwNotName('~!|'),
-	FunThisGen: kwNotName('.~|'),
-	FunThisGenDo: kwNotName('.~!|'),
+	FunGen: kwNotName('*|'),
+	FunGenDo: kwNotName('*!|'),
+	FunThisGen: kwNotName('.*|'),
+	FunThisGenDo: kwNotName('.*!|'),
 	Get: kw('get'),
 	If: kw('if'),
 	Ignore: kw('ignore'),
@@ -310,8 +310,8 @@ export const Keywords = {
 	ImportDo: kw('import!'),
 	ImportLazy: kw('import~'),
 	With: kw('with'),
-	Yield: kw('<~'),
-	YieldTo: kw('<~~')
+	Yield: kw('<-'),
+	YieldTo: kw('<-*')
 }
 
 /**

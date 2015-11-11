@@ -29,17 +29,8 @@ export function pos() {
 	return new Pos(line, column)
 }
 
-export function peek() {
-	return sourceString.charCodeAt(index)
-}
-export function peekNext() {
-	return sourceString.charCodeAt(index + 1)
-}
-export function peekPrev() {
-	return sourceString.charCodeAt(index - 1)
-}
-export function peek2Before() {
-	return sourceString.charCodeAt(index - 2)
+export function peek(n=0) {
+	return sourceString.charCodeAt(index + n)
 }
 
 // May eat a Newline.
@@ -49,18 +40,31 @@ export function eat() {
 	skip()
 	return char
 }
-export function skip() {
-	index = index + 1
-	column = column + 1
+export function skip(n=1) {
+	index = index + n
+	column = column + n
 }
 
 // charToEat must not be Newline.
 export function tryEat(charToEat) {
 	const canEat = peek() === charToEat
-	if (canEat) {
-		index = index + 1
-		column = column + 1
-	}
+	if (canEat)
+		skip()
+	return canEat
+}
+
+// chars must not be Newline
+export function tryEat2(char1, char2) {
+	const canEat = peek() === char1 && peek(1) === char2
+	if (canEat)
+		skip(2)
+	return canEat
+}
+
+export function tryEat3(char1, char2, char3) {
+	const canEat = peek() === char1 && peek(1) === char2 && peek(2) === char3
+	if (canEat)
+		skip(3)
 	return canEat
 }
 
