@@ -82,6 +82,10 @@ export default class VerifyResults {
 	isObjEntryExport(objEntry) {
 		return this.objEntryExports.has(objEntry)
 	}
+
+	constructorHasSuper(ctr) {
+		return this.constructorToSuper.has(ctr)
+	}
 }
 
 /** Kinds of {@link Block}. */

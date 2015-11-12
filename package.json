@@ -3,7 +3,7 @@
 	"version": "0.0.0",
 	"files": ["dist", "src"],
 	"scripts": {
-		"prepublish": "babel src --out-dir dist --source-maps inline",
+		"build": "babel src --out-dir dist --source-maps inline",
 		"watch": "babel src --out-dir dist --source-maps inline --watch",
 		"doc": "esdoc -c esdoc.json",
 		"lint": "eslint src test",

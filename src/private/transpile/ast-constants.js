@@ -1,5 +1,6 @@
-import {ArrayExpression, Identifier, Literal, NewExpression, ObjectExpression, ReturnStatement,
-	SwitchCase, ThisExpression, VariableDeclaration, VariableDeclarator} from 'esast/dist/ast'
+import {ArrayExpression, AssignmentExpression, Identifier, Literal, NewExpression, ObjectExpression,
+	ReturnStatement, SwitchCase, ThisExpression, VariableDeclaration, VariableDeclarator}
+	from 'esast/dist/ast'
 import {member} from 'esast/dist/util'
 import {throwErrorFromString} from './util'
 
@@ -37,6 +38,9 @@ export const
 			new NewExpression(member(new Identifier('global'), 'Map'), []))]),
 	DeclareBuiltObj = new VariableDeclaration('const', [
 		new VariableDeclarator(IdBuilt, new ObjectExpression([]))]),
+	ExportsDefault = member(IdExports, 'default'),
+
 	DeclareLexicalThis = new VariableDeclaration('const',
 		[new VariableDeclarator(IdLexicalThis, new ThisExpression())]),
-	ExportsDefault = member(IdExports, 'default')
+	LetLexicalThis = new VariableDeclaration('let', [new VariableDeclarator(IdLexicalThis)]),
+	SetLexicalThis = new AssignmentExpression('=', IdLexicalThis, new ThisExpression())

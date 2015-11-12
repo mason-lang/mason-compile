@@ -7,7 +7,7 @@ See documentation [here](https://doc.esdoc.org/github.com/mason-lang/mason-compi
 ## Build
 
 	npm install
-	npm run prepublish
+	npm run build
 	npm run doc
 	npm run lint
 	npm run test

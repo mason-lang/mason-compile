@@ -47,26 +47,6 @@ export default class MsAst {
 		}
 	}
 
-	/*
-	//Single export.
-	export class ModuleExport extends Do {
-		constructor(loc, assign) {
-			super(loc)
-			//@type {AssignSingle}
-			this.assign = assign
-		}
-	}
-	//Created with an ObjAssign in root.
-	export class ModuleExportNamed extends ModuleExport { }
-	//Created by assigning to the module's name.
-	export class ModuleExportDefault extends ModuleExport {
-		static forVal(loc, name, value) {
-			const assignee = LocalDeclare.plain(loc, name)
-			const assign = new AssignSingle(loc, assignee, value)
-			return new ModuleExportDefault(loc, assign)
-		}
-	}*/
-
 	/** Single import in an `import!` block. */
 	export class ImportDo extends MsAst {
 		constructor(loc, path) {

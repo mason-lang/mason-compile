@@ -16,10 +16,9 @@ import {assert, cat, flatMap, flatOpMap, ifElse, implementMany, isEmpty, last, o
 import {Blocks} from '../VerifyResults'
 import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, DeclareLexicalThis,
 	IdArguments, IdBuilt, IdExtract, IdFocus, IdLexicalThis, IdSuper, GlobalError, GlobalInfinity,
-	LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt, ReturnFocus, SwitchCaseNoMatch,
-	ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
-import {isInConstructor, setup, tearDown, verifyResults, withInConstructor, withInGenerator
-	} from './context'
+	LetLexicalThis, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt, ReturnFocus,
+	SetLexicalThis, SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
+import {setup, tearDown, verifyResults, withInGenerator} from './context'
 import {transpileMethodToDefinition, transpileMethodToProperty} from './transpileMethod'
 import transpileModule, {exportNamedOrDefault} from './transpileModule'
 import {accessLocalDeclare, blockWrap, blockWrapIfBlock, blockWrapIfVal, declare, doThrow,
@@ -191,16 +190,12 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	Constructor() {
-		return withInConstructor(() => {
-			// If there is a `super!`, `this` will not be defined until then,
-			// so must wait until then.
-			// Otherwise, do it at the beginning.
-			const body = verifyResults.constructorToSuper.has(this) ?
-				t0(this.fun) :
-				t1(this.fun, constructorSetMembers(this))
-
-			return MethodDefinition.constructor(body)
-		})
+		// If there is a `super`, `this` will not be defined until then,
+		// so must wait until then.
+		// Otherwise, do it at the beginning.
+		return MethodDefinition.constructor(verifyResults.constructorHasSuper(this) ?
+			t2(this.fun, LetLexicalThis, true) :
+			t1(this.fun, constructorSetMembers(this)))
 	},
 
 	Catch() {
@@ -225,7 +220,9 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	// leadStatements comes from constructor members
-	Fun(leadStatements=null) {
+	// dontDeclareThis: applies if this is the fun for a Constructor,
+	// which may declare `this` at a `super` call.
+	Fun(leadStatements=null, dontDeclareThis=false) {
 		const isGeneratorFun = this.kind !== Funs.Plain
 		return withInGenerator(isGeneratorFun, () => {
 			// TODO:ES6 use `...`f
@@ -235,10 +232,10 @@ implementMany(MsAstTypes, 'transpile', {
 			const argChecks = opIf(options.includeChecks(), () =>
 				flatOpMap(this.args, opTypeCheckForLocalDeclare))
 
-			const opDeclareThis =
-				opIf(!isInConstructor && this.opDeclareThis != null, () => DeclareLexicalThis)
+			const opDeclareThis = opIf(this.opDeclareThis !== null && !dontDeclareThis, () =>
+				DeclareLexicalThis)
 
-			const lead = cat(leadStatements, opDeclareThis, opDeclareRest, argChecks)
+			const lead = cat(opDeclareRest, opDeclareThis, argChecks, leadStatements)
 
 			const body =() => t2(this.block, lead, this.opReturnType)
 			const args = this.args.map(t0)
@@ -300,7 +297,7 @@ implementMany(MsAstTypes, 'transpile', {
 
 	LocalAccess() {
 		if (this.name === 'this')
-			return isInConstructor ? new ThisExpression() : IdLexicalThis
+			return IdLexicalThis
 		else {
 			const ld = verifyResults.localDeclareForAccess(this)
 			// If ld missing, this is a builtin, and builtins are never lazy
@@ -510,9 +507,10 @@ implementMany(MsAstTypes, 'transpile', {
 		const method = verifyResults.superCallToMethod.get(this)
 
 		if (method instanceof Constructor) {
+			// super must appear as a statement, so OK to decalre `this`
 			const call = new CallExpression(IdSuper, args)
 			const memberSets = constructorSetMembers(method)
-			return cat(call, memberSets)
+			return cat(call, memberSets, SetLexicalThis)
 		} else
 			return new CallExpression(memberStringOrVal(IdSuper, method.symbol), args)
 	},
