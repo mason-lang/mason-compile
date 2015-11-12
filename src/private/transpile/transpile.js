@@ -253,7 +253,7 @@ implementMany(MsAstTypes, 'transpile', {
 						return new FunctionExpression(id, args, body())
 				case Funs.Async: {
 					const plainBody = t2(this.block, null, this.opReturnType)
-					const genFunc = new FunctionExpression(id, [], plainBody, true)
+					const genFunc = new FunctionExpression(null, [], plainBody, true)
 					const ret = new ReturnStatement(msCall('async', genFunc))
 					return new FunctionExpression(id, args, new BlockStatement(cat(lead, ret)))
 				}
