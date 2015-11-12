@@ -15,7 +15,11 @@
 })(this, function (_lexQuote, _lex) {
   var _lexQuote2 = _interopRequireDefault(_lexQuote);
 
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
 
   (0, _lex.load)({
     lexQuote: _lexQuote2.default
