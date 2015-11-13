@@ -387,7 +387,11 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	ObjEntryPlain() {
-		return new AssignmentExpression('=', memberStringOrVal(IdBuilt, this.name), t0(this.value))
+		const val = t0(this.value)
+		return verifyResults.isObjEntryExport(this) ?
+			// We've verified that for module export, this.name must be a string.
+			exportNamedOrDefault(val, this.name) :
+			new AssignmentExpression('=', memberStringOrVal(IdBuilt, this.name), val)
 	},
 
 	ObjSimple() {

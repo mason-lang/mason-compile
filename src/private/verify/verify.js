@@ -391,8 +391,13 @@ implementMany(MsAstTypes, 'verify', {
 
 	ObjEntryPlain(sk) {
 		checkDo(this, sk)
-		accessLocal(this, 'built')
-		verifyName(this.name)
+		if (results.isObjEntryExport(this))
+			check(typeof this.name === 'string', this.loc,
+				'Module export must have a constant name.')
+		else {
+			accessLocal(this, 'built')
+			verifyName(this.name)
+		}
 		this.value.verify(SK.Val)
 	},
 
