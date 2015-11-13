@@ -164,8 +164,10 @@ let nextKeywordKind = 0
 const
 	keywordNameToKind = new Map(),
 	keywordKindToName = new Map(),
-	nameKeywords = new Set(),
-	reservedKeywords = new Set()
+	nameKeywords = new Set()
+// Exported for use by info.js
+export const reservedKeywords = new Set()
+
 // These keywords are special names.
 // When lexing a name, a map lookup is done by keywordKindFromName.
 function kw(name) {
