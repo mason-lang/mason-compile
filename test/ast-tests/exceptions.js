@@ -3,8 +3,9 @@ import {loc, one, strA, zero} from './util/ast-util'
 import {test} from './util/test-asts'
 
 describe('except', () => {
-	// TODO:
-	// except, try, try!, catch, catch!, else, else!, finally!
+	// TODO: except, try, catch, else, finally
+	// Test catch with type
+	// Test when all caught exceptions have the same name, and when they have different names.
 })
 
 describe('assert', () => {

@@ -2,25 +2,23 @@
 
 (function (global, factory) {
 	if (typeof define === "function" && define.amd) {
-		define(['exports', '../context', '../MsAst', '../util', '../Token', './checks', './parseBlock', './parseLocalDeclares'], factory);
+		define(['exports', '../context', '../MsAst', '../Token', './checks', './parseBlock', './parseLocalDeclares'], factory);
 	} else if (typeof exports !== "undefined") {
-		factory(exports, require('../context'), require('../MsAst'), require('../util'), require('../Token'), require('./checks'), require('./parseBlock'), require('./parseLocalDeclares'));
+		factory(exports, require('../context'), require('../MsAst'), require('../Token'), require('./checks'), require('./parseBlock'), require('./parseLocalDeclares'));
 	} else {
 		var mod = {
 			exports: {}
 		};
-		factory(mod.exports, global.context, global.MsAst, global.util, global.Token, global.checks, global.parseBlock, global.parseLocalDeclares);
+		factory(mod.exports, global.context, global.MsAst, global.Token, global.checks, global.parseBlock, global.parseLocalDeclares);
 		global.parseExcept = mod.exports;
 	}
-})(this, function (exports, _context, _MsAst, _util, _Token, _checks, _parseBlock, _parseLocalDeclares) {
+})(this, function (exports, _context, _MsAst, _Token, _checks, _parseBlock, _parseLocalDeclares) {
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
 	exports.default = parseExcept;
 
 	var _parseBlock2 = _interopRequireDefault(_parseBlock);
-
-	var _parseLocalDeclares2 = _interopRequireDefault(_parseLocalDeclares);
 
 	function _interopRequireDefault(obj) {
 		return obj && obj.__esModule ? obj : {
@@ -68,51 +66,80 @@
 
 	function parseExcept(tokens) {
 		const lines = (0, _parseBlock.justBlock)(_Token.Keywords.Except, tokens);
-		const firstLine = lines.headSlice();
-		const tokenTry = firstLine.head();
-		(0, _context.check)((0, _Token.isKeyword)(_Token.Keywords.Try, tokenTry), tokenTry.loc, () => `Must start with ${ (0, _Token.showKeyword)(_Token.Keywords.Try) }`);
 
-		const _try = (0, _parseBlock.parseJustBlock)(_Token.Keywords.Try, firstLine.tail());
+		var _takeTry = takeTry(lines);
 
-		const restLines = lines.tail();
-		(0, _checks.checkNonEmpty)(restLines, () => 'Must have at least one of ' + `${ (0, _Token.showKeyword)(_Token.Keywords.Catch) } or ${ (0, _Token.showKeyword)(_Token.Keywords.Finally) }`);
+		var _takeTry2 = _slicedToArray(_takeTry, 2);
 
-		const handleFinally = restLines => {
-			const line = restLines.headSlice();
-			const tokenFinally = line.head();
-			(0, _context.check)((0, _Token.isKeyword)(_Token.Keywords.Finally, tokenFinally), tokenFinally.loc, () => `Expected ${ (0, _Token.showKeyword)(_Token.Keywords.Finally) }`);
-			(0, _context.check)(restLines.size() === 1, restLines.loc, () => `Nothing is allowed to come after ${ (0, _Token.showKeyword)(_Token.Keywords.Finally) }.`);
-			return (0, _parseBlock.parseJustBlock)(_Token.Keywords.Finally, line.tail());
-		};
+		const _try = _takeTry2[0];
+		const rest = _takeTry2[1];
 
-		let _catch, _finally;
+		var _takeTypedCatches = takeTypedCatches(rest);
 
-		const line2 = restLines.headSlice();
-		const head2 = line2.head();
+		var _takeTypedCatches2 = _slicedToArray(_takeTypedCatches, 3);
 
-		if ((0, _Token.isKeyword)(_Token.Keywords.Catch, head2)) {
-			var _beforeAndBlock = (0, _parseBlock.beforeAndBlock)(line2.tail());
+		const typedCatches = _takeTypedCatches2[0];
+		const opCatchAll = _takeTypedCatches2[1];
+		const rest2 = _takeTypedCatches2[2];
+
+		var _opTakeElse = opTakeElse(rest2);
+
+		var _opTakeElse2 = _slicedToArray(_opTakeElse, 2);
+
+		const opElse = _opTakeElse2[0];
+		const rest3 = _opTakeElse2[1];
+		const opFinally = parseOpFinally(rest3);
+		return new _MsAst.Except(tokens.loc, _try, typedCatches, opCatchAll, opElse, opFinally);
+	}
+
+	function takeTry(lines) {
+		const line = lines.headSlice();
+		(0, _checks.checkKeyword)(_Token.Keywords.Try, line.head());
+		return [(0, _parseBlock.parseJustBlock)(_Token.Keywords.Try, line.tail()), lines.tail()];
+	}
+
+	function takeTypedCatches(lines) {
+		const typedCatches = [];
+		let opCatchAll = null;
+
+		while (!lines.isEmpty()) {
+			const line = lines.headSlice();
+			if (!(0, _Token.isKeyword)(_Token.Keywords.Catch, line.head())) break;
+
+			var _beforeAndBlock = (0, _parseBlock.beforeAndBlock)(line.tail());
 
 			var _beforeAndBlock2 = _slicedToArray(_beforeAndBlock, 2);
 
-			const before2 = _beforeAndBlock2[0];
-			const block2 = _beforeAndBlock2[1];
-			const caught = parseOneLocalDeclareOrFocus(before2);
-			_catch = new _MsAst.Catch(line2.loc, caught, (0, _parseBlock2.default)(block2));
-			_finally = (0, _util.opIf)(restLines.size() > 1, () => handleFinally(restLines.tail()));
-		} else {
-			_catch = null;
-			_finally = handleFinally(restLines);
+			const before = _beforeAndBlock2[0];
+			const block = _beforeAndBlock2[1];
+			const caught = (0, _parseLocalDeclares.parseLocalDeclareOrFocus)(before);
+
+			const _catch = new _MsAst.Catch(line.loc, caught, (0, _parseBlock2.default)(block));
+
+			lines = lines.tail();
+
+			if (caught.opType === null) {
+				opCatchAll = _catch;
+				break;
+			} else typedCatches.push(_catch);
 		}
 
-		return new _MsAst.Except(tokens.loc, _try, _catch, _finally);
+		return [typedCatches, opCatchAll, lines];
 	}
 
-	function parseOneLocalDeclareOrFocus(tokens) {
-		if (tokens.isEmpty()) return _MsAst.LocalDeclare.focus(tokens.loc);else {
-			(0, _context.check)(tokens.size() === 1, 'Expected only one local declare.');
-			return (0, _parseLocalDeclares2.default)(tokens)[0];
-		}
+	function opTakeElse(lines) {
+		if (lines.isEmpty()) return [null, lines];
+		const line = lines.headSlice();
+		const tokenElse = line.head();
+		return (0, _Token.isKeyword)(_Token.Keywords.Else, tokenElse) ? [(0, _parseBlock.parseJustBlock)(_Token.Keywords.Else, line.tail()), lines.tail()] : [null, lines];
+	}
+
+	function parseOpFinally(lines) {
+		if (lines.isEmpty()) return null;
+		const line = lines.headSlice();
+		(0, _checks.checkKeyword)(_Token.Keywords.Finally, line.head());
+		(0, _context.check)(lines.size() === 1, lines.loc, () => `Nothing may come after ${ (0, _Token.showKeyword)(_Token.Keywords.Finally) }.`);
+		return (0, _parseBlock.parseJustBlock)(_Token.Keywords.Finally, line.tail());
 	}
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9wcml2YXRlL3BhcnNlL3BhcnNlRXhjZXB0LmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7OzttQkFTd0IsV0FBVzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7VUFBWCxXQUFXIiwiZmlsZSI6InBhcnNlRXhjZXB0LmpzIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHtjaGVja30gZnJvbSAnLi4vY29udGV4dCdcbmltcG9ydCB7Q2F0Y2gsIEV4Y2VwdCwgTG9jYWxEZWNsYXJlfSBmcm9tICcuLi9Nc0FzdCdcbmltcG9ydCB7b3BJZn0gZnJvbSAnLi4vdXRpbCdcbmltcG9ydCB7aXNLZXl3b3JkLCBLZXl3b3Jkcywgc2hvd0tleXdvcmR9IGZyb20gJy4uL1Rva2VuJ1xuaW1wb3J0IHtjaGVja05vbkVtcHR5fSBmcm9tICcuL2NoZWNrcydcbmltcG9ydCBwYXJzZUJsb2NrLCB7YmVmb3JlQW5kQmxvY2ssIGp1c3RCbG9jaywgcGFyc2VKdXN0QmxvY2t9IGZyb20gJy4vcGFyc2VCbG9jaydcbmltcG9ydCBwYXJzZUxvY2FsRGVjbGFyZXMgZnJvbSAnLi9wYXJzZUxvY2FsRGVjbGFyZXMnXG5cbi8qKiBQYXJzZSBhbiB7QGxpbmsgRXhjZXB0fS4gKi9cbmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIHBhcnNlRXhjZXB0KHRva2Vucykge1xuXHRjb25zdCBsaW5lcyA9IGp1c3RCbG9jayhLZXl3b3Jkcy5FeGNlcHQsIHRva2VucylcblxuXHQvLyBgdHJ5YCAqbXVzdCogY29tZSBmaXJzdC5cblx0Y29uc3QgZmlyc3RMaW5lID0gbGluZXMuaGVhZFNsaWNlKClcblx0Y29uc3QgdG9rZW5UcnkgPSBmaXJzdExpbmUuaGVhZCgpXG5cdGNoZWNrKGlzS2V5d29yZChLZXl3b3Jkcy5UcnksIHRva2VuVHJ5KSwgdG9rZW5UcnkubG9jLCAoKSA9PlxuXHRcdGBNdXN0IHN0YXJ0IHdpdGggJHtzaG93S2V5d29yZChLZXl3b3Jkcy5UcnkpfWApXG5cdGNvbnN0IF90cnkgPSBwYXJzZUp1c3RCbG9jayhLZXl3b3Jkcy5UcnksIGZpcnN0TGluZS50YWlsKCkpXG5cblx0Y29uc3QgcmVzdExpbmVzID0gbGluZXMudGFpbCgpXG5cdGNoZWNrTm9uRW1wdHkocmVzdExpbmVzLCAoKSA9PlxuXHRcdCdNdXN0IGhhdmUgYXQgbGVhc3Qgb25lIG9mICcgK1xuXHRcdGAke3Nob3dLZXl3b3JkKEtleXdvcmRzLkNhdGNoKX0gb3IgJHtzaG93S2V5d29yZChLZXl3b3Jkcy5GaW5hbGx5KX1gKVxuXG5cdGNvbnN0IGhhbmRsZUZpbmFsbHkgPSByZXN0TGluZXMgPT4ge1xuXHRcdGNvbnN0IGxpbmUgPSByZXN0TGluZXMuaGVhZFNsaWNlKClcblx0XHRjb25zdCB0b2tlbkZpbmFsbHkgPSBsaW5lLmhlYWQoKVxuXHRcdGNoZWNrKGlzS2V5d29yZChLZXl3b3Jkcy5GaW5hbGx5LCB0b2tlbkZpbmFsbHkpLCB0b2tlbkZpbmFsbHkubG9jLCAoKSA9PlxuXHRcdFx0YEV4cGVjdGVkICR7c2hvd0tleXdvcmQoS2V5d29yZHMuRmluYWxseSl9YClcblx0XHRjaGVjayhyZXN0TGluZXMuc2l6ZSgpID09PSAxLCByZXN0TGluZXMubG9jLCAoKSA9PlxuXHRcdFx0YE5vdGhpbmcgaXMgYWxsb3dlZCB0byBjb21lIGFmdGVyICR7c2hvd0tleXdvcmQoS2V5d29yZHMuRmluYWxseSl9LmApXG5cdFx0cmV0dXJuIHBhcnNlSnVzdEJsb2NrKEtleXdvcmRzLkZpbmFsbHksIGxpbmUudGFpbCgpKVxuXHR9XG5cblx0bGV0IF9jYXRjaCwgX2ZpbmFsbHlcblxuXHRjb25zdCBsaW5lMiA9IHJlc3RMaW5lcy5oZWFkU2xpY2UoKVxuXHRjb25zdCBoZWFkMiA9IGxpbmUyLmhlYWQoKVxuXHRpZiAoaXNLZXl3b3JkKEtleXdvcmRzLkNhdGNoLCBoZWFkMikpIHtcblx0XHRjb25zdCBbYmVmb3JlMiwgYmxvY2syXSA9IGJlZm9yZUFuZEJsb2NrKGxpbmUyLnRhaWwoKSlcblx0XHRjb25zdCBjYXVnaHQgPSBwYXJzZU9uZUxvY2FsRGVjbGFyZU9yRm9jdXMoYmVmb3JlMilcblx0XHRfY2F0Y2ggPSBuZXcgQ2F0Y2gobGluZTIubG9jLCBjYXVnaHQsIHBhcnNlQmxvY2soYmxvY2syKSlcblx0XHRfZmluYWxseSA9IG9wSWYocmVzdExpbmVzLnNpemUoKSA+IDEsICgpID0+IGhhbmRsZUZpbmFsbHkocmVzdExpbmVzLnRhaWwoKSkpXG5cdH0gZWxzZSB7XG5cdFx0X2NhdGNoID0gbnVsbFxuXHRcdF9maW5hbGx5ID0gaGFuZGxlRmluYWxseShyZXN0TGluZXMpXG5cdH1cblxuXHRyZXR1cm4gbmV3IEV4Y2VwdCh0b2tlbnMubG9jLCBfdHJ5LCBfY2F0Y2gsIF9maW5hbGx5KVxufVxuXG5mdW5jdGlvbiBwYXJzZU9uZUxvY2FsRGVjbGFyZU9yRm9jdXModG9rZW5zKSB7XG5cdGlmICh0b2tlbnMuaXNFbXB0eSgpKVxuXHRcdHJldHVybiBMb2NhbERlY2xhcmUuZm9jdXModG9rZW5zLmxvYylcblx0ZWxzZSB7XG5cdFx0Y2hlY2sodG9rZW5zLnNpemUoKSA9PT0gMSwgJ0V4cGVjdGVkIG9ubHkgb25lIGxvY2FsIGRlY2xhcmUuJylcblx0XHRyZXR1cm4gcGFyc2VMb2NhbERlY2xhcmVzKHRva2VucylbMF1cblx0fVxufVxuIl19
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9wcml2YXRlL3BhcnNlL3BhcnNlRXhjZXB0LmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7OzttQkFRd0IsV0FBVzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O1VBQVgsV0FBVyIsImZpbGUiOiJwYXJzZUV4Y2VwdC5qcyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7Y2hlY2t9IGZyb20gJy4uL2NvbnRleHQnXG5pbXBvcnQge0NhdGNoLCBFeGNlcHR9IGZyb20gJy4uL01zQXN0J1xuaW1wb3J0IHtpc0tleXdvcmQsIEtleXdvcmRzLCBzaG93S2V5d29yZH0gZnJvbSAnLi4vVG9rZW4nXG5pbXBvcnQge2NoZWNrS2V5d29yZH0gZnJvbSAnLi9jaGVja3MnXG5pbXBvcnQgcGFyc2VCbG9jaywge2JlZm9yZUFuZEJsb2NrLCBqdXN0QmxvY2ssIHBhcnNlSnVzdEJsb2NrfSBmcm9tICcuL3BhcnNlQmxvY2snXG5pbXBvcnQge3BhcnNlTG9jYWxEZWNsYXJlT3JGb2N1c30gZnJvbSAnLi9wYXJzZUxvY2FsRGVjbGFyZXMnXG5cbi8qKiBQYXJzZSBhbiB7QGxpbmsgRXhjZXB0fS4gKi9cbmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIHBhcnNlRXhjZXB0KHRva2Vucykge1xuXHRjb25zdCBsaW5lcyA9IGp1c3RCbG9jayhLZXl3b3Jkcy5FeGNlcHQsIHRva2Vucylcblx0Y29uc3QgW190cnksIHJlc3RdID0gdGFrZVRyeShsaW5lcylcblx0Y29uc3QgW3R5cGVkQ2F0Y2hlcywgb3BDYXRjaEFsbCwgcmVzdDJdID0gdGFrZVR5cGVkQ2F0Y2hlcyhyZXN0KVxuXHRjb25zdCBbb3BFbHNlLCByZXN0M10gPSBvcFRha2VFbHNlKHJlc3QyKVxuXHRjb25zdCBvcEZpbmFsbHkgPSBwYXJzZU9wRmluYWxseShyZXN0Mylcblx0cmV0dXJuIG5ldyBFeGNlcHQodG9rZW5zLmxvYywgX3RyeSwgdHlwZWRDYXRjaGVzLCBvcENhdGNoQWxsLCBvcEVsc2UsIG9wRmluYWxseSlcbn1cblxuZnVuY3Rpb24gdGFrZVRyeShsaW5lcykge1xuXHRjb25zdCBsaW5lID0gbGluZXMuaGVhZFNsaWNlKClcblx0Y2hlY2tLZXl3b3JkKEtleXdvcmRzLlRyeSwgbGluZS5oZWFkKCkpXG5cdHJldHVybiBbcGFyc2VKdXN0QmxvY2soS2V5d29yZHMuVHJ5LCBsaW5lLnRhaWwoKSksIGxpbmVzLnRhaWwoKV1cbn1cblxuZnVuY3Rpb24gdGFrZVR5cGVkQ2F0Y2hlcyhsaW5lcykge1xuXHRjb25zdCB0eXBlZENhdGNoZXMgPSBbXVxuXHRsZXQgb3BDYXRjaEFsbCA9IG51bGxcblxuXHR3aGlsZSAoIWxpbmVzLmlzRW1wdHkoKSkge1xuXHRcdGNvbnN0IGxpbmUgPSBsaW5lcy5oZWFkU2xpY2UoKVxuXHRcdGlmICghaXNLZXl3b3JkKEtleXdvcmRzLkNhdGNoLCBsaW5lLmhlYWQoKSkpXG5cdFx0XHRicmVha1xuXG5cdFx0Y29uc3QgW2JlZm9yZSwgYmxvY2tdID0gYmVmb3JlQW5kQmxvY2sobGluZS50YWlsKCkpXG5cdFx0Y29uc3QgY2F1Z2h0ID0gcGFyc2VMb2NhbERlY2xhcmVPckZvY3VzKGJlZm9yZSlcblx0XHRjb25zdCBfY2F0Y2ggPSBuZXcgQ2F0Y2gobGluZS5sb2MsIGNhdWdodCwgcGFyc2VCbG9jayhibG9jaykpXG5cblx0XHRsaW5lcyA9IGxpbmVzLnRhaWwoKVxuXG5cdFx0aWYgKGNhdWdodC5vcFR5cGUgPT09IG51bGwpIHtcblx0XHRcdG9wQ2F0Y2hBbGwgPSBfY2F0Y2hcblx0XHRcdGJyZWFrXG5cdFx0fSBlbHNlXG5cdFx0XHR0eXBlZENhdGNoZXMucHVzaChfY2F0Y2gpXG5cdH1cblx0cmV0dXJuIFt0eXBlZENhdGNoZXMsIG9wQ2F0Y2hBbGwsIGxpbmVzXVxufVxuXG5mdW5jdGlvbiBvcFRha2VFbHNlKGxpbmVzKSB7XG5cdGlmIChsaW5lcy5pc0VtcHR5KCkpXG5cdFx0cmV0dXJuIFtudWxsLCBsaW5lc11cblxuXHRjb25zdCBsaW5lID0gbGluZXMuaGVhZFNsaWNlKClcblx0Y29uc3QgdG9rZW5FbHNlID0gbGluZS5oZWFkKClcblx0cmV0dXJuIGlzS2V5d29yZChLZXl3b3Jkcy5FbHNlLCB0b2tlbkVsc2UpID9cblx0XHRbcGFyc2VKdXN0QmxvY2soS2V5d29yZHMuRWxzZSwgbGluZS50YWlsKCkpLCBsaW5lcy50YWlsKCldIDpcblx0XHRbbnVsbCwgbGluZXNdXG59XG5cbmZ1bmN0aW9uIHBhcnNlT3BGaW5hbGx5KGxpbmVzKSB7XG5cdGlmIChsaW5lcy5pc0VtcHR5KCkpXG5cdFx0cmV0dXJuIG51bGxcblxuXHRjb25zdCBsaW5lID0gbGluZXMuaGVhZFNsaWNlKClcblx0Y2hlY2tLZXl3b3JkKEtleXdvcmRzLkZpbmFsbHksIGxpbmUuaGVhZCgpKVxuXHRjaGVjayhsaW5lcy5zaXplKCkgPT09IDEsIGxpbmVzLmxvYywgKCkgPT5cblx0XHRgTm90aGluZyBtYXkgY29tZSBhZnRlciAke3Nob3dLZXl3b3JkKEtleXdvcmRzLkZpbmFsbHkpfS5gKVxuXHRyZXR1cm4gcGFyc2VKdXN0QmxvY2soS2V5d29yZHMuRmluYWxseSwgbGluZS50YWlsKCkpXG59XG4iXX0=

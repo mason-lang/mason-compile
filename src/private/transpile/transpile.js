@@ -1,11 +1,11 @@
 import {ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryExpression,
-	BlockStatement, BreakStatement, CallExpression, CatchClause, ClassBody, ClassExpression,
+	BlockStatement, BreakStatement, CallExpression, ClassBody, ClassExpression,
 	ConditionalExpression, DebuggerStatement, ForOfStatement, ForStatement, FunctionExpression,
 	Identifier, IfStatement, Literal, LogicalExpression, MemberExpression, MethodDefinition,
 	NewExpression, ObjectExpression, Property, ReturnStatement, SpreadElement, SwitchCase,
 	SwitchStatement, TaggedTemplateExpression, TemplateElement, TemplateLiteral, ThisExpression,
-	ThrowStatement, TryStatement, VariableDeclaration, UnaryExpression, VariableDeclarator,
-	YieldExpression} from 'esast/dist/ast'
+	ThrowStatement, VariableDeclaration, UnaryExpression, VariableDeclarator, YieldExpression
+	} from 'esast/dist/ast'
 import {identifier, member, propertyIdOrLiteral} from 'esast/dist/util'
 import {options} from '../context'
 import * as MsAstTypes from '../MsAst'
@@ -19,6 +19,7 @@ import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, Decla
 	LetLexicalThis, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt, ReturnFocus,
 	SetLexicalThis, SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
 import {setup, tearDown, verifyResults, withInGenerator} from './context'
+import transpileExcept, {transpileCatch} from './transpileExcept'
 import {transpileMethodToDefinition, transpileMethodToProperty} from './transpileMethod'
 import transpileModule, {exportNamedOrDefault} from './transpileModule'
 import {accessLocalDeclare, blockWrap, blockWrapIfBlock, blockWrapIfVal, declare, doThrow,
@@ -198,14 +199,9 @@ implementMany(MsAstTypes, 'transpile', {
 			t1(this.fun, constructorSetMembers(this)))
 	},
 
-	Catch() {
-		return new CatchClause(t0(this.caught), t0(this.block))
-	},
+	Catch: transpileCatch,
 
-	Except() {
-		return blockWrapIfVal(this,
-			new TryStatement(t0(this.try), opMap(this.opCatch, t0), opMap(this.opFinally, t0)))
-	},
+	Except: transpileExcept,
 
 	For() {
 		return blockWrapIfVal(this, forLoop(this.opIteratee, this.block))

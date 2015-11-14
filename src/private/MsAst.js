@@ -106,6 +106,9 @@ export default class MsAst {
 		static focus(loc) {
 			return this.plain(loc, '_')
 		}
+		static typedFocus(loc, type) {
+			return new LocalDeclare(loc, '_', type, LocalDeclares.Const)
+		}
 		static this(loc) {
 			return this.plain(loc, 'this')
 		}
@@ -299,19 +302,32 @@ export default class MsAst {
 		try
 			{try}
 		catch
-			{catch}
+			{opCatch}
+		else
+			{opElse}
 		finally
-			{finally}```
+			{opFinally}```
 	*/
 	export class Except extends LineContent {
-		constructor(loc, _try, opCatch, opFinally) {
+		constructor(loc, _try, typedCatches, opCatchAll, opElse, opFinally) {
 			super(loc)
 			/** @type {Block} */
 			this.try = _try
-			/** @type {?Catch} */
-			this.opCatch = opCatch
+			/** @type {Array<Catch>} */
+			this.typedCatches = typedCatches
+			/**
+			opCatchAll.caught should have no type.
+			@type {?Catch}
+			*/
+			this.opCatchAll = opCatchAll
+			/** @type {?Block} */
+			this.opElse = opElse
 			/** @type {?Block} */
 			this.opFinally = opFinally
+		}
+
+		get allCatches() {
+			return cat(this.typedCatches, this.opCatchAll)
 		}
 	}
 

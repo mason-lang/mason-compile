@@ -9,10 +9,9 @@ import SK, {getSK} from './SK'
 import verifyLines from './verifyLines'
 
 export default function verifyBlock(sk) {
-	if (sk === SK.Do) {
-		verifyLines(this.lines)
-		results.blockToKind.set(this, Blocks.Do)
-	} else {
+	if (sk === SK.Do)
+		verifyDoBlock(this)
+	else {
 		check(!isEmpty(this.lines), 'Value block must have some content.')
 		const kind = autoBlockKind(this.lines, this.loc)
 		switch (kind) {
@@ -32,6 +31,11 @@ export default function verifyBlock(sk) {
 		}
 		results.blockToKind.set(this, kind)
 	}
+}
+
+export function verifyDoBlock(_) {
+	results.blockToKind.set(_, Blocks.Do)
+	return verifyLines(_.lines)
 }
 
 export function verifyModuleLines(lines, loc) {

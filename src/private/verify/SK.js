@@ -1,7 +1,7 @@
 import {check, warn} from '../context'
 import * as MsAstTypes from '../MsAst'
 import {Keywords, showKeyword} from '../Token'
-import {cat, implementMany, isEmpty, last, opMap, opOr} from '../util'
+import {cat, ifElse, implementMany, isEmpty, last, opOr} from '../util'
 import {Blocks} from '../VerifyResults'
 import autoBlockKind from './autoBlockKind'
 import {results} from './context'
@@ -41,11 +41,11 @@ Infers whether the last line of a module is a statement or a value.
 Prefers to make it a value, such as in the case of a Call.
 */
 export function getSK(_) {
-	return opOr(_.opGetSK(), () => SK.Val)
+	return opOr(_.opSK(), () => SK.Val)
 }
 
 // `null` means can't determine whether this must be a statement or value.
-implementMany(MsAstTypes, 'opGetSK', {
+implementMany(MsAstTypes, 'opSK', {
 	Do() { return SK.Do },
 	Val() { return SK.Val },
 	Call() { return null },
@@ -53,13 +53,16 @@ implementMany(MsAstTypes, 'opGetSK', {
 	YieldTo() { return null },
 	Block() {
 		return autoBlockKind(this.lines, this.loc) === Blocks.Return ?
-			isEmpty(this.lines) ? SK.Do : last(this.lines).opGetSK() :
+			isEmpty(this.lines) ? SK.Do : last(this.lines).opSK() :
 			SK.Val
 	},
-	Conditional() { return this.result.opGetSK() },
+	Conditional() { return this.result.opSK() },
 	Except() {
-		// Don't look at opFinally because that's always a Do
-		return compositeSK(this.loc, cat(this.try, opMap(this.opCatch, _ => _.block)))
+		const catches = this.allCatches.map(_ => _.block)
+		// If there's opElse, `try` is always SK.Do and `else` may be SK.Val.
+		const parts = ifElse(this.opElse, _ => cat(_, catches), () => cat(this.try, catches))
+		// opFinally is always SK.Do.
+		return compositeSK(this.loc, parts)
 	},
 	For() {
 		// If opForSK is null, there are no breaks, so this is an infinite loop.
@@ -82,9 +85,9 @@ implementMany(MsAstTypes, 'opForSK',{
 	Conditional() { return this.result.opForSK() },
 	Case: caseSwitchForSK,
 	Except() {
+		const catches = this.allCatches.map(_ => _.block)
 		// Do look at opFinally for break statements.
-		return compositeForSK(this.loc,
-			cat(this.try, opMap(this.opCatch, _ => _.block), this.opFinally))
+		return compositeForSK(this.loc, cat(this.try, catches, this.opElse, this.opFinally))
 	},
 	Switch: caseSwitchForSK
 })
@@ -98,7 +101,7 @@ function caseSwitchParts(_) {
 }
 
 function compositeSK(loc, parts) {
-	return composite(loc, 'opGetSK', parts,
+	return composite(loc, 'opSK', parts,
 		'Can\'t tell if this is a statement. Some parts are statements but others are values.')
 }
 

@@ -1,7 +1,7 @@
 import {check, options} from '../context'
 import {ImportDo, ImportGlobal, Import, LocalDeclare, LocalDeclares, Module} from '../MsAst'
 import {Groups, isGroup, isKeyword, Keyword, Keywords, showKeyword} from '../Token'
-import {checkNonEmpty, unexpected} from './checks'
+import {checkEmpty, checkNonEmpty, checkKeyword} from './checks'
 import {justBlock} from './parseBlock'
 import {parseLines} from './parseLine'
 import {parseLocalDeclaresJustNames} from './parseLocalDeclares'
@@ -49,22 +49,20 @@ function parseImports(importKeywordKind, tokens) {
 
 	for (const line of lines.slices()) {
 		const {path, name} = parseRequire(line.head())
+		const rest = line.tail()
 		if (importKeywordKind === Keywords.ImportDo) {
-			if (line.size() > 1)
-				unexpected(line.second())
+			checkEmpty(rest, () =>
+				`This is an ${showKeyword(Keywords.ImportDo)}, so you can't import any values.`)
 			imports.push(new ImportDo(line.loc, path))
 		} else
 			if (path === 'global') {
 				check(opImportGlobal === null, line.loc, 'Can\'t use global twice')
 				const {imported, opImportDefault} =
-					parseThingsImported(name, false, line.tail())
+					parseThingsImported(name, false, rest)
 				opImportGlobal = new ImportGlobal(line.loc, imported, opImportDefault)
 			} else {
 				const {imported, opImportDefault} =
-					parseThingsImported(
-						name,
-						importKeywordKind === Keywords.ImportLazy,
-						line.tail())
+					parseThingsImported(name, importKeywordKind === Keywords.ImportLazy, rest)
 				imports.push(new Import(line.loc, path, imported, opImportDefault))
 			}
 	}
@@ -134,8 +132,7 @@ function parseRequire(token) {
 				break
 
 			// If there's something left, it should be a dot, followed by a name.
-			if (!isKeyword(Keywords.Dot, rest.head()))
-				unexpected(rest.head())
+			checkKeyword(Keywords.Dot, rest.head())
 			rest = rest.tail()
 		}
 

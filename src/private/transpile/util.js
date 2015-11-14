@@ -6,7 +6,7 @@ import {loc, toStatement} from 'esast/dist/util'
 import {member} from 'esast/dist/util'
 import {options} from '../context'
 import {Block, QuoteAbstract} from '../MsAst'
-import {assert, cat, opIf, opMap} from '../util'
+import {assert, cat, opIf, opMap, toArray} from '../util'
 import {GlobalError} from './ast-constants'
 import {getDestructuredId, isInGenerator, verifyResults} from './context'
 
@@ -155,5 +155,7 @@ export function blockWrapIfBlock(value) {
 
 /** Wraps a statement in an IIFE if its MsAst is a value. */
 export function blockWrapIfVal(ast, statement) {
-	return verifyResults.isStatement(ast) ? statement : blockWrap(new BlockStatement([statement]))
+	return verifyResults.isStatement(ast) ?
+		statement :
+		blockWrap(new BlockStatement(toArray(statement)))
 }

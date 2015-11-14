@@ -3,15 +3,15 @@ import {check, options, warn} from '../context'
 import * as MsAstTypes from '../MsAst'
 import {Block, Class, Constructor, Fun, Funs, Kind, LocalDeclare, Method, Pattern} from '../MsAst'
 import {Keywords, showKeyword} from '../Token'
-import {cat, ifElse, implementMany, opEach} from '../util'
+import {cat, ifElse, implementMany, isEmpty, opEach} from '../util'
 import {funKind, locals, method, okToNotUse, opLoop, results, setup, tearDown, withIife,
 	withIifeIf, withIifeIfVal, withInFunKind, withMethod, withLoop, withName} from './context'
-import {accessLocal, getLocalDeclare, failMissingLocal, setDeclareAccessed, setLocal,
+import {accessLocal, getLocalDeclare, failMissingLocal, plusLocals, setDeclareAccessed, setLocal,
 	verifyAndPlusLocal, verifyAndPlusLocals, verifyLocalDeclare, warnUnusedLocals, withBlockLocals
 	} from './locals'
 import SK,{checkDo, checkVal, markStatement} from './SK'
-import {setName, verifyName, verifyOp} from './util'
-import verifyBlock, {verifyModuleLines} from './verifyBlock'
+import {okToNotUseIfFocus, setName, verifyName, verifyNotLazy, verifyOp} from './util'
+import verifyBlock, {verifyDoBlock, verifyModuleLines} from './verifyBlock'
 
 /**
 Generates information needed during transpiling, the VerifyResults.
@@ -132,8 +132,11 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	Catch(sk) {
-		check(this.caught.opType === null, this.caught.loc, 'TODO: Caught types')
-		verifyAndPlusLocal(this.caught, () => this.block.verify(sk))
+		okToNotUseIfFocus(this.caught)
+		verifyNotLazy(this.caught, 'Caught error can not be lazy.')
+		verifyAndPlusLocal(this.caught, () => {
+			this.block.verify(sk)
+		})
 	},
 
 	Class(sk) {
@@ -189,8 +192,22 @@ implementMany(MsAstTypes, 'verify', {
 
 	Except(sk) {
 		markStatement(this, sk)
-		this.try.verify(sk)
-		verifyOp(this.opCatch, sk)
+		if (this.opElse === null)
+			this.try.verify(sk)
+		else {
+			plusLocals(verifyDoBlock(this.try), () => this.opElse.verify(sk))
+			if (isEmpty(this.allCatches))
+				warn(this.loc,
+					`${showKeyword(Keywords.Else)} must come after ${showKeyword(Keywords.Catch)}.`)
+		}
+
+		if (isEmpty(this.allCatches) && this.opFinally === null)
+			warn(this.loc, `${showKeyword(Keywords.Except)} is pointless without ` +
+				`${showKeyword(Keywords.Catch)} or ${showKeyword(Keywords.Finally)}.`)
+
+		for (const _ of this.typedCatches)
+			_.verify()
+		verifyOp(this.opCatchAll, sk)
 		verifyOp(this.opFinally, SK.Do)
 	},
 
@@ -516,8 +533,8 @@ implementMany(MsAstTypes, 'verify', {
 		markStatement(this, sk)
 		this.value.verify(SK.Val)
 		withIifeIfVal(sk, () => {
-			if (sk === SK.Val && this.declare.name === '_')
-				okToNotUse.add(this.declare)
+			if (sk === SK.Val)
+				okToNotUseIfFocus(this.declare)
 			verifyAndPlusLocal(this.declare, () => {
 				this.block.verify(SK.Do)
 			})
@@ -565,6 +582,7 @@ function verifyFor(forLoop) {
 	ifElse(forLoop.opIteratee,
 		({element, bag}) => {
 			bag.verify(SK.Val)
+			verifyNotLazy(element, 'Iteration element can not be lazy.')
 			verifyAndPlusLocal(element, verifyBlock)
 		},
 		verifyBlock)

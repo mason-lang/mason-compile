@@ -1,8 +1,8 @@
 import {check} from '../context'
 import {LocalDeclare, LocalDeclares} from '../MsAst'
-import {Groups, isGroup, isKeyword, Keywords, Name, showKeyword} from '../Token'
+import {Groups, isGroup, isKeyword, Keywords, Name} from '../Token'
 import {opIf} from '../util'
-import {checkNonEmpty} from './checks'
+import {checkNonEmpty, checkKeyword} from './checks'
 import {parseSpaced} from './parse*'
 import Slice from './Slice'
 
@@ -62,6 +62,26 @@ export function parseLocalName(token) {
 	}
 }
 
+/**
+If `tokens` is:
+	empty: untyped focus
+	`:Type`: typed focus
+	`foo` or `foo:Type`: A normal LocalDeclare.
+*/
+export function parseLocalDeclareOrFocus(tokens) {
+	if (tokens.isEmpty())
+		return LocalDeclare.focus(tokens.loc)
+	else {
+		check(tokens.size() === 1, tokens.loc, 'Expected only one local declare.')
+		const token = tokens.head()
+		if (isGroup(Groups.Space, token)) {
+			const slice = Slice.group(token)
+			if (isKeyword(Keywords.Type, slice.head()))
+				return LocalDeclare.typedFocus(tokens.loc, parseSpaced(slice.tail()))
+		}
+		return parseLocalDeclare(token)
+	}
+}
 
 function _parseLocalDeclare(token, orMember=false) {
 	if (isGroup(Groups.Space, token))
@@ -83,8 +103,7 @@ function _parseLocalDeclareFromSpaced(tokens, orMember=false) {
 	const rest2 = rest.tail()
 	const opType = opIf(!rest2.isEmpty(), () => {
 		const colon = rest2.head()
-		check(isKeyword(Keywords.Type, colon), colon.loc, () =>
-			`Expected ${showKeyword(Keywords.Type)}`)
+		checkKeyword(Keywords.Type, colon)
 		const tokensType = rest2.tail()
 		checkNonEmpty(tokensType, () => `Expected something after ${colon}`)
 		return parseSpaced(tokensType)

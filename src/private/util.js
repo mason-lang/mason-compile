@@ -1,3 +1,14 @@
+/** Whether every element in `array` is equal. */
+export function allSame(array, mapper) {
+	if (isEmpty(array))
+		return true
+	const val = mapper(array[0])
+	for (let i = 1; i < array.length; i = i + 1)
+		if (mapper(array[i]) !== val)
+			return false
+	return true
+}
+
 /**
 Used to ensure that the compiler is programmed correctly.
 If an assertion fails, it's a bug in mason-compile.
@@ -121,6 +132,11 @@ export function rtail(array) {
 export function tail(array) {
 	assert(!isEmpty(array))
 	return array.slice(1)
+}
+
+/** Wrap value in an Array if it's not already one. */
+export function toArray(value) {
+	return value instanceof Array ? value : [value]
 }
 
 /** Asserts the type of a variable. */
