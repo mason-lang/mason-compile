@@ -8,7 +8,7 @@ import {loc} from './ast-util'
 
 export function test(ms, ast, js, opts={}) {
 	const isMultiLineTest = ast instanceof Array
-	ast = new Module(loc, 'test-compile', null, [], [], null, isMultiLineTest ? ast : [ast])
+	ast = new Module(loc, 'test-compile', null, [], [], isMultiLineTest ? ast : [ast])
 	ms = dedent(ms) + '\n'
 	js = dedent(js)
 	const expectedWarnings = opts.warnings || []

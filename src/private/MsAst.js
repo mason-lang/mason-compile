@@ -27,7 +27,7 @@ export default class MsAst {
 // Module
 	/** Whole source file. */
 	export class Module extends MsAst {
-		constructor(loc, name, opComment, doImports, imports, opImportGlobal, lines) {
+		constructor(loc, name, opComment, doImports, imports, lines) {
 			super(loc)
 			/**
 			Not used for compilation, but useful for tools.
@@ -40,8 +40,6 @@ export default class MsAst {
 			this.doImports = doImports
 			/** @type {Array<Import>} */
 			this.imports = imports
-			/** @type {?ImportGlobal} */
-			this.opImportGlobal = opImportGlobal
 			/** @type {Array<Do>} */
 			this.lines = lines
 		}
@@ -56,26 +54,15 @@ export default class MsAst {
 		}
 	}
 
-	/** Single import in an `import` block. */
+	/**
+	Single import in an `import` block.
+	If path is 'global', this is transpiled specially because there's no actual 'global' module.
+	*/
 	export class Import extends MsAst {
 		constructor(loc, path, imported, opImportDefault) {
 			super(loc)
 			/** @type {string} */
 			this.path = path
-			/** @type {Array<LocalDeclare>} */
-			this.imported = imported
-			/** @type {?LocalDeclare} */
-			this.opImportDefault = opImportDefault
-		}
-	}
-
-	/**
-	Imports from 'global' are handled specially because there's no module to import from.
-	Other than that, same as {@link Import}.
-	*/
-	export class ImportGlobal extends MsAst {
-		constructor(loc, imported, opImportDefault) {
-			super(loc)
 			/** @type {Array<LocalDeclare>} */
 			this.imported = imported
 			/** @type {?LocalDeclare} */

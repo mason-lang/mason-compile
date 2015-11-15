@@ -1,5 +1,5 @@
 import {check, options} from '../context'
-import {ImportDo, ImportGlobal, Import, LocalDeclare, LocalDeclares, Module} from '../MsAst'
+import {ImportDo, Import, LocalDeclare, LocalDeclares, Module} from '../MsAst'
 import {Groups, isGroup, isKeyword, Keyword, Keywords, showKeyword} from '../Token'
 import {checkEmpty, checkNonEmpty, checkKeyword} from './checks'
 import {justBlock} from './parseBlock'
@@ -18,56 +18,38 @@ export default function parseModule(tokens) {
 	// Module doc comment must come first.
 	const [opComment, rest0] = tryTakeComment(tokens)
 	// Import statements must appear in order.
-	const {imports: doImports, rest: rest1} = tryParseImports(Keywords.ImportDo, rest0)
-	const {imports: plainImports, opImportGlobal, rest: rest2} =
-		tryParseImports(Keywords.Import, rest1)
-	const {imports: lazyImports, rest: rest3} = tryParseImports(Keywords.ImportLazy, rest2)
+	const [doImports, rest1] = takeImports(Keywords.ImportDo, rest0)
+	const [plainImports, rest2] = takeImports(Keywords.Import, rest1)
+	const [lazyImports, rest3] = takeImports(Keywords.ImportLazy, rest2)
 	const lines = parseLines(rest3)
 	const imports = plainImports.concat(lazyImports)
-	return new Module(
-		tokens.loc, options.moduleName(), opComment, doImports, imports, opImportGlobal, lines)
+	return new Module(tokens.loc, options.moduleName(), opComment, doImports, imports, lines)
 }
 
-function tryParseImports(importKeywordKind, tokens) {
-	if (!tokens.isEmpty()) {
-		const line0 = tokens.headSlice()
-		if (isKeyword(importKeywordKind, line0.head())) {
-			const {imports, opImportGlobal} = parseImports(importKeywordKind, line0.tail())
-			if (importKeywordKind !== Keywords.Import)
-				check(opImportGlobal === null, line0.loc, 'Can\'t use global here.')
-			return {imports, opImportGlobal, rest: tokens.tail()}
-		}
+function takeImports(importKeywordKind, lines) {
+	if (!lines.isEmpty()) {
+		const line = lines.headSlice()
+		if (isKeyword(importKeywordKind, line.head()))
+			return [parseImports(importKeywordKind, line.tail()), lines.tail()]
 	}
-	return {imports: [], opImportGlobal: null, rest: tokens}
+	return [[], lines]
 }
 
 function parseImports(importKeywordKind, tokens) {
 	const lines = justBlock(importKeywordKind, tokens)
-	let opImportGlobal = null
-
-	const imports = []
-
-	for (const line of lines.slices()) {
+	return lines.mapSlices(line => {
 		const {path, name} = parseRequire(line.head())
 		const rest = line.tail()
 		if (importKeywordKind === Keywords.ImportDo) {
 			checkEmpty(rest, () =>
 				`This is an ${showKeyword(Keywords.ImportDo)}, so you can't import any values.`)
-			imports.push(new ImportDo(line.loc, path))
-		} else
-			if (path === 'global') {
-				check(opImportGlobal === null, line.loc, 'Can\'t use global twice')
-				const {imported, opImportDefault} =
-					parseThingsImported(name, false, rest)
-				opImportGlobal = new ImportGlobal(line.loc, imported, opImportDefault)
-			} else {
-				const {imported, opImportDefault} =
-					parseThingsImported(name, importKeywordKind === Keywords.ImportLazy, rest)
-				imports.push(new Import(line.loc, path, imported, opImportDefault))
-			}
-	}
-
-	return {imports, opImportGlobal}
+			return new ImportDo(line.loc, path)
+		} else {
+			const {imported, opImportDefault} =
+				parseThingsImported(name, importKeywordKind === Keywords.ImportLazy, rest)
+			return new Import(line.loc, path, imported, opImportDefault)
+		}
+	})
 }
 
 function parseThingsImported(name, isLazy, tokens) {

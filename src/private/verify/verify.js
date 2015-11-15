@@ -383,8 +383,6 @@ implementMany(MsAstTypes, 'verify', {
 		// No need to verify this.doImports.
 		for (const _ of this.imports)
 			_.verify()
-		verifyOp(this.opImportGlobal)
-
 		withName(options.moduleName(), () => {
 			verifyModuleLines(this.lines, this.loc)
 		})
@@ -526,8 +524,20 @@ implementMany(MsAstTypes, 'verify', {
 		verifyOp(this.opThrown, SK.Val)
 	},
 
-	Import: verifyImport,
-	ImportGlobal: verifyImport,
+	Import() {
+		// Since Uses are always in the outermost scope, don't have to worry about shadowing.
+		// So we mutate `locals` directly.
+		const addUseLocal = _ => {
+			const prev = locals.get(_.name)
+			check(prev === undefined, _.loc, () =>
+				`${code(_.name)} already imported at ${prev.loc}`)
+			verifyLocalDeclare(_)
+			setLocal(_)
+		}
+		for (const _ of this.imported)
+			addUseLocal(_)
+		opEach(this.opImportDefault, addUseLocal)
+	},
 
 	With(sk) {
 		markStatement(this, sk)
@@ -555,23 +565,6 @@ implementMany(MsAstTypes, 'verify', {
 		this.yieldedTo.verify(SK.Val)
 	}
 })
-
-// Shared implementations
-
-function verifyImport() {
-	// Since Uses are always in the outermost scope, don't have to worry about shadowing.
-	// So we mutate `locals` directly.
-	const addUseLocal = _ => {
-		const prev = locals.get(_.name)
-		check(prev === undefined, _.loc, () =>
-			`${code(_.name)} already imported at ${prev.loc}`)
-		verifyLocalDeclare(_)
-		setLocal(_)
-	}
-	for (const _ of this.imported)
-		addUseLocal(_)
-	opEach(this.opImportDefault, addUseLocal)
-}
 
 // Helpers specific to certain MsAst types
 

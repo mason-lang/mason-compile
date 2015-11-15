@@ -219,6 +219,7 @@ export const reservedKeywords = [
 	'do-while',
 	'do-until',
 	'final',
+	'$for',
 	'is',
 	'meta',
 	'out',

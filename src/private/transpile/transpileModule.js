@@ -15,7 +15,9 @@ import {idForDeclareCached, lazyWrap, makeDestructureDeclarators, msCall, t0, tL
 export default function transpileModule() {
 	const body = moduleBody(verifyResults.moduleKind, this.lines)
 
-	verifyResults.builtinPathToNames.forEach((imported, path) => {
+	const imports = this.imports.filter(_ => _.path !== 'global')
+
+	for (const [path, imported] of verifyResults.builtinPathToNames)
 		if (path !== 'global') {
 			const importedDeclares = []
 			let opImportDefault = null
@@ -27,11 +29,10 @@ export default function transpileModule() {
 				else
 					importedDeclares.push(declare)
 			}
-			this.imports.push(new Import(this.loc, path, importedDeclares, opImportDefault))
+			imports.push(new Import(this.loc, path, importedDeclares, opImportDefault))
 		}
-	})
 
-	const amd = amdWrapModule(this.doImports, this.imports, body)
+	const amd = amdWrapModule(this.doImports, imports, body)
 
 	return new Program(cat(
 		opIf(options.includeUseStrict(), () => UseStrict),
