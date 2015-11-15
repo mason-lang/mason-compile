@@ -59,6 +59,7 @@ export default {
 		'Opt->?',
 		'?->Opt',
 		'?-or',
+		'?-cond',
 		'?some',
 		'un-?'
 	],
@@ -162,7 +163,11 @@ export default {
 		'divisible?',
 		'Int',
 		'int/',
+		'log-base',
 		'modulo',
+		'nearest-ceil',
+		'nearest-floor',
+		'nearest-round',
 		'Nat',
 		'remainder',
 		'square'
