@@ -1,17 +1,57 @@
 export default {
 	global: [
+		// Standard globals
 		'Array',
 		'Boolean',
 		'console',
 		'Date',
 		'Error',
 		'Function',
+		'Intl',
+		'JSON',
+		'Proxy',
 		'Math',
 		'Number',
 		'Object',
+		'Reflect',
 		'RegExp',
+		'SIMD',
 		'String',
-		'Symbol'
+		'Symbol',
+
+		// Errors
+		'EvalError',
+		'InternalError',
+		'RangeError',
+		'ReferenceError',
+		'SyntaxError',
+		'TypeError',
+		'URIError',
+
+		// ArrayBuffer and views
+		'ArrayBuffer',
+		'DataView',
+		'Float32Array',
+		'Float64Array',
+		'Int16Array',
+		'Int32Array',
+		'Int8Array',
+		'Uint16Array',
+		'Uint32Array',
+		'Uint8Array',
+		'Uint8ClampedArray',
+
+		// URI functions
+		'decodeURI',
+		'decodeURIComponent',
+		'encodeURI',
+		'encodeURIComponent'
+
+		// Missing globals:
+		// eval: Want to discourage use
+		// isFinite, isNaN, parseFloat, parseInt: use Number.xxx functions
+		// Map, Set: have different meanings for msl. Use Id-Map and Id-Set for native versions.
+		// WeakMap, WeakSet: use Weak-Id-Map and Weak-Id-Set
 	],
 	'msl.@.?': [
 		'_',
@@ -112,8 +152,11 @@ export default {
 		'same?'
 	],
 	'msl.Function': ['Action', 'identity'],
-	'msl.Generator': ['gen-next!'],
-	'msl.js': ['defined?', 'id=?'],
+	'msl.js': [
+		'defined?',
+		'id=?',
+		'null?'
+	],
 	'msl.math.methods': ['+', '-', '*', '/'],
 	'msl.math.Number': [
 		'divisible?',
@@ -121,9 +164,8 @@ export default {
 		'int/',
 		'modulo',
 		'Nat',
-		'neg',
-		'log',
-		'remainder'
+		'remainder',
+		'square'
 	],
 	'msl.math.util': ['average', 'sum'],
 	'msl.methods': ['sub', 'set-sub!', 'del-sub!'],
