@@ -11,4 +11,4 @@ export const keywords =
 Array of the names of every reserved word.
 Alphabetically sorted.
 */
-export const reservedKeywords = Array(...reserved).map(keywordName).sort()
+export const reservedKeywords = reserved.sort()

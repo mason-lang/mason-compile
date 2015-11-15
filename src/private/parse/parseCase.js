@@ -41,7 +41,7 @@ function parseCaseTest(tokens) {
 	// E.g., `:Some val`
 	if (isGroup(Groups.Space, first) && tokens.size() > 1) {
 		const ft = Slice.group(first)
-		if (isKeyword(Keywords.Type, ft.head())) {
+		if (isKeyword(Keywords.Colon, ft.head())) {
 			const type = parseSpaced(ft.tail())
 			const locals = parseLocalDeclares(tokens.tail())
 			return new Pattern(tokens.loc, type, locals)

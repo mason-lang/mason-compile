@@ -112,7 +112,7 @@ function funKind(keywordKind) {
 function tryTakeReturnType(tokens) {
 	if (!tokens.isEmpty()) {
 		const h = tokens.head()
-		if (isGroup(Groups.Space, h) && isKeyword(Keywords.Type, head(h.subTokens)))
+		if (isGroup(Groups.Space, h) && isKeyword(Keywords.Colon, head(h.subTokens)))
 			return {
 				opReturnType: parseSpaced(Slice.group(h).tail()),
 				rest: tokens.tail()

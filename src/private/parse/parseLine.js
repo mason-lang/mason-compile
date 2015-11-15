@@ -28,8 +28,8 @@ export default function parseLine(tokens) {
 	// We only deal with mutable expressions here, otherwise we fall back to parseExpr.
 	if (head instanceof Keyword)
 		switch (head.kind) {
-			case Keywords.Assert: case Keywords.AssertNot:
-				return parseAssert(head.kind === Keywords.AssertNot, rest())
+			case Keywords.Assert: case Keywords.Forbid:
+				return parseAssert(head.kind === Keywords.Forbid, rest())
 			case Keywords.Break:
 				return new Break(loc, opParseExpr(rest()))
 			case Keywords.Debugger:
@@ -85,7 +85,7 @@ function parseAssignLike(before, at, after, loc) {
 		// `a.b = c`, `.b = c`, `a."b" = c`, `."b" = c`, `a[b] = c`
 		if (isGroup(Groups.Space, token)) {
 			const spaced = Slice.group(token)
-			const [value, opType] = ifElse(spaced.opSplitOnce(_ => isKeyword(Keywords.Type, _)),
+			const [value, opType] = ifElse(spaced.opSplitOnce(_ => isKeyword(Keywords.Colon, _)),
 				({before, after}) => [before, parseExpr(after)],
 				() => [spaced, null])
 

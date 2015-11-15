@@ -165,8 +165,6 @@ const
 	keywordNameToKind = new Map(),
 	keywordKindToName = new Map(),
 	nameKeywords = new Set()
-// Exported for use by info.js
-export const reservedKeywords = new Set()
 
 // These keywords are special names.
 // When lexing a name, a map lookup is done by keywordKindFromName.
@@ -183,12 +181,9 @@ function kwNotName(debugName) {
 	nextKeywordKind = nextKeywordKind + 1
 	return kind
 }
-function kwReserved(name) {
-	const kind = kw(name)
-	reservedKeywords.add(kind)
-}
 
-const reservedWords = [
+// Used by info.js
+export const reservedKeywords = [
 	// JavaScript reserved words
 	'enum',
 	'implements',
@@ -226,16 +221,18 @@ const reservedWords = [
 	'final',
 	'is',
 	'meta',
+	'my',
 	'out',
 	'override',
 	'send',
 	'to',
 	'type',
+	'types',
 	'until'
 ]
-
-for (const name of reservedWords)
-	kwReserved(name)
+for (const name of reservedKeywords)
+	kw(name)
+const firstNonReservedKeyword = nextKeywordKind
 
 /** Kinds of {@link Keyword}. */
 export const Keywords = {
@@ -244,7 +241,6 @@ export const Keywords = {
 	And: kw('and'),
 	As: kw('as'),
 	Assert: kw('assert'),
-	AssertNot: kw('forbid'),
 	Assign: kw('='),
 	AssignMutable: kwNotName('::='),
 	LocalMutate: kwNotName(':='),
@@ -254,6 +250,7 @@ export const Keywords = {
 	Catch: kw('catch'),
 	Cond: kw('cond'),
 	Class: kw('class'),
+	Colon: kwNotName(':'),
 	Construct: kw('construct'),
 	Debugger: kw('debugger'),
 	Del: kw('del'),
@@ -267,6 +264,7 @@ export const Keywords = {
 	Finally: kw('finally'),
 	Focus: kw('_'),
 	ForBag: kw('@for'),
+	Forbid: kw('forbid'),
 	For: kw('for'),
 	Fun: kwNotName('|'),
 	FunDo: kwNotName('!|'),
@@ -305,7 +303,6 @@ export const Keywords = {
 	Todo: kw('todo'),
 	True: kw('true'),
 	Try: kw('try'),
-	Type: kwNotName(':'),
 	Undefined: kw('undefined'),
 	Unless: kw('unless'),
 	Import: kw('import'),
@@ -389,5 +386,5 @@ export function isNameKeyword(token) {
 
 /** Whether `token` is a reserved word. */
 export function isReservedKeyword(token) {
-	return isAnyKeyword(reservedKeywords, token)
+	return token instanceof Keyword && token.kind < firstNonReservedKeyword
 }

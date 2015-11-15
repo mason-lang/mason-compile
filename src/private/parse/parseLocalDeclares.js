@@ -76,7 +76,7 @@ export function parseLocalDeclareOrFocus(tokens) {
 		const token = tokens.head()
 		if (isGroup(Groups.Space, token)) {
 			const slice = Slice.group(token)
-			if (isKeyword(Keywords.Type, slice.head()))
+			if (isKeyword(Keywords.Colon, slice.head()))
 				return LocalDeclare.typedFocus(tokens.loc, parseSpaced(slice.tail()))
 		}
 		return parseLocalDeclare(token)
@@ -103,7 +103,7 @@ function _parseLocalDeclareFromSpaced(tokens, orMember=false) {
 	const rest2 = rest.tail()
 	const opType = opIf(!rest2.isEmpty(), () => {
 		const colon = rest2.head()
-		checkKeyword(Keywords.Type, colon)
+		checkKeyword(Keywords.Colon, colon)
 		const tokensType = rest2.tail()
 		checkNonEmpty(tokensType, () => `Expected something after ${colon}`)
 		return parseSpaced(tokensType)

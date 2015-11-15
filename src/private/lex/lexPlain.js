@@ -293,7 +293,7 @@ export default function lexPlain(isInQuote) {
 				} else if (tryEat(Chars.Equal))
 					keyword(Keywords.LocalMutate)
 				else
-					keyword(Keywords.Type)
+					keyword(Keywords.Colon)
 				break
 
 			case Chars.Tick:

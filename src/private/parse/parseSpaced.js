@@ -71,7 +71,7 @@ export default function parseSpaced(tokens) {
 				const quote = new QuoteSimple(h2.loc, parseName(h2))
 				return parseSpacedFold(quote, rest.tail())
 			}
-			case Keywords.Type:
+			case Keywords.Colon:
 				return Call.contains(h.loc, parseSpaced(rest), LocalAccess.focus(h.loc))
 			default:
 				// fall through
@@ -113,7 +113,7 @@ function parseSpacedFold(start, rest) {
 				case Keywords.Focus:
 					acc = new Call(token.loc, acc, [LocalAccess.focus(loc)])
 					break
-				case Keywords.Type:
+				case Keywords.Colon:
 					return Call.contains(token.loc, restVal(), acc)
 				default:
 					unexpected(token)
