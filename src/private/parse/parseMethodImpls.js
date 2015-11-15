@@ -14,18 +14,24 @@ export function parseStatics(tokens) {
 }
 
 function parseMethodImpl(tokens) {
-	const head = tokens.head()
+	let head = tokens.head()
+
+	const isMy = isKeyword(Keywords.My, head)
+	if (isMy) {
+		tokens = tokens.tail()
+		head = tokens.head()
+	}
 
 	if (isKeyword(Keywords.Get, head)) {
 		const [before, block] = beforeAndBlock(tokens.tail())
-		return new MethodGetter(tokens.loc, parseExprOrQuoteSimple(before), parseBlock(block))
+		return new MethodGetter(tokens.loc, isMy, parseExprOrQuoteSimple(before), parseBlock(block))
 	} else if (isKeyword(Keywords.Set, head)) {
 		const [before, block] = beforeAndBlock(tokens.tail())
-		return new MethodSetter(tokens.loc, parseExprOrQuoteSimple(before), parseBlock(block))
+		return new MethodSetter(tokens.loc, isMy, parseExprOrQuoteSimple(before), parseBlock(block))
 	} else {
 		const {before, kind, after} = parseMethodSplit(tokens)
 		const fun = parseFun(kind, after)
-		return new MethodImpl(tokens.loc, parseExprOrQuoteSimple(before), fun)
+		return new MethodImpl(tokens.loc, isMy, parseExprOrQuoteSimple(before), fun)
 	}
 }
 

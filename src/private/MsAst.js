@@ -614,16 +614,21 @@ export default class MsAst {
 
 	/** Any part of {@link Class.statics} or {@link Class.methods}. */
 	export class MethodImplLike extends MsAst {
-		constructor(loc, symbol) {
+		constructor(loc, isMy, symbol) {
 			super(loc)
+			/**
+			Used by tools.
+			@type {boolean}
+			*/
+			this.isMy = isMy
 			/** @type {string | Val} */
 			this.symbol = symbol
 		}
 	}
 	/** `{symbol} {fun}` */
 	export class MethodImpl extends MethodImplLike {
-		constructor(loc, symbol, fun) {
-			super(loc, symbol)
+		constructor(loc, isMy, symbol, fun) {
+			super(loc, isMy, symbol)
 			/** @type {Fun} */
 			this.fun = fun
 		}
@@ -633,8 +638,8 @@ export default class MsAst {
 		{block}```
 	*/
 	export class MethodGetter extends MethodImplLike {
-		constructor(loc, symbol, block) {
-			super(loc, symbol)
+		constructor(loc, isMy, symbol, block) {
+			super(loc, isMy, symbol)
 			/** @type {Block} */
 			this.block = block
 			this.declareThis = LocalDeclare.this(loc)
@@ -645,8 +650,8 @@ export default class MsAst {
 		{block}```
 	*/
 	export class MethodSetter extends MethodImplLike {
-		constructor(loc, symbol, block) {
-			super(loc, symbol)
+		constructor(loc, isMy, symbol, block) {
+			super(loc, isMy, symbol)
 			/** @type {Block} */
 			this.block = block
 			this.declareThis = LocalDeclare.this(loc)

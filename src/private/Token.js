@@ -221,13 +221,11 @@ export const reservedKeywords = [
 	'final',
 	'is',
 	'meta',
-	'my',
 	'out',
 	'override',
 	'send',
 	'to',
 	'type',
-	'types',
 	'until'
 ]
 for (const name of reservedKeywords)
@@ -285,6 +283,7 @@ export const Keywords = {
 	Lazy: kwNotName('~'),
 	MapEntry: kw('->'),
 	Method: kw('method'),
+	My: kw('my'),
 	Name: kw('name'),
 	New: kw('new'),
 	Not: kw('not'),
