@@ -22,15 +22,13 @@ export default function verifyLines(lines) {
 	*/
 	const newLocals = []
 
-	const getLineLocals = line => {
+	for (const line of reverseIter(lines))
 		for (const _ of reverseIter(lineNewLocals(line))) {
 			// Register the local now. Can't wait until the assign is verified.
 			registerLocal(_)
 			newLocals.push(_)
 		}
-	}
-	for (const _ of reverseIter(lines))
-		getLineLocals(_)
+
 	pendingBlockLocals.push(...newLocals)
 
 	/*
@@ -50,7 +48,7 @@ export default function verifyLines(lines) {
 	// All shadowed locals for this block.
 	const shadowed = []
 
-	function verifyLine(line) {
+	for (const line of lines) {
 		for (const newLocal of lineNewLocals(line)) {
 			const name = newLocal.name
 			const oldLocal = locals.get(name)
@@ -70,14 +68,8 @@ export default function verifyLines(lines) {
 		line.verify(SK.Do)
 	}
 
-	for (const _ of lines)
-		verifyLine(_)
-
-	for (const _ of newLocals)
-		deleteLocal(_)
-	for (const _ of shadowed)
-		setLocal(_)
-
+	newLocals.forEach(deleteLocal)
+	shadowed.forEach(setLocal)
 	return newLocals
 }
 

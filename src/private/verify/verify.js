@@ -4,13 +4,14 @@ import * as MsAstTypes from '../MsAst'
 import {Block, Class, Constructor, Fun, Funs, Kind, LocalDeclare, Method, Pattern} from '../MsAst'
 import {Keywords, showKeyword} from '../Token'
 import {cat, ifElse, implementMany, isEmpty, opEach} from '../util'
-import {funKind, locals, method, okToNotUse, opLoop, results, setup, tearDown, withIife,
-	withIifeIf, withIifeIfVal, withInFunKind, withMethod, withLoop, withName} from './context'
+import {funKind, locals, method, opLoop, results, setup, tearDown, withIife, withIifeIf,
+	withIifeIfVal, withInFunKind, withMethod, withLoop, withName} from './context'
 import {accessLocal, getLocalDeclare, failMissingLocal, plusLocals, setDeclareAccessed, setLocal,
 	verifyAndPlusLocal, verifyAndPlusLocals, verifyLocalDeclare, warnUnusedLocals, withBlockLocals
 	} from './locals'
 import SK,{checkDo, checkVal, markStatement} from './SK'
-import {okToNotUseIfFocus, setName, verifyName, verifyNotLazy, verifyOp} from './util'
+import {makeUseOptional, makeUseOptionalIfFocus, setName, verifyEach, verifyName, verifyNotLazy,
+	verifyOp} from './util'
 import verifyBlock, {verifyDoBlock, verifyModuleLines} from './verifyBlock'
 
 /**
@@ -62,8 +63,7 @@ implementMany(MsAstTypes, 'verify', {
 	AssignDestructure(sk) {
 		checkDo(this, sk)
 		// Assignees registered by verifyLines.
-		for (const _ of this.assignees)
-			_.verify()
+		verifyEach(this.assignees)
 		this.value.verify(SK.Val)
 	},
 
@@ -75,8 +75,7 @@ implementMany(MsAstTypes, 'verify', {
 
 	BagSimple(sk) {
 		checkVal(this, sk)
-		for (const _ of this.parts)
-			_.verify(SK.Val)
+		verifyEach(this.parts, SK.Val)
 	},
 
 	Block: verifyBlock,
@@ -99,16 +98,14 @@ implementMany(MsAstTypes, 'verify', {
 
 	Call(_sk) {
 		this.called.verify(SK.Val)
-		for (const _ of this.args)
-			_.verify(SK.Val)
+		verifyEach(this.args, SK.Val)
 	},
 
 	Case(sk) {
 		markStatement(this, sk)
 		withIifeIfVal(sk, () => {
 			const doIt = () => {
-				for (const part of this.parts)
-					part.verify(sk)
+				verifyEach(this.parts, sk)
 				verifyOp(this.opElse, sk)
 			}
 			ifElse(this.opCased,
@@ -132,7 +129,8 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	Catch(sk) {
-		okToNotUseIfFocus(this.caught)
+		// No need to do anything with `sk` except pass it to my block.
+		makeUseOptionalIfFocus(this.caught)
 		verifyNotLazy(this.caught, 'Caught error can not be lazy.')
 		verifyAndPlusLocal(this.caught, () => {
 			this.block.verify(sk)
@@ -142,15 +140,11 @@ implementMany(MsAstTypes, 'verify', {
 	Class(sk) {
 		checkVal(this, sk)
 		verifyOp(this.opSuperClass, SK.Val)
-		for (const _ of this.kinds)
-			_.verify(SK.Val)
+		verifyEach(this.kinds, SK.Val)
 		verifyOp(this.opDo)
-		for (const _ of this.statics)
-			_.verify()
-		if (this.opConstructor !== null)
-			this.opConstructor.verify(this.opSuperClass !== null)
-		for (const _ of this.methods)
-			_.verify()
+		verifyEach(this.statics)
+		verifyOp(this.opConstructor, this.opSuperClass !== null)
+		verifyEach(this.methods)
 		// name set by AssignSingle
 	},
 
@@ -174,7 +168,7 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	Constructor(classHasSuper) {
-		okToNotUse.add(this.fun.opDeclareThis)
+		makeUseOptional(this.fun.opDeclareThis)
 		withMethod(this, () => { this.fun.verify(SK.Val) })
 
 		const superCall = results.constructorToSuper.get(this)
@@ -205,8 +199,7 @@ implementMany(MsAstTypes, 'verify', {
 			warn(this.loc, `${showKeyword(Keywords.Except)} is pointless without ` +
 				`${showKeyword(Keywords.Catch)} or ${showKeyword(Keywords.Finally)}.`)
 
-		for (const _ of this.typedCatches)
-			_.verify()
+		verifyEach(this.typedCatches, sk)
 		verifyOp(this.opCatchAll, sk)
 		verifyOp(this.opFinally, SK.Do)
 	},
@@ -239,8 +232,7 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	FunAbstract() {
-		for (const _ of this.args)
-			_.verify()
+		verifyEach(this.args)
 		verifyOp(this.opRestArg)
 		verifyOp(this.opReturnType, SK.Val)
 	},
@@ -253,13 +245,10 @@ implementMany(MsAstTypes, 'verify', {
 
 	Kind(sk) {
 		checkVal(this, sk)
-		for (const _ of this.superKinds)
-			_.verify(SK.Val)
+		verifyEach(this.superKinds, SK.Val)
 		verifyOp(this.opDo, SK.Do)
-		for (const _ of this.statics)
-			_.verify()
-		for (const _ of this.methods)
-			_.verify()
+		verifyEach(this.statics)
+		verifyEach(this.methods)
 		// name set by AssignSingle
 	},
 
@@ -307,8 +296,7 @@ implementMany(MsAstTypes, 'verify', {
 	Logic(sk) {
 		checkVal(this, sk)
 		check(this.args.length > 1, this.loc, 'Logic expression needs at least 2 arguments.')
-		for (const _ of this.args)
-			_.verify(SK.Val)
+		verifyEach(this.args, SK.Val)
 	},
 
 	Not(sk) {
@@ -349,23 +337,22 @@ implementMany(MsAstTypes, 'verify', {
 
 	Method(sk) {
 		checkVal(this, sk)
-		okToNotUse.add(this.fun.opDeclareThis)
-		for (const _ of this.fun.args)
-			okToNotUse.add(_)
-		opEach(this.fun.opRestArg, _ => okToNotUse.add(_))
+		makeUseOptional(this.fun.opDeclareThis)
+		this.fun.args.forEach(makeUseOptional)
+		opEach(this.fun.opRestArg, makeUseOptional)
 		this.fun.verify(SK.Val)
 		// name set by AssignSingle
 	},
 
 	MethodImpl() {
 		verifyMethodImpl(this, () => {
-			okToNotUse.add(this.fun.opDeclareThis)
+			makeUseOptional(this.fun.opDeclareThis)
 			this.fun.verify(SK.Val)
 		})
 	},
 	MethodGetter() {
 		verifyMethodImpl(this, () => {
-			okToNotUse.add(this.declareThis)
+			makeUseOptional(this.declareThis)
 			verifyAndPlusLocals([this.declareThis], () => {
 				this.block.verify(SK.Val)
 			})
@@ -381,8 +368,7 @@ implementMany(MsAstTypes, 'verify', {
 
 	Module() {
 		// No need to verify this.doImports.
-		for (const _ of this.imports)
-			_.verify()
+		verifyEach(this.imports)
 		withName(options.moduleName(), () => {
 			verifyModuleLines(this.lines, this.loc)
 		})
@@ -391,8 +377,7 @@ implementMany(MsAstTypes, 'verify', {
 	New(sk) {
 		checkVal(this, sk)
 		this.type.verify(SK.Val)
-		for (const _ of this.args)
-			_.verify(SK.Val)
+		verifyEach(this.args, SK.val)
 	},
 
 	ObjEntryAssign(sk) {
@@ -419,9 +404,8 @@ implementMany(MsAstTypes, 'verify', {
 	ObjSimple(sk) {
 		checkVal(this, sk)
 		const keys = new Set()
-		for (const pair of this.pairs) {
-			const {key, value} = pair
-			check(!keys.has(key), pair.loc, () => `Duplicate key ${key}`)
+		for (const {key, value, loc} of this.pairs) {
+			check(!keys.has(key), loc, () => `Duplicate key ${key}`)
 			keys.add(key)
 			value.verify(SK.Val)
 		}
@@ -457,8 +441,7 @@ implementMany(MsAstTypes, 'verify', {
 	SetSub(sk) {
 		checkDo(this, sk)
 		this.object.verify(SK.Val)
-		for (const _ of this.subbeds)
-			_.verify(SK.Val)
+		verifyEach(this.subbeds, SK.Val)
 		verifyOp(this.opType, SK.Val)
 		this.value.verify(SK.Val)
 	},
@@ -493,8 +476,7 @@ implementMany(MsAstTypes, 'verify', {
 			results.constructorToSuper.set(method, this)
 		}
 
-		for (const _ of this.args)
-			_.verify(SK.Val)
+		verifyEach(this.args, SK.Val)
 	},
 
 	SuperMember(sk) {
@@ -507,16 +489,14 @@ implementMany(MsAstTypes, 'verify', {
 		markStatement(this, sk)
 		withIifeIfVal(sk, () => {
 			this.switched.verify(SK.Val)
-			for (const part of this.parts)
-				part.verify(sk)
+			verifyEach(this.parts, sk)
 			verifyOp(this.opElse, sk)
 		})
 	},
 
 	SwitchPart(sk) {
 		markStatement(this, sk)
-		for (const _ of this.values)
-			_.verify(SK.Val)
+		verifyEach(this.values, SK.Val)
 		this.result.verify(sk)
 	},
 
@@ -544,7 +524,7 @@ implementMany(MsAstTypes, 'verify', {
 		this.value.verify(SK.Val)
 		withIifeIfVal(sk, () => {
 			if (sk === SK.Val)
-				okToNotUseIfFocus(this.declare)
+				makeUseOptionalIfFocus(this.declare)
 			verifyAndPlusLocal(this.declare, () => {
 				this.block.verify(SK.Do)
 			})
