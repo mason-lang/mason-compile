@@ -18,12 +18,12 @@ import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, Decla
 	IdArguments, IdBuilt, IdExtract, IdFocus, IdLexicalThis, IdSuper, GlobalError, GlobalInfinity,
 	LetLexicalThis, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt, ReturnFocus,
 	SetLexicalThis, SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
-import {setup, tearDown, verifyResults, withInGenerator} from './context'
+import {setup, tearDown, verifyResults, withFunKind} from './context'
 import transpileExcept, {transpileCatch} from './transpileExcept'
 import {transpileMethodToDefinition, transpileMethodToProperty} from './transpileMethod'
 import transpileModule, {exportNamedOrDefault} from './transpileModule'
-import {accessLocalDeclare, blockWrap, blockWrapIfBlock, blockWrapIfVal, declare, doThrow,
-	idForDeclareCached, lazyWrap, makeDeclarator, makeDestructureDeclarators,
+import {accessLocalDeclare, blockWrap, blockWrapIfBlock, blockWrapIfVal, callFocusFun, declare,
+	doThrow, focusFun, idForDeclareCached, lazyWrap, makeDeclarator, makeDestructureDeclarators,
 	maybeWrapInCheckContains, memberStringOrVal, msCall, msMember, opTypeCheckForLocalDeclare, t0,
 	t1, t2, t3, tLines, transpileName} from './util'
 
@@ -219,8 +219,7 @@ implementMany(MsAstTypes, 'transpile', {
 	// dontDeclareThis: applies if this is the fun for a Constructor,
 	// which may declare `this` at a `super` call.
 	Fun(leadStatements=null, dontDeclareThis=false) {
-		const isGeneratorFun = this.kind !== Funs.Plain
-		return withInGenerator(isGeneratorFun, () => {
+		return withFunKind(this.kind, () => {
 			// TODO:ES6 use `...`f
 			const nArgs = new Literal(this.args.length)
 			const opDeclareRest = opMap(this.opRestArg, rest =>
@@ -256,6 +255,11 @@ implementMany(MsAstTypes, 'transpile', {
 					throw new Error(this.kind)
 			}
 		})
+	},
+
+	GetterFun() {
+		// _ => _.foo
+		return focusFun(memberStringOrVal(IdFocus, this.name))
 	},
 
 	Ignore() {
@@ -309,8 +313,9 @@ implementMany(MsAstTypes, 'transpile', {
 
 	Logic() {
 		const op = this.kind === Logics.And ? '&&' : '||'
-		return tail(this.args).reduce((a, b) =>
-			new LogicalExpression(op, a, t0(b)), t0(this.args[0]))
+		return tail(this.args).reduce(
+			(a, b) => new LogicalExpression(op, a, t0(b)),
+			t0(this.args[0]))
 	},
 
 	MapEntry() { return msCall('setSub', IdBuilt, t0(this.key), t0(this.val)) },
@@ -395,9 +400,8 @@ implementMany(MsAstTypes, 'transpile', {
 			new Property('init', propertyIdOrLiteral(pair.key), t0(pair.value))))
 	},
 
-	GetterFun() {
-		// _ => _.foo
-		return new ArrowFunctionExpression([IdFocus], memberStringOrVal(IdFocus, this.name))
+	Pipe() {
+		return this.pipes.reduce((expr, pipe) => callFocusFun(t0(pipe), expr), t0(this.value))
 	},
 
 	QuotePlain() {
@@ -464,7 +468,7 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	SimpleFun() {
-		return new ArrowFunctionExpression([IdFocus], t0(this.value))
+		return focusFun(t0(this.value))
 	},
 
 	SpecialDo() {

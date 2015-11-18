@@ -1,11 +1,13 @@
+import {Funs} from '../MsAst'
+
 export let verifyResults
 /** Whether we are in an async/generator function. */
-export let isInGenerator
+export let funKind
 export let nextDestructuredId
 
 export function setup(_verifyResults) {
 	verifyResults = _verifyResults
-	isInGenerator = false
+	funKind = Funs.Plain
 	nextDestructuredId = 0
 }
 
@@ -20,10 +22,10 @@ export function getDestructuredId() {
 	return _
 }
 
-export function withInGenerator(newInGenerator, func) {
-	const oldInGenerator = isInGenerator
-	isInGenerator = newInGenerator
+export function withFunKind(newFunKind, func) {
+	const oldFunKind = funKind
+	funKind = newFunKind
 	const _ = func()
-	isInGenerator = oldInGenerator
+	funKind = oldFunKind
 	return _
 }

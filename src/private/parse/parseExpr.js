@@ -1,6 +1,6 @@
 import Loc from 'esast/dist/Loc'
 import {check, fail} from '../context'
-import {Call, Cond, Conditional, LocalDeclare, Logic, Logics, New, Not, ObjPair, ObjSimple,
+import {Call, Cond, Conditional, LocalDeclare, Logic, Logics, New, Not, ObjPair, ObjSimple, Pipe,
 	SuperCall, With, Yield, YieldTo} from '../MsAst'
 import {isAnyKeyword, isKeyword, Keywords, Name, showKeyword} from '../Token'
 import {cat, head, ifElse, opIf, tail} from '../util'
@@ -100,6 +100,8 @@ export function parseExprParts(tokens) {
 					}
 					case Keywords.Not:
 						return new Not(at.loc, parseExprPlain(after))
+					case Keywords.Pipe:
+						return parsePipe(after)
 					case Keywords.Super:
 						return new SuperCall(at.loc, parseExprParts(after))
 					case Keywords.Switch:
@@ -126,8 +128,8 @@ const exprSplitKeywords = new Set([
 	Keywords.FunThisDo, Keywords.FunAsync, Keywords.FunAsyncDo, Keywords.FunThisAsync,
 	Keywords.FunThisAsyncDo, Keywords.FunGen, Keywords.FunGenDo, Keywords.FunThisGen,
 	Keywords.FunThisGenDo, Keywords.If, Keywords.Kind, Keywords.Method, Keywords.New, Keywords.Not,
-	Keywords.Or, Keywords.Super, Keywords.Switch, Keywords.Unless, Keywords.With, Keywords.Yield,
-	Keywords.YieldTo
+	Keywords.Or, Keywords.Pipe, Keywords.Super, Keywords.Switch, Keywords.Unless, Keywords.With,
+	Keywords.Yield, Keywords.YieldTo
 ])
 
 function parseExprPlain(tokens) {
@@ -160,6 +162,13 @@ function parseConditional(kind, tokens) {
 			return parts
 		})
 	return new Conditional(tokens.loc, condition, result, kind === Keywords.Unless)
+}
+
+function parsePipe(tokens) {
+	const [before, block] = beforeAndBlock(tokens)
+	const val = parseExpr(before)
+	const pipes = block.mapSlices(parseExpr)
+	return new Pipe(tokens.loc, val, pipes)
 }
 
 function parseWith(tokens) {

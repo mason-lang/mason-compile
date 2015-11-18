@@ -162,3 +162,4 @@ describe('expressions', () => {
 // MemberFun
 // GetterFun
 // Method
+// Pipe

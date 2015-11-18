@@ -15,7 +15,7 @@ import verify from './private/verify/verify'
 	so indent type must be set once here and used consistently.
 	If '\t', use tabs to indent.
 	If a Number, indent with that many spaces. Should be an int 2 through 8.
-@param {boolean} [opts.mslPath='msl']
+@param {string} [opts.mslPath='msl']
 	Path to `msl`. This may be `msl/dist`.
 @param {boolean} [opts.checks=true]
 	If false, leave out type checks and assertions.

@@ -1,14 +1,14 @@
 import {ArrowFunctionExpression, BlockStatement, CallExpression, ExpressionStatement,
-	FunctionExpression, Identifier, Literal, MemberExpression, NewExpression, ThrowStatement,
-	VariableDeclarator, VariableDeclaration, YieldExpression} from 'esast/dist/ast'
+	FunctionExpression, Identifier, Literal, MemberExpression, NewExpression, ReturnStatement,
+	ThrowStatement, VariableDeclarator, VariableDeclaration, YieldExpression} from 'esast/dist/ast'
 import mangleIdentifier from 'esast/dist/mangle-identifier'
 import {loc, toStatement} from 'esast/dist/util'
 import {member} from 'esast/dist/util'
 import {options} from '../context'
-import {Block, QuoteAbstract} from '../MsAst'
+import {Block, Funs, QuoteAbstract} from '../MsAst'
 import {assert, cat, opIf, opMap, toArray} from '../util'
-import {GlobalError} from './ast-constants'
-import {getDestructuredId, isInGenerator, verifyResults} from './context'
+import {IdFocus, GlobalError} from './ast-constants'
+import {funKind, getDestructuredId, verifyResults} from './context'
 
 export function t0(expr) {
 	return loc(expr.transpile(), expr.loc)
@@ -141,11 +141,29 @@ function getMember(astObject, gotName, isLazy, isModule) {
 
 /** Wraps a block (with `return` statements in it) in an IIFE. */
 export function blockWrap(block) {
-	const thunk = isInGenerator ?
-		new FunctionExpression(null, [], block, true) :
-		new ArrowFunctionExpression([], block)
-	const invoke = new CallExpression(thunk, [])
-	return isInGenerator ? new YieldExpression(invoke, true) : invoke
+	const thunk = funKind === Funs.Plain ?
+		new ArrowFunctionExpression([], block) :
+		new FunctionExpression(null, [], block, true)
+	return callPreservingFunKind(new CallExpression(thunk, []))
+}
+
+/** Create a focus fun returning `value` and call it on `calledOn`, preserving generator/async. */
+export function callFocusFun(value, calledOn) {
+	const fun = funKind === Funs.Plain ?
+		new ArrowFunctionExpression([IdFocus], value) :
+		new FunctionExpression(
+			null, [IdFocus], new BlockStatement([new ReturnStatement(value)]), true)
+	return callPreservingFunKind(new CallExpression(fun, [calledOn]))
+}
+
+/**
+Call a function created by `blockWrap` or `callFocusFun`.
+This looks like:
+	Funs.Plain: `(_ => foo(_))(1)`.
+	Funs.Generator, Funs.Async: `yield* function*(_) { return foo(_) }(1)`
+*/
+function callPreservingFunKind(call) {
+	return funKind === Funs.Plain ? call : new YieldExpression(call, true)
 }
 
 export function blockWrapIfBlock(value) {
@@ -158,4 +176,8 @@ export function blockWrapIfVal(ast, statement) {
 	return verifyResults.isStatement(ast) ?
 		statement :
 		blockWrap(new BlockStatement(toArray(statement)))
+}
+
+export function focusFun(value) {
+	return new ArrowFunctionExpression([IdFocus], value)
 }

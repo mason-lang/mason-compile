@@ -995,6 +995,20 @@ export default class MsAst {
 	}
 
 	/**
+	```pipe {value}
+		{pipes}```
+	*/
+	export class Pipe extends Val {
+		constructor(loc, value, pipes) {
+			super(loc)
+			/** @type {Val} */
+			this.value = value
+			/** @type {Array<Val>} */
+			this.pipes = pipes
+		}
+	}
+
+	/**
 	```with {value} [as {declare}]
 		{block}```
 	*/

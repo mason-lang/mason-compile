@@ -32,6 +32,11 @@ export function registerLocal(localDeclare) {
 	results.localDeclareToAccesses.set(localDeclare, [])
 }
 
+export function registerAndPlusLocal(localDeclare, action) {
+	registerLocal(localDeclare)
+	plusLocal(localDeclare, action)
+}
+
 export function plusLocal(addedLocal, action) {
 	const shadowed = locals.get(addedLocal.name)
 	locals.set(addedLocal.name, addedLocal)

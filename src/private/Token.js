@@ -293,6 +293,7 @@ export const Keywords = {
 	Of: kw('of'),
 	Or: kw('or'),
 	Pass: kw('pass'),
+	Pipe: kw('pipe'),
 	Region: kw('region'),
 	Set: kw('set'),
 	Super: kw('super'),

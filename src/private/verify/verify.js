@@ -6,9 +6,9 @@ import {Keywords, showKeyword} from '../Token'
 import {cat, ifElse, implementMany, isEmpty, opEach} from '../util'
 import {funKind, locals, method, opLoop, results, setup, tearDown, withIife, withIifeIf,
 	withIifeIfVal, withInFunKind, withMethod, withLoop, withName} from './context'
-import {accessLocal, getLocalDeclare, failMissingLocal, plusLocals, setDeclareAccessed, setLocal,
-	verifyAndPlusLocal, verifyAndPlusLocals, verifyLocalDeclare, warnUnusedLocals, withBlockLocals
-	} from './locals'
+import {accessLocal, getLocalDeclare, failMissingLocal, plusLocals, registerAndPlusLocal,
+	setDeclareAccessed, setLocal, verifyAndPlusLocal, verifyAndPlusLocals, verifyLocalDeclare,
+	warnUnusedLocals, withBlockLocals} from './locals'
 import SK,{checkDo, checkVal, markStatement} from './SK'
 import {makeUseOptional, makeUseOptionalIfFocus, setName, verifyEach, verifyName, verifyNotLazy,
 	verifyOp} from './util'
@@ -218,15 +218,16 @@ implementMany(MsAstTypes, 'verify', {
 		checkVal(this, sk)
 		check(this.opReturnType === null || !this.isDo, this.loc,
 			'Function with return type must return something.')
+		verifyOp(this.opReturnType, SK.Val)
+		const args = cat(this.opDeclareThis, this.args, this.opRestArg)
 		withBlockLocals(() => {
-			withInFunKind(this.kind, () =>
-				withLoop(null, () => {
-					const allArgs = cat(this.opDeclareThis, this.args, this.opRestArg)
-					verifyAndPlusLocals(allArgs, () => {
+			withInFunKind(this.kind, () => {
+				withIife(() => {
+					verifyAndPlusLocals(args, () => {
 						this.block.verify(this.isDo ? SK.Do : SK.Val)
-						verifyOp(this.opReturnType, SK.Val)
 					})
-				}))
+				})
+			})
 		})
 		// name set by AssignSingle
 	},
@@ -235,6 +236,11 @@ implementMany(MsAstTypes, 'verify', {
 		verifyEach(this.args)
 		verifyOp(this.opRestArg)
 		verifyOp(this.opReturnType, SK.Val)
+	},
+
+	GetterFun(sk) {
+		checkVal(this, sk)
+		verifyName(this.name)
 	},
 
 	Ignore(sk) {
@@ -411,9 +417,13 @@ implementMany(MsAstTypes, 'verify', {
 		}
 	},
 
-	GetterFun(sk) {
+	Pipe(sk) {
 		checkVal(this, sk)
-		verifyName(this.name)
+		this.value.verify()
+		for (const pipe of this.pipes)
+			registerAndPlusLocal(LocalDeclare.focus(this.loc), () => {
+				pipe.verify(SK.Val)
+			})
 	},
 
 	QuotePlain(sk) {
@@ -448,8 +458,12 @@ implementMany(MsAstTypes, 'verify', {
 
 	SimpleFun(sk) {
 		checkVal(this, sk)
-		verifyAndPlusLocal(LocalDeclare.focus(this.loc), () => {
-			this.value.verify()
+		withBlockLocals(() => {
+			withInFunKind(Funs.Plain, () => {
+				registerAndPlusLocal(LocalDeclare.focus(this.loc), () => {
+					this.value.verify()
+				})
+			})
 		})
 	},
 
