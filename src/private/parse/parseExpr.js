@@ -1,5 +1,5 @@
 import Loc from 'esast/dist/Loc'
-import {check, fail} from '../context'
+import {check} from '../context'
 import {Call, Cond, Conditional, LocalDeclare, Logic, Logics, New, Not, ObjPair, ObjSimple, Pipe,
 	SuperCall, With, Yield, YieldTo} from '../MsAst'
 import {isAnyKeyword, isKeyword, Keywords, Name, showKeyword} from '../Token'
@@ -9,7 +9,7 @@ import {parseClass, parseExcept, parseSingle, parseSwitch} from './parse*'
 import parseBlock, {beforeAndBlock, beforeAndOpBlock} from './parseBlock'
 import parseCase from './parseCase'
 import parseDel from './parseDel'
-import {parseFor, parseForBag} from './parseFor'
+import parseFor from './parseFor'
 import parseFun from './parseFun'
 import parseMethod from './parseMethod'
 import parseKind from './parseKind'
@@ -60,88 +60,80 @@ However, `cond a b c` will still parse as a single expression.
 */
 export function parseExprParts(tokens) {
 	return ifElse(tokens.opSplitOnce(_ => isAnyKeyword(exprSplitKeywords, _)),
-		({before, at, after}) => {
-			const getLast = () => {
-				switch (at.kind) {
-					case Keywords.And: case Keywords.Or: {
-						const kind = at.kind === Keywords.And ? Logics.And : Logics.Or
-						return new Logic(at.loc, kind, parseExprParts(after))
-					}
-					case Keywords.Case:
-						return parseCase(false, after)
-					case Keywords.Class:
-						return parseClass(after)
-					case Keywords.Cond:
-						return parseCond(after)
-					case Keywords.Del:
-						return parseDel(after)
-					case Keywords.Except:
-						return parseExcept(after)
-					case Keywords.ForBag:
-						return parseForBag(after)
-					case Keywords.For:
-						return parseFor(after)
-					case Keywords.Fun: case Keywords.FunDo:
-					case Keywords.FunThis: case Keywords.FunThisDo:
-					case Keywords.FunAsync: case Keywords.FunAsyncDo:
-					case Keywords.FunThisAsync: case Keywords.FunThisAsyncDo:
-					case Keywords.FunGen: case Keywords.FunGenDo:
-					case Keywords.FunThisGen: case Keywords.FunThisGenDo:
-						return parseFun(at.kind, after)
-					case Keywords.If: case Keywords.Unless:
-						return parseConditional(at.kind, after)
-					case Keywords.Kind:
-						return parseKind(after)
-					case Keywords.Method:
-						return parseMethod(after)
-					case Keywords.New: {
-						const parts = parseExprParts(after)
-						return new New(at.loc, head(parts), tail(parts))
-					}
-					case Keywords.Not:
-						return new Not(at.loc, parseExprPlain(after))
-					case Keywords.Pipe:
-						return parsePipe(after)
-					case Keywords.Super:
-						return new SuperCall(at.loc, parseExprParts(after))
-					case Keywords.Switch:
-						return parseSwitch(false, after)
-					case Keywords.With:
-						return parseWith(after)
-					case Keywords.Yield:
-						return new Yield(at.loc,
-							opIf(!after.isEmpty(), () => parseExprPlain(after)))
-					case Keywords.YieldTo:
-						return new YieldTo(at.loc, parseExprPlain(after))
-					default:
-						throw new Error(at.kind)
-				}
-			}
-			return cat(before.map(parseSingle), getLast())
-		},
+		({before, at, after}) => cat(before.map(parseSingle), keywordExpr(at, after)),
 		() => tokens.map(parseSingle))
 }
 
+/** The keyword `at` groups with everything after it. */
+function keywordExpr(at, after) {
+	switch (at.kind) {
+		case Keywords.And: case Keywords.Or: {
+			const kind = at.kind === Keywords.And ? Logics.And : Logics.Or
+			return new Logic(at.loc, kind, parseExprParts(after))
+		}
+		case Keywords.Case:
+			return parseCase(false, after)
+		case Keywords.Class:
+			return parseClass(after)
+		case Keywords.Cond:
+			return parseCond(after)
+		case Keywords.Del:
+			return parseDel(after)
+		case Keywords.Except:
+			return parseExcept(after)
+		case Keywords.For: case Keywords.ForAsync: case Keywords.ForBag:
+			return parseFor(at.kind, after)
+		case Keywords.Fun: case Keywords.FunDo:
+		case Keywords.FunThis: case Keywords.FunThisDo:
+		case Keywords.FunAsync: case Keywords.FunAsyncDo:
+		case Keywords.FunThisAsync: case Keywords.FunThisAsyncDo:
+		case Keywords.FunGen: case Keywords.FunGenDo:
+		case Keywords.FunThisGen: case Keywords.FunThisGenDo:
+			return parseFun(at.kind, after)
+		case Keywords.If: case Keywords.Unless:
+			return parseConditional(at.kind, after)
+		case Keywords.Kind:
+			return parseKind(after)
+		case Keywords.Method:
+			return parseMethod(after)
+		case Keywords.New: {
+			const parts = parseExprParts(after)
+			return new New(at.loc, head(parts), tail(parts))
+		}
+		case Keywords.Not:
+			return new Not(at.loc, parseExprPlain(after))
+		case Keywords.Pipe:
+			return parsePipe(after)
+		case Keywords.Super:
+			return new SuperCall(at.loc, parseExprParts(after))
+		case Keywords.Switch:
+			return parseSwitch(false, after)
+		case Keywords.With:
+			return parseWith(after)
+		case Keywords.Yield:
+			return new Yield(at.loc, opIf(!after.isEmpty(), () => parseExprPlain(after)))
+		case Keywords.YieldTo:
+			return new YieldTo(at.loc, parseExprPlain(after))
+		default:
+			throw new Error(at.kind)
+	}
+}
+
+
 const exprSplitKeywords = new Set([
 	Keywords.And, Keywords.Case, Keywords.Class, Keywords.Cond, Keywords.Del, Keywords.Except,
-	Keywords.ForBag, Keywords.For, Keywords.Fun, Keywords.FunDo, Keywords.FunThis,
-	Keywords.FunThisDo, Keywords.FunAsync, Keywords.FunAsyncDo, Keywords.FunThisAsync,
-	Keywords.FunThisAsyncDo, Keywords.FunGen, Keywords.FunGenDo, Keywords.FunThisGen,
-	Keywords.FunThisGenDo, Keywords.If, Keywords.Kind, Keywords.Method, Keywords.New, Keywords.Not,
-	Keywords.Or, Keywords.Pipe, Keywords.Super, Keywords.Switch, Keywords.Unless, Keywords.With,
-	Keywords.Yield, Keywords.YieldTo
+	Keywords.For, Keywords.ForAsync, Keywords.ForBag, Keywords.Fun, Keywords.FunDo,
+	Keywords.FunThis, Keywords.FunThisDo, Keywords.FunAsync, Keywords.FunAsyncDo,
+	Keywords.FunThisAsync, Keywords.FunThisAsyncDo, Keywords.FunGen, Keywords.FunGenDo,
+	Keywords.FunThisGen, Keywords.FunThisGenDo, Keywords.If, Keywords.Kind, Keywords.Method,
+	Keywords.New, Keywords.Not, Keywords.Or, Keywords.Pipe, Keywords.Super, Keywords.Switch,
+	Keywords.Unless, Keywords.With, Keywords.Yield, Keywords.YieldTo
 ])
 
 function parseExprPlain(tokens) {
+	checkNonEmpty(tokens, 'Expected an expression, got nothing.')
 	const parts = parseExprParts(tokens)
-	switch (parts.length) {
-		case 0:
-			fail(tokens.loc, 'Expected an expression, got nothing.')
-		case 1:
-			return head(parts)
-		default:
-			return new Call(tokens.loc, head(parts), tail(parts))
-	}
+	return parts.length === 1 ? head(parts) : new Call(tokens.loc, head(parts), tail(parts))
 }
 
 function parseCond(tokens) {

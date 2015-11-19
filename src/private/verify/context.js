@@ -1,5 +1,6 @@
 import {Funs} from '../MsAst'
 import VerifyResults from '../VerifyResults'
+import {withBlockLocals} from './locals'
 import SK from './SK'
 
 /** Map from names to LocalDeclares. */
@@ -97,4 +98,12 @@ export function withIifeIfVal(sk, action) {
 // TODO:ES6 Shouldn't need this
 export function setPendingBlockLocals(val) {
 	pendingBlockLocals = val
+}
+
+export function withFun(funKind, action) {
+	withBlockLocals(() => {
+		withInFunKind(funKind, () => {
+			withIife(action)
+		})
+	})
 }

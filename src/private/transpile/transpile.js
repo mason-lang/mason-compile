@@ -207,6 +207,13 @@ implementMany(MsAstTypes, 'transpile', {
 		return blockWrapIfVal(this, forLoop(this.opIteratee, this.block))
 	},
 
+	ForAsync() {
+		const {element, bag} = this.iteratee
+		const func = new FunctionExpression(null, [t0(element)], t0(this.block), true)
+		const call = msCall('$for', t0(bag), func)
+		return verifyResults.isStatement(this) ? new YieldExpression(call) : call
+	},
+
 	ForBag() {
 		return blockWrap(new BlockStatement([
 			DeclareBuiltBag,

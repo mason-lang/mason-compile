@@ -17,16 +17,16 @@
 		"esast": "mason-lang/esast"
 	},
 	"devDependencies": {
-		"babel-cli": "6.1.4",
-		"babel-plugin-transform-es2015-destructuring": "6.1.4",
-		"babel-plugin-transform-es2015-modules-umd": "6.1.4",
-		"babel-plugin-transform-es2015-parameters": "6.1.4",
-		"babel-plugin-transform-strict-mode": "6.1.4",
+		"babel-cli": "6.1.14",
+		"babel-plugin-transform-es2015-destructuring": "6.1.18",
+		"babel-plugin-transform-es2015-modules-umd": "6.1.18",
+		"babel-plugin-transform-es2015-parameters": "6.1.18",
+		"babel-plugin-transform-strict-mode": "6.1.18",
 		"benchmark": "1.0.0",
 			"microtime": "2.0.0",
 		"esdoc": "0.4.3",
 		"eslint": "1.9.0",
-		"mocha": "2.3.3",
+		"mocha": "2.3.4",
 		"numeral": "1.5.3",
 		"source-map-support": "0.3.3"
 	},

@@ -4,12 +4,12 @@ import * as MsAstTypes from '../MsAst'
 import {Block, Class, Constructor, Fun, Funs, Kind, LocalDeclare, Method, Pattern} from '../MsAst'
 import {Keywords, showKeyword} from '../Token'
 import {cat, ifElse, implementMany, isEmpty, opEach} from '../util'
-import {funKind, locals, method, opLoop, results, setup, tearDown, withIife, withIifeIf,
+import {funKind, locals, method, opLoop, results, setup, tearDown, withFun, withIife, withIifeIf,
 	withIifeIfVal, withInFunKind, withMethod, withLoop, withName} from './context'
 import {accessLocal, getLocalDeclare, failMissingLocal, plusLocals, registerAndPlusLocal,
 	setDeclareAccessed, setLocal, verifyAndPlusLocal, verifyAndPlusLocals, verifyLocalDeclare,
 	warnUnusedLocals, withBlockLocals} from './locals'
-import SK,{checkDo, checkVal, markStatement} from './SK'
+import SK, {checkDo, checkVal, getSK, markStatement} from './SK'
 import {makeUseOptional, makeUseOptionalIfFocus, setName, verifyEach, verifyName, verifyNotLazy,
 	verifyOp} from './util'
 import verifyBlock, {verifyDoBlock, verifyModuleLines} from './verifyBlock'
@@ -204,14 +204,29 @@ implementMany(MsAstTypes, 'verify', {
 		verifyOp(this.opFinally, SK.Do)
 	},
 
-	ForBag(sk) {
-		checkVal(this, sk)
-		verifyAndPlusLocal(this.built, () => verifyFor(this))
-	},
-
 	For(sk) {
 		markStatement(this, sk)
 		verifyFor(this)
+	},
+
+	ForAsync(sk) {
+		markStatement(this, sk)
+		check(sk !== SK.Do || funKind === Funs.Async, this.loc, () =>
+			`${showKeyword(Keywords.ForAsync)} as statement must be inside an async function.`)
+
+		withVerifyIteratee(this.iteratee, () => {
+			withFun(Funs.Async, () => {
+				// Default block to returning a value, but OK if it doesn't.
+				// If a statement, statement, the compiled code will make a Promise
+				// that resolves to an array full of `undefined`.
+				this.block.verify(getSK(this.block))
+			})
+		})
+	},
+
+	ForBag(sk) {
+		checkVal(this, sk)
+		verifyAndPlusLocal(this.built, () => verifyFor(this))
 	},
 
 	Fun(sk) {
@@ -220,13 +235,9 @@ implementMany(MsAstTypes, 'verify', {
 			'Function with return type must return something.')
 		verifyOp(this.opReturnType, SK.Val)
 		const args = cat(this.opDeclareThis, this.args, this.opRestArg)
-		withBlockLocals(() => {
-			withInFunKind(this.kind, () => {
-				withIife(() => {
-					verifyAndPlusLocals(args, () => {
-						this.block.verify(this.isDo ? SK.Do : SK.Val)
-					})
-				})
+		withFun(this.kind, () => {
+			verifyAndPlusLocals(args, () => {
+				this.block.verify(this.isDo ? SK.Do : SK.Val)
 			})
 		})
 		// name set by AssignSingle
@@ -566,13 +577,13 @@ function verifyFor(forLoop) {
 	const verifyBlock = () => withLoop(forLoop, () => {
 		forLoop.block.verify(SK.Do)
 	})
-	ifElse(forLoop.opIteratee,
-		({element, bag}) => {
-			bag.verify(SK.Val)
-			verifyNotLazy(element, 'Iteration element can not be lazy.')
-			verifyAndPlusLocal(element, verifyBlock)
-		},
-		verifyBlock)
+	ifElse(forLoop.opIteratee, _ => { withVerifyIteratee(_, verifyBlock) }, verifyBlock)
+}
+
+function withVerifyIteratee({element, bag}, action) {
+	bag.verify(SK.Val)
+	verifyNotLazy(element, 'Iteration element can not be lazy.')
+	verifyAndPlusLocal(element, action)
 }
 
 function verifyInLoop(loopUser) {

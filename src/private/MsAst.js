@@ -792,14 +792,26 @@ export default class MsAst {
 
 // For
 	/** `for` */
-	export class For extends Do {
+	export class For extends LineContent {
 		constructor(loc, opIteratee, block) {
 			super(loc)
 			/** @type {?Iteratee} */
 			this.opIteratee = opIteratee
 			/** @type {Block} */
 			this.block = block
-			/** @type {boolean} */
+		}
+	}
+
+	/**
+	```$for {opIteratee}
+	*/
+	export class ForAsync extends Val {
+		constructor(loc, iteratee, block) {
+			super(loc)
+			/** @type {Iteratee} */
+			this.iteratee = iteratee
+			/** @type {Block} */
+			this.block = block
 		}
 	}
 
