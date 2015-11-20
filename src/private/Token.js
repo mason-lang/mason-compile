@@ -240,7 +240,6 @@ export const Keywords = {
 	As: kw('as'),
 	Assert: kw('assert'),
 	Assign: kw('='),
-	AssignMutable: kwNotName('::='),
 	LocalMutate: kwNotName(':='),
 	Break: kw('break'),
 	Built: kw('built'),

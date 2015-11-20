@@ -64,12 +64,12 @@ implementMany(MsAstTypes, 'transpile', {
 	AssignSingle(valWrap) {
 		const val = valWrap === undefined ? t0(this.value) : valWrap(t0(this.value))
 		const declare = makeDeclarator(this.assignee, val, false)
-		return new VariableDeclaration(this.assignee.isMutable() ? 'let' : 'const', [declare])
+		return new VariableDeclaration('let', [declare])
 	},
 	// TODO:ES6 Just use native destructuring assign
 	AssignDestructure() {
 		return new VariableDeclaration(
-			this.kind() === LocalDeclares.Mutable ? 'let' : 'const',
+			'let',
 			makeDestructureDeclarators(
 				this.assignees,
 				this.kind() === LocalDeclares.Lazy,
@@ -136,10 +136,10 @@ implementMany(MsAstTypes, 'transpile', {
 	CasePart(alternate) {
 		if (this.test instanceof Pattern) {
 			const {type, patterned, locals} = this.test
-			const decl = new VariableDeclaration('const', [
+			const decl = new VariableDeclaration('let', [
 				new VariableDeclarator(IdExtract, msCall('extract', t0(type), t0(patterned)))])
 			const test = new BinaryExpression('!==', IdExtract, LitNull)
-			const extract = new VariableDeclaration('const', locals.map((_, idx) =>
+			const extract = new VariableDeclaration('let', locals.map((_, idx) =>
 				new VariableDeclarator(
 					idForDeclareCached(_),
 					new MemberExpression(IdExtract, new Literal(idx)))))
@@ -163,7 +163,7 @@ implementMany(MsAstTypes, 'transpile', {
 			return classExpr
 		else {
 			const lead = cat(
-				new VariableDeclaration('const', [
+				new VariableDeclaration('let', [
 					new VariableDeclarator(IdFocus, classExpr)]),
 				this.kinds.map(_ => msCall('kindDo', IdFocus, t0(_))))
 			const block = ifElse(this.opDo,
@@ -283,7 +283,7 @@ implementMany(MsAstTypes, 'transpile', {
 		if (this.opDo === null)
 			return kind
 		else {
-			const lead = new VariableDeclaration('const',
+			const lead = new VariableDeclaration('let',
 				[new VariableDeclarator(IdFocus, kind)])
 			return blockWrap(t3(this.opDo.block, lead, null, ReturnFocus))
 		}
@@ -344,11 +344,10 @@ implementMany(MsAstTypes, 'transpile', {
 		switch (this.kind) {
 			case Setters.Init:
 				return msCall('newProperty', obj, transpileName(this.name), val)
-			case Setters.InitMutable:
-				return msCall('newMutableProperty', obj, transpileName(this.name), val)
 			case Setters.Mutate:
 				return new AssignmentExpression('=', memberStringOrVal(obj, this.name), val)
-			default: throw new Error()
+			default:
+				throw new Error()
 		}
 	},
 
@@ -457,8 +456,6 @@ implementMany(MsAstTypes, 'transpile', {
 			switch (this.kind) {
 				case Setters.Init:
 					return 'init'
-				case Setters.InitMutable:
-					return 'init-mutable'
 				case Setters.Mutate:
 					return 'mutate'
 				default:
@@ -575,7 +572,7 @@ implementMany(MsAstTypes, 'transpile', {
 	With() {
 		const idDeclare = idForDeclareCached(this.declare)
 		const val = t0(this.value)
-		const lead = new VariableDeclaration('const', [new VariableDeclarator(idDeclare, val)])
+		const lead = new VariableDeclaration('let', [new VariableDeclarator(idDeclare, val)])
 		return verifyResults.isStatement(this) ?
 			t1(this.block, lead) :
 			blockWrap(t3(this.block, lead, null, new ReturnStatement(idDeclare)))

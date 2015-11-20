@@ -28,7 +28,6 @@
 	exports.verifyAndPlusLocal = verifyAndPlusLocal;
 	exports.verifyAndPlusLocals = verifyAndPlusLocals;
 	exports.withBlockLocals = withBlockLocals;
-	exports.getLocalDeclare = getLocalDeclare;
 	exports.failMissingLocal = failMissingLocal;
 	exports.warnUnusedLocals = warnUnusedLocals;
 

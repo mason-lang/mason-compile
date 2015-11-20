@@ -291,8 +291,6 @@
 
 		LocalMutate(sk) {
 			(0, _SK.checkDo)(this, sk);
-			const declare = (0, _locals.getLocalDeclare)(this.name, this.loc);
-			(0, _context.check)(declare.isMutable(), this.loc, () => `${ (0, _CompileError.code)(this.name) } is not mutable.`);
 			this.value.verify(_SK2.default.Val);
 		},
 

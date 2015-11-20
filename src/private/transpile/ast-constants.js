@@ -31,16 +31,16 @@ export const
 	ThrowNoCaseMatch = throwErrorFromString('No branch of `case` matches.'),
 
 	ArraySliceCall = member(member(LitEmptyArray, 'slice'), 'call'),
-	DeclareBuiltBag = new VariableDeclaration('const',
+	DeclareBuiltBag = new VariableDeclaration('let',
 		[new VariableDeclarator(IdBuilt, LitEmptyArray)]),
-	DeclareBuiltMap = new VariableDeclaration('const', [
+	DeclareBuiltMap = new VariableDeclaration('let', [
 		new VariableDeclarator(IdBuilt,
 			new NewExpression(member(new Identifier('global'), 'Map'), []))]),
-	DeclareBuiltObj = new VariableDeclaration('const', [
+	DeclareBuiltObj = new VariableDeclaration('let', [
 		new VariableDeclarator(IdBuilt, new ObjectExpression([]))]),
 	ExportsDefault = member(IdExports, 'default'),
 
-	DeclareLexicalThis = new VariableDeclaration('const',
+	DeclareLexicalThis = new VariableDeclaration('let',
 		[new VariableDeclarator(IdLexicalThis, new ThisExpression())]),
 	LetLexicalThis = new VariableDeclaration('let', [new VariableDeclarator(IdLexicalThis)]),
 	SetLexicalThis = new AssignmentExpression('=', IdLexicalThis, new ThisExpression())

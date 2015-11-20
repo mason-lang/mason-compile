@@ -1,4 +1,4 @@
-import {Block, Fun, FunAbstract, Funs, LocalDeclare, LocalDeclares} from '../MsAst'
+import {Block, Fun, FunAbstract, Funs, LocalDeclare} from '../MsAst'
 import {Groups, isAnyKeyword, isGroup, isKeyword, Keywords} from '../Token'
 import {head} from '../util'
 import {checkNonEmpty} from './checks'
@@ -136,15 +136,8 @@ function parseFunLocals(tokens, includeMemberArgs) {
 		}
 		if (includeMemberArgs) {
 			const {declares: args, memberArgs} = parseLocalDeclaresAndMemberArgs(rest)
-			return {args: mutableArgs(args), memberArgs, opRestArg}
+			return {args, memberArgs, opRestArg}
 		} else
-			return {args: mutableArgs(parseLocalDeclares(rest)), opRestArg}
+			return {args: parseLocalDeclares(rest), opRestArg}
 	}
-}
-
-function mutableArgs(args) {
-	for (const _ of args)
-		if (!_.isLazy())
-			_.kind = LocalDeclares.Mutable
-	return args
 }

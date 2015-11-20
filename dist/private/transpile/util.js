@@ -82,7 +82,7 @@
 	}
 
 	function declare(localDeclare, val) {
-		return new _ast.VariableDeclaration('const', [new _ast.VariableDeclarator(idForDeclareCached(localDeclare), val)]);
+		return new _ast.VariableDeclaration('let', [new _ast.VariableDeclarator(idForDeclareCached(localDeclare), val)]);
 	}
 
 	const declareToId = new WeakMap();

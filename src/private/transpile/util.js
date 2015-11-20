@@ -42,7 +42,7 @@ export function accessLocalDeclare(localDeclare) {
 }
 
 export function declare(localDeclare, val) {
-	return new VariableDeclaration('const',
+	return new VariableDeclaration('let',
 		[new VariableDeclarator(idForDeclareCached(localDeclare), val)])
 }
 

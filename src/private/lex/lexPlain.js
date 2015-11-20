@@ -11,9 +11,9 @@ import {addToCurrentGroup, closeGroup, closeGroupsForDedent, closeLine,
 	closeParenthesis, closeSpaceOKIfEmpty, curGroup, openGroup, openLine, openParenthesis, space
 	} from './groupContext'
 import {lexQuote} from './lex*'
-import {column, eat, eatRestOfLine, index, mustEat, line, peek, pos, sourceString, skip,
-	skipNewlines, skipRestOfLine, skipWhile, skipWhileEquals, takeWhileWithPrev, tryEat, tryEat2,
-	tryEat3} from './sourceContext'
+import {column, eat, eatRestOfLine, index, line, peek, pos, sourceString, skip, skipNewlines,
+	skipRestOfLine, skipWhile, skipWhileEquals, takeWhileWithPrev, tryEat, tryEat2, tryEat3
+	} from './sourceContext'
 
 /*
 In the case of quote interpolation ("a{b}c") we'll recurse back into here.
@@ -287,10 +287,7 @@ export default function lexPlain(isInQuote) {
 			}
 
 			case Chars.Colon:
-				if (tryEat(Chars.Colon)) {
-					mustEat(Chars.Equal, '::')
-					keyword(Keywords.AssignMutable)
-				} else if (tryEat(Chars.Equal))
+				if (tryEat(Chars.Equal))
 					keyword(Keywords.LocalMutate)
 				else
 					keyword(Keywords.Colon)

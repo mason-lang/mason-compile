@@ -97,8 +97,8 @@ function _parseLocalDeclareFromSpaced(tokens, orMember=false) {
 		isKeyword(Keywords.Lazy, tokens.head()) ?
 			[tokens.tail(), LocalDeclares.Lazy, false] :
 			orMember && isKeyword(Keywords.Dot, tokens.head()) ?
-			[tokens.tail(), LocalDeclares.Const, true] :
-			[tokens, LocalDeclares.Const, false]
+			[tokens.tail(), LocalDeclares.Eager, true] :
+			[tokens, LocalDeclares.Eager, false]
 	const name = parseLocalName(rest.head())
 	const rest2 = rest.tail()
 	const opType = opIf(!rest2.isEmpty(), () => {

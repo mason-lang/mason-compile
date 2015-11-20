@@ -26,7 +26,7 @@
 
 	function transpileCatch(needsErrorDeclare) {
 		if (needsErrorDeclare) {
-			const declareError = new _ast.VariableDeclaration('const', [new _ast.VariableDeclarator((0, _util2.t0)(this.caught), IdError)]);
+			const declareError = new _ast.VariableDeclaration('let', [new _ast.VariableDeclarator((0, _util2.t0)(this.caught), IdError)]);
 			return (0, _util2.t1)(this.block, declareError);
 		} else return (0, _util2.t0)(this.block);
 	}

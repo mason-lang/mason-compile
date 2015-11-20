@@ -85,7 +85,7 @@ export function withBlockLocals(action) {
 	setPendingBlockLocals(oldPendingBlockLocals)
 }
 
-export function getLocalDeclare(name, accessLoc) {
+function getLocalDeclare(name, accessLoc) {
 	const declare = locals.get(name)
 	if (declare === undefined)
 		failMissingLocal(accessLoc, name)

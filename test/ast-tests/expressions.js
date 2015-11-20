@@ -127,7 +127,7 @@ describe('expressions', () => {
 			new With(loc, focusDeclare, zero, blockPass),
 			`
 				(()=>{
-					const _=0;
+					let _=0;
 					return _
 				})()`)
 		test(
@@ -137,7 +137,7 @@ describe('expressions', () => {
 			new With(loc, aDeclare, zero, blockPass),
 			`
 				(()=>{
-					const a=0;
+					let a=0;
 					return a
 				})()`,
 			{warnings: ['Unused local variable {{a}}.']})
@@ -149,7 +149,7 @@ describe('expressions', () => {
 				new Block(loc, null, [new Call(loc, focusAccess, [focusAccess])])),
 			`
 				(()=>{
-					const _=0;
+					let _=0;
 					_(_);
 					return _
 				})()`)

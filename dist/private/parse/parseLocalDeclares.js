@@ -142,7 +142,7 @@
 	function _parseLocalDeclareFromSpaced(tokens) {
 		let orMember = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
-		var _ref = (0, _Token.isKeyword)(_Token.Keywords.Lazy, tokens.head()) ? [tokens.tail(), _MsAst.LocalDeclares.Lazy, false] : orMember && (0, _Token.isKeyword)(_Token.Keywords.Dot, tokens.head()) ? [tokens.tail(), _MsAst.LocalDeclares.Const, true] : [tokens, _MsAst.LocalDeclares.Const, false];
+		var _ref = (0, _Token.isKeyword)(_Token.Keywords.Lazy, tokens.head()) ? [tokens.tail(), _MsAst.LocalDeclares.Lazy, false] : orMember && (0, _Token.isKeyword)(_Token.Keywords.Dot, tokens.head()) ? [tokens.tail(), _MsAst.LocalDeclares.Eager, true] : [tokens, _MsAst.LocalDeclares.Eager, false];
 
 		var _ref2 = _slicedToArray(_ref, 3);
 

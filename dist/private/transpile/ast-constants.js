@@ -40,11 +40,11 @@
 	      ThrowAssertFail = exports.ThrowAssertFail = (0, _util2.throwErrorFromString)('Assertion failed.'),
 	      ThrowNoCaseMatch = exports.ThrowNoCaseMatch = (0, _util2.throwErrorFromString)('No branch of `case` matches.'),
 	      ArraySliceCall = exports.ArraySliceCall = (0, _util.member)((0, _util.member)(LitEmptyArray, 'slice'), 'call'),
-	      DeclareBuiltBag = exports.DeclareBuiltBag = new _ast.VariableDeclaration('const', [new _ast.VariableDeclarator(IdBuilt, LitEmptyArray)]),
-	      DeclareBuiltMap = exports.DeclareBuiltMap = new _ast.VariableDeclaration('const', [new _ast.VariableDeclarator(IdBuilt, new _ast.NewExpression((0, _util.member)(new _ast.Identifier('global'), 'Map'), []))]),
-	      DeclareBuiltObj = exports.DeclareBuiltObj = new _ast.VariableDeclaration('const', [new _ast.VariableDeclarator(IdBuilt, new _ast.ObjectExpression([]))]),
+	      DeclareBuiltBag = exports.DeclareBuiltBag = new _ast.VariableDeclaration('let', [new _ast.VariableDeclarator(IdBuilt, LitEmptyArray)]),
+	      DeclareBuiltMap = exports.DeclareBuiltMap = new _ast.VariableDeclaration('let', [new _ast.VariableDeclarator(IdBuilt, new _ast.NewExpression((0, _util.member)(new _ast.Identifier('global'), 'Map'), []))]),
+	      DeclareBuiltObj = exports.DeclareBuiltObj = new _ast.VariableDeclaration('let', [new _ast.VariableDeclarator(IdBuilt, new _ast.ObjectExpression([]))]),
 	      ExportsDefault = exports.ExportsDefault = (0, _util.member)(IdExports, 'default'),
-	      DeclareLexicalThis = exports.DeclareLexicalThis = new _ast.VariableDeclaration('const', [new _ast.VariableDeclarator(IdLexicalThis, new _ast.ThisExpression())]),
+	      DeclareLexicalThis = exports.DeclareLexicalThis = new _ast.VariableDeclaration('let', [new _ast.VariableDeclarator(IdLexicalThis, new _ast.ThisExpression())]),
 	      LetLexicalThis = exports.LetLexicalThis = new _ast.VariableDeclaration('let', [new _ast.VariableDeclarator(IdLexicalThis)]),
 	      SetLexicalThis = exports.SetLexicalThis = new _ast.AssignmentExpression('=', IdLexicalThis, new _ast.ThisExpression());
 });

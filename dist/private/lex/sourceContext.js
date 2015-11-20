@@ -2,17 +2,17 @@
 
 (function (global, factory) {
 	if (typeof define === "function" && define.amd) {
-		define(['exports', 'esast/dist/Loc', '../../CompileError', '../context', './chars'], factory);
+		define(['exports', 'esast/dist/Loc', './chars'], factory);
 	} else if (typeof exports !== "undefined") {
-		factory(exports, require('esast/dist/Loc'), require('../../CompileError'), require('../context'), require('./chars'));
+		factory(exports, require('esast/dist/Loc'), require('./chars'));
 	} else {
 		var mod = {
 			exports: {}
 		};
-		factory(mod.exports, global.Loc, global.CompileError, global.context, global.chars);
+		factory(mod.exports, global.Loc, global.chars);
 		global.sourceContext = mod.exports;
 	}
-})(this, function (exports, _Loc, _CompileError, _context, _chars) {
+})(this, function (exports, _Loc, _chars) {
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
@@ -25,7 +25,6 @@
 	exports.tryEat = tryEat;
 	exports.tryEat2 = tryEat2;
 	exports.tryEat3 = tryEat3;
-	exports.mustEat = mustEat;
 	exports.tryEatNewline = tryEatNewline;
 	exports.stepBackMany = stepBackMany;
 	exports.takeWhile = takeWhile;
@@ -85,11 +84,6 @@
 		const canEat = peek() === char1 && peek(1) === char2 && peek(2) === char3;
 		if (canEat) skip(3);
 		return canEat;
-	}
-
-	function mustEat(charToEat, precededBy) {
-		const canEat = tryEat(charToEat);
-		(0, _context.check)(canEat, pos, () => `${ (0, _CompileError.code)(precededBy) } must be followed by ${ (0, _chars.showChar)(charToEat) }`);
 	}
 
 	function tryEatNewline() {

@@ -103,7 +103,7 @@ function amdWrapModule(doImports, imports, body) {
 
 	// Extracts imported values from the modules.
 	const opDeclareImportedLocals = opIf(!isEmpty(imports),
-		() => new VariableDeclaration('const',
+		() => new VariableDeclaration('let',
 			flatMap(imports, _ => importDeclarators(_, importToIdentifier.get(_)))))
 
 	const fullBody = new BlockStatement(cat(

@@ -61,7 +61,7 @@ describe('case', () => {
 			null),
 		`
 			{
-				const _=0;
+				let _=0;
 				if(_){} else throw new (Error)("No branch of \`case\` matches.")
 			}`)
 	test(
@@ -113,11 +113,11 @@ describe('case', () => {
 			blockTwo),
 		`
 			(()=>{
-				const _=0;
+				let _=0;
 				{
-					const _$=_ms.extract(1,_);
+					let _$=_ms.extract(1,_);
 					if((_$!==null)){
-						const b=_$[0];
+						let b=_$[0];
 						return b
 					} else {
 						return 2
@@ -198,7 +198,7 @@ describe('switch', () => {
 			(()=>{
 				switch(0){
 					case 1:{
-						const a=0;
+						let a=0;
 						return a
 					}
 					default:return 1

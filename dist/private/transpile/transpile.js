@@ -119,11 +119,11 @@
 		AssignSingle(valWrap) {
 			const val = valWrap === undefined ? (0, _util3.t0)(this.value) : valWrap((0, _util3.t0)(this.value));
 			const declare = (0, _util3.makeDeclarator)(this.assignee, val, false);
-			return new _ast.VariableDeclaration(this.assignee.isMutable() ? 'let' : 'const', [declare]);
+			return new _ast.VariableDeclaration('let', [declare]);
 		},
 
 		AssignDestructure() {
-			return new _ast.VariableDeclaration(this.kind() === _MsAst.LocalDeclares.Mutable ? 'let' : 'const', (0, _util3.makeDestructureDeclarators)(this.assignees, this.kind() === _MsAst.LocalDeclares.Lazy, (0, _util3.t0)(this.value), false));
+			return new _ast.VariableDeclaration('let', (0, _util3.makeDestructureDeclarators)(this.assignees, this.kind() === _MsAst.LocalDeclares.Lazy, (0, _util3.t0)(this.value), false));
 		},
 
 		BagEntry() {
@@ -192,9 +192,9 @@
 				const type = _test.type;
 				const patterned = _test.patterned;
 				const locals = _test.locals;
-				const decl = new _ast.VariableDeclaration('const', [new _ast.VariableDeclarator(_astConstants.IdExtract, (0, _util3.msCall)('extract', (0, _util3.t0)(type), (0, _util3.t0)(patterned)))]);
+				const decl = new _ast.VariableDeclaration('let', [new _ast.VariableDeclarator(_astConstants.IdExtract, (0, _util3.msCall)('extract', (0, _util3.t0)(type), (0, _util3.t0)(patterned)))]);
 				const test = new _ast.BinaryExpression('!==', _astConstants.IdExtract, _astConstants.LitNull);
-				const extract = new _ast.VariableDeclaration('const', locals.map((_, idx) => new _ast.VariableDeclarator((0, _util3.idForDeclareCached)(_), new _ast.MemberExpression(_astConstants.IdExtract, new _ast.Literal(idx)))));
+				const extract = new _ast.VariableDeclaration('let', locals.map((_, idx) => new _ast.VariableDeclarator((0, _util3.idForDeclareCached)(_), new _ast.MemberExpression(_astConstants.IdExtract, new _ast.Literal(idx)))));
 				const res = (0, _util3.t1)(this.result, extract);
 				return new _ast.BlockStatement([decl, new _ast.IfStatement(test, res, alternate)]);
 			} else return new _ast.IfStatement((0, _util3.t0)(this.test), (0, _util3.t0)(this.result), alternate);
@@ -205,7 +205,7 @@
 			const opName = (0, _util2.opMap)(_context2.verifyResults.opName(this), _util.identifier);
 			const classExpr = new _ast.ClassExpression(opName, (0, _util2.opMap)(this.opSuperClass, _util3.t0), new _ast.ClassBody(methods));
 			if (this.opDo === null && (0, _util2.isEmpty)(this.kinds)) return classExpr;else {
-				const lead = (0, _util2.cat)(new _ast.VariableDeclaration('const', [new _ast.VariableDeclarator(_astConstants.IdFocus, classExpr)]), this.kinds.map(_ => (0, _util3.msCall)('kindDo', _astConstants.IdFocus, (0, _util3.t0)(_))));
+				const lead = (0, _util2.cat)(new _ast.VariableDeclaration('let', [new _ast.VariableDeclarator(_astConstants.IdFocus, classExpr)]), this.kinds.map(_ => (0, _util3.msCall)('kindDo', _astConstants.IdFocus, (0, _util3.t0)(_))));
 				const block = (0, _util2.ifElse)(this.opDo, _ => (0, _util3.t3)(_.block, lead, null, _astConstants.ReturnFocus), () => new _ast.BlockStatement((0, _util2.cat)(lead, _astConstants.ReturnFocus)));
 				return (0, _util3.blockWrap)(block);
 			}
@@ -307,7 +307,7 @@
 
 			const kind = (0, _util3.msCall)('kind', name, supers, methods(this.statics), methods(this.methods));
 			if (this.opDo === null) return kind;else {
-				const lead = new _ast.VariableDeclaration('const', [new _ast.VariableDeclarator(_astConstants.IdFocus, kind)]);
+				const lead = new _ast.VariableDeclaration('let', [new _ast.VariableDeclarator(_astConstants.IdFocus, kind)]);
 				return (0, _util3.blockWrap)((0, _util3.t3)(this.opDo.block, lead, null, _astConstants.ReturnFocus));
 			}
 		},
@@ -364,9 +364,6 @@
 			switch (this.kind) {
 				case _MsAst.Setters.Init:
 					return (0, _util3.msCall)('newProperty', obj, (0, _util3.transpileName)(this.name), val);
-
-				case _MsAst.Setters.InitMutable:
-					return (0, _util3.msCall)('newMutableProperty', obj, (0, _util3.transpileName)(this.name), val);
 
 				case _MsAst.Setters.Mutate:
 					return new _ast.AssignmentExpression('=', (0, _util3.memberStringOrVal)(obj, this.name), val);
@@ -455,9 +452,6 @@
 				switch (this.kind) {
 					case _MsAst.Setters.Init:
 						return 'init';
-
-					case _MsAst.Setters.InitMutable:
-						return 'init-mutable';
 
 					case _MsAst.Setters.Mutate:
 						return 'mutate';
@@ -560,7 +554,7 @@
 		With() {
 			const idDeclare = (0, _util3.idForDeclareCached)(this.declare);
 			const val = (0, _util3.t0)(this.value);
-			const lead = new _ast.VariableDeclaration('const', [new _ast.VariableDeclarator(idDeclare, val)]);
+			const lead = new _ast.VariableDeclaration('let', [new _ast.VariableDeclarator(idDeclare, val)]);
 			return _context2.verifyResults.isStatement(this) ? (0, _util3.t1)(this.block, lead) : (0, _util3.blockWrap)((0, _util3.t3)(this.block, lead, null, new _ast.ReturnStatement(idDeclare)));
 		},
 

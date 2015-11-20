@@ -16,11 +16,6 @@ describe('statements', () => {
 		'_ms.newProperty(0,"x",1)')
 
 	test(
-		'0.x ::= 1',
-		new MemberSet(loc, zero, 'x', null, Setters.InitMutable, one),
-		'_ms.newMutableProperty(0,"x",1)')
-
-	test(
 		'0.x := 1',
 		new MemberSet(loc, zero, 'x', null, Setters.Mutate, one),
 		'0..x=1')

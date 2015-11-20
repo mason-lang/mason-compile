@@ -57,7 +57,7 @@ function parseThingsImported(name, isLazy, tokens) {
 		LocalDeclare.untyped(
 			tokens.loc,
 			name,
-			isLazy ? LocalDeclares.Lazy : LocalDeclares.Const)
+			isLazy ? LocalDeclares.Lazy : LocalDeclares.Eager)
 
 	if (tokens.isEmpty())
 		return {imported: [], opImportDefault: importDefault()}

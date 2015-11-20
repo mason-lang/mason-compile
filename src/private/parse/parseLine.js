@@ -1,8 +1,7 @@
 import {check} from '../context'
 import {Assert, AssignSingle, AssignDestructure, BagEntry, Break, Call, Ignore, LocalAccess,
-	LocalDeclares, LocalMutate, MapEntry, MemberSet, ObjEntryAssign, ObjEntryPlain, QuoteSimple,
-	SetSub, Setters, SpecialDo, SpecialDos, SpecialVal, SpecialVals, Throw, Yield, YieldTo
-	} from '../MsAst'
+	LocalMutate, MapEntry, MemberSet, ObjEntryAssign, ObjEntryPlain, QuoteSimple, SetSub, Setters,
+	SpecialDo, SpecialDos, SpecialVal, SpecialVals, Throw, Yield, YieldTo} from '../MsAst'
 import {Groups, isGroup, isAnyKeyword, isKeyword, Keyword, keywordName, Keywords, showKeyword
 	} from '../Token'
 import {ifElse, isEmpty, tail} from '../util'
@@ -57,8 +56,8 @@ export default function parseLine(tokens) {
 		() => parseExpr(tokens))
 }
 const lineSplitKeywords = new Set([
-	Keywords.Assign, Keywords.AssignMutable, Keywords.LocalMutate, Keywords.MapEntry,
-	Keywords.ObjAssign, Keywords.Yield, Keywords.YieldTo
+	Keywords.Assign, Keywords.LocalMutate, Keywords.MapEntry, Keywords.ObjAssign,
+	Keywords.Yield, Keywords.YieldTo
 ])
 
 export function parseLines(lineTokens) {
@@ -144,8 +143,6 @@ function setKind(keyword) {
 	switch (keyword.kind) {
 		case Keywords.Assign:
 			return Setters.Init
-		case Keywords.AssignMutable:
-			return Setters.InitMutable
 		case Keywords.LocalMutate:
 			return Setters.Mutate
 		default:
@@ -178,12 +175,6 @@ function parseAssign(localsTokens, kind, valueTokens, loc) {
 		if (isYield)
 			for (const _ of locals)
 				check(!_.isLazy(), _.loc, 'Can not yield to lazy variable.')
-
-		if (kind === Keywords.AssignMutable)
-			for (let _ of locals) {
-				check(!_.isLazy(), _.loc, 'Lazy local can not be mutable.')
-				_.kind = LocalDeclares.Mutable
-			}
 
 		if (locals.length === 1)
 			return new AssignSingle(loc, locals[0], value)

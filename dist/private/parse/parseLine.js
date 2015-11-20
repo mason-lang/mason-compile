@@ -123,7 +123,7 @@
 		}, () => (0, _parse.parseExpr)(tokens));
 	}
 
-	const lineSplitKeywords = new Set([_Token.Keywords.Assign, _Token.Keywords.AssignMutable, _Token.Keywords.LocalMutate, _Token.Keywords.MapEntry, _Token.Keywords.ObjAssign, _Token.Keywords.Yield, _Token.Keywords.YieldTo]);
+	const lineSplitKeywords = new Set([_Token.Keywords.Assign, _Token.Keywords.LocalMutate, _Token.Keywords.MapEntry, _Token.Keywords.ObjAssign, _Token.Keywords.Yield, _Token.Keywords.YieldTo]);
 
 	function parseLines(lineTokens) {
 		const lines = [];
@@ -182,7 +182,9 @@
 
 			const value = () => (0, _parse.parseExpr)(after);
 
-			if (after.isEmpty()) if (isName) return _MsAst.ObjEntryPlain.name(loc, new _MsAst.SpecialVal(loc, _MsAst.SpecialVals.Name));else return _MsAst.ObjEntryPlain.access(loc, (0, _parseLocalDeclares.parseLocalName)(token));else if (token instanceof _Token.Keyword) return new _MsAst.ObjEntryPlain(loc, (0, _Token.keywordName)(token.kind), value());else if ((0, _Token.isGroup)(_Token.Groups.Quote, token)) return new _MsAst.ObjEntryPlain(loc, (0, _parseQuote2.default)(_Slice2.default.group(token)), value());else if ((0, _Token.isGroup)(_Token.Groups.Space, token)) {
+			if (after.isEmpty()) {
+				if (isName) return _MsAst.ObjEntryPlain.name(loc, new _MsAst.SpecialVal(loc, _MsAst.SpecialVals.Name));else return _MsAst.ObjEntryPlain.access(loc, (0, _parseLocalDeclares.parseLocalName)(token));
+			} else if (token instanceof _Token.Keyword) return new _MsAst.ObjEntryPlain(loc, (0, _Token.keywordName)(token.kind), value());else if ((0, _Token.isGroup)(_Token.Groups.Quote, token)) return new _MsAst.ObjEntryPlain(loc, (0, _parseQuote2.default)(_Slice2.default.group(token)), value());else if ((0, _Token.isGroup)(_Token.Groups.Space, token)) {
 				const slice = _Slice2.default.group(token);
 
 				if (slice.size() === 2 && (0, _Token.isKeyword)(_Token.Keywords.Tick, slice.head())) {
@@ -200,9 +202,6 @@
 		switch (keyword.kind) {
 			case _Token.Keywords.Assign:
 				return _MsAst.Setters.Init;
-
-			case _Token.Keywords.AssignMutable:
-				return _MsAst.Setters.InitMutable;
 
 			case _Token.Keywords.LocalMutate:
 				return _MsAst.Setters.Mutate;
@@ -235,10 +234,6 @@
 			return value;
 		} else {
 			if (isYield) for (const _ of locals) (0, _context.check)(!_.isLazy(), _.loc, 'Can not yield to lazy variable.');
-			if (kind === _Token.Keywords.AssignMutable) for (let _ of locals) {
-				(0, _context.check)(!_.isLazy(), _.loc, 'Lazy local can not be mutable.');
-				_.kind = _MsAst.LocalDeclares.Mutable;
-			}
 			if (locals.length === 1) return new _MsAst.AssignSingle(loc, locals[0], value);else {
 				const kind = locals[0].kind;
 

@@ -20,7 +20,7 @@ export default function() {
 */
 export function transpileCatch(needsErrorDeclare) {
 	if (needsErrorDeclare) {
-		const declareError = new VariableDeclaration('const', [
+		const declareError = new VariableDeclaration('let', [
 			new VariableDeclarator(t0(this.caught), IdError)])
 		return t1(this.block, declareError)
 	} else

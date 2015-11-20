@@ -84,7 +84,7 @@ export default class MsAst {
 
 		/** LocalDeclare of just a name. */
 		static plain(loc, name) {
-			return new LocalDeclare(loc, name, null, LocalDeclares.Const)
+			return new LocalDeclare(loc, name, null, LocalDeclares.Eager)
 		}
 
 		static built(loc) {
@@ -94,7 +94,7 @@ export default class MsAst {
 			return this.plain(loc, '_')
 		}
 		static typedFocus(loc, type) {
-			return new LocalDeclare(loc, '_', type, LocalDeclares.Const)
+			return new LocalDeclare(loc, '_', type, LocalDeclares.Eager)
 		}
 		static this(loc) {
 			return this.plain(loc, 'this')
@@ -113,10 +113,6 @@ export default class MsAst {
 		isLazy() {
 			return this.kind === LocalDeclares.Lazy
 		}
-
-		isMutable() {
-			return this.kind === LocalDeclares.Mutable
-		}
 	}
 	/**
 	Kind of {@link LocalDeclare}.
@@ -124,11 +120,9 @@ export default class MsAst {
 	*/
 	export const LocalDeclares = {
 		/** Declared normally. */
-		Const: 0,
+		Eager: 0,
 		/** Declared with `~a`. */
-		Lazy: 1,
-		/** Declared with `::=`. */
-		Mutable: 2
+		Lazy: 1
 	}
 
 	/** Access the local `name`. */
@@ -212,10 +206,10 @@ export default class MsAst {
 		}
 	}
 
+	/** Kinds of {@link MemberSet} and {@link SetSub}. */
 	export const Setters = {
 		Init: 0,
-		Mutate: 1,
-		InitMutable: 2
+		Mutate: 1
 	}
 
 	/**

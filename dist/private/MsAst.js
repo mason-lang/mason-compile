@@ -81,7 +81,7 @@
 		}
 
 		static plain(loc, name) {
-			return new LocalDeclare(loc, name, null, LocalDeclares.Const);
+			return new LocalDeclare(loc, name, null, LocalDeclares.Eager);
 		}
 
 		static built(loc) {
@@ -93,7 +93,7 @@
 		}
 
 		static typedFocus(loc, type) {
-			return new LocalDeclare(loc, '_', type, LocalDeclares.Const);
+			return new LocalDeclare(loc, '_', type, LocalDeclares.Eager);
 		}
 
 		static this(loc) {
@@ -111,17 +111,12 @@
 			return this.kind === LocalDeclares.Lazy;
 		}
 
-		isMutable() {
-			return this.kind === LocalDeclares.Mutable;
-		}
-
 	}
 
 	exports.LocalDeclare = LocalDeclare;
 	const LocalDeclares = exports.LocalDeclares = {
-		Const: 0,
-		Lazy: 1,
-		Mutable: 2
+		Eager: 0,
+		Lazy: 1
 	};
 
 	class LocalAccess extends Val {
@@ -199,8 +194,7 @@
 	exports.AssignDestructure = AssignDestructure;
 	const Setters = exports.Setters = {
 		Init: 0,
-		Mutate: 1,
-		InitMutable: 2
+		Mutate: 1
 	};
 
 	class MemberSet extends Do {

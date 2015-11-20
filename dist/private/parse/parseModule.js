@@ -133,7 +133,7 @@
 	}
 
 	function parseThingsImported(name, isLazy, tokens) {
-		const importDefault = () => _MsAst.LocalDeclare.untyped(tokens.loc, name, isLazy ? _MsAst.LocalDeclares.Lazy : _MsAst.LocalDeclares.Const);
+		const importDefault = () => _MsAst.LocalDeclare.untyped(tokens.loc, name, isLazy ? _MsAst.LocalDeclares.Lazy : _MsAst.LocalDeclares.Eager);
 
 		if (tokens.isEmpty()) return {
 			imported: [],

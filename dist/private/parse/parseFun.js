@@ -280,21 +280,15 @@
 				const args = _parseLocalDeclaresAn.declares;
 				const memberArgs = _parseLocalDeclaresAn.memberArgs;
 				return {
-					args: mutableArgs(args),
+					args,
 					memberArgs,
 					opRestArg
 				};
 			} else return {
-				args: mutableArgs((0, _parseLocalDeclares2.default)(rest)),
+				args: (0, _parseLocalDeclares2.default)(rest),
 				opRestArg
 			};
 		}
-	}
-
-	function mutableArgs(args) {
-		for (const _ of args) if (!_.isLazy()) _.kind = _MsAst.LocalDeclares.Mutable;
-
-		return args;
 	}
 });
 //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJwYXJzZUZ1bi5qcyIsInNvdXJjZXNDb250ZW50IjpbXX0=

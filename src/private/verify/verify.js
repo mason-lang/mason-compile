@@ -6,9 +6,9 @@ import {Keywords, showKeyword} from '../Token'
 import {cat, ifElse, implementMany, isEmpty, opEach} from '../util'
 import {funKind, locals, method, opLoop, results, setup, tearDown, withFun, withIife, withIifeIf,
 	withIifeIfVal, withInFunKind, withMethod, withLoop, withName} from './context'
-import {accessLocal, getLocalDeclare, failMissingLocal, plusLocals, registerAndPlusLocal,
-	setDeclareAccessed, setLocal, verifyAndPlusLocal, verifyAndPlusLocals, verifyLocalDeclare,
-	warnUnusedLocals, withBlockLocals} from './locals'
+import {accessLocal, failMissingLocal, plusLocals, registerAndPlusLocal, setDeclareAccessed,
+	setLocal, verifyAndPlusLocal, verifyAndPlusLocals, verifyLocalDeclare, warnUnusedLocals,
+	withBlockLocals} from './locals'
 import SK, {checkDo, checkVal, getSK, markStatement} from './SK'
 import {makeUseOptional, makeUseOptionalIfFocus, setName, verifyEach, verifyName, verifyNotLazy,
 	verifyOp} from './util'
@@ -304,9 +304,6 @@ implementMany(MsAstTypes, 'verify', {
 
 	LocalMutate(sk) {
 		checkDo(this, sk)
-		const declare = getLocalDeclare(this.name, this.loc)
-		check(declare.isMutable(), this.loc, () => `${code(this.name)} is not mutable.`)
-		// TODO: Track mutations. Mutable local must be mutated somewhere.
 		this.value.verify(SK.Val)
 	},
 

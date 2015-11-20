@@ -1,7 +1,5 @@
 import {Pos, StartLine, StartColumn} from 'esast/dist/Loc'
-import {code} from '../../CompileError'
-import {check} from '../context'
-import {Chars, showChar} from './chars'
+import {Chars} from './chars'
 
 /*
 These are kept up-to-date as we iterate through sourceString.
@@ -66,12 +64,6 @@ export function tryEat3(char1, char2, char3) {
 	if (canEat)
 		skip(3)
 	return canEat
-}
-
-export function mustEat(charToEat, precededBy) {
-	const canEat = tryEat(charToEat)
-	check(canEat, pos, () =>
-		`${code(precededBy)} must be followed by ${showChar(charToEat)}`)
 }
 
 export function tryEatNewline() {
