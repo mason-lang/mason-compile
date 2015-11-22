@@ -40,7 +40,8 @@ export default class CompileOptions {
 			this._inFile = inFile
 		}
 
-		if (!(this._indent === '\t' || 2 <= this._indent && this._indent <= 8))
+		const minIndent = 2, maxIndent = 8
+		if (!(this._indent === '\t' || minIndent <= this._indent && this._indent <= maxIndent))
 			throw new Error(`opts.indent must be '\t' or a number 2-8, got: ${this._indent}`)
 
 		const builtins = opts.builtins || getDefaultBuiltins(this._mslPath)
@@ -86,7 +87,7 @@ function noExt(path) {
 function getDefaultBuiltins(mslPath) {
 	const builtins = Object.assign({}, defaultBuiltins)
 	if (mslPath !== 'msl')
-		for (let key in builtins) {
+		for (const key in builtins) {
 			const x = builtins[key]
 			delete builtins[key]
 			builtins[key.replace(/msl/g, mslPath)] = x

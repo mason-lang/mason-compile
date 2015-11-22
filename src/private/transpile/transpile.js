@@ -89,7 +89,7 @@ implementMany(MsAstTypes, 'transpile', {
 		return new ArrayExpression(this.parts.map(t0))
 	},
 
-	Block(lead=null, opReturnType=null, follow=null) {
+	Block(lead = null, opReturnType = null, follow = null) {
 		const kind = verifyResults.blockKind(this)
 		switch (kind) {
 			case Blocks.Do:
@@ -229,7 +229,7 @@ implementMany(MsAstTypes, 'transpile', {
 	// leadStatements comes from constructor members
 	// dontDeclareThis: applies if this is the fun for a Constructor,
 	// which may declare `this` at a `super` call.
-	Fun(leadStatements=null, dontDeclareThis=false) {
+	Fun(leadStatements = null, dontDeclareThis = false) {
 		return withFunKind(this.kind, () => {
 			// TODO:ES6 use `...`f
 			const nArgs = new Literal(this.args.length)
@@ -243,17 +243,16 @@ implementMany(MsAstTypes, 'transpile', {
 
 			const lead = cat(opDeclareRest, opDeclareThis, argChecks, leadStatements)
 
-			const body =() => t2(this.block, lead, this.opReturnType)
+			const body = () => t2(this.block, lead, this.opReturnType)
 			const args = this.args.map(t0)
 			const id = opMap(verifyResults.opName(this), identifier)
 
 			switch (this.kind) {
 				case Funs.Plain:
 					// TODO:ES6 Should be able to use rest args in arrow function
-					if (id === null && this.opDeclareThis === null && opDeclareRest === null)
-						return new ArrowFunctionExpression(args, body())
-					else
-						return new FunctionExpression(id, args, body())
+					return id === null && this.opDeclareThis === null && opDeclareRest === null ?
+						new ArrowFunctionExpression(args, body()) :
+						new FunctionExpression(id, args, body())
 				case Funs.Async: {
 					const plainBody = t2(this.block, null, this.opReturnType)
 					const genFunc = new FunctionExpression(null, [], plainBody, true)
@@ -358,19 +357,15 @@ implementMany(MsAstTypes, 'transpile', {
 	Method() {
 		const name = new Literal(verifyResults.name(this))
 
-		let args
-		if (this.fun.opRestArg !== null)
-			// TODO: do something better for rest arg
-			args = new UnaryExpression('void', new Literal(0))
-		else
-			args = new ArrayExpression(this.fun.args.map(arg => {
+		const args = this.fun.opRestArg === null ?
+			new ArrayExpression(this.fun.args.map(arg => {
 				const name = new Literal(arg.name)
 				const opType = opMap(arg.opType, t0)
 				return ifElse(opType,
 					_ => new ArrayExpression([name, _]),
 					() => name)
-			}))
-
+			})) :
+			new UnaryExpression('void', new Literal(0))
 		const impl = this.fun instanceof Fun ? [t0(this.fun)] : []
 		return msCall('method', name, args, ...impl)
 	},
@@ -424,7 +419,7 @@ implementMany(MsAstTypes, 'transpile', {
 			if (typeof this.parts[0] !== 'string')
 				quasis.push(TemplateElement.empty)
 
-			for (let part of this.parts)
+			for (const part of this.parts)
 				if (typeof part === 'string')
 					quasis.push(TemplateElement.forRawString(part))
 				else {

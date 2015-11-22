@@ -56,17 +56,17 @@ export function closeGroup(closePos, closeKind) {
 }
 
 function closeGroupNoCheck(closePos, closeKind) {
-	let justClosed = curGroup
+	const justClosed = curGroup
 	dropGroup()
 	justClosed.loc.end = closePos
 	switch (closeKind) {
 		case Groups.Space: {
 			const size = justClosed.subTokens.length
-			if (size !== 0)
+			if (size === 0)
+				warn(justClosed.loc, 'Unnecessary space.')
+			else
 				// Spaced should always have at least two elements.
 				addToCurrentGroup(size === 1 ? justClosed.subTokens[0] : justClosed)
-			else
-				warn(justClosed.loc, 'Unnecessary space.')
 			break
 		}
 		case Groups.Line:

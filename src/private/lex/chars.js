@@ -52,7 +52,7 @@ export function showChar(char) {
 	return code(String.fromCharCode(char))
 }
 
-function charPred(chars, negate=false) {
+function charPred(chars, negate = false) {
 	let src = 'switch(ch) {\n'
 	for (let i = 0; i < chars.length; i = i + 1)
 		src = `${src}case ${chars.charCodeAt(i)}: `
@@ -68,4 +68,4 @@ export const
 
 // Anything not explicitly reserved is a valid name character.
 const reservedCharacters = '`#%^\\;,'
-export const isNameCharacter = charPred('()[]{}\'&.:| \n\t"' + reservedCharacters, true)
+export const isNameCharacter = charPred(`()[]{}\'&.:| \n\t"${reservedCharacters}`, true)

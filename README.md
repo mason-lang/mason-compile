@@ -1,13 +1,10 @@
-Compiler API for [mason](http://mason-lang.org).
+Compiler API for [Mason](http://mason-lang.org).
 
-If you want to write a project in mason, see [here](http://mason-lang.org/setup.html). The compiler is intended to be used as a library by tools and has no user-friendly interface on its own.
+If you want to write a project in Mason, see [here](http://mason-lang.org/setup#build). The compiler is a library for use by those tools; it has no user interface.
 
-See documentation [here](https://doc.esdoc.org/github.com/mason-lang/mason-compile/).
+In case you're wondering how the compiler works, the [generated documentation](http://mason-lang.org/mason-compile) can help alongide reading the code.
 
 ## Build
 
 	npm install
-	npm run build
-	npm run doc
-	npm run lint
-	npm run test
+	npm run [build|lint|test|doc]

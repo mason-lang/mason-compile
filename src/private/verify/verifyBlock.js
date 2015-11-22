@@ -73,5 +73,7 @@ export function verifyModuleLines(lines, loc) {
 }
 
 function verifyBuiltLines(lines, loc) {
-	verifyAndPlusLocal(LocalDeclare.built(loc), () => { verifyLines(lines) })
+	verifyAndPlusLocal(LocalDeclare.built(loc), () => {
+		verifyLines(lines)
+	})
 }

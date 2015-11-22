@@ -39,17 +39,17 @@ export default function lexQuote(indent) {
 
 	openGroup(locSingle().start, Groups.Quote)
 
-	eatChars: while (true) {
+	eatChars: for (;;) {
 		const char = eat()
 		switch (char) {
 			case Chars.Backslash: {
 				const next = eat()
-				read = read + `\\${String.fromCharCode(next)}`
+				read = `${read}\\${String.fromCharCode(next)}`
 				break
 			}
 			// Since these compile to template literals, have to remember to escape.
 			case Chars.Backtick:
-				read = read + '\\`'
+				read = `${read}\\\``
 				break
 			case Chars.OpenBrace: {
 				maybeOutputRead()

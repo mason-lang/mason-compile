@@ -18,6 +18,7 @@ export function makeUseOptionalIfFocus(localDeclare) {
 
 /**
 Verify each of asts.
+@param {Array<MsAst>} asts
 @param {SK} [sk] Optional SK of each ast.
 */
 export function verifyEach(asts, sk) {
@@ -27,6 +28,7 @@ export function verifyEach(asts, sk) {
 
 /**
 Verify opAst if it exists.
+@param {?MsAst} opAst
 @param [arg] Argument to pass to _.verify. Usually an {@link SK}.
 */
 export function verifyOp(opAst, arg) {

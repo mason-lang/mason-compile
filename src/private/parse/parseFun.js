@@ -59,7 +59,7 @@ This also handles the `|case` and `|switch` forms.
 	block: Block
 }
 */
-export function funArgsAndBlock(tokens, isVal, includeMemberArgs=false) {
+export function funArgsAndBlock(tokens, isVal, includeMemberArgs = false) {
 	checkNonEmpty(tokens, 'Expected an indented block.')
 	const h = tokens.head()
 

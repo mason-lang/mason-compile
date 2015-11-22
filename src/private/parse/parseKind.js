@@ -17,8 +17,9 @@ export default function parseKind(tokens) {
 	if (opBlock === null)
 		return finish()
 
-	let [opCom, rest] = tryTakeComment(opBlock)
-	opComment = opCom
+	const [_opComment, _rest] = tryTakeComment(opBlock)
+	opComment = _opComment
+	let rest = _rest
 
 	if (rest.isEmpty())
 		return finish()

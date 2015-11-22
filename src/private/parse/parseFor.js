@@ -8,11 +8,11 @@ import {parseLocalDeclaresJustNames} from './parseLocalDeclares'
 
 export default function parseFor(kind, tokens) {
 	const [before, block] = beforeAndBlock(tokens)
-	const ctr = kindToCtr.get(kind)
-	const opIter = ctr === ForAsync ?
+	const Ctr = kindToCtr.get(kind)
+	const opIter = Ctr === ForAsync ?
 		parseIteratee(before) :
 		opIf(!before.isEmpty(), () => parseIteratee(before))
-	return new ctr(tokens.loc, opIter, parseBlock(block))
+	return new Ctr(tokens.loc, opIter, parseBlock(block))
 }
 
 const kindToCtr = new Map(

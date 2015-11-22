@@ -76,7 +76,7 @@ function caseSwitchSK() {
 	return compositeSK(this.loc, caseSwitchParts(this))
 }
 
-implementMany(MsAstTypes, 'opForSK',{
+implementMany(MsAstTypes, 'opForSK', {
 	default() { return null },
 	Break() {
 		return this.opValue === null ? SK.Do : SK.Val

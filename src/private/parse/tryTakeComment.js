@@ -6,13 +6,10 @@ Takes DocComment lines and puts them into a comment.
 @return {?string}
 */
 export default function tryTakeComment(lines) {
-	let comments = []
+	const comments = []
 	let rest = lines
 
-	while (true) {
-		if (rest.isEmpty())
-			break
-
+	while (!rest.isEmpty()) {
 		const hs = rest.headSlice()
 		const h = hs.head()
 		if (!(h instanceof DocComment))

@@ -38,7 +38,7 @@ export class Warning {
 		const message = this.message
 		const codeRegex = /{{(.*?)}}/g
 		let prevIdx = 0
-		while (true) {
+		for (;;) {
 			const match = codeRegex.exec(message)
 			if (match === null) {
 				yield message.slice(prevIdx, message.length)

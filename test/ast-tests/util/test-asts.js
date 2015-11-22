@@ -6,10 +6,10 @@ import transpile from '../../../dist/private/transpile/transpile'
 import verify from '../../../dist/private/verify/verify'
 import {loc} from './ast-util'
 
-export function test(ms, ast, js, opts={}) {
+export function test(ms, ast, js, opts = {}) {
 	const isMultiLineTest = ast instanceof Array
 	ast = new Module(loc, 'test-compile', null, [], [], isMultiLineTest ? ast : [ast])
-	ms = dedent(ms) + '\n'
+	ms = `${dedent(ms)}\n`
 	js = dedent(js)
 	const expectedWarnings = opts.warnings || []
 	const name = opts.name || `\`${ms.replace(/\n\t+/g, '; ')}\``
@@ -20,13 +20,16 @@ export function test(ms, ast, js, opts={}) {
 		if (parsedAst instanceof Error)
 			throw parsedAst
 
-		const toJSON = _ => JSON.stringify(_, null, '\t')
+		function toJSON(_) {
+			return JSON.stringify(_, null, '\t')
+		}
+
 		if (!equalAsts(ast, parsedAst))
 			throw new Error(
 				`Different AST.\nExpected: ${toJSON(ast)}\nParsed: ${toJSON(parsedAst)}`)
 
 		setContext(compileOptions)
-		let renderAst = ast.lines[0]
+		const renderAst = ast.lines[0]
 		let rendered = render(transpile(renderAst, verify(ast)))
 		if (rendered instanceof Error)
 			throw rendered

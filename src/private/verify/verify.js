@@ -175,7 +175,9 @@ implementMany(MsAstTypes, 'verify', {
 
 	Constructor(classHasSuper) {
 		makeUseOptional(this.fun.opDeclareThis)
-		withMethod(this, () => { this.fun.verify(SK.Val) })
+		withMethod(this, () => {
+			this.fun.verify(SK.Val)
+		})
 
 		const superCall = results.constructorToSuper.get(this)
 
@@ -535,7 +537,7 @@ implementMany(MsAstTypes, 'verify', {
 	Import() {
 		// Since Uses are always in the outermost scope, don't have to worry about shadowing.
 		// So we mutate `locals` directly.
-		const addUseLocal = _ => {
+		function addUseLocal(_) {
 			const prev = locals.get(_.name)
 			check(prev === undefined, _.loc, () =>
 				`${code(_.name)} already imported at ${prev.loc}`)
@@ -575,10 +577,12 @@ implementMany(MsAstTypes, 'verify', {
 // Helpers specific to certain MsAst types
 
 function verifyFor(forLoop) {
-	const verifyBlock = () => withLoop(forLoop, () => {
-		forLoop.block.verify(SK.Do)
-	})
-	ifElse(forLoop.opIteratee, _ => { withVerifyIteratee(_, verifyBlock) }, verifyBlock)
+	function verifyForBlock() {
+		withLoop(forLoop, () => {
+			forLoop.block.verify(SK.Do)
+		})
+	}
+	ifElse(forLoop.opIteratee, _ => { withVerifyIteratee(_, verifyForBlock) }, verifyForBlock)
 }
 
 function withVerifyIteratee({element, bag}, action) {

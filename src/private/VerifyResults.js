@@ -104,5 +104,5 @@ export const Modules = {
 	Val: 1,
 	Exports: 2,
 	Bag: 3,
-	Map: 4,
+	Map: 4
 }

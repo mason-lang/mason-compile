@@ -21,7 +21,7 @@ export default function transpileModule() {
 		if (path !== 'global') {
 			const importedDeclares = []
 			let opImportDefault = null
-			let defaultName = last(path.split('/'))
+			const defaultName = last(path.split('/'))
 			for (const name of imported) {
 				const declare = LocalDeclare.plain(this.loc, name)
 				if (name === defaultName)

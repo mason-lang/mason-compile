@@ -28,6 +28,7 @@ function methodFunKind(funKindToken) {
 		case Keywords.FunThisAsync: case Keywords.FunThisAsyncDo:
 		case Keywords.FunThisGen: case Keywords.FunThisGenDo:
 			fail(funKindToken.loc, 'Function `.` is implicit for methods.')
+			break
 		default:
 			fail(funKindToken.loc, `Expected function kind, got ${funKindToken}.`)
 	}

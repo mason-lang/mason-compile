@@ -14,7 +14,7 @@ export default function() {
 }
 
 /**
-@param {boolean} needsErrorDeclare:
+@param {boolean} needsErrorDeclare
 	If there are multiple catches with different error names, each one must declare its own.
 	The common error (used by the compiled `catch` block) is IdError.
 */

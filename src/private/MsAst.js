@@ -1,3 +1,5 @@
+/* eslint-disable indent */
+
 import {cat, opIf} from './util'
 
 /**
@@ -452,7 +454,7 @@ export default class MsAst {
 		{block}```
 	*/
 	export class Fun extends FunLike {
-		constructor(loc, args, opRestArg, block, opts={}) {
+		constructor(loc, args, opRestArg, block, opts = {}) {
 			super(loc, args, opRestArg)
 			/** @type {Block} */
 			this.block = block
@@ -510,7 +512,7 @@ export default class MsAst {
 
 	/** `yield {opValue}` */
 	export class Yield extends Val {
-		constructor(loc, opValue=null) {
+		constructor(loc, opValue = null) {
 			super(loc)
 			/** @type {?Val} */
 			this.opValue = opValue
@@ -528,7 +530,7 @@ export default class MsAst {
 
 // Class
 	export class Kind extends Val {
-		constructor(loc, superKinds, opComment=null, opDo=null, statics=[], methods=[]) {
+		constructor(loc, superKinds, opComment = null, opDo = null, statics = [], methods = []) {
 			super(loc)
 			/** @type {Array<Val>} */
 			this.superKinds = superKinds
@@ -556,7 +558,7 @@ export default class MsAst {
 	export class Class extends Val {
 		constructor(
 			loc, opSuperClass, kinds,
-			opComment=null, opDo=null, statics=[], opConstructor=null, methods=[]) {
+			opComment = null, opDo = null, statics = [], opConstructor = null, methods = []) {
 			super(loc)
 			/** @type {?Val} */
 			this.opSuperClass = opSuperClass
@@ -769,7 +771,7 @@ export default class MsAst {
 			/** @type {Val} */
 			this.switched = switched
 			/** @type {Array<SwitchPart>} */
-			this.parts =  parts
+			this.parts = parts
 			/** @type {?Block} */
 			this.opElse = opElse
 		}
@@ -841,7 +843,7 @@ export default class MsAst {
 
 	/** `break` */
 	export class Break extends Do {
-		constructor(loc, opValue=null) {
+		constructor(loc, opValue = null) {
 			super(loc)
 			/** @type {?Val} */
 			this.opValue = opValue

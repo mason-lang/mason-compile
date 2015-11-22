@@ -14,8 +14,7 @@ import transpile from '../dist/private/transpile/transpile'
 import verify from '../dist/private/verify/verify'
 install()
 
-if (!module.parent)
-	doTest(argv[2] === 'perf')
+const logSize = false
 
 function doTest(isPerfTest) {
 	const source = readFileSync('test/test-compile.ms', 'utf-8')
@@ -49,15 +48,27 @@ function doTest(isPerfTest) {
 
 		if (isPerfTest)
 			benchmark({
-				lex() { lex(source) },
-				parse() { parse(rootToken) },
-				verify() { verify(msAst) },
-				transpile() { transpile(msAst, verifyResults) },
-				render() { render(esAst) },
-				all() { compile(source, opts) }
+				lex() {
+					lex(source)
+				},
+				parse() {
+					parse(rootToken)
+				},
+				verify() {
+					verify(msAst)
+				},
+				transpile() {
+					transpile(msAst, verifyResults)
+				},
+				render() {
+					render(esAst)
+				},
+				all() {
+					compile(source, opts)
+				}
 			})
 		else {
-			if (false) {
+			if (logSize) {
 				console.log(`Expression tree size: ${treeSize(msAst, MsAst).size}.`)
 				console.log(`ES AST size: ${treeSize(esAst, Node).size}.`)
 				console.log(`Output size: ${code.length} characters.`)
@@ -90,8 +101,8 @@ function benchmark(tests) {
 function treeSize(tree, treeType) {
 	const visited = new Set()
 	let nLeaves = 0
-	const visit = node => {
-		if (node != null && !visited.has(node))
+	function visit(node) {
+		if (node !== null && node !== undefined && !visited.has(node))
 			if (node instanceof treeType) {
 				visited.add(node)
 				for (const name in node) {
@@ -107,3 +118,6 @@ function treeSize(tree, treeType) {
 	visit(tree)
 	return {size: visited.size, nLeaves}
 }
+
+if (!module.parent)
+	doTest(argv[2] === 'perf')

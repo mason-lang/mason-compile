@@ -24,12 +24,8 @@ export const
 	blockDbg = new Block(loc, null, [new SpecialDo(loc, SpecialDos.Debugger)]),
 	blockOne = new Block(loc, null, [one]),
 	blockTwo = new Block(loc, null, [two]),
-	blockPass = new Block(loc, null, []),
+	blockPass = new Block(loc, null, [])
 
-	funDo = lines =>
-		new Fun(
-			loc,
-			[],
-			null,
-			new Block(loc, null, lines),
-			{isDo: true})
+export function funDo(lines) {
+	return new Fun(loc, [], null, new Block(loc, null, lines), {isDo: true})
+}

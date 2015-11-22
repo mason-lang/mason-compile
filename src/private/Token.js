@@ -207,6 +207,7 @@ export const reservedKeywords = [
 	// Mason reserved words
 	'!',
 	'<',
+	'<-',
 	'>',
 	'actor',
 	'data',

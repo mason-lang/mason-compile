@@ -48,7 +48,7 @@ export default function lexPlain(isInQuote) {
 		if (peek(-1) === Chars.N0) {
 			const p = peek()
 			switch (p) {
-				case Chars.LetterB: case Chars.LetterO: case Chars.LetterX:
+				case Chars.LetterB: case Chars.LetterO: case Chars.LetterX: {
 					skip()
 					const isDigitSpecial =
 						p === Chars.LetterB ?
@@ -58,6 +58,7 @@ export default function lexPlain(isInQuote) {
 						isDigitHex
 					skipWhile(isDigitSpecial)
 					break
+				}
 				case Chars.Dot:
 					if (isDigit(peek(1))) {
 						skip()
@@ -127,7 +128,7 @@ export default function lexPlain(isInQuote) {
 			})
 	}
 
-	while (true) {
+	for (;;) {
 		startColumn = column
 		const characterEaten = eat()
 		// Generally, the type of a token is determined by the first character.
@@ -204,6 +205,7 @@ export default function lexPlain(isInQuote) {
 				// We always eat tabs in the Newline handler,
 				// so this will only happen in the middle of a line.
 				fail(loc(), 'Tab may only be used to indent')
+				break
 
 			// FUN
 
@@ -308,6 +310,7 @@ export default function lexPlain(isInQuote) {
 			case Chars.Backslash: case Chars.Backtick: case Chars.Caret:
 			case Chars.Comma: case Chars.Percent: case Chars.Semicolon:
 				fail(loc(), `Reserved character ${showChar(characterEaten)}`)
+				break
 
 			default:
 				handleName()

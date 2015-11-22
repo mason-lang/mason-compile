@@ -27,7 +27,7 @@ export function pos() {
 	return new Pos(line, column)
 }
 
-export function peek(n=0) {
+export function peek(n = 0) {
 	return sourceString.charCodeAt(index + n)
 }
 
@@ -38,7 +38,7 @@ export function eat() {
 	skip()
 	return char
 }
-export function skip(n=1) {
+export function skip(n = 1) {
 	index = index + n
 	column = column + n
 }

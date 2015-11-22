@@ -83,7 +83,7 @@ export function parseLocalDeclareOrFocus(tokens) {
 	}
 }
 
-function _parseLocalDeclare(token, orMember=false) {
+function _parseLocalDeclare(token, orMember = false) {
 	if (isGroup(Groups.Space, token))
 		return _parseLocalDeclareFromSpaced(Slice.group(token), orMember)
 	else {
@@ -92,7 +92,7 @@ function _parseLocalDeclare(token, orMember=false) {
 	}
 }
 
-function _parseLocalDeclareFromSpaced(tokens, orMember=false) {
+function _parseLocalDeclareFromSpaced(tokens, orMember = false) {
 	const [rest, kind, isMember] =
 		isKeyword(Keywords.Lazy, tokens.head()) ?
 			[tokens.tail(), LocalDeclares.Lazy, false] :

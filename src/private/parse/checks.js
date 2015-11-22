@@ -11,10 +11,7 @@ export function checkNonEmpty(tokens, message) {
 	check(!tokens.isEmpty(), tokens.loc, message)
 }
 
-/**
-Throw a {@link CompileError} if the token is not the expected keyword.
-@param {Keywords} keyword
-*/
+/** Throw a {@link CompileError} if the token is not the expected keyword. */
 export function checkKeyword(keyword, token) {
 	check(isKeyword(keyword, token), token.loc, () =>
 		`Expected ${showKeyword(keyword)}`)

@@ -90,7 +90,7 @@ export default {
 		'@keep',
 		'@keep~',
 		'@map',
-		'@map~',
+		'@map~'
 	],
 	'msl.@.@-Type': ['empty'],
 	'msl.@.Map.Id-Map': ['_'],

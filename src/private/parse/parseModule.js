@@ -1,6 +1,7 @@
 import {check, options} from '../context'
 import {ImportDo, Import, LocalDeclare, LocalDeclares, Module} from '../MsAst'
 import {Groups, isGroup, isKeyword, Keyword, Keywords, showKeyword} from '../Token'
+import {ifElse} from '../util'
 import {checkEmpty, checkNonEmpty, checkKeyword} from './checks'
 import {justBlock} from './parseBlock'
 import {parseLines} from './parseLine'
@@ -77,49 +78,48 @@ function parseThingsImported(name, isLazy, tokens) {
 }
 
 function parseRequire(token) {
-	const name = tryParseName(token)
-	if (name !== null)
-		return {path: name, name}
-	else {
-		check(isGroup(Groups.Space, token), token.loc, 'Not a valid module name.')
-		const tokens = Slice.group(token)
+	return ifElse(tryParseName(token),
+		name => ({path: name, name}),
+		() => {
+			check(isGroup(Groups.Space, token), token.loc, 'Not a valid module name.')
+			const tokens = Slice.group(token)
 
-		// Take leading dots.
-		let rest = tokens
-		const parts = []
-		const head = rest.head()
-		const n = tryTakeNDots(head)
-		if (n !== null) {
-			parts.push('.')
-			for (let i = 1; i < n; i = i + 1)
-				parts.push('..')
-			rest = rest.tail()
-			while (!rest.isEmpty()) {
-				const n = tryTakeNDots(rest.head())
-				if (n === null)
-					break
-				for (let i = 0; i < n; i = i + 1)
+			// Take leading dots.
+			let rest = tokens
+			const parts = []
+			const head = rest.head()
+			const n = tryTakeNDots(head)
+			if (n !== null) {
+				parts.push('.')
+				for (let i = 1; i < n; i = i + 1)
 					parts.push('..')
 				rest = rest.tail()
+				while (!rest.isEmpty()) {
+					const n = tryTakeNDots(rest.head())
+					if (n === null)
+						break
+					for (let i = 0; i < n; i = i + 1)
+						parts.push('..')
+					rest = rest.tail()
+				}
 			}
-		}
 
-		// Take name, then any number of dot-then-name (`.x`)
-		for (;;) {
-			checkNonEmpty(rest)
-			parts.push(parseName(rest.head()))
-			rest = rest.tail()
+			// Take name, then any number of dot-then-name (`.x`)
+			for (;;) {
+				checkNonEmpty(rest)
+				parts.push(parseName(rest.head()))
+				rest = rest.tail()
 
-			if (rest.isEmpty())
-				break
+				if (rest.isEmpty())
+					break
 
-			// If there's something left, it should be a dot, followed by a name.
-			checkKeyword(Keywords.Dot, rest.head())
-			rest = rest.tail()
-		}
+				// If there's something left, it should be a dot, followed by a name.
+				checkKeyword(Keywords.Dot, rest.head())
+				rest = rest.tail()
+			}
 
-		return {path: parts.join('/'), name: parts[parts.length - 1]}
-	}
+			return {path: parts.join('/'), name: parts[parts.length - 1]}
+		})
 }
 
 function tryTakeNDots(token) {
