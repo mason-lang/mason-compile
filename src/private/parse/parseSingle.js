@@ -7,10 +7,7 @@ import parseQuote from './parseQuote'
 import {parseExpr, parseExprParts, parseSpaced} from './parse*'
 import Slice from './Slice'
 
-/**
-Parse a single token.
-@return {Val}
-*/
+/** Parse a single token. */
 export default function parseSingle(token) {
 	const {loc} = token
 	if (token instanceof Name)

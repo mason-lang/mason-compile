@@ -1,7 +1,7 @@
 import Loc from 'esast/dist/Loc'
 import {check} from '../context'
-import {Call, Cond, Conditional, LocalDeclare, Logic, Logics, New, Not, ObjPair, ObjSimple, Pipe,
-	SuperCall, With, Yield, YieldTo} from '../MsAst'
+import {Await, Call, Cond, Conditional, LocalDeclare, Logic, Logics, New, Not, ObjPair, ObjSimple,
+	Pipe, SuperCall, With, Yield, YieldTo} from '../MsAst'
 import {isAnyKeyword, isKeyword, Keywords, Name, showKeyword} from '../Token'
 import {cat, head, ifElse, opIf, tail} from '../util'
 import {checkNonEmpty} from './checks'
@@ -71,6 +71,8 @@ function keywordExpr(at, after) {
 			const kind = at.kind === Keywords.And ? Logics.And : Logics.Or
 			return new Logic(at.loc, kind, parseExprParts(after))
 		}
+		case Keywords.Await:
+			return new Await(at.loc, parseExprPlain(after))
 		case Keywords.Case:
 			return parseCase(false, after)
 		case Keywords.Class:
@@ -121,8 +123,8 @@ function keywordExpr(at, after) {
 
 
 const exprSplitKeywords = new Set([
-	Keywords.And, Keywords.Case, Keywords.Class, Keywords.Cond, Keywords.Del, Keywords.Except,
-	Keywords.For, Keywords.ForAsync, Keywords.ForBag, Keywords.Fun, Keywords.FunDo,
+	Keywords.And, Keywords.Await, Keywords.Case, Keywords.Class, Keywords.Cond, Keywords.Del,
+	Keywords.Except, Keywords.For, Keywords.ForAsync, Keywords.ForBag, Keywords.Fun, Keywords.FunDo,
 	Keywords.FunThis, Keywords.FunThisDo, Keywords.FunAsync, Keywords.FunAsyncDo,
 	Keywords.FunThisAsync, Keywords.FunThisAsyncDo, Keywords.FunGen, Keywords.FunGenDo,
 	Keywords.FunThisGen, Keywords.FunThisGenDo, Keywords.If, Keywords.Kind, Keywords.Method,

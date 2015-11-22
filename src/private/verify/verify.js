@@ -67,6 +67,12 @@ implementMany(MsAstTypes, 'verify', {
 		this.value.verify(SK.Val)
 	},
 
+	Await(_sk) {
+		check(funKind === Funs.Async, this.loc, () =>
+			`Cannot ${showKeyword(Keywords.Await)} outside of async function.`)
+		this.value.verify(SK.Val)
+	},
+
 	BagEntry(sk) {
 		checkDo(this, sk)
 		accessLocal(this, 'built')
@@ -554,17 +560,15 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	Yield(_sk) {
-		check(funKind !== Funs.Plain, this.loc, () =>
-			`Cannot ${showKeyword(Keywords.Yield)} outside of async/generator.`)
-		if (funKind === Funs.Async)
-			check(this.opYielded !== null, this.loc, 'Cannot await nothing.')
-		verifyOp(this.opYielded, SK.Val)
+		check(funKind === Funs.Generator, this.loc, () =>
+			`Cannot ${showKeyword(Keywords.Yield)} outside of generator function.`)
+		verifyOp(this.opValue, SK.Val)
 	},
 
 	YieldTo(_sk) {
 		check(funKind === Funs.Generator, this.loc, () =>
-			`Cannot ${showKeyword(Keywords.YieldTo)} outside of generator.`)
-		this.yieldedTo.verify(SK.Val)
+			`Cannot ${showKeyword(Keywords.YieldTo)} outside of generator function.`)
+		this.value.verify(SK.Val)
 	}
 })
 

@@ -195,17 +195,12 @@ export const reservedKeywords = [
 
 	// JavaScript keywords
 	'arguments',
-	'async',
-	'await',
-	'const',
 	'delete',
 	'eval',
 	'in',
 	'instanceof',
-	'let',
 	'return',
 	'typeof',
-	'var',
 	'void',
 	'while',
 
@@ -240,6 +235,7 @@ export const Keywords = {
 	As: kw('as'),
 	Assert: kw('assert'),
 	Assign: kw('='),
+	Await: kw('$'),
 	LocalMutate: kwNotName(':='),
 	Break: kw('break'),
 	Built: kw('built'),
@@ -309,8 +305,8 @@ export const Keywords = {
 	ImportDo: kw('import!'),
 	ImportLazy: kw('import~'),
 	With: kw('with'),
-	Yield: kw('<-'),
-	YieldTo: kw('<-*')
+	Yield: kw('yield'),
+	YieldTo: kw('yield*')
 }
 
 /**

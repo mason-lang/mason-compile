@@ -26,7 +26,7 @@ function doTest(isPerfTest) {
 		builtins: {
 			global: [
 				'Array', 'Boolean', 'Error', 'Function',
-				'Number', 'Object', 'String', 'Symbol'
+				'Number', 'Object', 'Promise', 'String', 'Symbol'
 			]
 		}
 	}

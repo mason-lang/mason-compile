@@ -9,6 +9,7 @@ export default {
 		'Function',
 		'Intl',
 		'JSON',
+		'Promise',
 		'Proxy',
 		'Math',
 		'Number',
@@ -135,7 +136,6 @@ export default {
 	'msl.@.Seq.Stream': ['_'],
 	'msl.@.Set.Id-Set': ['_'],
 	'msl.@.Set.Set': ['_', 'set=?'],
-	'msl.$': ['_'],
 	'msl.compare': [
 		'=?',
 		'<?',

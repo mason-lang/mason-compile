@@ -497,28 +497,32 @@ export default class MsAst {
 		}
 	}
 
-// Generator
-	/**
-	`<~ {opYielded}`
-	These are also the value part of `a <~ b` assignments.
-	*/
-	export class Yield extends Val {
-		constructor(loc, opYielded=null) {
+// Async / Generator
+
+	/** `$ {value} `*/
+	export class Await extends Val {
+		constructor(loc, value) {
 			super(loc)
-			/** @type {?Val} */
-			this.opYielded = opYielded
+			/** @type {Val} */
+			this.value = value
 		}
 	}
 
-	/**
-	`<~~ {yieldedTo}`
-	These are also the value part of `a <~~ b` assignments.
-	*/
+	/** `yield {opValue}` */
+	export class Yield extends Val {
+		constructor(loc, opValue=null) {
+			super(loc)
+			/** @type {?Val} */
+			this.opValue = opValue
+		}
+	}
+
+	/** `yield* {value}` */
 	export class YieldTo extends Val {
-		constructor(loc, yieldedTo) {
+		constructor(loc, value) {
 			super(loc)
 			/** @type {Val} */
-			this.yieldedTo = yieldedTo
+			this.value = value
 		}
 	}
 

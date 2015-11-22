@@ -77,6 +77,10 @@ implementMany(MsAstTypes, 'transpile', {
 				false))
 	},
 
+	Await() {
+		return new YieldExpression(t0(this.value), false)
+	},
+
 	BagEntry() {
 		return msCall(this.isMany ? 'addMany' : 'add', IdBuilt, t0(this.value))
 	},
@@ -579,11 +583,11 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	Yield() {
-		return new YieldExpression(opMap(this.opYielded, t0), false)
+		return new YieldExpression(opMap(this.opValue, t0), false)
 	},
 
 	YieldTo() {
-		return new YieldExpression(t0(this.yieldedTo), true)
+		return new YieldExpression(t0(this.value), true)
 	}
 })
 
