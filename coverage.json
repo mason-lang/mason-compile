@@ -1,0 +1,575 @@
+{
+  "coverage": "63.76%",
+  "expectCount": 643,
+  "actualCount": 410,
+  "files": {
+    "src/private/MsAst.js": {
+      "expectCount": 339,
+      "actualCount": 247,
+      "undocumentLines": [
+        484,
+        441,
+        532,
+        494,
+        312,
+        829,
+        92,
+        1044,
+        515,
+        379,
+        239,
+        524,
+        1086,
+        890,
+        533,
+        882,
+        149,
+        390,
+        1004,
+        266,
+        322,
+        559,
+        401,
+        991,
+        1167,
+        1057,
+        873,
+        140,
+        10,
+        582,
+        416,
+        1068,
+        593,
+        864,
+        846,
+        604,
+        971,
+        1106,
+        429,
+        617,
+        835,
+        175,
+        628,
+        954,
+        32,
+        334,
+        640,
+        189,
+        442,
+        823,
+        1077,
+        654,
+        1018,
+        934,
+        663,
+        457,
+        295,
+        348,
+        809,
+        1030,
+        688,
+        358,
+        222,
+        64,
+        699,
+        485,
+        922,
+        710,
+        257,
+        719,
+        495,
+        52,
+        729,
+        796,
+        901,
+        744,
+        784,
+        105,
+        755,
+        506,
+        1125,
+        769,
+        645,
+        644,
+        632,
+        95,
+        132,
+        115,
+        375,
+        136,
+        101,
+        98
+      ]
+    },
+    "src/private/VerifyResults.js": {
+      "expectCount": 25,
+      "actualCount": 23,
+      "undocumentLines": [
+        8,
+        90
+      ]
+    },
+    "src/private/lex/chars.js": {
+      "expectCount": 4,
+      "actualCount": 0,
+      "undocumentLines": [
+        3,
+        64,
+        72,
+        52
+      ]
+    },
+    "src/CompileError.js": {
+      "expectCount": 9,
+      "actualCount": 7,
+      "undocumentLines": [
+        17,
+        5
+      ]
+    },
+    "src/Compiler.js": {
+      "expectCount": 6,
+      "actualCount": 4,
+      "undocumentLines": [
+        10,
+        29
+      ]
+    },
+    "src/private/CompileOptions.js": {
+      "expectCount": 11,
+      "actualCount": 1,
+      "undocumentLines": [
+        55,
+        39,
+        9,
+        54,
+        48,
+        46,
+        49,
+        50,
+        42,
+        52
+      ]
+    },
+    "src/private/Token.js": {
+      "expectCount": 33,
+      "actualCount": 20,
+      "undocumentLines": [
+        18,
+        28,
+        87,
+        70,
+        54,
+        19,
+        343,
+        194,
+        330,
+        40,
+        76,
+        93,
+        60
+      ]
+    },
+    "src/private/transpile/ast-constants.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        7
+      ]
+    },
+    "src/private/PathOptions.js": {
+      "expectCount": 6,
+      "actualCount": 0,
+      "undocumentLines": [
+        3,
+        4,
+        5,
+        16,
+        12,
+        8
+      ]
+    },
+    "src/private/verify/SK.js": {
+      "expectCount": 5,
+      "actualCount": 5,
+      "undocumentLines": []
+    },
+    "src/private/parse/Slice.js": {
+      "expectCount": 18,
+      "actualCount": 18,
+      "undocumentLines": []
+    },
+    "src/private/verify/locals.js": {
+      "expectCount": 14,
+      "actualCount": 0,
+      "undocumentLines": [
+        14,
+        6,
+        95,
+        40,
+        51,
+        35,
+        31,
+        19,
+        10,
+        66,
+        71,
+        26,
+        100,
+        81
+      ]
+    },
+    "src/private/transpile/util.js": {
+      "expectCount": 25,
+      "actualCount": 3,
+      "undocumentLines": [
+        39,
+        169,
+        44,
+        93,
+        181,
+        50,
+        109,
+        76,
+        122,
+        87,
+        103,
+        114,
+        118,
+        59,
+        185,
+        13,
+        16,
+        19,
+        22,
+        25,
+        70,
+        99
+      ]
+    },
+    "src/private/lex/groupContext.js": {
+      "expectCount": 14,
+      "actualCount": 1,
+      "undocumentLines": [
+        29,
+        51,
+        116,
+        132,
+        87,
+        46,
+        39,
+        100,
+        127,
+        95,
+        9,
+        139,
+        14
+      ]
+    },
+    "src/private/util.js": {
+      "expectCount": 18,
+      "actualCount": 18,
+      "undocumentLines": []
+    },
+    "src/private/verify/autoBlockKind.js": {
+      "expectCount": 2,
+      "actualCount": 0,
+      "undocumentLines": [
+        6,
+        11
+      ]
+    },
+    "src/private/parse/parseBlock.js": {
+      "expectCount": 6,
+      "actualCount": 6,
+      "undocumentLines": []
+    },
+    "src/private/context.js": {
+      "expectCount": 5,
+      "actualCount": 5,
+      "undocumentLines": []
+    },
+    "src/private/parse/checks.js": {
+      "expectCount": 4,
+      "actualCount": 4,
+      "undocumentLines": []
+    },
+    "src/private/lex/sourceContext.js": {
+      "expectCount": 17,
+      "actualCount": 0,
+      "undocumentLines": [
+        36,
+        108,
+        30,
+        26,
+        14,
+        41,
+        123,
+        104,
+        112,
+        100,
+        80,
+        89,
+        92,
+        47,
+        55,
+        62,
+        69
+      ]
+    },
+    "src/private/transpile/transpileModule.js": {
+      "expectCount": 2,
+      "actualCount": 0,
+      "undocumentLines": [
+        61,
+        15
+      ]
+    },
+    "src/private/parse/parseFun.js": {
+      "expectCount": 3,
+      "actualCount": 3,
+      "undocumentLines": []
+    },
+    "src/private/transpile/context.js": {
+      "expectCount": 4,
+      "actualCount": 0,
+      "undocumentLines": [
+        19,
+        8,
+        14,
+        25
+      ]
+    },
+    "src/info.js": {
+      "expectCount": 2,
+      "actualCount": 2,
+      "undocumentLines": []
+    },
+    "src/private/lex/lex.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/lex/lexName.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/lex/lexPlain.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        21
+      ]
+    },
+    "src/private/lex/lexQuote.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        13
+      ]
+    },
+    "src/private/lex/lex*.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        5
+      ]
+    },
+    "src/private/parse/parse*.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        12
+      ]
+    },
+    "src/private/verify/util.js": {
+      "expectCount": 7,
+      "actualCount": 5,
+      "undocumentLines": [
+        45,
+        49
+      ]
+    },
+    "src/private/manglePath.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/parse/parseExpr.js": {
+      "expectCount": 3,
+      "actualCount": 2,
+      "undocumentLines": [
+        50
+      ]
+    },
+    "src/private/parse/parse.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/parse/parseCase.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/parse/parseClass.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/parse/parseDel.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        8
+      ]
+    },
+    "src/private/parse/parseExcept.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/parse/parseFor.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        9
+      ]
+    },
+    "src/private/parse/parseKind.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/parse/parseLine.js": {
+      "expectCount": 2,
+      "actualCount": 1,
+      "undocumentLines": [
+        70
+      ]
+    },
+    "src/private/parse/parseLocalDeclares.js": {
+      "expectCount": 7,
+      "actualCount": 7,
+      "undocumentLines": []
+    },
+    "src/private/parse/parseMemberName.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/parse/parseMethod.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        7
+      ]
+    },
+    "src/private/parse/parseMethodImpls.js": {
+      "expectCount": 2,
+      "actualCount": 0,
+      "undocumentLines": [
+        8,
+        12
+      ]
+    },
+    "src/private/parse/parseMethodSplit.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/parse/parseModule.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/parse/parseName.js": {
+      "expectCount": 2,
+      "actualCount": 2,
+      "undocumentLines": []
+    },
+    "src/private/parse/parseQuote.js": {
+      "expectCount": 2,
+      "actualCount": 2,
+      "undocumentLines": []
+    },
+    "src/private/parse/parseSingle.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/parse/parseSpaced.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/parse/parseSwitch.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/render.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/verify/context.js": {
+      "expectCount": 12,
+      "actualCount": 2,
+      "undocumentLines": [
+        106,
+        43,
+        54,
+        117,
+        93,
+        58,
+        110,
+        65,
+        72,
+        79
+      ]
+    },
+    "src/private/transpile/transpile.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/transpile/transpileExcept.js": {
+      "expectCount": 2,
+      "actualCount": 1,
+      "undocumentLines": [
+        6
+      ]
+    },
+    "src/private/transpile/transpileMethod.js": {
+      "expectCount": 2,
+      "actualCount": 2,
+      "undocumentLines": []
+    },
+    "src/private/parse/tryTakeComment.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/verify/verify.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/private/verify/verifyBlock.js": {
+      "expectCount": 3,
+      "actualCount": 0,
+      "undocumentLines": [
+        11,
+        36,
+        41
+      ]
+    },
+    "src/private/verify/verifyLines.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    }
+  }
+}

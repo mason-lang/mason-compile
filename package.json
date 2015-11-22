@@ -1,0 +1,45 @@
+{
+	"name": "mason-compile",
+	"version": "0.0.0",
+	"files": ["dist", "src"],
+	"license": "WTFPL",
+	"repository": "mason-lang/mason-compile",
+	"scripts": {
+		"build": "babel src --out-dir dist --source-maps inline",
+		"watch": "babel src --out-dir dist --source-maps inline --watch",
+		"doc": "esdoc -c esdoc.json",
+		"lint": "eslint src test",
+		"compile-test": "babel test --out-dir compiled-test --source-maps inline",
+		"watch-compile-test": "babel test --out-dir compiled-test --source-maps inline --watch",
+		"test": "npm run compile-test && mocha compiled-test/*.js compiled-test/*/*.js",
+		"test-compile": "npm run compile-test && node compiled-test/test-compile",
+		"perf-test-compile": "npm run compile-test && node compiled-test/test-compile perf"
+	},
+	"dependencies": {
+		"esast": "mason-lang/esast"
+	},
+	"devDependencies": {
+		"babel-cli": "6.2.0",
+		"babel-plugin-transform-es2015-destructuring": "6.1.18",
+		"babel-plugin-transform-es2015-modules-umd": "6.1.18",
+		"babel-plugin-transform-es2015-parameters": "6.1.18",
+		"babel-plugin-transform-strict-mode": "6.2.0",
+		"benchmark": "1.0.0",
+			"microtime": "2.0.0",
+		"esdoc": "0.4.3",
+		"eslint": "1.10.3",
+		"eslint-config-mason": "mason-lang/eslint-config-mason",
+		"mocha": "2.3.4",
+		"numeral": "1.5.3",
+		"source-map-support": "0.4.0"
+	},
+	"babel": {
+		"plugins": [
+			"transform-es2015-destructuring",
+			"transform-es2015-modules-umd",
+			"transform-es2015-parameters",
+			"transform-strict-mode"
+		]
+	},
+	"eslintConfig": {"extends": "eslint-config-mason"}
+}

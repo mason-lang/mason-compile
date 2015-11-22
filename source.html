@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="">
+  <title data-ice="title">Source | mason-compile API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/mason-lang/mason-compile" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/CompileError.js~CompileError.html">CompileError</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/CompileError.js~Warning.html">Warning</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Compiler.js~Compiler.html">Compiler</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-code">code</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-keywords">keywords</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-reservedKeywords">reservedKeywords</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">private</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/CompileOptions.js~CompileOptions.html">CompileOptions</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Assert.html">Assert</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Assign.html">Assign</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~AssignDestructure.html">AssignDestructure</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~AssignSingle.html">AssignSingle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Await.html">Await</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~BagEntry.html">BagEntry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~BagSimple.html">BagSimple</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Block.html">Block</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~BlockWrap.html">BlockWrap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Break.html">Break</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~BuildEntry.html">BuildEntry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Call.html">Call</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Case.html">Case</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~CasePart.html">CasePart</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Catch.html">Catch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Class.html">Class</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ClassKindDo.html">ClassKindDo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Cond.html">Cond</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Conditional.html">Conditional</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Constructor.html">Constructor</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Do.html">Do</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Except.html">Except</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~For.html">For</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ForAsync.html">ForAsync</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ForBag.html">ForBag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Fun.html">Fun</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~FunAbstract.html">FunAbstract</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~FunLike.html">FunLike</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~GetterFun.html">GetterFun</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Ignore.html">Ignore</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Import.html">Import</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ImportDo.html">ImportDo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Iteratee.html">Iteratee</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Kind.html">Kind</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Lazy.html">Lazy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~LineContent.html">LineContent</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~LocalAccess.html">LocalAccess</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~LocalDeclare.html">LocalDeclare</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~LocalMutate.html">LocalMutate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Logic.html">Logic</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MapEntry.html">MapEntry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Member.html">Member</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MemberFun.html">MemberFun</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MemberSet.html">MemberSet</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Method.html">Method</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MethodGetter.html">MethodGetter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MethodImpl.html">MethodImpl</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MethodImplLike.html">MethodImplLike</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MethodSetter.html">MethodSetter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Module.html">Module</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MsAst.html">MsAst</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MsRegExp.html">MsRegExp</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~New.html">New</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Not.html">Not</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~NumberLiteral.html">NumberLiteral</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ObjEntry.html">ObjEntry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ObjEntryAssign.html">ObjEntryAssign</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ObjEntryPlain.html">ObjEntryPlain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ObjPair.html">ObjPair</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ObjSimple.html">ObjSimple</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Pattern.html">Pattern</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Pipe.html">Pipe</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~QuoteAbstract.html">QuoteAbstract</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~QuotePlain.html">QuotePlain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~QuoteSimple.html">QuoteSimple</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~QuoteTaggedTemplate.html">QuoteTaggedTemplate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Range.html">Range</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~SetSub.html">SetSub</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~SimpleFun.html">SimpleFun</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~SpecialDo.html">SpecialDo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~SpecialVal.html">SpecialVal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Spread.html">Spread</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~SuperCall.html">SuperCall</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~SuperMember.html">SuperMember</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Switch.html">Switch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~SwitchPart.html">SwitchPart</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Throw.html">Throw</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Val.html">Val</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~With.html">With</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Yield.html">Yield</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~YieldTo.html">YieldTo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/PathOptions.js~PathOptions.html">PathOptions</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/Token.js~DocComment.html">DocComment</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/Token.js~Group.html">Group</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/Token.js~Keyword.html">Keyword</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/Token.js~Name.html">Name</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/Token.js~Token.html">Token</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/VerifyResults.js~VerifyResults.html">VerifyResults</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isAnyKeyword">isAnyKeyword</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isGroup">isGroup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isKeyword">isKeyword</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isNameKeyword">isNameKeyword</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isReservedKeyword">isReservedKeyword</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-keywordName">keywordName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opKeywordKindFromName">opKeywordKindFromName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opKeywordKindToSpecialValueKind">opKeywordKindToSpecialValueKind</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showGroupKind">showGroupKind</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showKeyword">showKeyword</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-check">check</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-fail">fail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setContext">setContext</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-unsetContext">unsetContext</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-warn">warn</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-manglePath">manglePath</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-render">render</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-allSame">allSame</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-assert">assert</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-cat">cat</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-flatMap">flatMap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-flatOpMap">flatOpMap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-head">head</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-ifElse">ifElse</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-implementMany">implementMany</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isEmpty">isEmpty</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-last">last</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opEach">opEach</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opIf">opIf</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opMap">opMap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opOr">opOr</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-reverseIter">reverseIter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-rtail">rtail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tail">tail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-toArray">toArray</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-Funs">Funs</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-LocalDeclares">LocalDeclares</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-Logics">Logics</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-Setters">Setters</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SpecialDos">SpecialDos</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SpecialVals">SpecialVals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-Groups">Groups</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-Keywords">Keywords</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-reservedKeywords">reservedKeywords</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-Blocks">Blocks</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-Modules">Modules</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">private/lex</div><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showChar">showChar</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addToCurrentGroup">addToCurrentGroup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-closeGroup">closeGroup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-closeGroupsForDedent">closeGroupsForDedent</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-closeInterpolationOrParenthesis">closeInterpolationOrParenthesis</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-closeLine">closeLine</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-closeSpaceOKIfEmpty">closeSpaceOKIfEmpty</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-maybeCloseGroup">maybeCloseGroup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-openGroup">openGroup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-openInterpolation">openInterpolation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-openLine">openLine</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-openParenthesis">openParenthesis</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setupGroupContext">setupGroupContext</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-space">space</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tearDownGroupContext">tearDownGroupContext</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-load">load</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-lex">lex</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-lexName">lexName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-lexPlain">lexPlain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-lexQuote">lexQuote</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-eat">eat</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-eatRestOfLine">eatRestOfLine</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-peek">peek</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-pos">pos</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setupSourceContext">setupSourceContext</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-skip">skip</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-skipNewlines">skipNewlines</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-skipRestOfLine">skipRestOfLine</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-skipWhile">skipWhile</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-skipWhileEquals">skipWhileEquals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-stepBackMany">stepBackMany</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-takeWhile">takeWhile</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-takeWhileWithPrev">takeWhileWithPrev</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tryEat">tryEat</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tryEat2">tryEat2</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tryEat3">tryEat3</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tryEatNewline">tryEatNewline</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-Chars">Chars</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isDigit">isDigit</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNameCharacter">isNameCharacter</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">private/parse</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/parse/Slice.js~Slice.html">Slice</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-checkEmpty">checkEmpty</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-checkKeyword">checkKeyword</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-checkNonEmpty">checkNonEmpty</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-unexpected">unexpected</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-load">load</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parse">parse</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-beforeAndBlock">beforeAndBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-beforeAndOpBlock">beforeAndOpBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-justBlock">justBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseBlock">parseBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseBlockWrap">parseBlockWrap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseJustBlock">parseJustBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseCase">parseCase</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseClass">parseClass</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseDel">parseDel</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseExcept">parseExcept</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opParseExpr">opParseExpr</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseExpr">parseExpr</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseExprParts">parseExprParts</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseFor">parseFor</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-funArgsAndBlock">funArgsAndBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseFun">parseFun</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseFunLike">parseFunLike</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseKind">parseKind</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLine">parseLine</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLines">parseLines</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLocalDeclare">parseLocalDeclare</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLocalDeclareFromSpaced">parseLocalDeclareFromSpaced</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLocalDeclareOrFocus">parseLocalDeclareOrFocus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLocalDeclares">parseLocalDeclares</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLocalDeclaresAndMemberArgs">parseLocalDeclaresAndMemberArgs</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLocalDeclaresJustNames">parseLocalDeclaresJustNames</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLocalName">parseLocalName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseMemberName">parseMemberName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseMethod">parseMethod</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseMethodImpls">parseMethodImpls</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseStatics">parseStatics</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseMethodSplit">parseMethodSplit</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseModule">parseModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseName">parseName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tryParseName">tryParseName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseQuote">parseQuote</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseRegExp">parseRegExp</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseSingle">parseSingle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseSpaced">parseSpaced</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseSwitch">parseSwitch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tryTakeComment">tryTakeComment</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">private/transpile</div><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getDestructuredId">getDestructuredId</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setup">setup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tearDown">tearDown</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withFunKind">withFunKind</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-transpile">transpile</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-transpileCatch">transpileCatch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-transpileExcept">transpileExcept</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-transpileMethodToDefinition">transpileMethodToDefinition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-transpileMethodToProperty">transpileMethodToProperty</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-exportNamedOrDefault">exportNamedOrDefault</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-transpileModule">transpileModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-accessLocalDeclare">accessLocalDeclare</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-blockWrap">blockWrap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-blockWrapIfBlock">blockWrapIfBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-blockWrapIfVal">blockWrapIfVal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-callFocusFun">callFocusFun</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-declare">declare</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-doThrow">doThrow</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-focusFun">focusFun</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-idForDeclareCached">idForDeclareCached</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-lazyWrap">lazyWrap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-makeDeclarator">makeDeclarator</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-makeDestructureDeclarators">makeDestructureDeclarators</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-maybeWrapInCheckContains">maybeWrapInCheckContains</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-memberStringOrVal">memberStringOrVal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-msCall">msCall</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-msMember">msMember</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opTypeCheckForLocalDeclare">opTypeCheckForLocalDeclare</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plainLet">plainLet</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-t0">t0</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-t1">t1</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-t2">t2</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-t3">t3</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tLines">tLines</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-throwErrorFromString">throwErrorFromString</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-transpileName">transpileName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-GlobalError">GlobalError</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">private/verify</div><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-checkDo">checkDo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-checkVal">checkVal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getSK">getSK</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-markStatement">markStatement</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-autoBlockKind">autoBlockKind</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opBlockBuildKind">opBlockBuildKind</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setPendingBlockLocals">setPendingBlockLocals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setup">setup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tearDown">tearDown</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withFun">withFun</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withIife">withIife</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withIifeIf">withIifeIf</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withIifeIfVal">withIifeIfVal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withInFunKind">withInFunKind</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withInSwitch">withInSwitch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withLoop">withLoop</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withMethod">withMethod</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withName">withName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-accessLocal">accessLocal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-deleteLocal">deleteLocal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-failMissingLocal">failMissingLocal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plusLocal">plusLocal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plusLocals">plusLocals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-registerAndPlusLocal">registerAndPlusLocal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-registerLocal">registerLocal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setDeclareAccessed">setDeclareAccessed</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setLocal">setLocal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyAndPlusLocal">verifyAndPlusLocal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyAndPlusLocals">verifyAndPlusLocals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyLocalDeclare">verifyLocalDeclare</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-warnUnusedLocals">warnUnusedLocals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withBlockLocals">withBlockLocals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-makeUseOptional">makeUseOptional</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-makeUseOptionalIfFocus">makeUseOptionalIfFocus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setName">setName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyEach">verifyEach</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyName">verifyName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyNotLazy">verifyNotLazy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyOp">verifyOp</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verify">verify</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyBlock">verifyBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyDoBlock">verifyDoBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyModuleLines">verifyModuleLines</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyLines">verifyLines</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SK">SK</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1>Source <img data-ice="coverageBadge" src="./badge.svg"><span data-ice="totalCoverageCount" class="total-coverage-count">410/643</span></h1>
+
+<table class="files-summary" data-ice="files" data-use-coverage="true">
+  <thead>
+    <tr>
+      <td>File</td>
+      <td>Identifier</td>
+      <td class="coverage">Document</td>
+      <td style="display: none;">Size</td>
+      <td style="display: none;">Lines</td>
+      <td style="display: none;">Updated</td>
+    </tr>
+  </thead>
+  <tbody>
+    
+  <tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/CompileError.js.html#errorLines=17,5">src/CompileError.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="class/src/CompileError.js~CompileError.html">CompileError</a></span>
+<span><a href="class/src/CompileError.js~Warning.html">Warning</a></span>
+<span><a href="variable/index.html#static-variable-code">code</a></span></td>
+      <td class="coverage"><span data-ice="coverage">77 %</span><span data-ice="coverageCount" class="coverage-count">7/9</span></td>
+      <td style="display: none;" data-ice="size">1339 byte</td>
+      <td style="display: none;" data-ice="lines">57</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:19:13 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/Compiler.js.html#errorLines=10,29">src/Compiler.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="class/src/Compiler.js~Compiler.html">Compiler</a></span></td>
+      <td class="coverage"><span data-ice="coverage">66 %</span><span data-ice="coverageCount" class="coverage-count">4/6</span></td>
+      <td style="display: none;" data-ice="size">2615 byte</td>
+      <td style="display: none;" data-ice="lines">81</td>
+      <td style="display: none;" data-ice="updated">2015-12-04 06:43:28 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/info.js.html">src/info.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="variable/index.html#static-variable-keywords">keywords</a></span>
+<span><a href="variable/index.html#static-variable-reservedKeywords">reservedKeywords</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">2/2</span></td>
+      <td style="display: none;" data-ice="size">397 byte</td>
+      <td style="display: none;" data-ice="lines">14</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/CompileOptions.js.html#errorLines=39,42,46,48,49,50,52,54,55,9">src/private/CompileOptions.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="class/src/private/CompileOptions.js~CompileOptions.html">CompileOptions</a></span></td>
+      <td class="coverage"><span data-ice="coverage">9 %</span><span data-ice="coverageCount" class="coverage-count">1/11</span></td>
+      <td style="display: none;" data-ice="size">2163 byte</td>
+      <td style="display: none;" data-ice="lines">82</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:20:22 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/MsAst.js.html#errorLines=10,1004,101,1018,1030,1044,105,1057,1068,1077,1086,1106,1125,115,1167,132,136,140,149,175,189,222,239,257,266,295,312,32,322,334,348,358,375,379,390,401,416,429,441,442,457,484,485,494,495,506,515,52,524,532,533,559,582,593,604,617,628,632,64,640,644,645,654,663,688,699,710,719,729,744,755,769,784,796,809,823,829,835,846,864,873,882,890,901,92,922,934,95,954,971,98,991">src/private/MsAst.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="class/src/private/MsAst.js~Assert.html">Assert</a></span>
+<span><a href="class/src/private/MsAst.js~Assign.html">Assign</a></span>
+<span><a href="class/src/private/MsAst.js~AssignDestructure.html">AssignDestructure</a></span>
+<span><a href="class/src/private/MsAst.js~AssignSingle.html">AssignSingle</a></span>
+<span><a href="class/src/private/MsAst.js~Await.html">Await</a></span>
+<span><a href="class/src/private/MsAst.js~BagEntry.html">BagEntry</a></span>
+<span><a href="class/src/private/MsAst.js~BagSimple.html">BagSimple</a></span>
+<span><a href="class/src/private/MsAst.js~Block.html">Block</a></span>
+<span><a href="class/src/private/MsAst.js~BlockWrap.html">BlockWrap</a></span>
+<span><a href="class/src/private/MsAst.js~Break.html">Break</a></span>
+<span><a href="class/src/private/MsAst.js~BuildEntry.html">BuildEntry</a></span>
+<span><a href="class/src/private/MsAst.js~Call.html">Call</a></span>
+<span><a href="class/src/private/MsAst.js~Case.html">Case</a></span>
+<span><a href="class/src/private/MsAst.js~CasePart.html">CasePart</a></span>
+<span><a href="class/src/private/MsAst.js~Catch.html">Catch</a></span>
+<span><a href="class/src/private/MsAst.js~Class.html">Class</a></span>
+<span><a href="class/src/private/MsAst.js~ClassKindDo.html">ClassKindDo</a></span>
+<span><a href="class/src/private/MsAst.js~Cond.html">Cond</a></span>
+<span><a href="class/src/private/MsAst.js~Conditional.html">Conditional</a></span>
+<span><a href="class/src/private/MsAst.js~Constructor.html">Constructor</a></span>
+<span><a href="class/src/private/MsAst.js~Do.html">Do</a></span>
+<span><a href="class/src/private/MsAst.js~Except.html">Except</a></span>
+<span><a href="class/src/private/MsAst.js~For.html">For</a></span>
+<span><a href="class/src/private/MsAst.js~ForAsync.html">ForAsync</a></span>
+<span><a href="class/src/private/MsAst.js~ForBag.html">ForBag</a></span>
+<span><a href="class/src/private/MsAst.js~Fun.html">Fun</a></span>
+<span><a href="class/src/private/MsAst.js~FunAbstract.html">FunAbstract</a></span>
+<span><a href="class/src/private/MsAst.js~FunLike.html">FunLike</a></span>
+<span><a href="variable/index.html#static-variable-Funs">Funs</a></span>
+<span><a href="class/src/private/MsAst.js~GetterFun.html">GetterFun</a></span>
+<span><a href="class/src/private/MsAst.js~Ignore.html">Ignore</a></span>
+<span><a href="class/src/private/MsAst.js~Import.html">Import</a></span>
+<span><a href="class/src/private/MsAst.js~ImportDo.html">ImportDo</a></span>
+<span><a href="class/src/private/MsAst.js~Iteratee.html">Iteratee</a></span>
+<span><a href="class/src/private/MsAst.js~Kind.html">Kind</a></span>
+<span><a href="class/src/private/MsAst.js~Lazy.html">Lazy</a></span>
+<span><a href="class/src/private/MsAst.js~LineContent.html">LineContent</a></span>
+<span><a href="class/src/private/MsAst.js~LocalAccess.html">LocalAccess</a></span>
+<span><a href="class/src/private/MsAst.js~LocalDeclare.html">LocalDeclare</a></span>
+<span><a href="variable/index.html#static-variable-LocalDeclares">LocalDeclares</a></span>
+<span><a href="class/src/private/MsAst.js~LocalMutate.html">LocalMutate</a></span>
+<span><a href="class/src/private/MsAst.js~Logic.html">Logic</a></span>
+<span><a href="variable/index.html#static-variable-Logics">Logics</a></span>
+<span><a href="class/src/private/MsAst.js~MapEntry.html">MapEntry</a></span>
+<span><a href="class/src/private/MsAst.js~Member.html">Member</a></span>
+<span><a href="class/src/private/MsAst.js~MemberFun.html">MemberFun</a></span>
+<span><a href="class/src/private/MsAst.js~MemberSet.html">MemberSet</a></span>
+<span><a href="class/src/private/MsAst.js~Method.html">Method</a></span>
+<span><a href="class/src/private/MsAst.js~MethodGetter.html">MethodGetter</a></span>
+<span><a href="class/src/private/MsAst.js~MethodImpl.html">MethodImpl</a></span>
+<span><a href="class/src/private/MsAst.js~MethodImplLike.html">MethodImplLike</a></span>
+<span><a href="class/src/private/MsAst.js~MethodSetter.html">MethodSetter</a></span>
+<span><a href="class/src/private/MsAst.js~Module.html">Module</a></span>
+<span><a href="class/src/private/MsAst.js~MsAst.html">MsAst</a></span>
+<span><a href="class/src/private/MsAst.js~MsRegExp.html">MsRegExp</a></span>
+<span><a href="class/src/private/MsAst.js~New.html">New</a></span>
+<span><a href="class/src/private/MsAst.js~Not.html">Not</a></span>
+<span><a href="class/src/private/MsAst.js~NumberLiteral.html">NumberLiteral</a></span>
+<span><a href="class/src/private/MsAst.js~ObjEntry.html">ObjEntry</a></span>
+<span><a href="class/src/private/MsAst.js~ObjEntryAssign.html">ObjEntryAssign</a></span>
+<span><a href="class/src/private/MsAst.js~ObjEntryPlain.html">ObjEntryPlain</a></span>
+<span><a href="class/src/private/MsAst.js~ObjPair.html">ObjPair</a></span>
+<span><a href="class/src/private/MsAst.js~ObjSimple.html">ObjSimple</a></span>
+<span><a href="class/src/private/MsAst.js~Pattern.html">Pattern</a></span>
+<span><a href="class/src/private/MsAst.js~Pipe.html">Pipe</a></span>
+<span><a href="class/src/private/MsAst.js~QuoteAbstract.html">QuoteAbstract</a></span>
+<span><a href="class/src/private/MsAst.js~QuotePlain.html">QuotePlain</a></span>
+<span><a href="class/src/private/MsAst.js~QuoteSimple.html">QuoteSimple</a></span>
+<span><a href="class/src/private/MsAst.js~QuoteTaggedTemplate.html">QuoteTaggedTemplate</a></span>
+<span><a href="class/src/private/MsAst.js~Range.html">Range</a></span>
+<span><a href="class/src/private/MsAst.js~SetSub.html">SetSub</a></span>
+<span><a href="variable/index.html#static-variable-Setters">Setters</a></span>
+<span><a href="class/src/private/MsAst.js~SimpleFun.html">SimpleFun</a></span>
+<span><a href="class/src/private/MsAst.js~SpecialDo.html">SpecialDo</a></span>
+<span><a href="variable/index.html#static-variable-SpecialDos">SpecialDos</a></span>
+<span><a href="class/src/private/MsAst.js~SpecialVal.html">SpecialVal</a></span>
+<span><a href="variable/index.html#static-variable-SpecialVals">SpecialVals</a></span>
+<span><a href="class/src/private/MsAst.js~Spread.html">Spread</a></span>
+<span><a href="class/src/private/MsAst.js~SuperCall.html">SuperCall</a></span>
+<span><a href="class/src/private/MsAst.js~SuperMember.html">SuperMember</a></span>
+<span><a href="class/src/private/MsAst.js~Switch.html">Switch</a></span>
+<span><a href="class/src/private/MsAst.js~SwitchPart.html">SwitchPart</a></span>
+<span><a href="class/src/private/MsAst.js~Throw.html">Throw</a></span>
+<span><a href="class/src/private/MsAst.js~Val.html">Val</a></span>
+<span><a href="class/src/private/MsAst.js~With.html">With</a></span>
+<span><a href="class/src/private/MsAst.js~Yield.html">Yield</a></span>
+<span><a href="class/src/private/MsAst.js~YieldTo.html">YieldTo</a></span></td>
+      <td class="coverage"><span data-ice="coverage">72 %</span><span data-ice="coverageCount" class="coverage-count">247/339</span></td>
+      <td style="display: none;" data-ice="size">24137 byte</td>
+      <td style="display: none;" data-ice="lines">1172</td>
+      <td style="display: none;" data-ice="updated">2015-12-03 03:26:27 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/PathOptions.js.html#errorLines=12,16,3,4,5,8">src/private/PathOptions.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="class/src/private/PathOptions.js~PathOptions.html">PathOptions</a></span></td>
+      <td class="coverage"><span data-ice="coverage">0 %</span><span data-ice="coverageCount" class="coverage-count">0/6</span></td>
+      <td style="display: none;" data-ice="size">508 byte</td>
+      <td style="display: none;" data-ice="lines">32</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:20:22 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/Token.js.html#errorLines=18,19,194,28,330,343,40,54,60,70,76,87,93">src/private/Token.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="class/src/private/Token.js~DocComment.html">DocComment</a></span>
+<span><a href="class/src/private/Token.js~Group.html">Group</a></span>
+<span><a href="variable/index.html#static-variable-Groups">Groups</a></span>
+<span><a href="class/src/private/Token.js~Keyword.html">Keyword</a></span>
+<span><a href="variable/index.html#static-variable-Keywords">Keywords</a></span>
+<span><a href="class/src/private/Token.js~Name.html">Name</a></span>
+<span><a href="class/src/private/Token.js~Token.html">Token</a></span>
+<span><a href="function/index.html#static-function-isAnyKeyword">isAnyKeyword</a></span>
+<span><a href="function/index.html#static-function-isGroup">isGroup</a></span>
+<span><a href="function/index.html#static-function-isKeyword">isKeyword</a></span>
+<span><a href="function/index.html#static-function-isNameKeyword">isNameKeyword</a></span>
+<span><a href="function/index.html#static-function-isReservedKeyword">isReservedKeyword</a></span>
+<span><a href="function/index.html#static-function-keywordName">keywordName</a></span>
+<span><a href="function/index.html#static-function-opKeywordKindFromName">opKeywordKindFromName</a></span>
+<span><a href="function/index.html#static-function-opKeywordKindToSpecialValueKind">opKeywordKindToSpecialValueKind</a></span>
+<span><a href="variable/index.html#static-variable-reservedKeywords">reservedKeywords</a></span>
+<span><a href="function/index.html#static-function-showGroupKind">showGroupKind</a></span>
+<span><a href="function/index.html#static-function-showKeyword">showKeyword</a></span></td>
+      <td class="coverage"><span data-ice="coverage">60 %</span><span data-ice="coverageCount" class="coverage-count">20/33</span></td>
+      <td style="display: none;" data-ice="size">8678 byte</td>
+      <td style="display: none;" data-ice="lines">395</td>
+      <td style="display: none;" data-ice="updated">2015-12-03 05:31:32 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/VerifyResults.js.html#errorLines=8,90">src/private/VerifyResults.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="variable/index.html#static-variable-Blocks">Blocks</a></span>
+<span><a href="variable/index.html#static-variable-Modules">Modules</a></span>
+<span><a href="class/src/private/VerifyResults.js~VerifyResults.html">VerifyResults</a></span></td>
+      <td class="coverage"><span data-ice="coverage">92 %</span><span data-ice="coverageCount" class="coverage-count">23/25</span></td>
+      <td style="display: none;" data-ice="size">3253 byte</td>
+      <td style="display: none;" data-ice="lines">122</td>
+      <td style="display: none;" data-ice="updated">2015-11-03 04:12:29 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/context.js.html">src/private/context.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-check">check</a></span>
+<span><a href="function/index.html#static-function-fail">fail</a></span>
+<span><a href="function/index.html#static-function-setContext">setContext</a></span>
+<span><a href="function/index.html#static-function-unsetContext">unsetContext</a></span>
+<span><a href="function/index.html#static-function-warn">warn</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">5/5</span></td>
+      <td style="display: none;" data-ice="size">1539 byte</td>
+      <td style="display: none;" data-ice="lines">67</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:20:22 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/defaultBuiltins.js.html">src/private/defaultBuiltins.js</a></span></td>
+      <td data-ice="identifier" class="identifiers">-</td>
+      <td class="coverage"><span data-ice="coverage">-</span></td>
+      <td style="display: none;" data-ice="size">2831 byte</td>
+      <td style="display: none;" data-ice="lines">182</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:19:13 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/lex/chars.js.html#errorLines=3,52,64,72">src/private/lex/chars.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="variable/index.html#static-variable-Chars">Chars</a></span>
+<span><a href="variable/index.html#static-variable-isDigit">isDigit</a></span>
+<span><a href="variable/index.html#static-variable-isNameCharacter">isNameCharacter</a></span>
+<span><a href="function/index.html#static-function-showChar">showChar</a></span></td>
+      <td class="coverage"><span data-ice="coverage">0 %</span><span data-ice="coverageCount" class="coverage-count">0/4</span></td>
+      <td style="display: none;" data-ice="size">1395 byte</td>
+      <td style="display: none;" data-ice="lines">72</td>
+      <td style="display: none;" data-ice="updated">2015-12-03 03:07:50 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/lex/groupContext.js.html#errorLines=100,116,127,132,139,14,29,39,46,51,87,9,95">src/private/lex/groupContext.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-addToCurrentGroup">addToCurrentGroup</a></span>
+<span><a href="function/index.html#static-function-closeGroup">closeGroup</a></span>
+<span><a href="function/index.html#static-function-closeGroupsForDedent">closeGroupsForDedent</a></span>
+<span><a href="function/index.html#static-function-closeInterpolationOrParenthesis">closeInterpolationOrParenthesis</a></span>
+<span><a href="function/index.html#static-function-closeLine">closeLine</a></span>
+<span><a href="function/index.html#static-function-closeSpaceOKIfEmpty">closeSpaceOKIfEmpty</a></span>
+<span><a href="function/index.html#static-function-maybeCloseGroup">maybeCloseGroup</a></span>
+<span><a href="function/index.html#static-function-openGroup">openGroup</a></span>
+<span><a href="function/index.html#static-function-openInterpolation">openInterpolation</a></span>
+<span><a href="function/index.html#static-function-openLine">openLine</a></span>
+<span><a href="function/index.html#static-function-openParenthesis">openParenthesis</a></span>
+<span><a href="function/index.html#static-function-setupGroupContext">setupGroupContext</a></span>
+<span><a href="function/index.html#static-function-space">space</a></span>
+<span><a href="function/index.html#static-function-tearDownGroupContext">tearDownGroupContext</a></span></td>
+      <td class="coverage"><span data-ice="coverage">7 %</span><span data-ice="coverageCount" class="coverage-count">1/14</span></td>
+      <td style="display: none;" data-ice="size">3974 byte</td>
+      <td style="display: none;" data-ice="lines">142</td>
+      <td style="display: none;" data-ice="updated">2015-12-03 05:53:20 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/lex/lex*.js.html#errorLines=5">src/private/lex/lex*.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-load">load</a></span></td>
+      <td class="coverage"><span data-ice="coverage">0 %</span><span data-ice="coverageCount" class="coverage-count">0/1</span></td>
+      <td style="display: none;" data-ice="size">149 byte</td>
+      <td style="display: none;" data-ice="lines">7</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/lex/lex.js.html">src/private/lex/lex.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-lex">lex</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">1110 byte</td>
+      <td style="display: none;" data-ice="lines">38</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/lex/lexName.js.html">src/private/lex/lexName.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-lexName">lexName</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">1544 byte</td>
+      <td style="display: none;" data-ice="lines">48</td>
+      <td style="display: none;" data-ice="updated">2015-12-03 05:53:00 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/lex/lexPlain.js.html#errorLines=21">src/private/lex/lexPlain.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-lexPlain">lexPlain</a></span></td>
+      <td class="coverage"><span data-ice="coverage">0 %</span><span data-ice="coverageCount" class="coverage-count">0/1</span></td>
+      <td style="display: none;" data-ice="size">7994 byte</td>
+      <td style="display: none;" data-ice="lines">286</td>
+      <td style="display: none;" data-ice="updated">2015-12-03 05:52:04 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/lex/lexQuote.js.html#errorLines=13">src/private/lex/lexQuote.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-lexQuote">lexQuote</a></span></td>
+      <td class="coverage"><span data-ice="coverage">0 %</span><span data-ice="coverageCount" class="coverage-count">0/1</span></td>
+      <td style="display: none;" data-ice="size">4434 byte</td>
+      <td style="display: none;" data-ice="lines">157</td>
+      <td style="display: none;" data-ice="updated">2015-12-04 03:43:26 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/lex/loadLex*.js.html">src/private/lex/loadLex*.js</a></span></td>
+      <td data-ice="identifier" class="identifiers">-</td>
+      <td class="coverage"><span data-ice="coverage">-</span></td>
+      <td style="display: none;" data-ice="size">157 byte</td>
+      <td style="display: none;" data-ice="lines">6</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/lex/sourceContext.js.html#errorLines=100,104,108,112,123,14,26,30,36,41,47,55,62,69,80,89,92">src/private/lex/sourceContext.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-eat">eat</a></span>
+<span><a href="function/index.html#static-function-eatRestOfLine">eatRestOfLine</a></span>
+<span><a href="function/index.html#static-function-peek">peek</a></span>
+<span><a href="function/index.html#static-function-pos">pos</a></span>
+<span><a href="function/index.html#static-function-setupSourceContext">setupSourceContext</a></span>
+<span><a href="function/index.html#static-function-skip">skip</a></span>
+<span><a href="function/index.html#static-function-skipNewlines">skipNewlines</a></span>
+<span><a href="function/index.html#static-function-skipRestOfLine">skipRestOfLine</a></span>
+<span><a href="function/index.html#static-function-skipWhile">skipWhile</a></span>
+<span><a href="function/index.html#static-function-skipWhileEquals">skipWhileEquals</a></span>
+<span><a href="function/index.html#static-function-stepBackMany">stepBackMany</a></span>
+<span><a href="function/index.html#static-function-takeWhile">takeWhile</a></span>
+<span><a href="function/index.html#static-function-takeWhileWithPrev">takeWhileWithPrev</a></span>
+<span><a href="function/index.html#static-function-tryEat">tryEat</a></span>
+<span><a href="function/index.html#static-function-tryEat2">tryEat2</a></span>
+<span><a href="function/index.html#static-function-tryEat3">tryEat3</a></span>
+<span><a href="function/index.html#static-function-tryEatNewline">tryEatNewline</a></span></td>
+      <td class="coverage"><span data-ice="coverage">0 %</span><span data-ice="coverageCount" class="coverage-count">0/17</span></td>
+      <td style="display: none;" data-ice="size">4023 byte</td>
+      <td style="display: none;" data-ice="lines">165</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:19:13 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/manglePath.js.html">src/private/manglePath.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-manglePath">manglePath</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">216 byte</td>
+      <td style="display: none;" data-ice="lines">7</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/Slice.js.html">src/private/parse/Slice.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="class/src/private/parse/Slice.js~Slice.html">Slice</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">18/18</span></td>
+      <td style="display: none;" data-ice="size">4178 byte</td>
+      <td style="display: none;" data-ice="lines">185</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/checks.js.html">src/private/parse/checks.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-checkEmpty">checkEmpty</a></span>
+<span><a href="function/index.html#static-function-checkKeyword">checkKeyword</a></span>
+<span><a href="function/index.html#static-function-checkNonEmpty">checkNonEmpty</a></span>
+<span><a href="function/index.html#static-function-unexpected">unexpected</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">4/4</span></td>
+      <td style="display: none;" data-ice="size">873 byte</td>
+      <td style="display: none;" data-ice="lines">24</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:19:13 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/loadParse*.js.html">src/private/parse/loadParse*.js</a></span></td>
+      <td data-ice="identifier" class="identifiers">-</td>
+      <td class="coverage"><span data-ice="coverage">-</span></td>
+      <td style="display: none;" data-ice="size">488 byte</td>
+      <td style="display: none;" data-ice="lines">14</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parse*.js.html#errorLines=12">src/private/parse/parse*.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-load">load</a></span></td>
+      <td class="coverage"><span data-ice="coverage">0 %</span><span data-ice="coverageCount" class="coverage-count">0/1</span></td>
+      <td style="display: none;" data-ice="size">522 byte</td>
+      <td style="display: none;" data-ice="lines">21</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parse.js.html">src/private/parse/parse.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parse">parse</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">662 byte</td>
+      <td style="display: none;" data-ice="lines">20</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 06:15:53 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseBlock.js.html">src/private/parse/parseBlock.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-beforeAndBlock">beforeAndBlock</a></span>
+<span><a href="function/index.html#static-function-beforeAndOpBlock">beforeAndOpBlock</a></span>
+<span><a href="function/index.html#static-function-justBlock">justBlock</a></span>
+<span><a href="function/index.html#static-function-parseBlock">parseBlock</a></span>
+<span><a href="function/index.html#static-function-parseBlockWrap">parseBlockWrap</a></span>
+<span><a href="function/index.html#static-function-parseJustBlock">parseJustBlock</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">6/6</span></td>
+      <td style="display: none;" data-ice="size">1891 byte</td>
+      <td style="display: none;" data-ice="lines">58</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseCase.js.html">src/private/parse/parseCase.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseCase">parseCase</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">1845 byte</td>
+      <td style="display: none;" data-ice="lines">51</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseClass.js.html">src/private/parse/parseClass.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseClass">parseClass</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">2170 byte</td>
+      <td style="display: none;" data-ice="lines">71</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:19:13 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseDel.js.html#errorLines=8">src/private/parse/parseDel.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseDel">parseDel</a></span></td>
+      <td class="coverage"><span data-ice="coverage">0 %</span><span data-ice="coverageCount" class="coverage-count">0/1</span></td>
+      <td style="display: none;" data-ice="size">753 byte</td>
+      <td style="display: none;" data-ice="lines">23</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseExcept.js.html">src/private/parse/parseExcept.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseExcept">parseExcept</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">2002 byte</td>
+      <td style="display: none;" data-ice="lines">68</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseExpr.js.html#errorLines=50">src/private/parse/parseExpr.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-opParseExpr">opParseExpr</a></span>
+<span><a href="function/index.html#static-function-parseExpr">parseExpr</a></span>
+<span><a href="function/index.html#static-function-parseExprParts">parseExprParts</a></span></td>
+      <td class="coverage"><span data-ice="coverage">66 %</span><span data-ice="coverageCount" class="coverage-count">2/3</span></td>
+      <td style="display: none;" data-ice="size">6641 byte</td>
+      <td style="display: none;" data-ice="lines">180</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseFor.js.html#errorLines=9">src/private/parse/parseFor.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseFor">parseFor</a></span></td>
+      <td class="coverage"><span data-ice="coverage">0 %</span><span data-ice="coverageCount" class="coverage-count">0/1</span></td>
+      <td style="display: none;" data-ice="size">1155 byte</td>
+      <td style="display: none;" data-ice="lines">30</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:19:13 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseFun.js.html">src/private/parse/parseFun.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-funArgsAndBlock">funArgsAndBlock</a></span>
+<span><a href="function/index.html#static-function-parseFun">parseFun</a></span>
+<span><a href="function/index.html#static-function-parseFunLike">parseFunLike</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">3/3</span></td>
+      <td style="display: none;" data-ice="size">4823 byte</td>
+      <td style="display: none;" data-ice="lines">143</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:19:13 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseKind.js.html">src/private/parse/parseKind.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseKind">parseKind</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">1286 byte</td>
+      <td style="display: none;" data-ice="lines">49</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:19:13 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseLine.js.html#errorLines=70">src/private/parse/parseLine.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseLine">parseLine</a></span>
+<span><a href="function/index.html#static-function-parseLines">parseLines</a></span></td>
+      <td class="coverage"><span data-ice="coverage">50 %</span><span data-ice="coverageCount" class="coverage-count">1/2</span></td>
+      <td style="display: none;" data-ice="size">6396 byte</td>
+      <td style="display: none;" data-ice="lines">187</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseLocalDeclares.js.html">src/private/parse/parseLocalDeclares.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseLocalDeclare">parseLocalDeclare</a></span>
+<span><a href="function/index.html#static-function-parseLocalDeclareFromSpaced">parseLocalDeclareFromSpaced</a></span>
+<span><a href="function/index.html#static-function-parseLocalDeclareOrFocus">parseLocalDeclareOrFocus</a></span>
+<span><a href="function/index.html#static-function-parseLocalDeclares">parseLocalDeclares</a></span>
+<span><a href="function/index.html#static-function-parseLocalDeclaresAndMemberArgs">parseLocalDeclaresAndMemberArgs</a></span>
+<span><a href="function/index.html#static-function-parseLocalDeclaresJustNames">parseLocalDeclaresJustNames</a></span>
+<span><a href="function/index.html#static-function-parseLocalName">parseLocalName</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">7/7</span></td>
+      <td style="display: none;" data-ice="size">3443 byte</td>
+      <td style="display: none;" data-ice="lines">113</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:19:13 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseMemberName.js.html">src/private/parse/parseMemberName.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseMemberName">parseMemberName</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">520 byte</td>
+      <td style="display: none;" data-ice="lines">20</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseMethod.js.html#errorLines=7">src/private/parse/parseMethod.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseMethod">parseMethod</a></span></td>
+      <td class="coverage"><span data-ice="coverage">0 %</span><span data-ice="coverageCount" class="coverage-count">0/1</span></td>
+      <td style="display: none;" data-ice="size">477 byte</td>
+      <td style="display: none;" data-ice="lines">12</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseMethodImpls.js.html#errorLines=12,8">src/private/parse/parseMethodImpls.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseMethodImpls">parseMethodImpls</a></span>
+<span><a href="function/index.html#static-function-parseStatics">parseStatics</a></span></td>
+      <td class="coverage"><span data-ice="coverage">0 %</span><span data-ice="coverageCount" class="coverage-count">0/2</span></td>
+      <td style="display: none;" data-ice="size">1468 byte</td>
+      <td style="display: none;" data-ice="lines">42</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseMethodSplit.js.html">src/private/parse/parseMethodSplit.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseMethodSplit">parseMethodSplit</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">1420 byte</td>
+      <td style="display: none;" data-ice="lines">41</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:19:13 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseModule.js.html">src/private/parse/parseModule.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseModule">parseModule</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">4090 byte</td>
+      <td style="display: none;" data-ice="lines">138</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:20:22 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseName.js.html">src/private/parse/parseName.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseName">parseName</a></span>
+<span><a href="function/index.html#static-function-tryParseName">tryParseName</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">2/2</span></td>
+      <td style="display: none;" data-ice="size">533 byte</td>
+      <td style="display: none;" data-ice="lines">25</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseQuote.js.html">src/private/parse/parseQuote.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseQuote">parseQuote</a></span>
+<span><a href="function/index.html#static-function-parseRegExp">parseRegExp</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">2/2</span></td>
+      <td style="display: none;" data-ice="size">902 byte</td>
+      <td style="display: none;" data-ice="lines">30</td>
+      <td style="display: none;" data-ice="updated">2015-12-03 04:20:25 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseSingle.js.html">src/private/parse/parseSingle.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseSingle">parseSingle</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">1491 byte</td>
+      <td style="display: none;" data-ice="lines">47</td>
+      <td style="display: none;" data-ice="updated">2015-12-03 04:18:45 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseSpaced.js.html">src/private/parse/parseSpaced.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseSpaced">parseSpaced</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">4746 byte</td>
+      <td style="display: none;" data-ice="lines">141</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/parseSwitch.js.html">src/private/parse/parseSwitch.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-parseSwitch">parseSwitch</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">1216 byte</td>
+      <td style="display: none;" data-ice="lines">29</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/parse/tryTakeComment.js.html">src/private/parse/tryTakeComment.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-tryTakeComment">tryTakeComment</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">518 byte</td>
+      <td style="display: none;" data-ice="lines">24</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:19:13 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/render.js.html">src/private/render.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-render">render</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">357 byte</td>
+      <td style="display: none;" data-ice="lines">9</td>
+      <td style="display: none;" data-ice="updated">2015-12-04 06:37:11 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/transpile/ast-constants.js.html#errorLines=7">src/private/transpile/ast-constants.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="variable/index.html#static-variable-GlobalError">GlobalError</a></span></td>
+      <td class="coverage"><span data-ice="coverage">0 %</span><span data-ice="coverageCount" class="coverage-count">0/1</span></td>
+      <td style="display: none;" data-ice="size">2127 byte</td>
+      <td style="display: none;" data-ice="lines">46</td>
+      <td style="display: none;" data-ice="updated">2015-12-04 03:38:41 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/transpile/context.js.html#errorLines=14,19,25,8">src/private/transpile/context.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-getDestructuredId">getDestructuredId</a></span>
+<span><a href="function/index.html#static-function-setup">setup</a></span>
+<span><a href="function/index.html#static-function-tearDown">tearDown</a></span>
+<span><a href="function/index.html#static-function-withFunKind">withFunKind</a></span></td>
+      <td class="coverage"><span data-ice="coverage">0 %</span><span data-ice="coverageCount" class="coverage-count">0/4</span></td>
+      <td style="display: none;" data-ice="size">647 byte</td>
+      <td style="display: none;" data-ice="lines">31</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/transpile/transpile.js.html">src/private/transpile/transpile.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-transpile">transpile</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">20131 byte</td>
+      <td style="display: none;" data-ice="lines">629</td>
+      <td style="display: none;" data-ice="updated">2015-12-04 04:10:03 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/transpile/transpileExcept.js.html#errorLines=6">src/private/transpile/transpileExcept.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-transpileCatch">transpileCatch</a></span>
+<span><a href="function/index.html#static-function-transpileExcept">transpileExcept</a></span></td>
+      <td class="coverage"><span data-ice="coverage">50 %</span><span data-ice="coverageCount" class="coverage-count">1/2</span></td>
+      <td style="display: none;" data-ice="size">2808 byte</td>
+      <td style="display: none;" data-ice="lines">81</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:19:13 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/transpile/transpileMethod.js.html">src/private/transpile/transpileMethod.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-transpileMethodToDefinition">transpileMethodToDefinition</a></span>
+<span><a href="function/index.html#static-function-transpileMethodToProperty">transpileMethodToProperty</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">2/2</span></td>
+      <td style="display: none;" data-ice="size">1357 byte</td>
+      <td style="display: none;" data-ice="lines">36</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/transpile/transpileModule.js.html#errorLines=15,61">src/private/transpile/transpileModule.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-exportNamedOrDefault">exportNamedOrDefault</a></span>
+<span><a href="function/index.html#static-function-transpileModule">transpileModule</a></span></td>
+      <td class="coverage"><span data-ice="coverage">0 %</span><span data-ice="coverageCount" class="coverage-count">0/2</span></td>
+      <td style="display: none;" data-ice="size">5678 byte</td>
+      <td style="display: none;" data-ice="lines">159</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:20:22 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/transpile/util.js.html#errorLines=103,109,114,118,122,13,16,169,181,185,19,22,25,39,44,50,59,70,76,87,93,99">src/private/transpile/util.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-accessLocalDeclare">accessLocalDeclare</a></span>
+<span><a href="function/index.html#static-function-blockWrap">blockWrap</a></span>
+<span><a href="function/index.html#static-function-blockWrapIfBlock">blockWrapIfBlock</a></span>
+<span><a href="function/index.html#static-function-blockWrapIfVal">blockWrapIfVal</a></span>
+<span><a href="function/index.html#static-function-callFocusFun">callFocusFun</a></span>
+<span><a href="function/index.html#static-function-declare">declare</a></span>
+<span><a href="function/index.html#static-function-doThrow">doThrow</a></span>
+<span><a href="function/index.html#static-function-focusFun">focusFun</a></span>
+<span><a href="function/index.html#static-function-idForDeclareCached">idForDeclareCached</a></span>
+<span><a href="function/index.html#static-function-lazyWrap">lazyWrap</a></span>
+<span><a href="function/index.html#static-function-makeDeclarator">makeDeclarator</a></span>
+<span><a href="function/index.html#static-function-makeDestructureDeclarators">makeDestructureDeclarators</a></span>
+<span><a href="function/index.html#static-function-maybeWrapInCheckContains">maybeWrapInCheckContains</a></span>
+<span><a href="function/index.html#static-function-memberStringOrVal">memberStringOrVal</a></span>
+<span><a href="function/index.html#static-function-msCall">msCall</a></span>
+<span><a href="function/index.html#static-function-msMember">msMember</a></span>
+<span><a href="function/index.html#static-function-opTypeCheckForLocalDeclare">opTypeCheckForLocalDeclare</a></span>
+<span><a href="function/index.html#static-function-plainLet">plainLet</a></span>
+<span><a href="function/index.html#static-function-t0">t0</a></span>
+<span><a href="function/index.html#static-function-t1">t1</a></span>
+<span><a href="function/index.html#static-function-t2">t2</a></span>
+<span><a href="function/index.html#static-function-t3">t3</a></span>
+<span><a href="function/index.html#static-function-tLines">tLines</a></span>
+<span><a href="function/index.html#static-function-throwErrorFromString">throwErrorFromString</a></span>
+<span><a href="function/index.html#static-function-transpileName">transpileName</a></span></td>
+      <td class="coverage"><span data-ice="coverage">12 %</span><span data-ice="coverageCount" class="coverage-count">3/25</span></td>
+      <td style="display: none;" data-ice="size">6227 byte</td>
+      <td style="display: none;" data-ice="lines">187</td>
+      <td style="display: none;" data-ice="updated">2015-11-03 04:22:52 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/util.js.html">src/private/util.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-allSame">allSame</a></span>
+<span><a href="function/index.html#static-function-assert">assert</a></span>
+<span><a href="function/index.html#static-function-cat">cat</a></span>
+<span><a href="function/index.html#static-function-flatMap">flatMap</a></span>
+<span><a href="function/index.html#static-function-flatOpMap">flatOpMap</a></span>
+<span><a href="function/index.html#static-function-head">head</a></span>
+<span><a href="function/index.html#static-function-ifElse">ifElse</a></span>
+<span><a href="function/index.html#static-function-implementMany">implementMany</a></span>
+<span><a href="function/index.html#static-function-isEmpty">isEmpty</a></span>
+<span><a href="function/index.html#static-function-last">last</a></span>
+<span><a href="function/index.html#static-function-opEach">opEach</a></span>
+<span><a href="function/index.html#static-function-opIf">opIf</a></span>
+<span><a href="function/index.html#static-function-opMap">opMap</a></span>
+<span><a href="function/index.html#static-function-opOr">opOr</a></span>
+<span><a href="function/index.html#static-function-reverseIter">reverseIter</a></span>
+<span><a href="function/index.html#static-function-rtail">rtail</a></span>
+<span><a href="function/index.html#static-function-tail">tail</a></span>
+<span><a href="function/index.html#static-function-toArray">toArray</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">18/18</span></td>
+      <td style="display: none;" data-ice="size">3346 byte</td>
+      <td style="display: none;" data-ice="lines">140</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:20:22 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/verify/SK.js.html">src/private/verify/SK.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="variable/index.html#static-variable-SK">SK</a></span>
+<span><a href="function/index.html#static-function-checkDo">checkDo</a></span>
+<span><a href="function/index.html#static-function-checkVal">checkVal</a></span>
+<span><a href="function/index.html#static-function-getSK">getSK</a></span>
+<span><a href="function/index.html#static-function-markStatement">markStatement</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">5/5</span></td>
+      <td style="display: none;" data-ice="size">3840 byte</td>
+      <td style="display: none;" data-ice="lines">137</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:19:13 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/verify/autoBlockKind.js.html#errorLines=11,6">src/private/verify/autoBlockKind.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-autoBlockKind">autoBlockKind</a></span>
+<span><a href="function/index.html#static-function-opBlockBuildKind">opBlockBuildKind</a></span></td>
+      <td class="coverage"><span data-ice="coverage">0 %</span><span data-ice="coverageCount" class="coverage-count">0/2</span></td>
+      <td style="display: none;" data-ice="size">860 byte</td>
+      <td style="display: none;" data-ice="lines">25</td>
+      <td style="display: none;" data-ice="updated">2015-12-04 03:39:54 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/verify/context.js.html#errorLines=106,110,117,43,54,58,65,72,79,93">src/private/verify/context.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-setPendingBlockLocals">setPendingBlockLocals</a></span>
+<span><a href="function/index.html#static-function-setup">setup</a></span>
+<span><a href="function/index.html#static-function-tearDown">tearDown</a></span>
+<span><a href="function/index.html#static-function-withFun">withFun</a></span>
+<span><a href="function/index.html#static-function-withIife">withIife</a></span>
+<span><a href="function/index.html#static-function-withIifeIf">withIifeIf</a></span>
+<span><a href="function/index.html#static-function-withIifeIfVal">withIifeIfVal</a></span>
+<span><a href="function/index.html#static-function-withInFunKind">withInFunKind</a></span>
+<span><a href="function/index.html#static-function-withInSwitch">withInSwitch</a></span>
+<span><a href="function/index.html#static-function-withLoop">withLoop</a></span>
+<span><a href="function/index.html#static-function-withMethod">withMethod</a></span>
+<span><a href="function/index.html#static-function-withName">withName</a></span></td>
+      <td class="coverage"><span data-ice="coverage">16 %</span><span data-ice="coverageCount" class="coverage-count">2/12</span></td>
+      <td style="display: none;" data-ice="size">2627 byte</td>
+      <td style="display: none;" data-ice="lines">123</td>
+      <td style="display: none;" data-ice="updated">2015-11-03 04:04:21 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/verify/locals.js.html#errorLines=10,100,14,19,26,31,35,40,51,6,66,71,81,95">src/private/verify/locals.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-accessLocal">accessLocal</a></span>
+<span><a href="function/index.html#static-function-deleteLocal">deleteLocal</a></span>
+<span><a href="function/index.html#static-function-failMissingLocal">failMissingLocal</a></span>
+<span><a href="function/index.html#static-function-plusLocal">plusLocal</a></span>
+<span><a href="function/index.html#static-function-plusLocals">plusLocals</a></span>
+<span><a href="function/index.html#static-function-registerAndPlusLocal">registerAndPlusLocal</a></span>
+<span><a href="function/index.html#static-function-registerLocal">registerLocal</a></span>
+<span><a href="function/index.html#static-function-setDeclareAccessed">setDeclareAccessed</a></span>
+<span><a href="function/index.html#static-function-setLocal">setLocal</a></span>
+<span><a href="function/index.html#static-function-verifyAndPlusLocal">verifyAndPlusLocal</a></span>
+<span><a href="function/index.html#static-function-verifyAndPlusLocals">verifyAndPlusLocals</a></span>
+<span><a href="function/index.html#static-function-verifyLocalDeclare">verifyLocalDeclare</a></span>
+<span><a href="function/index.html#static-function-warnUnusedLocals">warnUnusedLocals</a></span>
+<span><a href="function/index.html#static-function-withBlockLocals">withBlockLocals</a></span></td>
+      <td class="coverage"><span data-ice="coverage">0 %</span><span data-ice="coverageCount" class="coverage-count">0/14</span></td>
+      <td style="display: none;" data-ice="size">3011 byte</td>
+      <td style="display: none;" data-ice="lines">104</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/verify/util.js.html#errorLines=45,49">src/private/verify/util.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-makeUseOptional">makeUseOptional</a></span>
+<span><a href="function/index.html#static-function-makeUseOptionalIfFocus">makeUseOptionalIfFocus</a></span>
+<span><a href="function/index.html#static-function-setName">setName</a></span>
+<span><a href="function/index.html#static-function-verifyEach">verifyEach</a></span>
+<span><a href="function/index.html#static-function-verifyName">verifyName</a></span>
+<span><a href="function/index.html#static-function-verifyNotLazy">verifyNotLazy</a></span>
+<span><a href="function/index.html#static-function-verifyOp">verifyOp</a></span></td>
+      <td class="coverage"><span data-ice="coverage">71 %</span><span data-ice="coverageCount" class="coverage-count">5/7</span></td>
+      <td style="display: none;" data-ice="size">1197 byte</td>
+      <td style="display: none;" data-ice="lines">51</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:19:13 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/verify/verify.js.html">src/private/verify/verify.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-verify">verify</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">15319 byte</td>
+      <td style="display: none;" data-ice="lines">634</td>
+      <td style="display: none;" data-ice="updated">2015-12-04 04:13:10 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/verify/verifyBlock.js.html#errorLines=11,36,41">src/private/verify/verifyBlock.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-verifyBlock">verifyBlock</a></span>
+<span><a href="function/index.html#static-function-verifyDoBlock">verifyDoBlock</a></span>
+<span><a href="function/index.html#static-function-verifyModuleLines">verifyModuleLines</a></span></td>
+      <td class="coverage"><span data-ice="coverage">0 %</span><span data-ice="coverageCount" class="coverage-count">0/3</span></td>
+      <td style="display: none;" data-ice="size">2047 byte</td>
+      <td style="display: none;" data-ice="lines">79</td>
+      <td style="display: none;" data-ice="updated">2015-11-02 07:19:13 (UTC)</td>
+    </tr>
+<tr data-ice="file">
+      <td data-ice="filePath"><span><a href="file/src/private/verify/verifyLines.js.html">src/private/verify/verifyLines.js</a></span></td>
+      <td data-ice="identifier" class="identifiers"><span><a href="function/index.html#static-function-verifyLines">verifyLines</a></span></td>
+      <td class="coverage"><span data-ice="coverage">100 %</span><span data-ice="coverageCount" class="coverage-count">1/1</span></td>
+      <td style="display: none;" data-ice="size">2420 byte</td>
+      <td style="display: none;" data-ice="lines">84</td>
+      <td style="display: none;" data-ice="updated">2015-11-01 06:22:05 (UTC)</td>
+    </tr>
+</tbody>
+</table>
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.3)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

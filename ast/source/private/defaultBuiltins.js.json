@@ -1,0 +1,5131 @@
+{
+  "type": "Program",
+  "body": [
+    {
+      "type": "ExportDefaultDeclaration",
+      "declaration": {
+        "type": "ObjectExpression",
+        "properties": [
+          {
+            "type": "Property",
+            "key": {
+              "type": "Identifier",
+              "name": "global",
+              "range": [
+                18,
+                24
+              ],
+              "loc": {
+                "start": {
+                  "line": 2,
+                  "column": 1
+                },
+                "end": {
+                  "line": 2,
+                  "column": 7
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "Array",
+                  "raw": "'Array'",
+                  "range": [
+                    52,
+                    59
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 4,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 4,
+                      "column": 9
+                    }
+                  },
+                  "leadingComments": [
+                    {
+                      "type": "Line",
+                      "value": " Standard globals",
+                      "range": [
+                        30,
+                        49
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 3,
+                          "column": 2
+                        },
+                        "end": {
+                          "line": 3,
+                          "column": 21
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "Literal",
+                  "value": "Boolean",
+                  "raw": "'Boolean'",
+                  "range": [
+                    63,
+                    72
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 5,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 5,
+                      "column": 11
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "console",
+                  "raw": "'console'",
+                  "range": [
+                    76,
+                    85
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 6,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 6,
+                      "column": 11
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Date",
+                  "raw": "'Date'",
+                  "range": [
+                    89,
+                    95
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 7,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 7,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Error",
+                  "raw": "'Error'",
+                  "range": [
+                    99,
+                    106
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 8,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 8,
+                      "column": 9
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Function",
+                  "raw": "'Function'",
+                  "range": [
+                    110,
+                    120
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 9,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 9,
+                      "column": 12
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Intl",
+                  "raw": "'Intl'",
+                  "range": [
+                    124,
+                    130
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 10,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 10,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "JSON",
+                  "raw": "'JSON'",
+                  "range": [
+                    134,
+                    140
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 11,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 11,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Promise",
+                  "raw": "'Promise'",
+                  "range": [
+                    144,
+                    153
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 12,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 12,
+                      "column": 11
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Proxy",
+                  "raw": "'Proxy'",
+                  "range": [
+                    157,
+                    164
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 13,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 13,
+                      "column": 9
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Math",
+                  "raw": "'Math'",
+                  "range": [
+                    168,
+                    174
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 14,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 14,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Number",
+                  "raw": "'Number'",
+                  "range": [
+                    178,
+                    186
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 15,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 15,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Object",
+                  "raw": "'Object'",
+                  "range": [
+                    190,
+                    198
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 16,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 16,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Reflect",
+                  "raw": "'Reflect'",
+                  "range": [
+                    202,
+                    211
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 17,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 17,
+                      "column": 11
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "RegExp",
+                  "raw": "'RegExp'",
+                  "range": [
+                    215,
+                    223
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 18,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 18,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "SIMD",
+                  "raw": "'SIMD'",
+                  "range": [
+                    227,
+                    233
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 19,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 19,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "String",
+                  "raw": "'String'",
+                  "range": [
+                    237,
+                    245
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 20,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 20,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Symbol",
+                  "raw": "'Symbol'",
+                  "range": [
+                    249,
+                    257
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 21,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 21,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "EvalError",
+                  "raw": "'EvalError'",
+                  "range": [
+                    274,
+                    285
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 24,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 24,
+                      "column": 13
+                    }
+                  },
+                  "leadingComments": [
+                    {
+                      "type": "Line",
+                      "value": " Errors",
+                      "range": [
+                        262,
+                        271
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 23,
+                          "column": 2
+                        },
+                        "end": {
+                          "line": 23,
+                          "column": 11
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "Literal",
+                  "value": "InternalError",
+                  "raw": "'InternalError'",
+                  "range": [
+                    289,
+                    304
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 25,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 25,
+                      "column": 17
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "RangeError",
+                  "raw": "'RangeError'",
+                  "range": [
+                    308,
+                    320
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 26,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 26,
+                      "column": 14
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "ReferenceError",
+                  "raw": "'ReferenceError'",
+                  "range": [
+                    324,
+                    340
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 27,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 27,
+                      "column": 18
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "SyntaxError",
+                  "raw": "'SyntaxError'",
+                  "range": [
+                    344,
+                    357
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 28,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 28,
+                      "column": 15
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "TypeError",
+                  "raw": "'TypeError'",
+                  "range": [
+                    361,
+                    372
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 29,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 29,
+                      "column": 13
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "URIError",
+                  "raw": "'URIError'",
+                  "range": [
+                    376,
+                    386
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 30,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 30,
+                      "column": 12
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "ArrayBuffer",
+                  "raw": "'ArrayBuffer'",
+                  "range": [
+                    418,
+                    431
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 33,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 33,
+                      "column": 15
+                    }
+                  },
+                  "leadingComments": [
+                    {
+                      "type": "Line",
+                      "value": " ArrayBuffer and views",
+                      "range": [
+                        391,
+                        415
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 32,
+                          "column": 2
+                        },
+                        "end": {
+                          "line": 32,
+                          "column": 26
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "Literal",
+                  "value": "DataView",
+                  "raw": "'DataView'",
+                  "range": [
+                    435,
+                    445
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 34,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 34,
+                      "column": 12
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Float32Array",
+                  "raw": "'Float32Array'",
+                  "range": [
+                    449,
+                    463
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 35,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 35,
+                      "column": 16
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Float64Array",
+                  "raw": "'Float64Array'",
+                  "range": [
+                    467,
+                    481
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 36,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 36,
+                      "column": 16
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Int16Array",
+                  "raw": "'Int16Array'",
+                  "range": [
+                    485,
+                    497
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 37,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 37,
+                      "column": 14
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Int32Array",
+                  "raw": "'Int32Array'",
+                  "range": [
+                    501,
+                    513
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 38,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 38,
+                      "column": 14
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Int8Array",
+                  "raw": "'Int8Array'",
+                  "range": [
+                    517,
+                    528
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 39,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 39,
+                      "column": 13
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Uint16Array",
+                  "raw": "'Uint16Array'",
+                  "range": [
+                    532,
+                    545
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 40,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 40,
+                      "column": 15
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Uint32Array",
+                  "raw": "'Uint32Array'",
+                  "range": [
+                    549,
+                    562
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 41,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 41,
+                      "column": 15
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Uint8Array",
+                  "raw": "'Uint8Array'",
+                  "range": [
+                    566,
+                    578
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 42,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 42,
+                      "column": 14
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Uint8ClampedArray",
+                  "raw": "'Uint8ClampedArray'",
+                  "range": [
+                    582,
+                    601
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 43,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 43,
+                      "column": 21
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "decodeURI",
+                  "raw": "'decodeURI'",
+                  "range": [
+                    625,
+                    636
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 46,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 46,
+                      "column": 13
+                    }
+                  },
+                  "leadingComments": [
+                    {
+                      "type": "Line",
+                      "value": " URI functions",
+                      "range": [
+                        606,
+                        622
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 45,
+                          "column": 2
+                        },
+                        "end": {
+                          "line": 45,
+                          "column": 18
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "Literal",
+                  "value": "decodeURIComponent",
+                  "raw": "'decodeURIComponent'",
+                  "range": [
+                    640,
+                    660
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 47,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 47,
+                      "column": 22
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "encodeURI",
+                  "raw": "'encodeURI'",
+                  "range": [
+                    664,
+                    675
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 48,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 48,
+                      "column": 13
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "encodeURIComponent",
+                  "raw": "'encodeURIComponent'",
+                  "range": [
+                    679,
+                    699
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 49,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 49,
+                      "column": 22
+                    }
+                  },
+                  "trailingComments": [
+                    {
+                      "type": "Line",
+                      "value": " Missing globals:",
+                      "range": [
+                        703,
+                        722
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 51,
+                          "column": 2
+                        },
+                        "end": {
+                          "line": 51,
+                          "column": 21
+                        }
+                      }
+                    },
+                    {
+                      "type": "Line",
+                      "value": " eval: Want to discourage use",
+                      "range": [
+                        725,
+                        756
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 52,
+                          "column": 2
+                        },
+                        "end": {
+                          "line": 52,
+                          "column": 33
+                        }
+                      }
+                    },
+                    {
+                      "type": "Line",
+                      "value": " isFinite, isNaN, parseFloat, parseInt: use Number.xxx functions",
+                      "range": [
+                        759,
+                        825
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 53,
+                          "column": 2
+                        },
+                        "end": {
+                          "line": 53,
+                          "column": 68
+                        }
+                      }
+                    },
+                    {
+                      "type": "Line",
+                      "value": " Map, Set: have different meanings for msl. Use Id-Map and Id-Set for native versions.",
+                      "range": [
+                        828,
+                        916
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 54,
+                          "column": 2
+                        },
+                        "end": {
+                          "line": 54,
+                          "column": 90
+                        }
+                      }
+                    },
+                    {
+                      "type": "Line",
+                      "value": " WeakMap, WeakSet: use Weak-Id-Map and Weak-Id-Set",
+                      "range": [
+                        919,
+                        971
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 55,
+                          "column": 2
+                        },
+                        "end": {
+                          "line": 55,
+                          "column": 54
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "range": [
+                26,
+                974
+              ],
+              "loc": {
+                "start": {
+                  "line": 2,
+                  "column": 9
+                },
+                "end": {
+                  "line": 56,
+                  "column": 2
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              18,
+              974
+            ],
+            "loc": {
+              "start": {
+                "line": 2,
+                "column": 1
+              },
+              "end": {
+                "line": 56,
+                "column": 2
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.@.?",
+              "raw": "'msl.@.?'",
+              "range": [
+                977,
+                986
+              ],
+              "loc": {
+                "start": {
+                  "line": 57,
+                  "column": 1
+                },
+                "end": {
+                  "line": 57,
+                  "column": 10
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "_",
+                  "raw": "'_'",
+                  "range": [
+                    992,
+                    995
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 58,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 58,
+                      "column": 5
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "?None",
+                  "raw": "'?None'",
+                  "range": [
+                    999,
+                    1006
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 59,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 59,
+                      "column": 9
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Opt->?",
+                  "raw": "'Opt->?'",
+                  "range": [
+                    1010,
+                    1018
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 60,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 60,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "?->Opt",
+                  "raw": "'?->Opt'",
+                  "range": [
+                    1022,
+                    1030
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 61,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 61,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "?-or",
+                  "raw": "'?-or'",
+                  "range": [
+                    1034,
+                    1040
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 62,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 62,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "?-cond",
+                  "raw": "'?-cond'",
+                  "range": [
+                    1044,
+                    1052
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 63,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 63,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "?some",
+                  "raw": "'?some'",
+                  "range": [
+                    1056,
+                    1063
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 64,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 64,
+                      "column": 9
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "un-?",
+                  "raw": "'un-?'",
+                  "range": [
+                    1067,
+                    1073
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 65,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 65,
+                      "column": 8
+                    }
+                  }
+                }
+              ],
+              "range": [
+                988,
+                1076
+              ],
+              "loc": {
+                "start": {
+                  "line": 57,
+                  "column": 12
+                },
+                "end": {
+                  "line": 66,
+                  "column": 2
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              977,
+              1076
+            ],
+            "loc": {
+              "start": {
+                "line": 57,
+                "column": 1
+              },
+              "end": {
+                "line": 66,
+                "column": 2
+              }
+            },
+            "leadingComments": [
+              {
+                "type": "Line",
+                "value": " Missing globals:",
+                "range": [
+                  703,
+                  722
+                ],
+                "loc": {
+                  "start": {
+                    "line": 51,
+                    "column": 2
+                  },
+                  "end": {
+                    "line": 51,
+                    "column": 21
+                  }
+                }
+              },
+              {
+                "type": "Line",
+                "value": " eval: Want to discourage use",
+                "range": [
+                  725,
+                  756
+                ],
+                "loc": {
+                  "start": {
+                    "line": 52,
+                    "column": 2
+                  },
+                  "end": {
+                    "line": 52,
+                    "column": 33
+                  }
+                }
+              },
+              {
+                "type": "Line",
+                "value": " isFinite, isNaN, parseFloat, parseInt: use Number.xxx functions",
+                "range": [
+                  759,
+                  825
+                ],
+                "loc": {
+                  "start": {
+                    "line": 53,
+                    "column": 2
+                  },
+                  "end": {
+                    "line": 53,
+                    "column": 68
+                  }
+                }
+              },
+              {
+                "type": "Line",
+                "value": " Map, Set: have different meanings for msl. Use Id-Map and Id-Set for native versions.",
+                "range": [
+                  828,
+                  916
+                ],
+                "loc": {
+                  "start": {
+                    "line": 54,
+                    "column": 2
+                  },
+                  "end": {
+                    "line": 54,
+                    "column": 90
+                  }
+                }
+              },
+              {
+                "type": "Line",
+                "value": " WeakMap, WeakSet: use Weak-Id-Map and Weak-Id-Set",
+                "range": [
+                  919,
+                  971
+                ],
+                "loc": {
+                  "start": {
+                    "line": 55,
+                    "column": 2
+                  },
+                  "end": {
+                    "line": 55,
+                    "column": 54
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.@.@",
+              "raw": "'msl.@.@'",
+              "range": [
+                1079,
+                1088
+              ],
+              "loc": {
+                "start": {
+                  "line": 67,
+                  "column": 1
+                },
+                "end": {
+                  "line": 67,
+                  "column": 10
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "_",
+                  "raw": "'_'",
+                  "range": [
+                    1094,
+                    1097
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 68,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 68,
+                      "column": 5
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "++",
+                  "raw": "'++'",
+                  "range": [
+                    1101,
+                    1105
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 69,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 69,
+                      "column": 6
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "++~",
+                  "raw": "'++~'",
+                  "range": [
+                    1109,
+                    1114
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 70,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 70,
+                      "column": 7
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "+!",
+                  "raw": "'+!'",
+                  "range": [
+                    1118,
+                    1122
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 71,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 71,
+                      "column": 6
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "++!",
+                  "raw": "'++!'",
+                  "range": [
+                    1126,
+                    1131
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 72,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 72,
+                      "column": 7
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "--",
+                  "raw": "'--'",
+                  "range": [
+                    1135,
+                    1139
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 73,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 73,
+                      "column": 6
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "--~",
+                  "raw": "'--~'",
+                  "range": [
+                    1143,
+                    1148
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 74,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 74,
+                      "column": 7
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "-!",
+                  "raw": "'-!'",
+                  "range": [
+                    1152,
+                    1156
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 75,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 75,
+                      "column": 6
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "--!",
+                  "raw": "'--!'",
+                  "range": [
+                    1160,
+                    1165
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 76,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 76,
+                      "column": 7
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "all?",
+                  "raw": "'all?'",
+                  "range": [
+                    1169,
+                    1175
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 77,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 77,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "any?",
+                  "raw": "'any?'",
+                  "range": [
+                    1179,
+                    1185
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 78,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 78,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "count",
+                  "raw": "'count'",
+                  "range": [
+                    1189,
+                    1196
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 79,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 79,
+                      "column": 9
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "each!",
+                  "raw": "'each!'",
+                  "range": [
+                    1200,
+                    1207
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 80,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 80,
+                      "column": 9
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "empty?",
+                  "raw": "'empty?'",
+                  "range": [
+                    1211,
+                    1219
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 81,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 81,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "empty!",
+                  "raw": "'empty!'",
+                  "range": [
+                    1223,
+                    1231
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 82,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 82,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "?find",
+                  "raw": "'?find'",
+                  "range": [
+                    1235,
+                    1242
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 83,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 83,
+                      "column": 9
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "fold",
+                  "raw": "'fold'",
+                  "range": [
+                    1246,
+                    1252
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 84,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 84,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@flat-map",
+                  "raw": "'@flat-map'",
+                  "range": [
+                    1256,
+                    1267
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 85,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 85,
+                      "column": 13
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@flat-map~",
+                  "raw": "'@flat-map~'",
+                  "range": [
+                    1271,
+                    1283
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 86,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 86,
+                      "column": 14
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@flatten",
+                  "raw": "'@flatten'",
+                  "range": [
+                    1287,
+                    1297
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 87,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 87,
+                      "column": 12
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@flatten~",
+                  "raw": "'@flatten~'",
+                  "range": [
+                    1301,
+                    1312
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 88,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 88,
+                      "column": 13
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "iterator",
+                  "raw": "'iterator'",
+                  "range": [
+                    1316,
+                    1326
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 89,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 89,
+                      "column": 12
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@keep",
+                  "raw": "'@keep'",
+                  "range": [
+                    1330,
+                    1337
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 90,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 90,
+                      "column": 9
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@keep~",
+                  "raw": "'@keep~'",
+                  "range": [
+                    1341,
+                    1349
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 91,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 91,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@map",
+                  "raw": "'@map'",
+                  "range": [
+                    1353,
+                    1359
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 92,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 92,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@map~",
+                  "raw": "'@map~'",
+                  "range": [
+                    1363,
+                    1370
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 93,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 93,
+                      "column": 9
+                    }
+                  }
+                }
+              ],
+              "range": [
+                1090,
+                1373
+              ],
+              "loc": {
+                "start": {
+                  "line": 67,
+                  "column": 12
+                },
+                "end": {
+                  "line": 94,
+                  "column": 2
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              1079,
+              1373
+            ],
+            "loc": {
+              "start": {
+                "line": 67,
+                "column": 1
+              },
+              "end": {
+                "line": 94,
+                "column": 2
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.@.@-Type",
+              "raw": "'msl.@.@-Type'",
+              "range": [
+                1376,
+                1390
+              ],
+              "loc": {
+                "start": {
+                  "line": 95,
+                  "column": 1
+                },
+                "end": {
+                  "line": 95,
+                  "column": 15
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "empty",
+                  "raw": "'empty'",
+                  "range": [
+                    1393,
+                    1400
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 95,
+                      "column": 18
+                    },
+                    "end": {
+                      "line": 95,
+                      "column": 25
+                    }
+                  }
+                }
+              ],
+              "range": [
+                1392,
+                1401
+              ],
+              "loc": {
+                "start": {
+                  "line": 95,
+                  "column": 17
+                },
+                "end": {
+                  "line": 95,
+                  "column": 26
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              1376,
+              1401
+            ],
+            "loc": {
+              "start": {
+                "line": 95,
+                "column": 1
+              },
+              "end": {
+                "line": 95,
+                "column": 26
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.@.Map.Id-Map",
+              "raw": "'msl.@.Map.Id-Map'",
+              "range": [
+                1404,
+                1422
+              ],
+              "loc": {
+                "start": {
+                  "line": 96,
+                  "column": 1
+                },
+                "end": {
+                  "line": 96,
+                  "column": 19
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "_",
+                  "raw": "'_'",
+                  "range": [
+                    1425,
+                    1428
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 96,
+                      "column": 22
+                    },
+                    "end": {
+                      "line": 96,
+                      "column": 25
+                    }
+                  }
+                }
+              ],
+              "range": [
+                1424,
+                1429
+              ],
+              "loc": {
+                "start": {
+                  "line": 96,
+                  "column": 21
+                },
+                "end": {
+                  "line": 96,
+                  "column": 26
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              1404,
+              1429
+            ],
+            "loc": {
+              "start": {
+                "line": 96,
+                "column": 1
+              },
+              "end": {
+                "line": 96,
+                "column": 26
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.@.Map.Hash-Map",
+              "raw": "'msl.@.Map.Hash-Map'",
+              "range": [
+                1432,
+                1452
+              ],
+              "loc": {
+                "start": {
+                  "line": 97,
+                  "column": 1
+                },
+                "end": {
+                  "line": 97,
+                  "column": 21
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "_",
+                  "raw": "'_'",
+                  "range": [
+                    1455,
+                    1458
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 97,
+                      "column": 24
+                    },
+                    "end": {
+                      "line": 97,
+                      "column": 27
+                    }
+                  }
+                }
+              ],
+              "range": [
+                1454,
+                1459
+              ],
+              "loc": {
+                "start": {
+                  "line": 97,
+                  "column": 23
+                },
+                "end": {
+                  "line": 97,
+                  "column": 28
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              1432,
+              1459
+            ],
+            "loc": {
+              "start": {
+                "line": 97,
+                "column": 1
+              },
+              "end": {
+                "line": 97,
+                "column": 28
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.@.Map.Map",
+              "raw": "'msl.@.Map.Map'",
+              "range": [
+                1462,
+                1477
+              ],
+              "loc": {
+                "start": {
+                  "line": 98,
+                  "column": 1
+                },
+                "end": {
+                  "line": 98,
+                  "column": 16
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "_",
+                  "raw": "'_'",
+                  "range": [
+                    1483,
+                    1486
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 99,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 99,
+                      "column": 5
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "?get",
+                  "raw": "'?get'",
+                  "range": [
+                    1490,
+                    1496
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 100,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 100,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@keys",
+                  "raw": "'@keys'",
+                  "range": [
+                    1500,
+                    1507
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 101,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 101,
+                      "column": 9
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "make-map",
+                  "raw": "'make-map'",
+                  "range": [
+                    1511,
+                    1521
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 102,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 102,
+                      "column": 12
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "map=?",
+                  "raw": "'map=?'",
+                  "range": [
+                    1525,
+                    1532
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 103,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 103,
+                      "column": 9
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@values",
+                  "raw": "'@values'",
+                  "range": [
+                    1536,
+                    1545
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 104,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 104,
+                      "column": 11
+                    }
+                  }
+                }
+              ],
+              "range": [
+                1479,
+                1548
+              ],
+              "loc": {
+                "start": {
+                  "line": 98,
+                  "column": 18
+                },
+                "end": {
+                  "line": 105,
+                  "column": 2
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              1462,
+              1548
+            ],
+            "loc": {
+              "start": {
+                "line": 98,
+                "column": 1
+              },
+              "end": {
+                "line": 105,
+                "column": 2
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.@.Range",
+              "raw": "'msl.@.Range'",
+              "range": [
+                1551,
+                1564
+              ],
+              "loc": {
+                "start": {
+                  "line": 106,
+                  "column": 1
+                },
+                "end": {
+                  "line": 106,
+                  "column": 14
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "_",
+                  "raw": "'_'",
+                  "range": [
+                    1567,
+                    1570
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 106,
+                      "column": 17
+                    },
+                    "end": {
+                      "line": 106,
+                      "column": 20
+                    }
+                  }
+                }
+              ],
+              "range": [
+                1566,
+                1571
+              ],
+              "loc": {
+                "start": {
+                  "line": 106,
+                  "column": 16
+                },
+                "end": {
+                  "line": 106,
+                  "column": 21
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              1551,
+              1571
+            ],
+            "loc": {
+              "start": {
+                "line": 106,
+                "column": 1
+              },
+              "end": {
+                "line": 106,
+                "column": 21
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.@.Seq.Seq",
+              "raw": "'msl.@.Seq.Seq'",
+              "range": [
+                1574,
+                1589
+              ],
+              "loc": {
+                "start": {
+                  "line": 107,
+                  "column": 1
+                },
+                "end": {
+                  "line": 107,
+                  "column": 16
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "_",
+                  "raw": "'_'",
+                  "range": [
+                    1595,
+                    1598
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 108,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 108,
+                      "column": 5
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "+>!",
+                  "raw": "'+>!'",
+                  "range": [
+                    1602,
+                    1607
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 109,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 109,
+                      "column": 7
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@drop",
+                  "raw": "'@drop'",
+                  "range": [
+                    1611,
+                    1618
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 110,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 110,
+                      "column": 9
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@drop~",
+                  "raw": "'@drop~'",
+                  "range": [
+                    1622,
+                    1630
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 111,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 111,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@drop-while",
+                  "raw": "'@drop-while'",
+                  "range": [
+                    1634,
+                    1647
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 112,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 112,
+                      "column": 15
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@drop-while~",
+                  "raw": "'@drop-while~'",
+                  "range": [
+                    1651,
+                    1665
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 113,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 113,
+                      "column": 16
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "first",
+                  "raw": "'first'",
+                  "range": [
+                    1669,
+                    1676
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 114,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 114,
+                      "column": 9
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "?first",
+                  "raw": "'?first'",
+                  "range": [
+                    1680,
+                    1688
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 115,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 115,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@indexes",
+                  "raw": "'@indexes'",
+                  "range": [
+                    1692,
+                    1702
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 116,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 116,
+                      "column": 12
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "last",
+                  "raw": "'last'",
+                  "range": [
+                    1706,
+                    1712
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 117,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 117,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "?last",
+                  "raw": "'?last'",
+                  "range": [
+                    1716,
+                    1723
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 118,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 118,
+                      "column": 9
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "?nth",
+                  "raw": "'?nth'",
+                  "range": [
+                    1727,
+                    1733
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 119,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 119,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@reverse",
+                  "raw": "'@reverse'",
+                  "range": [
+                    1737,
+                    1747
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 120,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 120,
+                      "column": 12
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@reverse~",
+                  "raw": "'@reverse~'",
+                  "range": [
+                    1751,
+                    1762
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 121,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 121,
+                      "column": 13
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@rtail",
+                  "raw": "'@rtail'",
+                  "range": [
+                    1766,
+                    1774
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 122,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 122,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@slice",
+                  "raw": "'@slice'",
+                  "range": [
+                    1778,
+                    1786
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 123,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 123,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@slice~",
+                  "raw": "'@slice~'",
+                  "range": [
+                    1790,
+                    1799
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 124,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 124,
+                      "column": 11
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@split",
+                  "raw": "'@split'",
+                  "range": [
+                    1803,
+                    1811
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 125,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 125,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@split~",
+                  "raw": "'@split~'",
+                  "range": [
+                    1815,
+                    1824
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 126,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 126,
+                      "column": 11
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "seq=?",
+                  "raw": "'seq=?'",
+                  "range": [
+                    1828,
+                    1835
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 127,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 127,
+                      "column": 9
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@tail",
+                  "raw": "'@tail'",
+                  "range": [
+                    1839,
+                    1846
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 128,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 128,
+                      "column": 9
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@take",
+                  "raw": "'@take'",
+                  "range": [
+                    1850,
+                    1857
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 129,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 129,
+                      "column": 9
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@take~",
+                  "raw": "'@take~'",
+                  "range": [
+                    1861,
+                    1869
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 130,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 130,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@take-while",
+                  "raw": "'@take-while'",
+                  "range": [
+                    1873,
+                    1886
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 131,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 131,
+                      "column": 15
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@take-while~",
+                  "raw": "'@take-while~'",
+                  "range": [
+                    1890,
+                    1904
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 132,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 132,
+                      "column": 16
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@zip",
+                  "raw": "'@zip'",
+                  "range": [
+                    1908,
+                    1914
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 133,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 133,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "@zip~",
+                  "raw": "'@zip~'",
+                  "range": [
+                    1918,
+                    1925
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 134,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 134,
+                      "column": 9
+                    }
+                  }
+                }
+              ],
+              "range": [
+                1591,
+                1928
+              ],
+              "loc": {
+                "start": {
+                  "line": 107,
+                  "column": 18
+                },
+                "end": {
+                  "line": 135,
+                  "column": 2
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              1574,
+              1928
+            ],
+            "loc": {
+              "start": {
+                "line": 107,
+                "column": 1
+              },
+              "end": {
+                "line": 135,
+                "column": 2
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.@.Seq.Stream",
+              "raw": "'msl.@.Seq.Stream'",
+              "range": [
+                1931,
+                1949
+              ],
+              "loc": {
+                "start": {
+                  "line": 136,
+                  "column": 1
+                },
+                "end": {
+                  "line": 136,
+                  "column": 19
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "_",
+                  "raw": "'_'",
+                  "range": [
+                    1952,
+                    1955
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 136,
+                      "column": 22
+                    },
+                    "end": {
+                      "line": 136,
+                      "column": 25
+                    }
+                  }
+                }
+              ],
+              "range": [
+                1951,
+                1956
+              ],
+              "loc": {
+                "start": {
+                  "line": 136,
+                  "column": 21
+                },
+                "end": {
+                  "line": 136,
+                  "column": 26
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              1931,
+              1956
+            ],
+            "loc": {
+              "start": {
+                "line": 136,
+                "column": 1
+              },
+              "end": {
+                "line": 136,
+                "column": 26
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.@.Set.Id-Set",
+              "raw": "'msl.@.Set.Id-Set'",
+              "range": [
+                1959,
+                1977
+              ],
+              "loc": {
+                "start": {
+                  "line": 137,
+                  "column": 1
+                },
+                "end": {
+                  "line": 137,
+                  "column": 19
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "_",
+                  "raw": "'_'",
+                  "range": [
+                    1980,
+                    1983
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 137,
+                      "column": 22
+                    },
+                    "end": {
+                      "line": 137,
+                      "column": 25
+                    }
+                  }
+                }
+              ],
+              "range": [
+                1979,
+                1984
+              ],
+              "loc": {
+                "start": {
+                  "line": 137,
+                  "column": 21
+                },
+                "end": {
+                  "line": 137,
+                  "column": 26
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              1959,
+              1984
+            ],
+            "loc": {
+              "start": {
+                "line": 137,
+                "column": 1
+              },
+              "end": {
+                "line": 137,
+                "column": 26
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.@.Set.Set",
+              "raw": "'msl.@.Set.Set'",
+              "range": [
+                1987,
+                2002
+              ],
+              "loc": {
+                "start": {
+                  "line": 138,
+                  "column": 1
+                },
+                "end": {
+                  "line": 138,
+                  "column": 16
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "_",
+                  "raw": "'_'",
+                  "range": [
+                    2005,
+                    2008
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 138,
+                      "column": 19
+                    },
+                    "end": {
+                      "line": 138,
+                      "column": 22
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "set=?",
+                  "raw": "'set=?'",
+                  "range": [
+                    2010,
+                    2017
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 138,
+                      "column": 24
+                    },
+                    "end": {
+                      "line": 138,
+                      "column": 31
+                    }
+                  }
+                }
+              ],
+              "range": [
+                2004,
+                2018
+              ],
+              "loc": {
+                "start": {
+                  "line": 138,
+                  "column": 18
+                },
+                "end": {
+                  "line": 138,
+                  "column": 32
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              1987,
+              2018
+            ],
+            "loc": {
+              "start": {
+                "line": 138,
+                "column": 1
+              },
+              "end": {
+                "line": 138,
+                "column": 32
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.compare",
+              "raw": "'msl.compare'",
+              "range": [
+                2021,
+                2034
+              ],
+              "loc": {
+                "start": {
+                  "line": 139,
+                  "column": 1
+                },
+                "end": {
+                  "line": 139,
+                  "column": 14
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "=?",
+                  "raw": "'=?'",
+                  "range": [
+                    2040,
+                    2044
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 140,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 140,
+                      "column": 6
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "<?",
+                  "raw": "'<?'",
+                  "range": [
+                    2048,
+                    2052
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 141,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 141,
+                      "column": 6
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "<=?",
+                  "raw": "'<=?'",
+                  "range": [
+                    2056,
+                    2061
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 142,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 142,
+                      "column": 7
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": ">?",
+                  "raw": "'>?'",
+                  "range": [
+                    2065,
+                    2069
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 143,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 143,
+                      "column": 6
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": ">=?",
+                  "raw": "'>=?'",
+                  "range": [
+                    2073,
+                    2078
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 144,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 144,
+                      "column": 7
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "?min",
+                  "raw": "'?min'",
+                  "range": [
+                    2082,
+                    2088
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 145,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 145,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "min",
+                  "raw": "'min'",
+                  "range": [
+                    2092,
+                    2097
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 146,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 146,
+                      "column": 7
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "?min-by",
+                  "raw": "'?min-by'",
+                  "range": [
+                    2101,
+                    2110
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 147,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 147,
+                      "column": 11
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "min-by",
+                  "raw": "'min-by'",
+                  "range": [
+                    2114,
+                    2122
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 148,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 148,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "?max",
+                  "raw": "'?max'",
+                  "range": [
+                    2126,
+                    2132
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 149,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 149,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "max",
+                  "raw": "'max'",
+                  "range": [
+                    2136,
+                    2141
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 150,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 150,
+                      "column": 7
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "?max-by",
+                  "raw": "'?max-by'",
+                  "range": [
+                    2145,
+                    2154
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 151,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 151,
+                      "column": 11
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "max-by",
+                  "raw": "'max-by'",
+                  "range": [
+                    2158,
+                    2166
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 152,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 152,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "same?",
+                  "raw": "'same?'",
+                  "range": [
+                    2170,
+                    2177
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 153,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 153,
+                      "column": 9
+                    }
+                  }
+                }
+              ],
+              "range": [
+                2036,
+                2180
+              ],
+              "loc": {
+                "start": {
+                  "line": 139,
+                  "column": 16
+                },
+                "end": {
+                  "line": 154,
+                  "column": 2
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              2021,
+              2180
+            ],
+            "loc": {
+              "start": {
+                "line": 139,
+                "column": 1
+              },
+              "end": {
+                "line": 154,
+                "column": 2
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.Function",
+              "raw": "'msl.Function'",
+              "range": [
+                2183,
+                2197
+              ],
+              "loc": {
+                "start": {
+                  "line": 155,
+                  "column": 1
+                },
+                "end": {
+                  "line": 155,
+                  "column": 15
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "Action",
+                  "raw": "'Action'",
+                  "range": [
+                    2200,
+                    2208
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 155,
+                      "column": 18
+                    },
+                    "end": {
+                      "line": 155,
+                      "column": 26
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "identity",
+                  "raw": "'identity'",
+                  "range": [
+                    2210,
+                    2220
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 155,
+                      "column": 28
+                    },
+                    "end": {
+                      "line": 155,
+                      "column": 38
+                    }
+                  }
+                }
+              ],
+              "range": [
+                2199,
+                2221
+              ],
+              "loc": {
+                "start": {
+                  "line": 155,
+                  "column": 17
+                },
+                "end": {
+                  "line": 155,
+                  "column": 39
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              2183,
+              2221
+            ],
+            "loc": {
+              "start": {
+                "line": 155,
+                "column": 1
+              },
+              "end": {
+                "line": 155,
+                "column": 39
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.js",
+              "raw": "'msl.js'",
+              "range": [
+                2224,
+                2232
+              ],
+              "loc": {
+                "start": {
+                  "line": 156,
+                  "column": 1
+                },
+                "end": {
+                  "line": 156,
+                  "column": 9
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "defined?",
+                  "raw": "'defined?'",
+                  "range": [
+                    2238,
+                    2248
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 157,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 157,
+                      "column": 12
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "id=?",
+                  "raw": "'id=?'",
+                  "range": [
+                    2252,
+                    2258
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 158,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 158,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "null?",
+                  "raw": "'null?'",
+                  "range": [
+                    2262,
+                    2269
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 159,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 159,
+                      "column": 9
+                    }
+                  }
+                }
+              ],
+              "range": [
+                2234,
+                2272
+              ],
+              "loc": {
+                "start": {
+                  "line": 156,
+                  "column": 11
+                },
+                "end": {
+                  "line": 160,
+                  "column": 2
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              2224,
+              2272
+            ],
+            "loc": {
+              "start": {
+                "line": 156,
+                "column": 1
+              },
+              "end": {
+                "line": 160,
+                "column": 2
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.math.methods",
+              "raw": "'msl.math.methods'",
+              "range": [
+                2275,
+                2293
+              ],
+              "loc": {
+                "start": {
+                  "line": 161,
+                  "column": 1
+                },
+                "end": {
+                  "line": 161,
+                  "column": 19
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "+",
+                  "raw": "'+'",
+                  "range": [
+                    2296,
+                    2299
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 161,
+                      "column": 22
+                    },
+                    "end": {
+                      "line": 161,
+                      "column": 25
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "-",
+                  "raw": "'-'",
+                  "range": [
+                    2301,
+                    2304
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 161,
+                      "column": 27
+                    },
+                    "end": {
+                      "line": 161,
+                      "column": 30
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "*",
+                  "raw": "'*'",
+                  "range": [
+                    2306,
+                    2309
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 161,
+                      "column": 32
+                    },
+                    "end": {
+                      "line": 161,
+                      "column": 35
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "/",
+                  "raw": "'/'",
+                  "range": [
+                    2311,
+                    2314
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 161,
+                      "column": 37
+                    },
+                    "end": {
+                      "line": 161,
+                      "column": 40
+                    }
+                  }
+                }
+              ],
+              "range": [
+                2295,
+                2315
+              ],
+              "loc": {
+                "start": {
+                  "line": 161,
+                  "column": 21
+                },
+                "end": {
+                  "line": 161,
+                  "column": 41
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              2275,
+              2315
+            ],
+            "loc": {
+              "start": {
+                "line": 161,
+                "column": 1
+              },
+              "end": {
+                "line": 161,
+                "column": 41
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.math.Number",
+              "raw": "'msl.math.Number'",
+              "range": [
+                2318,
+                2335
+              ],
+              "loc": {
+                "start": {
+                  "line": 162,
+                  "column": 1
+                },
+                "end": {
+                  "line": 162,
+                  "column": 18
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "divisible?",
+                  "raw": "'divisible?'",
+                  "range": [
+                    2341,
+                    2353
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 163,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 163,
+                      "column": 14
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Int",
+                  "raw": "'Int'",
+                  "range": [
+                    2357,
+                    2362
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 164,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 164,
+                      "column": 7
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "int/",
+                  "raw": "'int/'",
+                  "range": [
+                    2366,
+                    2372
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 165,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 165,
+                      "column": 8
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "log-base",
+                  "raw": "'log-base'",
+                  "range": [
+                    2376,
+                    2386
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 166,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 166,
+                      "column": 12
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "modulo",
+                  "raw": "'modulo'",
+                  "range": [
+                    2390,
+                    2398
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 167,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 167,
+                      "column": 10
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "nearest-ceil",
+                  "raw": "'nearest-ceil'",
+                  "range": [
+                    2402,
+                    2416
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 168,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 168,
+                      "column": 16
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "nearest-floor",
+                  "raw": "'nearest-floor'",
+                  "range": [
+                    2420,
+                    2435
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 169,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 169,
+                      "column": 17
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "nearest-round",
+                  "raw": "'nearest-round'",
+                  "range": [
+                    2439,
+                    2454
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 170,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 170,
+                      "column": 17
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Nat",
+                  "raw": "'Nat'",
+                  "range": [
+                    2458,
+                    2463
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 171,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 171,
+                      "column": 7
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "remainder",
+                  "raw": "'remainder'",
+                  "range": [
+                    2467,
+                    2478
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 172,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 172,
+                      "column": 13
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "square",
+                  "raw": "'square'",
+                  "range": [
+                    2482,
+                    2490
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 173,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 173,
+                      "column": 10
+                    }
+                  }
+                }
+              ],
+              "range": [
+                2337,
+                2493
+              ],
+              "loc": {
+                "start": {
+                  "line": 162,
+                  "column": 20
+                },
+                "end": {
+                  "line": 174,
+                  "column": 2
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              2318,
+              2493
+            ],
+            "loc": {
+              "start": {
+                "line": 162,
+                "column": 1
+              },
+              "end": {
+                "line": 174,
+                "column": 2
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.math.util",
+              "raw": "'msl.math.util'",
+              "range": [
+                2496,
+                2511
+              ],
+              "loc": {
+                "start": {
+                  "line": 175,
+                  "column": 1
+                },
+                "end": {
+                  "line": 175,
+                  "column": 16
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "average",
+                  "raw": "'average'",
+                  "range": [
+                    2514,
+                    2523
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 175,
+                      "column": 19
+                    },
+                    "end": {
+                      "line": 175,
+                      "column": 28
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "sum",
+                  "raw": "'sum'",
+                  "range": [
+                    2525,
+                    2530
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 175,
+                      "column": 30
+                    },
+                    "end": {
+                      "line": 175,
+                      "column": 35
+                    }
+                  }
+                }
+              ],
+              "range": [
+                2513,
+                2531
+              ],
+              "loc": {
+                "start": {
+                  "line": 175,
+                  "column": 18
+                },
+                "end": {
+                  "line": 175,
+                  "column": 36
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              2496,
+              2531
+            ],
+            "loc": {
+              "start": {
+                "line": 175,
+                "column": 1
+              },
+              "end": {
+                "line": 175,
+                "column": 36
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.methods",
+              "raw": "'msl.methods'",
+              "range": [
+                2534,
+                2547
+              ],
+              "loc": {
+                "start": {
+                  "line": 176,
+                  "column": 1
+                },
+                "end": {
+                  "line": 176,
+                  "column": 14
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "sub",
+                  "raw": "'sub'",
+                  "range": [
+                    2550,
+                    2555
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 176,
+                      "column": 17
+                    },
+                    "end": {
+                      "line": 176,
+                      "column": 22
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "set-sub!",
+                  "raw": "'set-sub!'",
+                  "range": [
+                    2557,
+                    2567
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 176,
+                      "column": 24
+                    },
+                    "end": {
+                      "line": 176,
+                      "column": 34
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "del-sub!",
+                  "raw": "'del-sub!'",
+                  "range": [
+                    2569,
+                    2579
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 176,
+                      "column": 36
+                    },
+                    "end": {
+                      "line": 176,
+                      "column": 46
+                    }
+                  }
+                }
+              ],
+              "range": [
+                2549,
+                2580
+              ],
+              "loc": {
+                "start": {
+                  "line": 176,
+                  "column": 16
+                },
+                "end": {
+                  "line": 176,
+                  "column": 47
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              2534,
+              2580
+            ],
+            "loc": {
+              "start": {
+                "line": 176,
+                "column": 1
+              },
+              "end": {
+                "line": 176,
+                "column": 47
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.to-string",
+              "raw": "'msl.to-string'",
+              "range": [
+                2583,
+                2598
+              ],
+              "loc": {
+                "start": {
+                  "line": 177,
+                  "column": 1
+                },
+                "end": {
+                  "line": 177,
+                  "column": 16
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "_",
+                  "raw": "'_'",
+                  "range": [
+                    2601,
+                    2604
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 177,
+                      "column": 19
+                    },
+                    "end": {
+                      "line": 177,
+                      "column": 22
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "inspect",
+                  "raw": "'inspect'",
+                  "range": [
+                    2606,
+                    2615
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 177,
+                      "column": 24
+                    },
+                    "end": {
+                      "line": 177,
+                      "column": 33
+                    }
+                  }
+                }
+              ],
+              "range": [
+                2600,
+                2616
+              ],
+              "loc": {
+                "start": {
+                  "line": 177,
+                  "column": 18
+                },
+                "end": {
+                  "line": 177,
+                  "column": 34
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              2583,
+              2616
+            ],
+            "loc": {
+              "start": {
+                "line": 177,
+                "column": 1
+              },
+              "end": {
+                "line": 177,
+                "column": 34
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.Type.Method",
+              "raw": "'msl.Type.Method'",
+              "range": [
+                2619,
+                2636
+              ],
+              "loc": {
+                "start": {
+                  "line": 178,
+                  "column": 1
+                },
+                "end": {
+                  "line": 178,
+                  "column": 18
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "_",
+                  "raw": "'_'",
+                  "range": [
+                    2639,
+                    2642
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 178,
+                      "column": 21
+                    },
+                    "end": {
+                      "line": 178,
+                      "column": 24
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "impl!",
+                  "raw": "'impl!'",
+                  "range": [
+                    2644,
+                    2651
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 178,
+                      "column": 26
+                    },
+                    "end": {
+                      "line": 178,
+                      "column": 33
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "impl-for",
+                  "raw": "'impl-for'",
+                  "range": [
+                    2653,
+                    2663
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 178,
+                      "column": 35
+                    },
+                    "end": {
+                      "line": 178,
+                      "column": 45
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "self-impl!",
+                  "raw": "'self-impl!'",
+                  "range": [
+                    2665,
+                    2677
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 178,
+                      "column": 47
+                    },
+                    "end": {
+                      "line": 178,
+                      "column": 59
+                    }
+                  }
+                }
+              ],
+              "range": [
+                2638,
+                2678
+              ],
+              "loc": {
+                "start": {
+                  "line": 178,
+                  "column": 20
+                },
+                "end": {
+                  "line": 178,
+                  "column": 60
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              2619,
+              2678
+            ],
+            "loc": {
+              "start": {
+                "line": 178,
+                "column": 1
+              },
+              "end": {
+                "line": 178,
+                "column": 60
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.Type.Kind",
+              "raw": "'msl.Type.Kind'",
+              "range": [
+                2681,
+                2696
+              ],
+              "loc": {
+                "start": {
+                  "line": 179,
+                  "column": 1
+                },
+                "end": {
+                  "line": 179,
+                  "column": 16
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "_",
+                  "raw": "'_'",
+                  "range": [
+                    2699,
+                    2702
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 179,
+                      "column": 19
+                    },
+                    "end": {
+                      "line": 179,
+                      "column": 22
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "kind!",
+                  "raw": "'kind!'",
+                  "range": [
+                    2704,
+                    2711
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 179,
+                      "column": 24
+                    },
+                    "end": {
+                      "line": 179,
+                      "column": 31
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "self-kind!",
+                  "raw": "'self-kind!'",
+                  "range": [
+                    2713,
+                    2725
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 179,
+                      "column": 33
+                    },
+                    "end": {
+                      "line": 179,
+                      "column": 45
+                    }
+                  }
+                }
+              ],
+              "range": [
+                2698,
+                2726
+              ],
+              "loc": {
+                "start": {
+                  "line": 179,
+                  "column": 18
+                },
+                "end": {
+                  "line": 179,
+                  "column": 46
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              2681,
+              2726
+            ],
+            "loc": {
+              "start": {
+                "line": 179,
+                "column": 1
+              },
+              "end": {
+                "line": 179,
+                "column": 46
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.Type.Pred-Type",
+              "raw": "'msl.Type.Pred-Type'",
+              "range": [
+                2729,
+                2749
+              ],
+              "loc": {
+                "start": {
+                  "line": 180,
+                  "column": 1
+                },
+                "end": {
+                  "line": 180,
+                  "column": 21
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "_",
+                  "raw": "'_'",
+                  "range": [
+                    2752,
+                    2755
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 180,
+                      "column": 24
+                    },
+                    "end": {
+                      "line": 180,
+                      "column": 27
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "Any",
+                  "raw": "'Any'",
+                  "range": [
+                    2757,
+                    2762
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 180,
+                      "column": 29
+                    },
+                    "end": {
+                      "line": 180,
+                      "column": 34
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "ObjLit",
+                  "raw": "'ObjLit'",
+                  "range": [
+                    2764,
+                    2772
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 180,
+                      "column": 36
+                    },
+                    "end": {
+                      "line": 180,
+                      "column": 44
+                    }
+                  }
+                }
+              ],
+              "range": [
+                2751,
+                2773
+              ],
+              "loc": {
+                "start": {
+                  "line": 180,
+                  "column": 23
+                },
+                "end": {
+                  "line": 180,
+                  "column": 45
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              2729,
+              2773
+            ],
+            "loc": {
+              "start": {
+                "line": 180,
+                "column": 1
+              },
+              "end": {
+                "line": 180,
+                "column": 45
+              }
+            }
+          },
+          {
+            "type": "Property",
+            "key": {
+              "type": "Literal",
+              "value": "msl.Type.Type",
+              "raw": "'msl.Type.Type'",
+              "range": [
+                2776,
+                2791
+              ],
+              "loc": {
+                "start": {
+                  "line": 181,
+                  "column": 1
+                },
+                "end": {
+                  "line": 181,
+                  "column": 16
+                }
+              }
+            },
+            "value": {
+              "type": "ArrayExpression",
+              "elements": [
+                {
+                  "type": "Literal",
+                  "value": "_",
+                  "raw": "'_'",
+                  "range": [
+                    2794,
+                    2797
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 181,
+                      "column": 19
+                    },
+                    "end": {
+                      "line": 181,
+                      "column": 22
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "=>",
+                  "raw": "'=>'",
+                  "range": [
+                    2799,
+                    2803
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 181,
+                      "column": 24
+                    },
+                    "end": {
+                      "line": 181,
+                      "column": 28
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "contains?",
+                  "raw": "'contains?'",
+                  "range": [
+                    2805,
+                    2816
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 181,
+                      "column": 30
+                    },
+                    "end": {
+                      "line": 181,
+                      "column": 41
+                    }
+                  }
+                },
+                {
+                  "type": "Literal",
+                  "value": "extract",
+                  "raw": "'extract'",
+                  "range": [
+                    2818,
+                    2827
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 181,
+                      "column": 43
+                    },
+                    "end": {
+                      "line": 181,
+                      "column": 52
+                    }
+                  }
+                }
+              ],
+              "range": [
+                2793,
+                2828
+              ],
+              "loc": {
+                "start": {
+                  "line": 181,
+                  "column": 18
+                },
+                "end": {
+                  "line": 181,
+                  "column": 53
+                }
+              }
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "computed": false,
+            "range": [
+              2776,
+              2828
+            ],
+            "loc": {
+              "start": {
+                "line": 181,
+                "column": 1
+              },
+              "end": {
+                "line": 181,
+                "column": 53
+              }
+            }
+          }
+        ],
+        "range": [
+          15,
+          2830
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 15
+          },
+          "end": {
+            "line": 182,
+            "column": 1
+          }
+        },
+        "leadingComments": [],
+        "trailingComments": []
+      },
+      "range": [
+        0,
+        2831
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 183,
+          "column": 0
+        }
+      }
+    }
+  ],
+  "sourceType": "module",
+  "range": [
+    0,
+    2831
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 183,
+      "column": 0
+    }
+  },
+  "comments": [
+    {
+      "type": "Line",
+      "value": " Standard globals",
+      "range": [
+        30,
+        49
+      ],
+      "loc": {
+        "start": {
+          "line": 3,
+          "column": 2
+        },
+        "end": {
+          "line": 3,
+          "column": 21
+        }
+      }
+    },
+    {
+      "type": "Line",
+      "value": " Errors",
+      "range": [
+        262,
+        271
+      ],
+      "loc": {
+        "start": {
+          "line": 23,
+          "column": 2
+        },
+        "end": {
+          "line": 23,
+          "column": 11
+        }
+      }
+    },
+    {
+      "type": "Line",
+      "value": " ArrayBuffer and views",
+      "range": [
+        391,
+        415
+      ],
+      "loc": {
+        "start": {
+          "line": 32,
+          "column": 2
+        },
+        "end": {
+          "line": 32,
+          "column": 26
+        }
+      }
+    },
+    {
+      "type": "Line",
+      "value": " URI functions",
+      "range": [
+        606,
+        622
+      ],
+      "loc": {
+        "start": {
+          "line": 45,
+          "column": 2
+        },
+        "end": {
+          "line": 45,
+          "column": 18
+        }
+      }
+    },
+    {
+      "type": "Line",
+      "value": " Missing globals:",
+      "range": [
+        703,
+        722
+      ],
+      "loc": {
+        "start": {
+          "line": 51,
+          "column": 2
+        },
+        "end": {
+          "line": 51,
+          "column": 21
+        }
+      }
+    },
+    {
+      "type": "Line",
+      "value": " eval: Want to discourage use",
+      "range": [
+        725,
+        756
+      ],
+      "loc": {
+        "start": {
+          "line": 52,
+          "column": 2
+        },
+        "end": {
+          "line": 52,
+          "column": 33
+        }
+      }
+    },
+    {
+      "type": "Line",
+      "value": " isFinite, isNaN, parseFloat, parseInt: use Number.xxx functions",
+      "range": [
+        759,
+        825
+      ],
+      "loc": {
+        "start": {
+          "line": 53,
+          "column": 2
+        },
+        "end": {
+          "line": 53,
+          "column": 68
+        }
+      }
+    },
+    {
+      "type": "Line",
+      "value": " Map, Set: have different meanings for msl. Use Id-Map and Id-Set for native versions.",
+      "range": [
+        828,
+        916
+      ],
+      "loc": {
+        "start": {
+          "line": 54,
+          "column": 2
+        },
+        "end": {
+          "line": 54,
+          "column": 90
+        }
+      }
+    },
+    {
+      "type": "Line",
+      "value": " WeakMap, WeakSet: use Weak-Id-Map and Weak-Id-Set",
+      "range": [
+        919,
+        971
+      ],
+      "loc": {
+        "start": {
+          "line": 55,
+          "column": 2
+        },
+        "end": {
+          "line": 55,
+          "column": 54
+        }
+      }
+    }
+  ]
+}

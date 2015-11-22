@@ -1,0 +1,1666 @@
+{
+  "type": "Program",
+  "body": [
+    {
+      "type": "ImportDeclaration",
+      "specifiers": [],
+      "source": {
+        "type": "Literal",
+        "value": "./loadLex*",
+        "raw": "'./loadLex*'",
+        "range": [
+          7,
+          19
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 7
+          },
+          "end": {
+            "line": 1,
+            "column": 19
+          }
+        }
+      },
+      "range": [
+        0,
+        20
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 2,
+          "column": 0
+        }
+      }
+    },
+    {
+      "type": "ImportDeclaration",
+      "specifiers": [
+        {
+          "type": "ImportSpecifier",
+          "local": {
+            "type": "Identifier",
+            "name": "StartPos",
+            "range": [
+              28,
+              36
+            ],
+            "loc": {
+              "start": {
+                "line": 2,
+                "column": 8
+              },
+              "end": {
+                "line": 2,
+                "column": 16
+              }
+            }
+          },
+          "imported": {
+            "type": "Identifier",
+            "name": "StartPos",
+            "range": [
+              28,
+              36
+            ],
+            "loc": {
+              "start": {
+                "line": 2,
+                "column": 8
+              },
+              "end": {
+                "line": 2,
+                "column": 16
+              }
+            }
+          },
+          "range": [
+            28,
+            36
+          ],
+          "loc": {
+            "start": {
+              "line": 2,
+              "column": 8
+            },
+            "end": {
+              "line": 2,
+              "column": 16
+            }
+          }
+        }
+      ],
+      "source": {
+        "type": "Literal",
+        "value": "esast/dist/Loc",
+        "raw": "'esast/dist/Loc'",
+        "range": [
+          43,
+          59
+        ],
+        "loc": {
+          "start": {
+            "line": 2,
+            "column": 23
+          },
+          "end": {
+            "line": 2,
+            "column": 39
+          }
+        }
+      },
+      "range": [
+        20,
+        60
+      ],
+      "loc": {
+        "start": {
+          "line": 2,
+          "column": 0
+        },
+        "end": {
+          "line": 3,
+          "column": 0
+        }
+      }
+    },
+    {
+      "type": "ImportDeclaration",
+      "specifiers": [
+        {
+          "type": "ImportSpecifier",
+          "local": {
+            "type": "Identifier",
+            "name": "openLine",
+            "range": [
+              68,
+              76
+            ],
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 8
+              },
+              "end": {
+                "line": 3,
+                "column": 16
+              }
+            }
+          },
+          "imported": {
+            "type": "Identifier",
+            "name": "openLine",
+            "range": [
+              68,
+              76
+            ],
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 8
+              },
+              "end": {
+                "line": 3,
+                "column": 16
+              }
+            }
+          },
+          "range": [
+            68,
+            76
+          ],
+          "loc": {
+            "start": {
+              "line": 3,
+              "column": 8
+            },
+            "end": {
+              "line": 3,
+              "column": 16
+            }
+          }
+        },
+        {
+          "type": "ImportSpecifier",
+          "local": {
+            "type": "Identifier",
+            "name": "setupGroupContext",
+            "range": [
+              78,
+              95
+            ],
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 18
+              },
+              "end": {
+                "line": 3,
+                "column": 35
+              }
+            }
+          },
+          "imported": {
+            "type": "Identifier",
+            "name": "setupGroupContext",
+            "range": [
+              78,
+              95
+            ],
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 18
+              },
+              "end": {
+                "line": 3,
+                "column": 35
+              }
+            }
+          },
+          "range": [
+            78,
+            95
+          ],
+          "loc": {
+            "start": {
+              "line": 3,
+              "column": 18
+            },
+            "end": {
+              "line": 3,
+              "column": 35
+            }
+          }
+        },
+        {
+          "type": "ImportSpecifier",
+          "local": {
+            "type": "Identifier",
+            "name": "tearDownGroupContext",
+            "range": [
+              97,
+              117
+            ],
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 37
+              },
+              "end": {
+                "line": 3,
+                "column": 57
+              }
+            }
+          },
+          "imported": {
+            "type": "Identifier",
+            "name": "tearDownGroupContext",
+            "range": [
+              97,
+              117
+            ],
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 37
+              },
+              "end": {
+                "line": 3,
+                "column": 57
+              }
+            }
+          },
+          "range": [
+            97,
+            117
+          ],
+          "loc": {
+            "start": {
+              "line": 3,
+              "column": 37
+            },
+            "end": {
+              "line": 3,
+              "column": 57
+            }
+          }
+        }
+      ],
+      "source": {
+        "type": "Literal",
+        "value": "./groupContext",
+        "raw": "'./groupContext'",
+        "range": [
+          124,
+          140
+        ],
+        "loc": {
+          "start": {
+            "line": 3,
+            "column": 64
+          },
+          "end": {
+            "line": 3,
+            "column": 80
+          }
+        }
+      },
+      "range": [
+        60,
+        141
+      ],
+      "loc": {
+        "start": {
+          "line": 3,
+          "column": 0
+        },
+        "end": {
+          "line": 4,
+          "column": 0
+        }
+      }
+    },
+    {
+      "type": "ImportDeclaration",
+      "specifiers": [
+        {
+          "type": "ImportDefaultSpecifier",
+          "local": {
+            "type": "Identifier",
+            "name": "lexPlain",
+            "range": [
+              148,
+              156
+            ],
+            "loc": {
+              "start": {
+                "line": 4,
+                "column": 7
+              },
+              "end": {
+                "line": 4,
+                "column": 15
+              }
+            }
+          },
+          "range": [
+            148,
+            156
+          ],
+          "loc": {
+            "start": {
+              "line": 4,
+              "column": 7
+            },
+            "end": {
+              "line": 4,
+              "column": 15
+            }
+          }
+        }
+      ],
+      "source": {
+        "type": "Literal",
+        "value": "./lexPlain",
+        "raw": "'./lexPlain'",
+        "range": [
+          162,
+          174
+        ],
+        "loc": {
+          "start": {
+            "line": 4,
+            "column": 21
+          },
+          "end": {
+            "line": 4,
+            "column": 33
+          }
+        }
+      },
+      "range": [
+        141,
+        175
+      ],
+      "loc": {
+        "start": {
+          "line": 4,
+          "column": 0
+        },
+        "end": {
+          "line": 5,
+          "column": 0
+        }
+      }
+    },
+    {
+      "type": "ImportDeclaration",
+      "specifiers": [
+        {
+          "type": "ImportSpecifier",
+          "local": {
+            "type": "Identifier",
+            "name": "pos",
+            "range": [
+              183,
+              186
+            ],
+            "loc": {
+              "start": {
+                "line": 5,
+                "column": 8
+              },
+              "end": {
+                "line": 5,
+                "column": 11
+              }
+            }
+          },
+          "imported": {
+            "type": "Identifier",
+            "name": "pos",
+            "range": [
+              183,
+              186
+            ],
+            "loc": {
+              "start": {
+                "line": 5,
+                "column": 8
+              },
+              "end": {
+                "line": 5,
+                "column": 11
+              }
+            }
+          },
+          "range": [
+            183,
+            186
+          ],
+          "loc": {
+            "start": {
+              "line": 5,
+              "column": 8
+            },
+            "end": {
+              "line": 5,
+              "column": 11
+            }
+          }
+        },
+        {
+          "type": "ImportSpecifier",
+          "local": {
+            "type": "Identifier",
+            "name": "setupSourceContext",
+            "range": [
+              188,
+              206
+            ],
+            "loc": {
+              "start": {
+                "line": 5,
+                "column": 13
+              },
+              "end": {
+                "line": 5,
+                "column": 31
+              }
+            }
+          },
+          "imported": {
+            "type": "Identifier",
+            "name": "setupSourceContext",
+            "range": [
+              188,
+              206
+            ],
+            "loc": {
+              "start": {
+                "line": 5,
+                "column": 13
+              },
+              "end": {
+                "line": 5,
+                "column": 31
+              }
+            }
+          },
+          "range": [
+            188,
+            206
+          ],
+          "loc": {
+            "start": {
+              "line": 5,
+              "column": 13
+            },
+            "end": {
+              "line": 5,
+              "column": 31
+            }
+          }
+        }
+      ],
+      "source": {
+        "type": "Literal",
+        "value": "./sourceContext",
+        "raw": "'./sourceContext'",
+        "range": [
+          213,
+          230
+        ],
+        "loc": {
+          "start": {
+            "line": 5,
+            "column": 38
+          },
+          "end": {
+            "line": 5,
+            "column": 55
+          }
+        },
+        "trailingComments": [
+          {
+            "type": "Block",
+            "value": "*\nLexes the source code into {@link Token}s.\nThe Mason lexer also groups tokens as part of lexing.\nThis makes writing a recursive-descent parser easy.\nSee {@link Group}.\n\n@param {string} sourceString\n@return {Group<Groups.Block>}\n\tBlock token representing the whole module.\n",
+            "range": [
+              232,
+              510
+            ],
+            "loc": {
+              "start": {
+                "line": 7,
+                "column": 0
+              },
+              "end": {
+                "line": 16,
+                "column": 2
+              }
+            }
+          }
+        ]
+      },
+      "range": [
+        175,
+        511
+      ],
+      "loc": {
+        "start": {
+          "line": 5,
+          "column": 0
+        },
+        "end": {
+          "line": 17,
+          "column": 0
+        }
+      }
+    },
+    {
+      "type": "ExportDefaultDeclaration",
+      "declaration": {
+        "type": "FunctionDeclaration",
+        "id": {
+          "type": "Identifier",
+          "name": "lex",
+          "range": [
+            535,
+            538
+          ],
+          "loc": {
+            "start": {
+              "line": 17,
+              "column": 24
+            },
+            "end": {
+              "line": 17,
+              "column": 27
+            }
+          }
+        },
+        "params": [
+          {
+            "type": "Identifier",
+            "name": "sourceString",
+            "range": [
+              539,
+              551
+            ],
+            "loc": {
+              "start": {
+                "line": 17,
+                "column": 28
+              },
+              "end": {
+                "line": 17,
+                "column": 40
+              }
+            }
+          }
+        ],
+        "body": {
+          "type": "BlockStatement",
+          "body": [
+            {
+              "type": "IfStatement",
+              "test": {
+                "type": "UnaryExpression",
+                "operator": "!",
+                "argument": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "MemberExpression",
+                    "computed": false,
+                    "object": {
+                      "type": "Identifier",
+                      "name": "sourceString",
+                      "range": [
+                        622,
+                        634
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 19,
+                          "column": 6
+                        },
+                        "end": {
+                          "line": 19,
+                          "column": 18
+                        }
+                      }
+                    },
+                    "property": {
+                      "type": "Identifier",
+                      "name": "endsWith",
+                      "range": [
+                        635,
+                        643
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 19,
+                          "column": 19
+                        },
+                        "end": {
+                          "line": 19,
+                          "column": 27
+                        }
+                      }
+                    },
+                    "range": [
+                      622,
+                      643
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 19,
+                        "column": 6
+                      },
+                      "end": {
+                        "line": 19,
+                        "column": 27
+                      }
+                    }
+                  },
+                  "arguments": [
+                    {
+                      "type": "Literal",
+                      "value": "\n",
+                      "raw": "'\\n'",
+                      "range": [
+                        644,
+                        648
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 19,
+                          "column": 28
+                        },
+                        "end": {
+                          "line": 19,
+                          "column": 32
+                        }
+                      }
+                    }
+                  ],
+                  "range": [
+                    622,
+                    649
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 19,
+                      "column": 6
+                    },
+                    "end": {
+                      "line": 19,
+                      "column": 33
+                    }
+                  }
+                },
+                "prefix": true,
+                "range": [
+                  621,
+                  649
+                ],
+                "loc": {
+                  "start": {
+                    "line": 19,
+                    "column": 5
+                  },
+                  "end": {
+                    "line": 19,
+                    "column": 33
+                  }
+                }
+              },
+              "consequent": {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "sourceString",
+                    "range": [
+                      653,
+                      665
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 20,
+                        "column": 2
+                      },
+                      "end": {
+                        "line": 20,
+                        "column": 14
+                      }
+                    }
+                  },
+                  "right": {
+                    "type": "TemplateLiteral",
+                    "quasis": [
+                      {
+                        "type": "TemplateElement",
+                        "value": {
+                          "raw": "",
+                          "cooked": ""
+                        },
+                        "tail": false,
+                        "range": [
+                          668,
+                          671
+                        ],
+                        "loc": {
+                          "start": {
+                            "line": 20,
+                            "column": 17
+                          },
+                          "end": {
+                            "line": 20,
+                            "column": 20
+                          }
+                        }
+                      },
+                      {
+                        "type": "TemplateElement",
+                        "value": {
+                          "raw": "\\n",
+                          "cooked": "\n"
+                        },
+                        "tail": true,
+                        "range": [
+                          683,
+                          687
+                        ],
+                        "loc": {
+                          "start": {
+                            "line": 20,
+                            "column": 32
+                          },
+                          "end": {
+                            "line": 20,
+                            "column": 36
+                          }
+                        }
+                      }
+                    ],
+                    "expressions": [
+                      {
+                        "type": "Identifier",
+                        "name": "sourceString",
+                        "range": [
+                          671,
+                          683
+                        ],
+                        "loc": {
+                          "start": {
+                            "line": 20,
+                            "column": 20
+                          },
+                          "end": {
+                            "line": 20,
+                            "column": 32
+                          }
+                        }
+                      }
+                    ],
+                    "range": [
+                      668,
+                      687
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 20,
+                        "column": 17
+                      },
+                      "end": {
+                        "line": 20,
+                        "column": 36
+                      }
+                    }
+                  },
+                  "range": [
+                    653,
+                    687
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 20,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 20,
+                      "column": 36
+                    }
+                  },
+                  "trailingComments": [
+                    {
+                      "type": "Block",
+                      "value": "\n\tUse a 0-terminated string so that we can use `0` as a switch case in lexPlain.\n\tThis is faster than checking whether index === length.\n\t(If we check past the end of the string we get `NaN`, which can't be switched on.)\n\t",
+                      "range": [
+                        690,
+                        916
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 22,
+                          "column": 1
+                        },
+                        "end": {
+                          "line": 26,
+                          "column": 3
+                        }
+                      }
+                    }
+                  ]
+                },
+                "range": [
+                  653,
+                  918
+                ],
+                "loc": {
+                  "start": {
+                    "line": 20,
+                    "column": 2
+                  },
+                  "end": {
+                    "line": 27,
+                    "column": 1
+                  }
+                }
+              },
+              "alternate": null,
+              "range": [
+                617,
+                918
+              ],
+              "loc": {
+                "start": {
+                  "line": 19,
+                  "column": 1
+                },
+                "end": {
+                  "line": 27,
+                  "column": 1
+                }
+              },
+              "leadingComments": [
+                {
+                  "type": "Line",
+                  "value": " Algorithm requires trailing newline to close any blocks.",
+                  "range": [
+                    556,
+                    615
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 18,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 18,
+                      "column": 60
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "ExpressionStatement",
+              "expression": {
+                "type": "AssignmentExpression",
+                "operator": "=",
+                "left": {
+                  "type": "Identifier",
+                  "name": "sourceString",
+                  "range": [
+                    918,
+                    930
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 27,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 27,
+                      "column": 13
+                    }
+                  }
+                },
+                "right": {
+                  "type": "TemplateLiteral",
+                  "quasis": [
+                    {
+                      "type": "TemplateElement",
+                      "value": {
+                        "raw": "",
+                        "cooked": ""
+                      },
+                      "tail": false,
+                      "range": [
+                        933,
+                        936
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 27,
+                          "column": 16
+                        },
+                        "end": {
+                          "line": 27,
+                          "column": 19
+                        }
+                      }
+                    },
+                    {
+                      "type": "TemplateElement",
+                      "value": {
+                        "raw": "\\0",
+                        "cooked": "\u0000"
+                      },
+                      "tail": true,
+                      "range": [
+                        948,
+                        952
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 27,
+                          "column": 31
+                        },
+                        "end": {
+                          "line": 27,
+                          "column": 35
+                        }
+                      }
+                    }
+                  ],
+                  "expressions": [
+                    {
+                      "type": "Identifier",
+                      "name": "sourceString",
+                      "range": [
+                        936,
+                        948
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 27,
+                          "column": 19
+                        },
+                        "end": {
+                          "line": 27,
+                          "column": 31
+                        }
+                      }
+                    }
+                  ],
+                  "range": [
+                    933,
+                    952
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 27,
+                      "column": 16
+                    },
+                    "end": {
+                      "line": 27,
+                      "column": 35
+                    }
+                  }
+                },
+                "range": [
+                  918,
+                  952
+                ],
+                "loc": {
+                  "start": {
+                    "line": 27,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 27,
+                    "column": 35
+                  }
+                }
+              },
+              "range": [
+                918,
+                955
+              ],
+              "loc": {
+                "start": {
+                  "line": 27,
+                  "column": 1
+                },
+                "end": {
+                  "line": 29,
+                  "column": 1
+                }
+              },
+              "leadingComments": [
+                {
+                  "type": "Block",
+                  "value": "\n\tUse a 0-terminated string so that we can use `0` as a switch case in lexPlain.\n\tThis is faster than checking whether index === length.\n\t(If we check past the end of the string we get `NaN`, which can't be switched on.)\n\t",
+                  "range": [
+                    690,
+                    916
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 22,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 26,
+                      "column": 3
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "ExpressionStatement",
+              "expression": {
+                "type": "CallExpression",
+                "callee": {
+                  "type": "Identifier",
+                  "name": "setupGroupContext",
+                  "range": [
+                    955,
+                    972
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 29,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 29,
+                      "column": 18
+                    }
+                  }
+                },
+                "arguments": [],
+                "range": [
+                  955,
+                  974
+                ],
+                "loc": {
+                  "start": {
+                    "line": 29,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 29,
+                    "column": 20
+                  }
+                }
+              },
+              "range": [
+                955,
+                976
+              ],
+              "loc": {
+                "start": {
+                  "line": 29,
+                  "column": 1
+                },
+                "end": {
+                  "line": 30,
+                  "column": 1
+                }
+              }
+            },
+            {
+              "type": "ExpressionStatement",
+              "expression": {
+                "type": "CallExpression",
+                "callee": {
+                  "type": "Identifier",
+                  "name": "setupSourceContext",
+                  "range": [
+                    976,
+                    994
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 30,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 30,
+                      "column": 19
+                    }
+                  }
+                },
+                "arguments": [
+                  {
+                    "type": "Identifier",
+                    "name": "sourceString",
+                    "range": [
+                      995,
+                      1007
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 30,
+                        "column": 20
+                      },
+                      "end": {
+                        "line": 30,
+                        "column": 32
+                      }
+                    }
+                  }
+                ],
+                "range": [
+                  976,
+                  1008
+                ],
+                "loc": {
+                  "start": {
+                    "line": 30,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 30,
+                    "column": 33
+                  }
+                }
+              },
+              "range": [
+                976,
+                1011
+              ],
+              "loc": {
+                "start": {
+                  "line": 30,
+                  "column": 1
+                },
+                "end": {
+                  "line": 32,
+                  "column": 1
+                }
+              }
+            },
+            {
+              "type": "ExpressionStatement",
+              "expression": {
+                "type": "CallExpression",
+                "callee": {
+                  "type": "Identifier",
+                  "name": "openLine",
+                  "range": [
+                    1011,
+                    1019
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 32,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 32,
+                      "column": 9
+                    }
+                  }
+                },
+                "arguments": [
+                  {
+                    "type": "Identifier",
+                    "name": "StartPos",
+                    "range": [
+                      1020,
+                      1028
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 32,
+                        "column": 10
+                      },
+                      "end": {
+                        "line": 32,
+                        "column": 18
+                      }
+                    }
+                  }
+                ],
+                "range": [
+                  1011,
+                  1029
+                ],
+                "loc": {
+                  "start": {
+                    "line": 32,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 32,
+                    "column": 19
+                  }
+                }
+              },
+              "range": [
+                1011,
+                1032
+              ],
+              "loc": {
+                "start": {
+                  "line": 32,
+                  "column": 1
+                },
+                "end": {
+                  "line": 34,
+                  "column": 1
+                }
+              }
+            },
+            {
+              "type": "ExpressionStatement",
+              "expression": {
+                "type": "CallExpression",
+                "callee": {
+                  "type": "Identifier",
+                  "name": "lexPlain",
+                  "range": [
+                    1032,
+                    1040
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 34,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 34,
+                      "column": 9
+                    }
+                  }
+                },
+                "arguments": [
+                  {
+                    "type": "Literal",
+                    "value": false,
+                    "raw": "false",
+                    "range": [
+                      1041,
+                      1046
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 34,
+                        "column": 10
+                      },
+                      "end": {
+                        "line": 34,
+                        "column": 15
+                      }
+                    }
+                  }
+                ],
+                "range": [
+                  1032,
+                  1047
+                ],
+                "loc": {
+                  "start": {
+                    "line": 34,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 34,
+                    "column": 16
+                  }
+                }
+              },
+              "range": [
+                1032,
+                1050
+              ],
+              "loc": {
+                "start": {
+                  "line": 34,
+                  "column": 1
+                },
+                "end": {
+                  "line": 36,
+                  "column": 1
+                }
+              }
+            },
+            {
+              "type": "VariableDeclaration",
+              "declarations": [
+                {
+                  "type": "VariableDeclarator",
+                  "id": {
+                    "type": "Identifier",
+                    "name": "endPos",
+                    "range": [
+                      1056,
+                      1062
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 36,
+                        "column": 7
+                      },
+                      "end": {
+                        "line": 36,
+                        "column": 13
+                      }
+                    }
+                  },
+                  "init": {
+                    "type": "CallExpression",
+                    "callee": {
+                      "type": "Identifier",
+                      "name": "pos",
+                      "range": [
+                        1065,
+                        1068
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 36,
+                          "column": 16
+                        },
+                        "end": {
+                          "line": 36,
+                          "column": 19
+                        }
+                      }
+                    },
+                    "arguments": [],
+                    "range": [
+                      1065,
+                      1070
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 36,
+                        "column": 16
+                      },
+                      "end": {
+                        "line": 36,
+                        "column": 21
+                      }
+                    }
+                  },
+                  "range": [
+                    1056,
+                    1070
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 36,
+                      "column": 7
+                    },
+                    "end": {
+                      "line": 36,
+                      "column": 21
+                    }
+                  }
+                }
+              ],
+              "kind": "const",
+              "range": [
+                1050,
+                1072
+              ],
+              "loc": {
+                "start": {
+                  "line": 36,
+                  "column": 1
+                },
+                "end": {
+                  "line": 37,
+                  "column": 1
+                }
+              }
+            },
+            {
+              "type": "ReturnStatement",
+              "argument": {
+                "type": "CallExpression",
+                "callee": {
+                  "type": "Identifier",
+                  "name": "tearDownGroupContext",
+                  "range": [
+                    1079,
+                    1099
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 37,
+                      "column": 8
+                    },
+                    "end": {
+                      "line": 37,
+                      "column": 28
+                    }
+                  }
+                },
+                "arguments": [
+                  {
+                    "type": "Identifier",
+                    "name": "endPos",
+                    "range": [
+                      1100,
+                      1106
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 37,
+                        "column": 29
+                      },
+                      "end": {
+                        "line": 37,
+                        "column": 35
+                      }
+                    }
+                  }
+                ],
+                "range": [
+                  1079,
+                  1107
+                ],
+                "loc": {
+                  "start": {
+                    "line": 37,
+                    "column": 8
+                  },
+                  "end": {
+                    "line": 37,
+                    "column": 36
+                  }
+                }
+              },
+              "range": [
+                1072,
+                1108
+              ],
+              "loc": {
+                "start": {
+                  "line": 37,
+                  "column": 1
+                },
+                "end": {
+                  "line": 38,
+                  "column": 0
+                }
+              }
+            }
+          ],
+          "range": [
+            553,
+            1109
+          ],
+          "loc": {
+            "start": {
+              "line": 17,
+              "column": 42
+            },
+            "end": {
+              "line": 38,
+              "column": 1
+            }
+          }
+        },
+        "generator": false,
+        "expression": false,
+        "range": [
+          526,
+          1109
+        ],
+        "loc": {
+          "start": {
+            "line": 17,
+            "column": 15
+          },
+          "end": {
+            "line": 38,
+            "column": 1
+          }
+        },
+        "leadingComments": [
+          {
+            "type": "Block",
+            "value": "*\nLexes the source code into {@link Token}s.\nThe Mason lexer also groups tokens as part of lexing.\nThis makes writing a recursive-descent parser easy.\nSee {@link Group}.\n\n@param {string} sourceString\n@return {Group<Groups.Block>}\n\tBlock token representing the whole module.\n",
+            "range": [
+              232,
+              510
+            ],
+            "loc": {
+              "start": {
+                "line": 7,
+                "column": 0
+              },
+              "end": {
+                "line": 16,
+                "column": 2
+              }
+            }
+          }
+        ],
+        "trailingComments": []
+      },
+      "range": [
+        511,
+        1109
+      ],
+      "loc": {
+        "start": {
+          "line": 17,
+          "column": 0
+        },
+        "end": {
+          "line": 38,
+          "column": 1
+        }
+      },
+      "leadingComments": [
+        {
+          "type": "Block",
+          "value": "*\nLexes the source code into {@link Token}s.\nThe Mason lexer also groups tokens as part of lexing.\nThis makes writing a recursive-descent parser easy.\nSee {@link Group}.\n\n@param {string} sourceString\n@return {Group<Groups.Block>}\n\tBlock token representing the whole module.\n",
+          "range": [
+            232,
+            510
+          ],
+          "loc": {
+            "start": {
+              "line": 7,
+              "column": 0
+            },
+            "end": {
+              "line": 16,
+              "column": 2
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "sourceType": "module",
+  "range": [
+    0,
+    1109
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 38,
+      "column": 1
+    }
+  },
+  "comments": [
+    {
+      "type": "Block",
+      "value": "*\nLexes the source code into {@link Token}s.\nThe Mason lexer also groups tokens as part of lexing.\nThis makes writing a recursive-descent parser easy.\nSee {@link Group}.\n\n@param {string} sourceString\n@return {Group<Groups.Block>}\n\tBlock token representing the whole module.\n",
+      "range": [
+        232,
+        510
+      ],
+      "loc": {
+        "start": {
+          "line": 7,
+          "column": 0
+        },
+        "end": {
+          "line": 16,
+          "column": 2
+        }
+      }
+    },
+    {
+      "type": "Line",
+      "value": " Algorithm requires trailing newline to close any blocks.",
+      "range": [
+        556,
+        615
+      ],
+      "loc": {
+        "start": {
+          "line": 18,
+          "column": 1
+        },
+        "end": {
+          "line": 18,
+          "column": 60
+        }
+      }
+    },
+    {
+      "type": "Block",
+      "value": "\n\tUse a 0-terminated string so that we can use `0` as a switch case in lexPlain.\n\tThis is faster than checking whether index === length.\n\t(If we check past the end of the string we get `NaN`, which can't be switched on.)\n\t",
+      "range": [
+        690,
+        916
+      ],
+      "loc": {
+        "start": {
+          "line": 22,
+          "column": 1
+        },
+        "end": {
+          "line": 26,
+          "column": 3
+        }
+      }
+    }
+  ]
+}

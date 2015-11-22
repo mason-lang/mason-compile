@@ -1,0 +1,354 @@
+{
+  "type": "Program",
+  "body": [
+    {
+      "type": "ImportDeclaration",
+      "specifiers": [
+        {
+          "type": "ImportDefaultSpecifier",
+          "local": {
+            "type": "Identifier",
+            "name": "lexQuote",
+            "range": [
+              84,
+              92
+            ],
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 7
+              },
+              "end": {
+                "line": 3,
+                "column": 15
+              }
+            }
+          },
+          "range": [
+            84,
+            92
+          ],
+          "loc": {
+            "start": {
+              "line": 3,
+              "column": 7
+            },
+            "end": {
+              "line": 3,
+              "column": 15
+            }
+          }
+        }
+      ],
+      "source": {
+        "type": "Literal",
+        "value": "./lexQuote",
+        "raw": "'./lexQuote'",
+        "range": [
+          98,
+          110
+        ],
+        "loc": {
+          "start": {
+            "line": 3,
+            "column": 21
+          },
+          "end": {
+            "line": 3,
+            "column": 33
+          }
+        }
+      },
+      "range": [
+        77,
+        111
+      ],
+      "loc": {
+        "start": {
+          "line": 3,
+          "column": 0
+        },
+        "end": {
+          "line": 4,
+          "column": 0
+        }
+      },
+      "leadingComments": [
+        {
+          "type": "Line",
+          "value": " TODO:ES6 Recursive modules should work, so this should not be necessary.",
+          "range": [
+            0,
+            75
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 0
+            },
+            "end": {
+              "line": 1,
+              "column": 75
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "ImportDeclaration",
+      "specifiers": [
+        {
+          "type": "ImportSpecifier",
+          "local": {
+            "type": "Identifier",
+            "name": "load",
+            "range": [
+              119,
+              123
+            ],
+            "loc": {
+              "start": {
+                "line": 4,
+                "column": 8
+              },
+              "end": {
+                "line": 4,
+                "column": 12
+              }
+            }
+          },
+          "imported": {
+            "type": "Identifier",
+            "name": "load",
+            "range": [
+              119,
+              123
+            ],
+            "loc": {
+              "start": {
+                "line": 4,
+                "column": 8
+              },
+              "end": {
+                "line": 4,
+                "column": 12
+              }
+            }
+          },
+          "range": [
+            119,
+            123
+          ],
+          "loc": {
+            "start": {
+              "line": 4,
+              "column": 8
+            },
+            "end": {
+              "line": 4,
+              "column": 12
+            }
+          }
+        }
+      ],
+      "source": {
+        "type": "Literal",
+        "value": "./lex*",
+        "raw": "'./lex*'",
+        "range": [
+          130,
+          138
+        ],
+        "loc": {
+          "start": {
+            "line": 4,
+            "column": 19
+          },
+          "end": {
+            "line": 4,
+            "column": 27
+          }
+        }
+      },
+      "range": [
+        111,
+        140
+      ],
+      "loc": {
+        "start": {
+          "line": 4,
+          "column": 0
+        },
+        "end": {
+          "line": 6,
+          "column": 0
+        }
+      }
+    },
+    {
+      "type": "ExpressionStatement",
+      "expression": {
+        "type": "CallExpression",
+        "callee": {
+          "type": "Identifier",
+          "name": "load",
+          "range": [
+            140,
+            144
+          ],
+          "loc": {
+            "start": {
+              "line": 6,
+              "column": 0
+            },
+            "end": {
+              "line": 6,
+              "column": 4
+            }
+          }
+        },
+        "arguments": [
+          {
+            "type": "ObjectExpression",
+            "properties": [
+              {
+                "type": "Property",
+                "key": {
+                  "type": "Identifier",
+                  "name": "lexQuote",
+                  "range": [
+                    146,
+                    154
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 6,
+                      "column": 6
+                    },
+                    "end": {
+                      "line": 6,
+                      "column": 14
+                    }
+                  }
+                },
+                "value": {
+                  "type": "Identifier",
+                  "name": "lexQuote",
+                  "range": [
+                    146,
+                    154
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 6,
+                      "column": 6
+                    },
+                    "end": {
+                      "line": 6,
+                      "column": 14
+                    }
+                  }
+                },
+                "kind": "init",
+                "method": false,
+                "shorthand": true,
+                "computed": false,
+                "range": [
+                  146,
+                  154
+                ],
+                "loc": {
+                  "start": {
+                    "line": 6,
+                    "column": 6
+                  },
+                  "end": {
+                    "line": 6,
+                    "column": 14
+                  }
+                }
+              }
+            ],
+            "range": [
+              145,
+              155
+            ],
+            "loc": {
+              "start": {
+                "line": 6,
+                "column": 5
+              },
+              "end": {
+                "line": 6,
+                "column": 15
+              }
+            }
+          }
+        ],
+        "range": [
+          140,
+          156
+        ],
+        "loc": {
+          "start": {
+            "line": 6,
+            "column": 0
+          },
+          "end": {
+            "line": 6,
+            "column": 16
+          }
+        }
+      },
+      "range": [
+        140,
+        157
+      ],
+      "loc": {
+        "start": {
+          "line": 6,
+          "column": 0
+        },
+        "end": {
+          "line": 7,
+          "column": 0
+        }
+      }
+    }
+  ],
+  "sourceType": "module",
+  "range": [
+    77,
+    157
+  ],
+  "loc": {
+    "start": {
+      "line": 3,
+      "column": 0
+    },
+    "end": {
+      "line": 7,
+      "column": 0
+    }
+  },
+  "comments": [
+    {
+      "type": "Line",
+      "value": " TODO:ES6 Recursive modules should work, so this should not be necessary.",
+      "range": [
+        0,
+        75
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 75
+        }
+      }
+    }
+  ]
+}

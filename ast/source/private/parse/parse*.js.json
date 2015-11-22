@@ -1,0 +1,1648 @@
+{
+  "type": "Program",
+  "body": [
+    {
+      "type": "ExportNamedDeclaration",
+      "declaration": {
+        "type": "VariableDeclaration",
+        "declarations": [
+          {
+            "type": "VariableDeclarator",
+            "id": {
+              "type": "Identifier",
+              "name": "opParseExpr",
+              "range": [
+                88,
+                99
+              ],
+              "loc": {
+                "start": {
+                  "line": 3,
+                  "column": 11
+                },
+                "end": {
+                  "line": 3,
+                  "column": 22
+                }
+              }
+            },
+            "init": null,
+            "range": [
+              88,
+              99
+            ],
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 11
+              },
+              "end": {
+                "line": 3,
+                "column": 22
+              }
+            }
+          }
+        ],
+        "kind": "let",
+        "range": [
+          84,
+          100
+        ],
+        "loc": {
+          "start": {
+            "line": 3,
+            "column": 7
+          },
+          "end": {
+            "line": 4,
+            "column": 0
+          }
+        },
+        "leadingComments": [
+          {
+            "type": "Line",
+            "value": " TODO:ES6 Recursive modules should work, so this should not be necessary.",
+            "range": [
+              0,
+              75
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 75
+              }
+            }
+          }
+        ],
+        "trailingComments": []
+      },
+      "specifiers": [],
+      "source": null,
+      "range": [
+        77,
+        100
+      ],
+      "loc": {
+        "start": {
+          "line": 3,
+          "column": 0
+        },
+        "end": {
+          "line": 4,
+          "column": 0
+        }
+      },
+      "leadingComments": [
+        {
+          "type": "Line",
+          "value": " TODO:ES6 Recursive modules should work, so this should not be necessary.",
+          "range": [
+            0,
+            75
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 0
+            },
+            "end": {
+              "line": 1,
+              "column": 75
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "ExportNamedDeclaration",
+      "declaration": {
+        "type": "VariableDeclaration",
+        "declarations": [
+          {
+            "type": "VariableDeclarator",
+            "id": {
+              "type": "Identifier",
+              "name": "parseClass",
+              "range": [
+                111,
+                121
+              ],
+              "loc": {
+                "start": {
+                  "line": 4,
+                  "column": 11
+                },
+                "end": {
+                  "line": 4,
+                  "column": 21
+                }
+              }
+            },
+            "init": null,
+            "range": [
+              111,
+              121
+            ],
+            "loc": {
+              "start": {
+                "line": 4,
+                "column": 11
+              },
+              "end": {
+                "line": 4,
+                "column": 21
+              }
+            }
+          }
+        ],
+        "kind": "let",
+        "range": [
+          107,
+          122
+        ],
+        "loc": {
+          "start": {
+            "line": 4,
+            "column": 7
+          },
+          "end": {
+            "line": 5,
+            "column": 0
+          }
+        },
+        "leadingComments": [],
+        "trailingComments": []
+      },
+      "specifiers": [],
+      "source": null,
+      "range": [
+        100,
+        122
+      ],
+      "loc": {
+        "start": {
+          "line": 4,
+          "column": 0
+        },
+        "end": {
+          "line": 5,
+          "column": 0
+        }
+      }
+    },
+    {
+      "type": "ExportNamedDeclaration",
+      "declaration": {
+        "type": "VariableDeclaration",
+        "declarations": [
+          {
+            "type": "VariableDeclarator",
+            "id": {
+              "type": "Identifier",
+              "name": "parseExcept",
+              "range": [
+                133,
+                144
+              ],
+              "loc": {
+                "start": {
+                  "line": 5,
+                  "column": 11
+                },
+                "end": {
+                  "line": 5,
+                  "column": 22
+                }
+              }
+            },
+            "init": null,
+            "range": [
+              133,
+              144
+            ],
+            "loc": {
+              "start": {
+                "line": 5,
+                "column": 11
+              },
+              "end": {
+                "line": 5,
+                "column": 22
+              }
+            }
+          }
+        ],
+        "kind": "let",
+        "range": [
+          129,
+          145
+        ],
+        "loc": {
+          "start": {
+            "line": 5,
+            "column": 7
+          },
+          "end": {
+            "line": 6,
+            "column": 0
+          }
+        },
+        "leadingComments": [],
+        "trailingComments": []
+      },
+      "specifiers": [],
+      "source": null,
+      "range": [
+        122,
+        145
+      ],
+      "loc": {
+        "start": {
+          "line": 5,
+          "column": 0
+        },
+        "end": {
+          "line": 6,
+          "column": 0
+        }
+      }
+    },
+    {
+      "type": "ExportNamedDeclaration",
+      "declaration": {
+        "type": "VariableDeclaration",
+        "declarations": [
+          {
+            "type": "VariableDeclarator",
+            "id": {
+              "type": "Identifier",
+              "name": "parseExpr",
+              "range": [
+                156,
+                165
+              ],
+              "loc": {
+                "start": {
+                  "line": 6,
+                  "column": 11
+                },
+                "end": {
+                  "line": 6,
+                  "column": 20
+                }
+              }
+            },
+            "init": null,
+            "range": [
+              156,
+              165
+            ],
+            "loc": {
+              "start": {
+                "line": 6,
+                "column": 11
+              },
+              "end": {
+                "line": 6,
+                "column": 20
+              }
+            }
+          }
+        ],
+        "kind": "let",
+        "range": [
+          152,
+          166
+        ],
+        "loc": {
+          "start": {
+            "line": 6,
+            "column": 7
+          },
+          "end": {
+            "line": 7,
+            "column": 0
+          }
+        },
+        "leadingComments": [],
+        "trailingComments": []
+      },
+      "specifiers": [],
+      "source": null,
+      "range": [
+        145,
+        166
+      ],
+      "loc": {
+        "start": {
+          "line": 6,
+          "column": 0
+        },
+        "end": {
+          "line": 7,
+          "column": 0
+        }
+      }
+    },
+    {
+      "type": "ExportNamedDeclaration",
+      "declaration": {
+        "type": "VariableDeclaration",
+        "declarations": [
+          {
+            "type": "VariableDeclarator",
+            "id": {
+              "type": "Identifier",
+              "name": "parseExprParts",
+              "range": [
+                177,
+                191
+              ],
+              "loc": {
+                "start": {
+                  "line": 7,
+                  "column": 11
+                },
+                "end": {
+                  "line": 7,
+                  "column": 25
+                }
+              }
+            },
+            "init": null,
+            "range": [
+              177,
+              191
+            ],
+            "loc": {
+              "start": {
+                "line": 7,
+                "column": 11
+              },
+              "end": {
+                "line": 7,
+                "column": 25
+              }
+            }
+          }
+        ],
+        "kind": "let",
+        "range": [
+          173,
+          192
+        ],
+        "loc": {
+          "start": {
+            "line": 7,
+            "column": 7
+          },
+          "end": {
+            "line": 8,
+            "column": 0
+          }
+        },
+        "leadingComments": [],
+        "trailingComments": []
+      },
+      "specifiers": [],
+      "source": null,
+      "range": [
+        166,
+        192
+      ],
+      "loc": {
+        "start": {
+          "line": 7,
+          "column": 0
+        },
+        "end": {
+          "line": 8,
+          "column": 0
+        }
+      }
+    },
+    {
+      "type": "ExportNamedDeclaration",
+      "declaration": {
+        "type": "VariableDeclaration",
+        "declarations": [
+          {
+            "type": "VariableDeclarator",
+            "id": {
+              "type": "Identifier",
+              "name": "parseSingle",
+              "range": [
+                203,
+                214
+              ],
+              "loc": {
+                "start": {
+                  "line": 8,
+                  "column": 11
+                },
+                "end": {
+                  "line": 8,
+                  "column": 22
+                }
+              }
+            },
+            "init": null,
+            "range": [
+              203,
+              214
+            ],
+            "loc": {
+              "start": {
+                "line": 8,
+                "column": 11
+              },
+              "end": {
+                "line": 8,
+                "column": 22
+              }
+            }
+          }
+        ],
+        "kind": "let",
+        "range": [
+          199,
+          215
+        ],
+        "loc": {
+          "start": {
+            "line": 8,
+            "column": 7
+          },
+          "end": {
+            "line": 9,
+            "column": 0
+          }
+        },
+        "leadingComments": [],
+        "trailingComments": []
+      },
+      "specifiers": [],
+      "source": null,
+      "range": [
+        192,
+        215
+      ],
+      "loc": {
+        "start": {
+          "line": 8,
+          "column": 0
+        },
+        "end": {
+          "line": 9,
+          "column": 0
+        }
+      }
+    },
+    {
+      "type": "ExportNamedDeclaration",
+      "declaration": {
+        "type": "VariableDeclaration",
+        "declarations": [
+          {
+            "type": "VariableDeclarator",
+            "id": {
+              "type": "Identifier",
+              "name": "parseSpaced",
+              "range": [
+                226,
+                237
+              ],
+              "loc": {
+                "start": {
+                  "line": 9,
+                  "column": 11
+                },
+                "end": {
+                  "line": 9,
+                  "column": 22
+                }
+              }
+            },
+            "init": null,
+            "range": [
+              226,
+              237
+            ],
+            "loc": {
+              "start": {
+                "line": 9,
+                "column": 11
+              },
+              "end": {
+                "line": 9,
+                "column": 22
+              }
+            }
+          }
+        ],
+        "kind": "let",
+        "range": [
+          222,
+          238
+        ],
+        "loc": {
+          "start": {
+            "line": 9,
+            "column": 7
+          },
+          "end": {
+            "line": 10,
+            "column": 0
+          }
+        },
+        "leadingComments": [],
+        "trailingComments": []
+      },
+      "specifiers": [],
+      "source": null,
+      "range": [
+        215,
+        238
+      ],
+      "loc": {
+        "start": {
+          "line": 9,
+          "column": 0
+        },
+        "end": {
+          "line": 10,
+          "column": 0
+        }
+      }
+    },
+    {
+      "type": "ExportNamedDeclaration",
+      "declaration": {
+        "type": "VariableDeclaration",
+        "declarations": [
+          {
+            "type": "VariableDeclarator",
+            "id": {
+              "type": "Identifier",
+              "name": "parseSwitch",
+              "range": [
+                249,
+                260
+              ],
+              "loc": {
+                "start": {
+                  "line": 10,
+                  "column": 11
+                },
+                "end": {
+                  "line": 10,
+                  "column": 22
+                }
+              }
+            },
+            "init": null,
+            "range": [
+              249,
+              260
+            ],
+            "loc": {
+              "start": {
+                "line": 10,
+                "column": 11
+              },
+              "end": {
+                "line": 10,
+                "column": 22
+              }
+            }
+          }
+        ],
+        "kind": "let",
+        "range": [
+          245,
+          262
+        ],
+        "loc": {
+          "start": {
+            "line": 10,
+            "column": 7
+          },
+          "end": {
+            "line": 12,
+            "column": 0
+          }
+        },
+        "leadingComments": [],
+        "trailingComments": []
+      },
+      "specifiers": [],
+      "source": null,
+      "range": [
+        238,
+        262
+      ],
+      "loc": {
+        "start": {
+          "line": 10,
+          "column": 0
+        },
+        "end": {
+          "line": 12,
+          "column": 0
+        }
+      }
+    },
+    {
+      "type": "ExportNamedDeclaration",
+      "declaration": {
+        "type": "FunctionDeclaration",
+        "id": {
+          "type": "Identifier",
+          "name": "load",
+          "range": [
+            278,
+            282
+          ],
+          "loc": {
+            "start": {
+              "line": 12,
+              "column": 16
+            },
+            "end": {
+              "line": 12,
+              "column": 20
+            }
+          }
+        },
+        "params": [
+          {
+            "type": "Identifier",
+            "name": "_",
+            "range": [
+              283,
+              284
+            ],
+            "loc": {
+              "start": {
+                "line": 12,
+                "column": 21
+              },
+              "end": {
+                "line": 12,
+                "column": 22
+              }
+            }
+          }
+        ],
+        "body": {
+          "type": "BlockStatement",
+          "body": [
+            {
+              "type": "ExpressionStatement",
+              "expression": {
+                "type": "AssignmentExpression",
+                "operator": "=",
+                "left": {
+                  "type": "Identifier",
+                  "name": "opParseExpr",
+                  "range": [
+                    289,
+                    300
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 13,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 13,
+                      "column": 12
+                    }
+                  }
+                },
+                "right": {
+                  "type": "MemberExpression",
+                  "computed": false,
+                  "object": {
+                    "type": "Identifier",
+                    "name": "_",
+                    "range": [
+                      303,
+                      304
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 13,
+                        "column": 15
+                      },
+                      "end": {
+                        "line": 13,
+                        "column": 16
+                      }
+                    }
+                  },
+                  "property": {
+                    "type": "Identifier",
+                    "name": "opParseExpr",
+                    "range": [
+                      305,
+                      316
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 13,
+                        "column": 17
+                      },
+                      "end": {
+                        "line": 13,
+                        "column": 28
+                      }
+                    }
+                  },
+                  "range": [
+                    303,
+                    316
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 13,
+                      "column": 15
+                    },
+                    "end": {
+                      "line": 13,
+                      "column": 28
+                    }
+                  }
+                },
+                "range": [
+                  289,
+                  316
+                ],
+                "loc": {
+                  "start": {
+                    "line": 13,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 13,
+                    "column": 28
+                  }
+                }
+              },
+              "range": [
+                289,
+                318
+              ],
+              "loc": {
+                "start": {
+                  "line": 13,
+                  "column": 1
+                },
+                "end": {
+                  "line": 14,
+                  "column": 1
+                }
+              }
+            },
+            {
+              "type": "ExpressionStatement",
+              "expression": {
+                "type": "AssignmentExpression",
+                "operator": "=",
+                "left": {
+                  "type": "Identifier",
+                  "name": "parseClass",
+                  "range": [
+                    318,
+                    328
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 14,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 14,
+                      "column": 11
+                    }
+                  }
+                },
+                "right": {
+                  "type": "MemberExpression",
+                  "computed": false,
+                  "object": {
+                    "type": "Identifier",
+                    "name": "_",
+                    "range": [
+                      331,
+                      332
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 14,
+                        "column": 14
+                      },
+                      "end": {
+                        "line": 14,
+                        "column": 15
+                      }
+                    }
+                  },
+                  "property": {
+                    "type": "Identifier",
+                    "name": "parseClass",
+                    "range": [
+                      333,
+                      343
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 14,
+                        "column": 16
+                      },
+                      "end": {
+                        "line": 14,
+                        "column": 26
+                      }
+                    }
+                  },
+                  "range": [
+                    331,
+                    343
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 14,
+                      "column": 14
+                    },
+                    "end": {
+                      "line": 14,
+                      "column": 26
+                    }
+                  }
+                },
+                "range": [
+                  318,
+                  343
+                ],
+                "loc": {
+                  "start": {
+                    "line": 14,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 14,
+                    "column": 26
+                  }
+                }
+              },
+              "range": [
+                318,
+                345
+              ],
+              "loc": {
+                "start": {
+                  "line": 14,
+                  "column": 1
+                },
+                "end": {
+                  "line": 15,
+                  "column": 1
+                }
+              }
+            },
+            {
+              "type": "ExpressionStatement",
+              "expression": {
+                "type": "AssignmentExpression",
+                "operator": "=",
+                "left": {
+                  "type": "Identifier",
+                  "name": "parseExcept",
+                  "range": [
+                    345,
+                    356
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 15,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 15,
+                      "column": 12
+                    }
+                  }
+                },
+                "right": {
+                  "type": "MemberExpression",
+                  "computed": false,
+                  "object": {
+                    "type": "Identifier",
+                    "name": "_",
+                    "range": [
+                      359,
+                      360
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 15,
+                        "column": 15
+                      },
+                      "end": {
+                        "line": 15,
+                        "column": 16
+                      }
+                    }
+                  },
+                  "property": {
+                    "type": "Identifier",
+                    "name": "parseExcept",
+                    "range": [
+                      361,
+                      372
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 15,
+                        "column": 17
+                      },
+                      "end": {
+                        "line": 15,
+                        "column": 28
+                      }
+                    }
+                  },
+                  "range": [
+                    359,
+                    372
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 15,
+                      "column": 15
+                    },
+                    "end": {
+                      "line": 15,
+                      "column": 28
+                    }
+                  }
+                },
+                "range": [
+                  345,
+                  372
+                ],
+                "loc": {
+                  "start": {
+                    "line": 15,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 15,
+                    "column": 28
+                  }
+                }
+              },
+              "range": [
+                345,
+                374
+              ],
+              "loc": {
+                "start": {
+                  "line": 15,
+                  "column": 1
+                },
+                "end": {
+                  "line": 16,
+                  "column": 1
+                }
+              }
+            },
+            {
+              "type": "ExpressionStatement",
+              "expression": {
+                "type": "AssignmentExpression",
+                "operator": "=",
+                "left": {
+                  "type": "Identifier",
+                  "name": "parseExpr",
+                  "range": [
+                    374,
+                    383
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 16,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 16,
+                      "column": 10
+                    }
+                  }
+                },
+                "right": {
+                  "type": "MemberExpression",
+                  "computed": false,
+                  "object": {
+                    "type": "Identifier",
+                    "name": "_",
+                    "range": [
+                      386,
+                      387
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 16,
+                        "column": 13
+                      },
+                      "end": {
+                        "line": 16,
+                        "column": 14
+                      }
+                    }
+                  },
+                  "property": {
+                    "type": "Identifier",
+                    "name": "parseExpr",
+                    "range": [
+                      388,
+                      397
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 16,
+                        "column": 15
+                      },
+                      "end": {
+                        "line": 16,
+                        "column": 24
+                      }
+                    }
+                  },
+                  "range": [
+                    386,
+                    397
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 16,
+                      "column": 13
+                    },
+                    "end": {
+                      "line": 16,
+                      "column": 24
+                    }
+                  }
+                },
+                "range": [
+                  374,
+                  397
+                ],
+                "loc": {
+                  "start": {
+                    "line": 16,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 16,
+                    "column": 24
+                  }
+                }
+              },
+              "range": [
+                374,
+                399
+              ],
+              "loc": {
+                "start": {
+                  "line": 16,
+                  "column": 1
+                },
+                "end": {
+                  "line": 17,
+                  "column": 1
+                }
+              }
+            },
+            {
+              "type": "ExpressionStatement",
+              "expression": {
+                "type": "AssignmentExpression",
+                "operator": "=",
+                "left": {
+                  "type": "Identifier",
+                  "name": "parseExprParts",
+                  "range": [
+                    399,
+                    413
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 17,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 17,
+                      "column": 15
+                    }
+                  }
+                },
+                "right": {
+                  "type": "MemberExpression",
+                  "computed": false,
+                  "object": {
+                    "type": "Identifier",
+                    "name": "_",
+                    "range": [
+                      416,
+                      417
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 17,
+                        "column": 18
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 19
+                      }
+                    }
+                  },
+                  "property": {
+                    "type": "Identifier",
+                    "name": "parseExprParts",
+                    "range": [
+                      418,
+                      432
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 17,
+                        "column": 20
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 34
+                      }
+                    }
+                  },
+                  "range": [
+                    416,
+                    432
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 17,
+                      "column": 18
+                    },
+                    "end": {
+                      "line": 17,
+                      "column": 34
+                    }
+                  }
+                },
+                "range": [
+                  399,
+                  432
+                ],
+                "loc": {
+                  "start": {
+                    "line": 17,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 17,
+                    "column": 34
+                  }
+                }
+              },
+              "range": [
+                399,
+                434
+              ],
+              "loc": {
+                "start": {
+                  "line": 17,
+                  "column": 1
+                },
+                "end": {
+                  "line": 18,
+                  "column": 1
+                }
+              }
+            },
+            {
+              "type": "ExpressionStatement",
+              "expression": {
+                "type": "AssignmentExpression",
+                "operator": "=",
+                "left": {
+                  "type": "Identifier",
+                  "name": "parseSingle",
+                  "range": [
+                    434,
+                    445
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 18,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 18,
+                      "column": 12
+                    }
+                  }
+                },
+                "right": {
+                  "type": "MemberExpression",
+                  "computed": false,
+                  "object": {
+                    "type": "Identifier",
+                    "name": "_",
+                    "range": [
+                      448,
+                      449
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 18,
+                        "column": 15
+                      },
+                      "end": {
+                        "line": 18,
+                        "column": 16
+                      }
+                    }
+                  },
+                  "property": {
+                    "type": "Identifier",
+                    "name": "parseSingle",
+                    "range": [
+                      450,
+                      461
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 18,
+                        "column": 17
+                      },
+                      "end": {
+                        "line": 18,
+                        "column": 28
+                      }
+                    }
+                  },
+                  "range": [
+                    448,
+                    461
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 18,
+                      "column": 15
+                    },
+                    "end": {
+                      "line": 18,
+                      "column": 28
+                    }
+                  }
+                },
+                "range": [
+                  434,
+                  461
+                ],
+                "loc": {
+                  "start": {
+                    "line": 18,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 18,
+                    "column": 28
+                  }
+                }
+              },
+              "range": [
+                434,
+                463
+              ],
+              "loc": {
+                "start": {
+                  "line": 18,
+                  "column": 1
+                },
+                "end": {
+                  "line": 19,
+                  "column": 1
+                }
+              }
+            },
+            {
+              "type": "ExpressionStatement",
+              "expression": {
+                "type": "AssignmentExpression",
+                "operator": "=",
+                "left": {
+                  "type": "Identifier",
+                  "name": "parseSpaced",
+                  "range": [
+                    463,
+                    474
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 19,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 19,
+                      "column": 12
+                    }
+                  }
+                },
+                "right": {
+                  "type": "MemberExpression",
+                  "computed": false,
+                  "object": {
+                    "type": "Identifier",
+                    "name": "_",
+                    "range": [
+                      477,
+                      478
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 19,
+                        "column": 15
+                      },
+                      "end": {
+                        "line": 19,
+                        "column": 16
+                      }
+                    }
+                  },
+                  "property": {
+                    "type": "Identifier",
+                    "name": "parseSpaced",
+                    "range": [
+                      479,
+                      490
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 19,
+                        "column": 17
+                      },
+                      "end": {
+                        "line": 19,
+                        "column": 28
+                      }
+                    }
+                  },
+                  "range": [
+                    477,
+                    490
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 19,
+                      "column": 15
+                    },
+                    "end": {
+                      "line": 19,
+                      "column": 28
+                    }
+                  }
+                },
+                "range": [
+                  463,
+                  490
+                ],
+                "loc": {
+                  "start": {
+                    "line": 19,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 19,
+                    "column": 28
+                  }
+                }
+              },
+              "range": [
+                463,
+                492
+              ],
+              "loc": {
+                "start": {
+                  "line": 19,
+                  "column": 1
+                },
+                "end": {
+                  "line": 20,
+                  "column": 1
+                }
+              }
+            },
+            {
+              "type": "ExpressionStatement",
+              "expression": {
+                "type": "AssignmentExpression",
+                "operator": "=",
+                "left": {
+                  "type": "Identifier",
+                  "name": "parseSwitch",
+                  "range": [
+                    492,
+                    503
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 20,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 20,
+                      "column": 12
+                    }
+                  }
+                },
+                "right": {
+                  "type": "MemberExpression",
+                  "computed": false,
+                  "object": {
+                    "type": "Identifier",
+                    "name": "_",
+                    "range": [
+                      506,
+                      507
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 20,
+                        "column": 15
+                      },
+                      "end": {
+                        "line": 20,
+                        "column": 16
+                      }
+                    }
+                  },
+                  "property": {
+                    "type": "Identifier",
+                    "name": "parseSwitch",
+                    "range": [
+                      508,
+                      519
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 20,
+                        "column": 17
+                      },
+                      "end": {
+                        "line": 20,
+                        "column": 28
+                      }
+                    }
+                  },
+                  "range": [
+                    506,
+                    519
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 20,
+                      "column": 15
+                    },
+                    "end": {
+                      "line": 20,
+                      "column": 28
+                    }
+                  }
+                },
+                "range": [
+                  492,
+                  519
+                ],
+                "loc": {
+                  "start": {
+                    "line": 20,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 20,
+                    "column": 28
+                  }
+                }
+              },
+              "range": [
+                492,
+                520
+              ],
+              "loc": {
+                "start": {
+                  "line": 20,
+                  "column": 1
+                },
+                "end": {
+                  "line": 21,
+                  "column": 0
+                }
+              }
+            }
+          ],
+          "range": [
+            286,
+            521
+          ],
+          "loc": {
+            "start": {
+              "line": 12,
+              "column": 24
+            },
+            "end": {
+              "line": 21,
+              "column": 1
+            }
+          }
+        },
+        "generator": false,
+        "expression": false,
+        "range": [
+          269,
+          521
+        ],
+        "loc": {
+          "start": {
+            "line": 12,
+            "column": 7
+          },
+          "end": {
+            "line": 21,
+            "column": 1
+          }
+        },
+        "leadingComments": [],
+        "trailingComments": []
+      },
+      "specifiers": [],
+      "source": null,
+      "range": [
+        262,
+        521
+      ],
+      "loc": {
+        "start": {
+          "line": 12,
+          "column": 0
+        },
+        "end": {
+          "line": 21,
+          "column": 1
+        }
+      }
+    }
+  ],
+  "sourceType": "module",
+  "range": [
+    77,
+    521
+  ],
+  "loc": {
+    "start": {
+      "line": 3,
+      "column": 0
+    },
+    "end": {
+      "line": 21,
+      "column": 1
+    }
+  },
+  "comments": [
+    {
+      "type": "Line",
+      "value": " TODO:ES6 Recursive modules should work, so this should not be necessary.",
+      "range": [
+        0,
+        75
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 75
+        }
+      }
+    }
+  ]
+}

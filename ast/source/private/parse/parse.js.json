@@ -1,0 +1,522 @@
+{
+  "type": "Program",
+  "body": [
+    {
+      "type": "ImportDeclaration",
+      "specifiers": [],
+      "source": {
+        "type": "Literal",
+        "value": "./loadParse*",
+        "raw": "'./loadParse*'",
+        "range": [
+          7,
+          21
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 7
+          },
+          "end": {
+            "line": 1,
+            "column": 21
+          }
+        }
+      },
+      "range": [
+        0,
+        22
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 2,
+          "column": 0
+        }
+      }
+    },
+    {
+      "type": "ImportDeclaration",
+      "specifiers": [
+        {
+          "type": "ImportDefaultSpecifier",
+          "local": {
+            "type": "Identifier",
+            "name": "parseModule",
+            "range": [
+              29,
+              40
+            ],
+            "loc": {
+              "start": {
+                "line": 2,
+                "column": 7
+              },
+              "end": {
+                "line": 2,
+                "column": 18
+              }
+            }
+          },
+          "range": [
+            29,
+            40
+          ],
+          "loc": {
+            "start": {
+              "line": 2,
+              "column": 7
+            },
+            "end": {
+              "line": 2,
+              "column": 18
+            }
+          }
+        }
+      ],
+      "source": {
+        "type": "Literal",
+        "value": "./parseModule",
+        "raw": "'./parseModule'",
+        "range": [
+          46,
+          61
+        ],
+        "loc": {
+          "start": {
+            "line": 2,
+            "column": 24
+          },
+          "end": {
+            "line": 2,
+            "column": 39
+          }
+        }
+      },
+      "range": [
+        22,
+        62
+      ],
+      "loc": {
+        "start": {
+          "line": 2,
+          "column": 0
+        },
+        "end": {
+          "line": 3,
+          "column": 0
+        }
+      }
+    },
+    {
+      "type": "ImportDeclaration",
+      "specifiers": [
+        {
+          "type": "ImportDefaultSpecifier",
+          "local": {
+            "type": "Identifier",
+            "name": "Slice",
+            "range": [
+              69,
+              74
+            ],
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 7
+              },
+              "end": {
+                "line": 3,
+                "column": 12
+              }
+            }
+          },
+          "range": [
+            69,
+            74
+          ],
+          "loc": {
+            "start": {
+              "line": 3,
+              "column": 7
+            },
+            "end": {
+              "line": 3,
+              "column": 12
+            }
+          }
+        }
+      ],
+      "source": {
+        "type": "Literal",
+        "value": "./Slice",
+        "raw": "'./Slice'",
+        "range": [
+          80,
+          89
+        ],
+        "loc": {
+          "start": {
+            "line": 3,
+            "column": 18
+          },
+          "end": {
+            "line": 3,
+            "column": 27
+          }
+        },
+        "trailingComments": [
+          {
+            "type": "Block",
+            "value": "*\nThis converts a Token tree to a MsAst.\nThis is a recursive-descent parser, made easier by two facts:\n\t* We have already grouped tokens.\n\t* Most of the time, an ast's type is determined by the first token.\n\nThere are exceptions such as assignment statements (indicated by a `=` somewhere in the middle).\nFor those we must iterate through tokens and split.\n(See {@link Slice#opSplitOnce} and {@link Slice#opSplitMany}.)\n\n@param {Group<Groups.Block>} rootToken\n@return {Module}\n",
+            "range": [
+              91,
+              572
+            ],
+            "loc": {
+              "start": {
+                "line": 5,
+                "column": 0
+              },
+              "end": {
+                "line": 17,
+                "column": 2
+              }
+            }
+          }
+        ]
+      },
+      "range": [
+        62,
+        573
+      ],
+      "loc": {
+        "start": {
+          "line": 3,
+          "column": 0
+        },
+        "end": {
+          "line": 18,
+          "column": 0
+        }
+      }
+    },
+    {
+      "type": "ExportDefaultDeclaration",
+      "declaration": {
+        "type": "FunctionDeclaration",
+        "id": {
+          "type": "Identifier",
+          "name": "parse",
+          "range": [
+            597,
+            602
+          ],
+          "loc": {
+            "start": {
+              "line": 18,
+              "column": 24
+            },
+            "end": {
+              "line": 18,
+              "column": 29
+            }
+          }
+        },
+        "params": [
+          {
+            "type": "Identifier",
+            "name": "rootToken",
+            "range": [
+              603,
+              612
+            ],
+            "loc": {
+              "start": {
+                "line": 18,
+                "column": 30
+              },
+              "end": {
+                "line": 18,
+                "column": 39
+              }
+            }
+          }
+        ],
+        "body": {
+          "type": "BlockStatement",
+          "body": [
+            {
+              "type": "ReturnStatement",
+              "argument": {
+                "type": "CallExpression",
+                "callee": {
+                  "type": "Identifier",
+                  "name": "parseModule",
+                  "range": [
+                    624,
+                    635
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 19,
+                      "column": 8
+                    },
+                    "end": {
+                      "line": 19,
+                      "column": 19
+                    }
+                  }
+                },
+                "arguments": [
+                  {
+                    "type": "CallExpression",
+                    "callee": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "Identifier",
+                        "name": "Slice",
+                        "range": [
+                          636,
+                          641
+                        ],
+                        "loc": {
+                          "start": {
+                            "line": 19,
+                            "column": 20
+                          },
+                          "end": {
+                            "line": 19,
+                            "column": 25
+                          }
+                        }
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "group",
+                        "range": [
+                          642,
+                          647
+                        ],
+                        "loc": {
+                          "start": {
+                            "line": 19,
+                            "column": 26
+                          },
+                          "end": {
+                            "line": 19,
+                            "column": 31
+                          }
+                        }
+                      },
+                      "range": [
+                        636,
+                        647
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 19,
+                          "column": 20
+                        },
+                        "end": {
+                          "line": 19,
+                          "column": 31
+                        }
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "type": "Identifier",
+                        "name": "rootToken",
+                        "range": [
+                          648,
+                          657
+                        ],
+                        "loc": {
+                          "start": {
+                            "line": 19,
+                            "column": 32
+                          },
+                          "end": {
+                            "line": 19,
+                            "column": 41
+                          }
+                        }
+                      }
+                    ],
+                    "range": [
+                      636,
+                      658
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 19,
+                        "column": 20
+                      },
+                      "end": {
+                        "line": 19,
+                        "column": 42
+                      }
+                    }
+                  }
+                ],
+                "range": [
+                  624,
+                  659
+                ],
+                "loc": {
+                  "start": {
+                    "line": 19,
+                    "column": 8
+                  },
+                  "end": {
+                    "line": 19,
+                    "column": 43
+                  }
+                }
+              },
+              "range": [
+                617,
+                660
+              ],
+              "loc": {
+                "start": {
+                  "line": 19,
+                  "column": 1
+                },
+                "end": {
+                  "line": 20,
+                  "column": 0
+                }
+              }
+            }
+          ],
+          "range": [
+            614,
+            661
+          ],
+          "loc": {
+            "start": {
+              "line": 18,
+              "column": 41
+            },
+            "end": {
+              "line": 20,
+              "column": 1
+            }
+          }
+        },
+        "generator": false,
+        "expression": false,
+        "range": [
+          588,
+          661
+        ],
+        "loc": {
+          "start": {
+            "line": 18,
+            "column": 15
+          },
+          "end": {
+            "line": 20,
+            "column": 1
+          }
+        },
+        "leadingComments": [
+          {
+            "type": "Block",
+            "value": "*\nThis converts a Token tree to a MsAst.\nThis is a recursive-descent parser, made easier by two facts:\n\t* We have already grouped tokens.\n\t* Most of the time, an ast's type is determined by the first token.\n\nThere are exceptions such as assignment statements (indicated by a `=` somewhere in the middle).\nFor those we must iterate through tokens and split.\n(See {@link Slice#opSplitOnce} and {@link Slice#opSplitMany}.)\n\n@param {Group<Groups.Block>} rootToken\n@return {Module}\n",
+            "range": [
+              91,
+              572
+            ],
+            "loc": {
+              "start": {
+                "line": 5,
+                "column": 0
+              },
+              "end": {
+                "line": 17,
+                "column": 2
+              }
+            }
+          }
+        ],
+        "trailingComments": []
+      },
+      "range": [
+        573,
+        661
+      ],
+      "loc": {
+        "start": {
+          "line": 18,
+          "column": 0
+        },
+        "end": {
+          "line": 20,
+          "column": 1
+        }
+      },
+      "leadingComments": [
+        {
+          "type": "Block",
+          "value": "*\nThis converts a Token tree to a MsAst.\nThis is a recursive-descent parser, made easier by two facts:\n\t* We have already grouped tokens.\n\t* Most of the time, an ast's type is determined by the first token.\n\nThere are exceptions such as assignment statements (indicated by a `=` somewhere in the middle).\nFor those we must iterate through tokens and split.\n(See {@link Slice#opSplitOnce} and {@link Slice#opSplitMany}.)\n\n@param {Group<Groups.Block>} rootToken\n@return {Module}\n",
+          "range": [
+            91,
+            572
+          ],
+          "loc": {
+            "start": {
+              "line": 5,
+              "column": 0
+            },
+            "end": {
+              "line": 17,
+              "column": 2
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "sourceType": "module",
+  "range": [
+    0,
+    661
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 20,
+      "column": 1
+    }
+  },
+  "comments": [
+    {
+      "type": "Block",
+      "value": "*\nThis converts a Token tree to a MsAst.\nThis is a recursive-descent parser, made easier by two facts:\n\t* We have already grouped tokens.\n\t* Most of the time, an ast's type is determined by the first token.\n\nThere are exceptions such as assignment statements (indicated by a `=` somewhere in the middle).\nFor those we must iterate through tokens and split.\n(See {@link Slice#opSplitOnce} and {@link Slice#opSplitMany}.)\n\n@param {Group<Groups.Block>} rootToken\n@return {Module}\n",
+      "range": [
+        91,
+        572
+      ],
+      "loc": {
+        "start": {
+          "line": 5,
+          "column": 0
+        },
+        "end": {
+          "line": 17,
+          "column": 2
+        }
+      }
+    }
+  ]
+}

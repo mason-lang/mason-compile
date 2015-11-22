@@ -1,0 +1,360 @@
+{
+  "type": "Program",
+  "body": [
+    {
+      "type": "ExportNamedDeclaration",
+      "declaration": {
+        "type": "VariableDeclaration",
+        "declarations": [
+          {
+            "type": "VariableDeclarator",
+            "id": {
+              "type": "Identifier",
+              "name": "lexQuote",
+              "range": [
+                88,
+                96
+              ],
+              "loc": {
+                "start": {
+                  "line": 3,
+                  "column": 11
+                },
+                "end": {
+                  "line": 3,
+                  "column": 19
+                }
+              }
+            },
+            "init": null,
+            "range": [
+              88,
+              96
+            ],
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 11
+              },
+              "end": {
+                "line": 3,
+                "column": 19
+              }
+            }
+          }
+        ],
+        "kind": "let",
+        "range": [
+          84,
+          98
+        ],
+        "loc": {
+          "start": {
+            "line": 3,
+            "column": 7
+          },
+          "end": {
+            "line": 5,
+            "column": 0
+          }
+        },
+        "leadingComments": [
+          {
+            "type": "Line",
+            "value": " TODO:ES6 Recursive modules should work, so this should not be necessary.",
+            "range": [
+              0,
+              75
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 75
+              }
+            }
+          }
+        ],
+        "trailingComments": []
+      },
+      "specifiers": [],
+      "source": null,
+      "range": [
+        77,
+        98
+      ],
+      "loc": {
+        "start": {
+          "line": 3,
+          "column": 0
+        },
+        "end": {
+          "line": 5,
+          "column": 0
+        }
+      },
+      "leadingComments": [
+        {
+          "type": "Line",
+          "value": " TODO:ES6 Recursive modules should work, so this should not be necessary.",
+          "range": [
+            0,
+            75
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 0
+            },
+            "end": {
+              "line": 1,
+              "column": 75
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "ExportNamedDeclaration",
+      "declaration": {
+        "type": "FunctionDeclaration",
+        "id": {
+          "type": "Identifier",
+          "name": "load",
+          "range": [
+            114,
+            118
+          ],
+          "loc": {
+            "start": {
+              "line": 5,
+              "column": 16
+            },
+            "end": {
+              "line": 5,
+              "column": 20
+            }
+          }
+        },
+        "params": [
+          {
+            "type": "Identifier",
+            "name": "_",
+            "range": [
+              119,
+              120
+            ],
+            "loc": {
+              "start": {
+                "line": 5,
+                "column": 21
+              },
+              "end": {
+                "line": 5,
+                "column": 22
+              }
+            }
+          }
+        ],
+        "body": {
+          "type": "BlockStatement",
+          "body": [
+            {
+              "type": "ExpressionStatement",
+              "expression": {
+                "type": "AssignmentExpression",
+                "operator": "=",
+                "left": {
+                  "type": "Identifier",
+                  "name": "lexQuote",
+                  "range": [
+                    125,
+                    133
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 6,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 6,
+                      "column": 9
+                    }
+                  }
+                },
+                "right": {
+                  "type": "MemberExpression",
+                  "computed": false,
+                  "object": {
+                    "type": "Identifier",
+                    "name": "_",
+                    "range": [
+                      136,
+                      137
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 6,
+                        "column": 12
+                      },
+                      "end": {
+                        "line": 6,
+                        "column": 13
+                      }
+                    }
+                  },
+                  "property": {
+                    "type": "Identifier",
+                    "name": "lexQuote",
+                    "range": [
+                      138,
+                      146
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 6,
+                        "column": 14
+                      },
+                      "end": {
+                        "line": 6,
+                        "column": 22
+                      }
+                    }
+                  },
+                  "range": [
+                    136,
+                    146
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 6,
+                      "column": 12
+                    },
+                    "end": {
+                      "line": 6,
+                      "column": 22
+                    }
+                  }
+                },
+                "range": [
+                  125,
+                  146
+                ],
+                "loc": {
+                  "start": {
+                    "line": 6,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 6,
+                    "column": 22
+                  }
+                }
+              },
+              "range": [
+                125,
+                147
+              ],
+              "loc": {
+                "start": {
+                  "line": 6,
+                  "column": 1
+                },
+                "end": {
+                  "line": 7,
+                  "column": 0
+                }
+              }
+            }
+          ],
+          "range": [
+            122,
+            148
+          ],
+          "loc": {
+            "start": {
+              "line": 5,
+              "column": 24
+            },
+            "end": {
+              "line": 7,
+              "column": 1
+            }
+          }
+        },
+        "generator": false,
+        "expression": false,
+        "range": [
+          105,
+          148
+        ],
+        "loc": {
+          "start": {
+            "line": 5,
+            "column": 7
+          },
+          "end": {
+            "line": 7,
+            "column": 1
+          }
+        },
+        "leadingComments": [],
+        "trailingComments": []
+      },
+      "specifiers": [],
+      "source": null,
+      "range": [
+        98,
+        148
+      ],
+      "loc": {
+        "start": {
+          "line": 5,
+          "column": 0
+        },
+        "end": {
+          "line": 7,
+          "column": 1
+        }
+      }
+    }
+  ],
+  "sourceType": "module",
+  "range": [
+    77,
+    148
+  ],
+  "loc": {
+    "start": {
+      "line": 3,
+      "column": 0
+    },
+    "end": {
+      "line": 7,
+      "column": 1
+    }
+  },
+  "comments": [
+    {
+      "type": "Line",
+      "value": " TODO:ES6 Recursive modules should work, so this should not be necessary.",
+      "range": [
+        0,
+        75
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 75
+        }
+      }
+    }
+  ]
+}

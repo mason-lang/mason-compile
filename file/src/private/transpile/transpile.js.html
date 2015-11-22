@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../../">
+  <title data-ice="title">src/private/transpile/transpile.js | mason-compile API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/mason-lang/mason-compile" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/CompileError.js~CompileError.html">CompileError</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/CompileError.js~Warning.html">Warning</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Compiler.js~Compiler.html">Compiler</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-code">code</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-keywords">keywords</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-reservedKeywords">reservedKeywords</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">private</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/CompileOptions.js~CompileOptions.html">CompileOptions</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Assert.html">Assert</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Assign.html">Assign</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~AssignDestructure.html">AssignDestructure</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~AssignSingle.html">AssignSingle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Await.html">Await</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~BagEntry.html">BagEntry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~BagSimple.html">BagSimple</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Block.html">Block</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~BlockWrap.html">BlockWrap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Break.html">Break</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~BuildEntry.html">BuildEntry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Call.html">Call</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Case.html">Case</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~CasePart.html">CasePart</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Catch.html">Catch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Class.html">Class</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ClassKindDo.html">ClassKindDo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Cond.html">Cond</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Conditional.html">Conditional</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Constructor.html">Constructor</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Do.html">Do</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Except.html">Except</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~For.html">For</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ForAsync.html">ForAsync</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ForBag.html">ForBag</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Fun.html">Fun</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~FunAbstract.html">FunAbstract</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~FunLike.html">FunLike</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~GetterFun.html">GetterFun</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Ignore.html">Ignore</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Import.html">Import</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ImportDo.html">ImportDo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Iteratee.html">Iteratee</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Kind.html">Kind</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Lazy.html">Lazy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~LineContent.html">LineContent</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~LocalAccess.html">LocalAccess</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~LocalDeclare.html">LocalDeclare</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~LocalMutate.html">LocalMutate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Logic.html">Logic</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MapEntry.html">MapEntry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Member.html">Member</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MemberFun.html">MemberFun</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MemberSet.html">MemberSet</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Method.html">Method</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MethodGetter.html">MethodGetter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MethodImpl.html">MethodImpl</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MethodImplLike.html">MethodImplLike</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MethodSetter.html">MethodSetter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Module.html">Module</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MsAst.html">MsAst</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~MsRegExp.html">MsRegExp</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~New.html">New</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Not.html">Not</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~NumberLiteral.html">NumberLiteral</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ObjEntry.html">ObjEntry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ObjEntryAssign.html">ObjEntryAssign</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ObjEntryPlain.html">ObjEntryPlain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ObjPair.html">ObjPair</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~ObjSimple.html">ObjSimple</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Pattern.html">Pattern</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Pipe.html">Pipe</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~QuoteAbstract.html">QuoteAbstract</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~QuotePlain.html">QuotePlain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~QuoteSimple.html">QuoteSimple</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~QuoteTaggedTemplate.html">QuoteTaggedTemplate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Range.html">Range</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~SetSub.html">SetSub</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~SimpleFun.html">SimpleFun</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~SpecialDo.html">SpecialDo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~SpecialVal.html">SpecialVal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Spread.html">Spread</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~SuperCall.html">SuperCall</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~SuperMember.html">SuperMember</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Switch.html">Switch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~SwitchPart.html">SwitchPart</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Throw.html">Throw</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Val.html">Val</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~With.html">With</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~Yield.html">Yield</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/MsAst.js~YieldTo.html">YieldTo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/PathOptions.js~PathOptions.html">PathOptions</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/Token.js~DocComment.html">DocComment</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/Token.js~Group.html">Group</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/Token.js~Keyword.html">Keyword</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/Token.js~Name.html">Name</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/Token.js~Token.html">Token</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/VerifyResults.js~VerifyResults.html">VerifyResults</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isAnyKeyword">isAnyKeyword</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isGroup">isGroup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isKeyword">isKeyword</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isNameKeyword">isNameKeyword</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isReservedKeyword">isReservedKeyword</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-keywordName">keywordName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opKeywordKindFromName">opKeywordKindFromName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opKeywordKindToSpecialValueKind">opKeywordKindToSpecialValueKind</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showGroupKind">showGroupKind</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showKeyword">showKeyword</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-check">check</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-fail">fail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setContext">setContext</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-unsetContext">unsetContext</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-warn">warn</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-manglePath">manglePath</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-render">render</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-allSame">allSame</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-assert">assert</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-cat">cat</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-flatMap">flatMap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-flatOpMap">flatOpMap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-head">head</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-ifElse">ifElse</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-implementMany">implementMany</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isEmpty">isEmpty</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-last">last</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opEach">opEach</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opIf">opIf</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opMap">opMap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opOr">opOr</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-reverseIter">reverseIter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-rtail">rtail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tail">tail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-toArray">toArray</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-Funs">Funs</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-LocalDeclares">LocalDeclares</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-Logics">Logics</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-Setters">Setters</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SpecialDos">SpecialDos</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SpecialVals">SpecialVals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-Groups">Groups</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-Keywords">Keywords</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-reservedKeywords">reservedKeywords</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-Blocks">Blocks</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-Modules">Modules</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">private/lex</div><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-showChar">showChar</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addToCurrentGroup">addToCurrentGroup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-closeGroup">closeGroup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-closeGroupsForDedent">closeGroupsForDedent</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-closeInterpolationOrParenthesis">closeInterpolationOrParenthesis</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-closeLine">closeLine</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-closeSpaceOKIfEmpty">closeSpaceOKIfEmpty</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-maybeCloseGroup">maybeCloseGroup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-openGroup">openGroup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-openInterpolation">openInterpolation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-openLine">openLine</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-openParenthesis">openParenthesis</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setupGroupContext">setupGroupContext</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-space">space</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tearDownGroupContext">tearDownGroupContext</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-load">load</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-lex">lex</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-lexName">lexName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-lexPlain">lexPlain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-lexQuote">lexQuote</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-eat">eat</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-eatRestOfLine">eatRestOfLine</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-peek">peek</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-pos">pos</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setupSourceContext">setupSourceContext</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-skip">skip</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-skipNewlines">skipNewlines</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-skipRestOfLine">skipRestOfLine</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-skipWhile">skipWhile</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-skipWhileEquals">skipWhileEquals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-stepBackMany">stepBackMany</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-takeWhile">takeWhile</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-takeWhileWithPrev">takeWhileWithPrev</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tryEat">tryEat</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tryEat2">tryEat2</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tryEat3">tryEat3</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tryEatNewline">tryEatNewline</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-Chars">Chars</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isDigit">isDigit</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-isNameCharacter">isNameCharacter</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">private/parse</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/private/parse/Slice.js~Slice.html">Slice</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-checkEmpty">checkEmpty</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-checkKeyword">checkKeyword</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-checkNonEmpty">checkNonEmpty</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-unexpected">unexpected</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-load">load</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parse">parse</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-beforeAndBlock">beforeAndBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-beforeAndOpBlock">beforeAndOpBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-justBlock">justBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseBlock">parseBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseBlockWrap">parseBlockWrap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseJustBlock">parseJustBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseCase">parseCase</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseClass">parseClass</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseDel">parseDel</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseExcept">parseExcept</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opParseExpr">opParseExpr</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseExpr">parseExpr</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseExprParts">parseExprParts</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseFor">parseFor</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-funArgsAndBlock">funArgsAndBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseFun">parseFun</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseFunLike">parseFunLike</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseKind">parseKind</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLine">parseLine</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLines">parseLines</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLocalDeclare">parseLocalDeclare</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLocalDeclareFromSpaced">parseLocalDeclareFromSpaced</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLocalDeclareOrFocus">parseLocalDeclareOrFocus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLocalDeclares">parseLocalDeclares</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLocalDeclaresAndMemberArgs">parseLocalDeclaresAndMemberArgs</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLocalDeclaresJustNames">parseLocalDeclaresJustNames</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseLocalName">parseLocalName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseMemberName">parseMemberName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseMethod">parseMethod</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseMethodImpls">parseMethodImpls</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseStatics">parseStatics</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseMethodSplit">parseMethodSplit</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseModule">parseModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseName">parseName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tryParseName">tryParseName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseQuote">parseQuote</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseRegExp">parseRegExp</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseSingle">parseSingle</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseSpaced">parseSpaced</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseSwitch">parseSwitch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tryTakeComment">tryTakeComment</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">private/transpile</div><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getDestructuredId">getDestructuredId</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setup">setup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tearDown">tearDown</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withFunKind">withFunKind</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-transpile">transpile</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-transpileCatch">transpileCatch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-transpileExcept">transpileExcept</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-transpileMethodToDefinition">transpileMethodToDefinition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-transpileMethodToProperty">transpileMethodToProperty</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-exportNamedOrDefault">exportNamedOrDefault</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-transpileModule">transpileModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-accessLocalDeclare">accessLocalDeclare</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-blockWrap">blockWrap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-blockWrapIfBlock">blockWrapIfBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-blockWrapIfVal">blockWrapIfVal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-callFocusFun">callFocusFun</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-declare">declare</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-doThrow">doThrow</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-focusFun">focusFun</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-idForDeclareCached">idForDeclareCached</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-lazyWrap">lazyWrap</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-makeDeclarator">makeDeclarator</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-makeDestructureDeclarators">makeDestructureDeclarators</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-maybeWrapInCheckContains">maybeWrapInCheckContains</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-memberStringOrVal">memberStringOrVal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-msCall">msCall</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-msMember">msMember</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opTypeCheckForLocalDeclare">opTypeCheckForLocalDeclare</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plainLet">plainLet</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-t0">t0</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-t1">t1</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-t2">t2</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-t3">t3</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tLines">tLines</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-throwErrorFromString">throwErrorFromString</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-transpileName">transpileName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-GlobalError">GlobalError</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">private/verify</div><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-checkDo">checkDo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-checkVal">checkVal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getSK">getSK</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-markStatement">markStatement</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-autoBlockKind">autoBlockKind</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-opBlockBuildKind">opBlockBuildKind</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setPendingBlockLocals">setPendingBlockLocals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setup">setup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-tearDown">tearDown</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withFun">withFun</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withIife">withIife</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withIifeIf">withIifeIf</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withIifeIfVal">withIifeIfVal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withInFunKind">withInFunKind</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withInSwitch">withInSwitch</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withLoop">withLoop</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withMethod">withMethod</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withName">withName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-accessLocal">accessLocal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-deleteLocal">deleteLocal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-failMissingLocal">failMissingLocal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plusLocal">plusLocal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-plusLocals">plusLocals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-registerAndPlusLocal">registerAndPlusLocal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-registerLocal">registerLocal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setDeclareAccessed">setDeclareAccessed</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setLocal">setLocal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyAndPlusLocal">verifyAndPlusLocal</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyAndPlusLocals">verifyAndPlusLocals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyLocalDeclare">verifyLocalDeclare</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-warnUnusedLocals">warnUnusedLocals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-withBlockLocals">withBlockLocals</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-makeUseOptional">makeUseOptional</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-makeUseOptionalIfFocus">makeUseOptionalIfFocus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-setName">setName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyEach">verifyEach</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyName">verifyName</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyNotLazy">verifyNotLazy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyOp">verifyOp</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verify">verify</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyBlock">verifyBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyDoBlock">verifyDoBlock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyModuleLines">verifyModuleLines</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyLines">verifyLines</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SK">SK</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/private/transpile/transpile.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import {ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryExpression,
+	BlockStatement, BreakStatement, CallExpression, ClassBody, ClassExpression,
+	ConditionalExpression, DebuggerStatement, ForOfStatement, ForStatement, FunctionExpression,
+	Identifier, IfStatement, LabeledStatement, Literal, LogicalExpression, MemberExpression,
+	MethodDefinition, NewExpression, ObjectExpression, Property, ReturnStatement, SpreadElement,
+	SwitchCase, SwitchStatement, TaggedTemplateExpression, TemplateElement, TemplateLiteral,
+	ThisExpression, ThrowStatement, VariableDeclaration, UnaryExpression, VariableDeclarator,
+	YieldExpression} from &apos;esast/dist/ast&apos;
+import {identifier, member, propertyIdOrLiteral} from &apos;esast/dist/util&apos;
+import {options} from &apos;../context&apos;
+import * as MsAstTypes from &apos;../MsAst&apos;
+import {AssignSingle, Call, Constructor, Fun, Funs, Logics, Member, LocalDeclares, Pattern, Setters,
+	SpecialDos, SpecialVals} from &apos;../MsAst&apos;
+import {assert, cat, flatMap, flatOpMap, ifElse, implementMany, isEmpty, last, opIf, opMap, rtail,
+	tail} from &apos;../util&apos;
+import {Blocks} from &apos;../VerifyResults&apos;
+import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, DeclareLexicalThis,
+	IdArguments, IdBuilt, IdExtract, IdFocus, IdLexicalThis, IdLoop, IdSuper, GlobalError,
+	GlobalInfinity, LetLexicalThis, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt,
+	ReturnFocus, SetLexicalThis, SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch
+	} from &apos;./ast-constants&apos;
+import {setup, tearDown, verifyResults, withFunKind} from &apos;./context&apos;
+import transpileExcept, {transpileCatch} from &apos;./transpileExcept&apos;
+import {transpileMethodToDefinition, transpileMethodToProperty} from &apos;./transpileMethod&apos;
+import transpileModule, {exportNamedOrDefault} from &apos;./transpileModule&apos;
+import {accessLocalDeclare, blockWrap, blockWrapIfBlock, blockWrapIfVal, callFocusFun, declare,
+	doThrow, focusFun, idForDeclareCached, lazyWrap, makeDeclarator, makeDestructureDeclarators,
+	maybeWrapInCheckContains, memberStringOrVal, msCall, msMember, opTypeCheckForLocalDeclare,
+	plainLet, t0, t1, t2, t3, tLines, transpileName} from &apos;./util&apos;
+
+/** Transform a {@link MsAst} into an esast. **/
+export default function transpile(moduleExpression, verifyResults) {
+	setup(verifyResults)
+	const res = t0(moduleExpression)
+	tearDown()
+	return res
+}
+
+implementMany(MsAstTypes, &apos;transpile&apos;, {
+	Assert() {
+		const failCond = () =&gt; {
+			const cond = t0(this.condition)
+			return this.negate ? cond : new UnaryExpression(&apos;!&apos;, cond)
+		}
+
+		return ifElse(this.opThrown,
+			_ =&gt; new IfStatement(failCond(), doThrow(_)),
+			() =&gt; {
+				if (this.condition instanceof Call) {
+					const call = this.condition
+					const called = call.called
+					const args = call.args.map(t0)
+					if (called instanceof Member) {
+						const ass = this.negate ? &apos;assertNotMember&apos; : &apos;assertMember&apos;
+						return msCall(ass, t0(called.object), transpileName(called.name), ...args)
+					} else {
+						const ass = this.negate ? &apos;assertNot&apos; : &apos;assert&apos;
+						return msCall(ass, t0(called), ...args)
+					}
+				} else
+					return new IfStatement(failCond(), ThrowAssertFail)
+			})
+	},
+
+	AssignSingle(valWrap) {
+		const val = valWrap === undefined ? t0(this.value) : valWrap(t0(this.value))
+		const declare = makeDeclarator(this.assignee, val, false)
+		return new VariableDeclaration(&apos;let&apos;, [declare])
+	},
+	// TODO:ES6 Just use native destructuring assign
+	AssignDestructure() {
+		return new VariableDeclaration(
+			&apos;let&apos;,
+			makeDestructureDeclarators(
+				this.assignees,
+				this.kind() === LocalDeclares.Lazy,
+				t0(this.value),
+				false))
+	},
+
+	Await() {
+		return new YieldExpression(t0(this.value), false)
+	},
+
+	BagEntry() {
+		return msCall(this.isMany ? &apos;addMany&apos; : &apos;add&apos;, IdBuilt, t0(this.value))
+	},
+
+	BagSimple() {
+		return new ArrayExpression(this.parts.map(t0))
+	},
+
+	Block(lead = null, opReturnType = null, follow = null) {
+		const kind = verifyResults.blockKind(this)
+		switch (kind) {
+			case Blocks.Do:
+				assert(opReturnType === null)
+				return new BlockStatement(cat(lead, tLines(this.lines), follow))
+			case Blocks.Throw:
+				return new BlockStatement(
+					cat(lead, tLines(rtail(this.lines)), t0(last(this.lines))))
+			case Blocks.Return:
+				return transpileBlockReturn(
+					t0(last(this.lines)), tLines(rtail(this.lines)), lead, opReturnType)
+			case Blocks.Bag: case Blocks.Map: case Blocks.Obj: {
+				const declare = kind === Blocks.Bag ?
+					DeclareBuiltBag :
+					kind === Blocks.Map ? DeclareBuiltMap : DeclareBuiltObj
+				const body = cat(declare, tLines(this.lines))
+				return transpileBlockReturn(IdBuilt, body, lead, opReturnType)
+			}
+			default:
+				throw new Error(kind)
+		}
+	},
+
+	BlockWrap() {
+		return blockWrap(t0(this.block))
+	},
+
+	Break() {
+		return ifElse(this.opValue,
+			_ =&gt; new ReturnStatement(t0(_)),
+			() =&gt; new BreakStatement(verifyResults.isBreakInSwitch(this) ? IdLoop : null))
+	},
+
+	Call() {
+		return new CallExpression(t0(this.called), this.args.map(t0))
+	},
+
+	Case() {
+		const body = caseBody(this.parts, this.opElse)
+		if (verifyResults.isStatement(this))
+			return ifElse(this.opCased, _ =&gt; new BlockStatement([t0(_), body]), () =&gt; body)
+		else {
+			const block = ifElse(this.opCased, _ =&gt; [t0(_), body], () =&gt; [body])
+			return blockWrap(new BlockStatement(block))
+		}
+	},
+
+	CasePart(alternate) {
+		if (this.test instanceof Pattern) {
+			const {type, patterned, locals} = this.test
+			const decl = plainLet(IdExtract, msCall(&apos;extract&apos;, t0(type), t0(patterned)))
+			const test = new BinaryExpression(&apos;!==&apos;, IdExtract, LitNull)
+			const extract = new VariableDeclaration(&apos;let&apos;, locals.map((_, idx) =&gt;
+				new VariableDeclarator(
+					idForDeclareCached(_),
+					new MemberExpression(IdExtract, new Literal(idx)))))
+			const res = t1(this.result, extract)
+			return new BlockStatement([decl, new IfStatement(test, res, alternate)])
+		} else
+			// alternate written to by `caseBody`.
+			return new IfStatement(t0(this.test), t0(this.result), alternate)
+	},
+
+	Class() {
+		const methods = cat(
+			this.statics.map(_ =&gt; transpileMethodToDefinition(_, true)),
+			opMap(this.opConstructor, t0),
+			this.methods.map(_ =&gt; transpileMethodToDefinition(_, false)))
+		const opName = opMap(verifyResults.opName(this), identifier)
+		const classExpr = new ClassExpression(opName,
+			opMap(this.opSuperClass, t0), new ClassBody(methods))
+
+		if (this.opDo === null &amp;&amp; isEmpty(this.kinds))
+			return classExpr
+		else {
+			const lead = cat(
+				plainLet(IdFocus, classExpr),
+				this.kinds.map(_ =&gt; msCall(&apos;kindDo&apos;, IdFocus, t0(_))))
+			const block = ifElse(this.opDo,
+				_ =&gt; t3(_.block, lead, null, ReturnFocus),
+				() =&gt; new BlockStatement(cat(lead, ReturnFocus)))
+			return blockWrap(block)
+		}
+	},
+
+	Cond() {
+		return new ConditionalExpression(t0(this.test), t0(this.ifTrue), t0(this.ifFalse))
+	},
+
+	Conditional() {
+		const test = t0(this.test)
+		if (verifyResults.isStatement(this))
+			return new IfStatement(
+				this.isUnless ? new UnaryExpression(&apos;!&apos;, test) : test, t0(this.result))
+		else {
+			const result = msCall(&apos;some&apos;, blockWrapIfBlock(this.result))
+			const none = msMember(&apos;None&apos;)
+			const [then, _else] = this.isUnless ? [none, result] : [result, none]
+			return new ConditionalExpression(test, then, _else)
+		}
+	},
+
+	Constructor() {
+		// If there is a `super`, `this` will not be defined until then,
+		// so must wait until then.
+		// Otherwise, do it at the beginning.
+		return MethodDefinition.constructor(verifyResults.constructorHasSuper(this) ?
+			t2(this.fun, LetLexicalThis, true) :
+			t1(this.fun, constructorSetMembers(this)))
+	},
+
+	Catch: transpileCatch,
+
+	Except: transpileExcept,
+
+	For() {
+		const loop = forLoop(this.opIteratee, this.block)
+		return verifyResults.isStatement(this) ?
+			maybeLabelLoop(this, loop) :
+			// use `return` instead of `break`, so no label needed
+			blockWrap(new BlockStatement([loop]))
+	},
+
+	ForAsync() {
+		const {element, bag} = this.iteratee
+		const func = new FunctionExpression(null, [t0(element)], t0(this.block), true)
+		const call = msCall(&apos;$for&apos;, t0(bag), func)
+		return verifyResults.isStatement(this) ? new YieldExpression(call) : call
+	},
+
+	ForBag() {
+		const loop = maybeLabelLoop(this, forLoop(this.opIteratee, this.block))
+		return blockWrap(new BlockStatement([DeclareBuiltBag, loop, ReturnBuilt]))
+	},
+
+	// leadStatements comes from constructor members
+	// dontDeclareThis: applies if this is the fun for a Constructor,
+	// which may declare `this` at a `super` call.
+	Fun(leadStatements = null, dontDeclareThis = false) {
+		return withFunKind(this.kind, () =&gt; {
+			// TODO:ES6 use `...`f
+			const nArgs = new Literal(this.args.length)
+			const opDeclareRest = opMap(this.opRestArg, rest =&gt;
+				declare(rest, new CallExpression(ArraySliceCall, [IdArguments, nArgs])))
+			const argChecks = opIf(options.includeChecks(), () =&gt;
+				flatOpMap(this.args, opTypeCheckForLocalDeclare))
+
+			const opDeclareThis = opIf(this.opDeclareThis !== null &amp;&amp; !dontDeclareThis, () =&gt;
+				DeclareLexicalThis)
+
+			const lead = cat(opDeclareRest, opDeclareThis, argChecks, leadStatements)
+
+			const body = () =&gt; t2(this.block, lead, this.opReturnType)
+			const args = this.args.map(t0)
+			const id = opMap(verifyResults.opName(this), identifier)
+
+			switch (this.kind) {
+				case Funs.Plain:
+					// TODO:ES6 Should be able to use rest args in arrow function
+					return id === null &amp;&amp; this.opDeclareThis === null &amp;&amp; opDeclareRest === null ?
+						new ArrowFunctionExpression(args, body()) :
+						new FunctionExpression(id, args, body())
+				case Funs.Async: {
+					const plainBody = t2(this.block, null, this.opReturnType)
+					const genFunc = new FunctionExpression(null, [], plainBody, true)
+					const ret = new ReturnStatement(msCall(&apos;async&apos;, genFunc))
+					return new FunctionExpression(id, args, new BlockStatement(cat(lead, ret)))
+				}
+				case Funs.Generator:
+					return new FunctionExpression(id, args, body(), true)
+				default:
+					throw new Error(this.kind)
+			}
+		})
+	},
+
+	GetterFun() {
+		// _ =&gt; _.foo
+		return focusFun(memberStringOrVal(IdFocus, this.name))
+	},
+
+	Ignore() {
+		return []
+	},
+
+	Kind() {
+		const name = new Literal(verifyResults.name(this))
+		const supers = new ArrayExpression(this.superKinds.map(t0))
+		const methods = _ =&gt;
+			new ObjectExpression(_.map(transpileMethodToProperty))
+		const kind = msCall(&apos;kind&apos;, name, supers, methods(this.statics), methods(this.methods))
+
+		return ifElse(this.opDo,
+			_ =&gt; blockWrap(t3(_.block, plainLet(IdFocus, kind), null, ReturnFocus)),
+			() =&gt; kind)
+	},
+
+	Lazy() {
+		return lazyWrap(t0(this.value))
+	},
+
+	NumberLiteral() {
+		// Negative numbers are not part of ES spec.
+		// http://www.ecma-international.org/ecma-262/5.1/#sec-7.8.3
+		const value = Number(this.value)
+		const lit = new Literal(Math.abs(value))
+		const isPositive = value &gt;= 0 &amp;&amp; 1 / value !== -Infinity
+		return isPositive ? lit : new UnaryExpression(&apos;-&apos;, lit)
+	},
+
+	LocalAccess() {
+		if (this.name === &apos;this&apos;)
+			return IdLexicalThis
+		else {
+			const ld = verifyResults.localDeclareForAccess(this)
+			// If ld missing, this is a builtin, and builtins are never lazy
+			return ld === undefined ? identifier(this.name) : accessLocalDeclare(ld)
+		}
+	},
+
+	LocalDeclare() { return new Identifier(idForDeclareCached(this).name) },
+
+	LocalMutate() {
+		return new AssignmentExpression(&apos;=&apos;, identifier(this.name), t0(this.value))
+	},
+
+	Logic() {
+		const op = this.kind === Logics.And ? &apos;&amp;&amp;&apos; : &apos;||&apos;
+		return tail(this.args).reduce(
+			(a, b) =&gt; new LogicalExpression(op, a, t0(b)),
+			t0(this.args[0]))
+	},
+
+	MapEntry() { return msCall(&apos;setSub&apos;, IdBuilt, t0(this.key), t0(this.val)) },
+
+	Member() {
+		return memberStringOrVal(t0(this.object), this.name)
+	},
+
+	MemberFun() {
+		const name = transpileName(this.name)
+		return ifElse(this.opObject,
+			_ =&gt; msCall(&apos;methodBound&apos;, t0(_), name),
+			() =&gt; msCall(&apos;methodUnbound&apos;, name))
+	},
+
+	MemberSet() {
+		const obj = t0(this.object)
+		const val = maybeWrapInCheckContains(t0(this.value), this.opType, this.name)
+		switch (this.kind) {
+			case Setters.Init:
+				return msCall(&apos;newProperty&apos;, obj, transpileName(this.name), val)
+			case Setters.Mutate:
+				return new AssignmentExpression(&apos;=&apos;, memberStringOrVal(obj, this.name), val)
+			default:
+				throw new Error()
+		}
+	},
+
+	Method() {
+		const name = new Literal(verifyResults.name(this))
+
+		const args = this.fun.opRestArg === null ?
+			new ArrayExpression(this.fun.args.map(arg =&gt; {
+				const name = new Literal(arg.name)
+				const opType = opMap(arg.opType, t0)
+				return ifElse(opType,
+					_ =&gt; new ArrayExpression([name, _]),
+					() =&gt; name)
+			})) :
+			new UnaryExpression(&apos;void&apos;, new Literal(0))
+		const impl = this.fun instanceof Fun ? [t0(this.fun)] : []
+		return msCall(&apos;method&apos;, name, args, ...impl)
+	},
+
+	Module: transpileModule,
+
+	MsRegExp() {
+		return this.parts.length === 0 ?
+			new Literal(new RegExp(&apos;&apos;, this.flags)) :
+			this.parts.length === 1 &amp;&amp; typeof this.parts[0] === &apos;string&apos; ?
+			new Literal(new RegExp(this.parts[0].replace(&apos;\n&apos;, &apos;\\n&apos;), this.flags)) :
+			msCall(&apos;regexp&apos;,
+				new ArrayExpression(this.parts.map(transpileName)), new Literal(this.flags))
+	},
+
+	New() {
+		return new NewExpression(t0(this.type), this.args.map(t0))
+	},
+
+	Not() { return new UnaryExpression(&apos;!&apos;, t0(this.arg)) },
+
+	ObjEntryAssign() {
+		if (this.assign instanceof AssignSingle &amp;&amp; !this.assign.assignee.isLazy()) {
+			const name = this.assign.assignee.name
+			return t1(this.assign, val =&gt;
+				verifyResults.isObjEntryExport(this) ?
+					exportNamedOrDefault(val, name) :
+					new AssignmentExpression(&apos;=&apos;, member(IdBuilt, name), val))
+		} else {
+			const assigns = this.assign.allAssignees().map(_ =&gt;
+				msCall(&apos;setLazy&apos;, IdBuilt, new Literal(_.name), idForDeclareCached(_)))
+			return cat(t0(this.assign), assigns)
+		}
+	},
+
+	ObjEntryPlain() {
+		const val = t0(this.value)
+		return verifyResults.isObjEntryExport(this) ?
+			// We&apos;ve verified that for module export, this.name must be a string.
+			exportNamedOrDefault(val, this.name) :
+			new AssignmentExpression(&apos;=&apos;, memberStringOrVal(IdBuilt, this.name), val)
+	},
+
+	ObjSimple() {
+		return new ObjectExpression(this.pairs.map(pair =&gt;
+			new Property(&apos;init&apos;, propertyIdOrLiteral(pair.key), t0(pair.value))))
+	},
+
+	Pipe() {
+		return this.pipes.reduce((expr, pipe) =&gt; callFocusFun(t0(pipe), expr), t0(this.value))
+	},
+
+	QuotePlain() {
+		if (isEmpty(this.parts))
+			return LitEmptyString
+		else {
+			const quasis = [], expressions = []
+
+			// TemplateLiteral must start with a TemplateElement
+			if (typeof this.parts[0] !== &apos;string&apos;)
+				quasis.push(TemplateElement.empty)
+
+			for (const part of this.parts)
+				if (typeof part === &apos;string&apos;)
+					quasis.push(TemplateElement.forRawString(part))
+				else {
+					// &quot;{1}{1}&quot; needs an empty quasi in the middle (and on the ends).
+					// There are never more than 2 string parts in a row,
+					// so quasis.length === expressions.length or is exactly 1 more.
+					if (quasis.length === expressions.length)
+						quasis.push(TemplateElement.empty)
+					expressions.push(t0(part))
+				}
+
+			// TemplateLiteral must end with a TemplateElement, so one more quasi than expression.
+			if (quasis.length === expressions.length)
+				quasis.push(TemplateElement.empty)
+
+			return new TemplateLiteral(quasis, expressions)
+		}
+	},
+
+	QuoteSimple() {
+		return new Literal(this.name)
+	},
+
+	QuoteTaggedTemplate() {
+		return new TaggedTemplateExpression(t0(this.tag), t0(this.quote))
+	},
+
+	Range() {
+		const end = ifElse(this.end, t0, () =&gt; GlobalInfinity)
+		return msCall(&apos;range&apos;, t0(this.start), end, new Literal(this.isExclusive))
+	},
+
+	SetSub() {
+		const getKind = () =&gt; {
+			switch (this.kind) {
+				case Setters.Init:
+					return &apos;init&apos;
+				case Setters.Mutate:
+					return &apos;mutate&apos;
+				default:
+					throw new Error()
+			}
+		}
+		const kind = getKind()
+		return msCall(
+			&apos;setSub&apos;,
+			t0(this.object),
+			this.subbeds.length === 1 ? t0(this.subbeds[0]) : this.subbeds.map(t0),
+			maybeWrapInCheckContains(t0(this.value), this.opType, &apos;value&apos;),
+			new Literal(kind))
+	},
+
+	SimpleFun() {
+		return focusFun(t0(this.value))
+	},
+
+	SpecialDo() {
+		switch (this.kind) {
+			case SpecialDos.Debugger: return new DebuggerStatement()
+			default: throw new Error(this.kind)
+		}
+	},
+
+	SpecialVal() {
+		// Make new objects because we will assign `loc` to them.
+		switch (this.kind) {
+			case SpecialVals.Contains:
+				return msMember(&apos;contains&apos;)
+			case SpecialVals.DelSub:
+				return msMember(&apos;delSub&apos;)
+			case SpecialVals.False:
+				return new Literal(false)
+			case SpecialVals.Name:
+				return new Literal(verifyResults.name(this))
+			case SpecialVals.Null:
+				return new Literal(null)
+			case SpecialVals.Sub:
+				return msMember(&apos;sub&apos;)
+			case SpecialVals.True:
+				return new Literal(true)
+			case SpecialVals.Undefined:
+				return new UnaryExpression(&apos;void&apos;, LitZero)
+			default:
+				throw new Error(this.kind)
+		}
+	},
+
+	Spread() {
+		return new SpreadElement(t0(this.spreaded))
+	},
+
+	SuperCall() {
+		const args = this.args.map(t0)
+		const method = verifyResults.superCallToMethod.get(this)
+
+		if (method instanceof Constructor) {
+			// super must appear as a statement, so OK to decalre `this`
+			const call = new CallExpression(IdSuper, args)
+			const memberSets = constructorSetMembers(method)
+			return cat(call, memberSets, SetLexicalThis)
+		} else
+			return new CallExpression(memberStringOrVal(IdSuper, method.symbol), args)
+	},
+
+	SuperMember() {
+		return memberStringOrVal(IdSuper, this.name)
+	},
+
+	Switch() {
+		const parts = flatMap(this.parts, t0)
+		parts.push(ifElse(this.opElse,
+			_ =&gt; new SwitchCase(undefined, t0(_).body),
+			() =&gt; SwitchCaseNoMatch))
+		return blockWrapIfVal(this, new SwitchStatement(t0(this.switched), parts))
+	},
+
+	SwitchPart() {
+		const follow = opIf(verifyResults.isStatement(this), () =&gt; new BreakStatement)
+		/*
+		We could just pass block.body for the switch lines, but instead
+		enclose the body of the switch case in curly braces to ensure a new scope.
+		That way this code works:
+			switch (0) {
+				case 0: {
+					const a = 0
+					return a
+				}
+				default: {
+					// Without curly braces this would conflict with the other `a`.
+					const a = 1
+					a
+				}
+			}
+		*/
+		const block = t3(this.result, null, null, follow)
+		// If switch has multiple values, build up a statement like: `case 1: case 2: { doBlock() }`
+		const x = []
+		for (let i = 0; i &lt; this.values.length - 1; i = i + 1)
+			// These cases fallthrough to the one at the end.
+			x.push(new SwitchCase(t0(this.values[i]), []))
+		x.push(new SwitchCase(t0(this.values[this.values.length - 1]), [block]))
+		return x
+	},
+
+	Throw() {
+		return ifElse(this.opThrown,
+			_ =&gt; doThrow(_),
+			() =&gt; new ThrowStatement(new NewExpression(GlobalError, [LitStrThrow])))
+	},
+
+	With() {
+		const idDeclare = idForDeclareCached(this.declare)
+		const val = t0(this.value)
+		const lead = plainLet(idDeclare, val)
+		return verifyResults.isStatement(this) ?
+			t1(this.block, lead) :
+			blockWrap(t3(this.block, lead, null, new ReturnStatement(idDeclare)))
+	},
+
+	Yield() {
+		return new YieldExpression(opMap(this.opValue, t0), false)
+	},
+
+	YieldTo() {
+		return new YieldExpression(t0(this.value), true)
+	}
+})
+
+// Functions specific to certain expressions
+
+function caseBody(parts, opElse) {
+	let acc = ifElse(opElse, t0, () =&gt; ThrowNoCaseMatch)
+	for (let i = parts.length - 1; i &gt;= 0; i = i - 1)
+		acc = t1(parts[i], acc)
+	return acc
+}
+
+function constructorSetMembers(constructor) {
+	return constructor.memberArgs.map(_ =&gt;
+		msCall(&apos;newProperty&apos;, new ThisExpression(), new Literal(_.name), idForDeclareCached(_)))
+}
+
+function forLoop(opIteratee, block) {
+	const jsBlock = t0(block)
+	return ifElse(opIteratee,
+		({element, bag}) =&gt;
+			new ForOfStatement(
+				new VariableDeclaration(&apos;let&apos;, [new VariableDeclarator(t0(element))]),
+				t0(bag),
+				jsBlock),
+		() =&gt; new ForStatement(null, null, null, jsBlock))
+}
+
+function maybeLabelLoop(ast, loop) {
+	return verifyResults.loopNeedsLabel(ast) ? new LabeledStatement(IdLoop, loop) : loop
+}
+
+function transpileBlockReturn(returned, lines, lead, opReturnType) {
+	const ret = new ReturnStatement(
+		maybeWrapInCheckContains(returned, opReturnType, &apos;returned value&apos;))
+	return new BlockStatement(cat(lead, lines, ret))
+}
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.3)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

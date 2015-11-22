@@ -1,0 +1,597 @@
+{
+  "type": "Program",
+  "body": [
+    {
+      "type": "ExportDefaultDeclaration",
+      "declaration": {
+        "type": "FunctionDeclaration",
+        "id": {
+          "type": "Identifier",
+          "name": "manglePath",
+          "range": [
+            91,
+            101
+          ],
+          "loc": {
+            "start": {
+              "line": 2,
+              "column": 24
+            },
+            "end": {
+              "line": 2,
+              "column": 34
+            }
+          }
+        },
+        "params": [
+          {
+            "type": "Identifier",
+            "name": "path",
+            "range": [
+              102,
+              106
+            ],
+            "loc": {
+              "start": {
+                "line": 2,
+                "column": 35
+              },
+              "end": {
+                "line": 2,
+                "column": 39
+              }
+            }
+          }
+        ],
+        "body": {
+          "type": "BlockStatement",
+          "body": [
+            {
+              "type": "ReturnStatement",
+              "argument": {
+                "type": "CallExpression",
+                "callee": {
+                  "type": "MemberExpression",
+                  "computed": false,
+                  "object": {
+                    "type": "CallExpression",
+                    "callee": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "CallExpression",
+                        "callee": {
+                          "type": "MemberExpression",
+                          "computed": false,
+                          "object": {
+                            "type": "CallExpression",
+                            "callee": {
+                              "type": "MemberExpression",
+                              "computed": false,
+                              "object": {
+                                "type": "Identifier",
+                                "name": "path",
+                                "range": [
+                                  118,
+                                  122
+                                ],
+                                "loc": {
+                                  "start": {
+                                    "line": 3,
+                                    "column": 8
+                                  },
+                                  "end": {
+                                    "line": 3,
+                                    "column": 12
+                                  }
+                                }
+                              },
+                              "property": {
+                                "type": "Identifier",
+                                "name": "replace",
+                                "range": [
+                                  123,
+                                  130
+                                ],
+                                "loc": {
+                                  "start": {
+                                    "line": 3,
+                                    "column": 13
+                                  },
+                                  "end": {
+                                    "line": 3,
+                                    "column": 20
+                                  }
+                                }
+                              },
+                              "range": [
+                                118,
+                                130
+                              ],
+                              "loc": {
+                                "start": {
+                                  "line": 3,
+                                  "column": 8
+                                },
+                                "end": {
+                                  "line": 3,
+                                  "column": 20
+                                }
+                              }
+                            },
+                            "arguments": [
+                              {
+                                "type": "Literal",
+                                "value": {},
+                                "raw": "/!/g",
+                                "regex": {
+                                  "pattern": "!",
+                                  "flags": "g"
+                                },
+                                "range": [
+                                  131,
+                                  135
+                                ],
+                                "loc": {
+                                  "start": {
+                                    "line": 3,
+                                    "column": 21
+                                  },
+                                  "end": {
+                                    "line": 3,
+                                    "column": 25
+                                  }
+                                }
+                              },
+                              {
+                                "type": "Literal",
+                                "value": "bang",
+                                "raw": "'bang'",
+                                "range": [
+                                  137,
+                                  143
+                                ],
+                                "loc": {
+                                  "start": {
+                                    "line": 3,
+                                    "column": 27
+                                  },
+                                  "end": {
+                                    "line": 3,
+                                    "column": 33
+                                  }
+                                }
+                              }
+                            ],
+                            "range": [
+                              118,
+                              144
+                            ],
+                            "loc": {
+                              "start": {
+                                "line": 3,
+                                "column": 8
+                              },
+                              "end": {
+                                "line": 3,
+                                "column": 34
+                              }
+                            }
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "replace",
+                            "range": [
+                              147,
+                              154
+                            ],
+                            "loc": {
+                              "start": {
+                                "line": 4,
+                                "column": 2
+                              },
+                              "end": {
+                                "line": 4,
+                                "column": 9
+                              }
+                            }
+                          },
+                          "range": [
+                            118,
+                            154
+                          ],
+                          "loc": {
+                            "start": {
+                              "line": 3,
+                              "column": 8
+                            },
+                            "end": {
+                              "line": 4,
+                              "column": 9
+                            }
+                          }
+                        },
+                        "arguments": [
+                          {
+                            "type": "Literal",
+                            "value": {},
+                            "raw": "/@/g",
+                            "regex": {
+                              "pattern": "@",
+                              "flags": "g"
+                            },
+                            "range": [
+                              155,
+                              159
+                            ],
+                            "loc": {
+                              "start": {
+                                "line": 4,
+                                "column": 10
+                              },
+                              "end": {
+                                "line": 4,
+                                "column": 14
+                              }
+                            }
+                          },
+                          {
+                            "type": "Literal",
+                            "value": "at",
+                            "raw": "'at'",
+                            "range": [
+                              161,
+                              165
+                            ],
+                            "loc": {
+                              "start": {
+                                "line": 4,
+                                "column": 16
+                              },
+                              "end": {
+                                "line": 4,
+                                "column": 20
+                              }
+                            }
+                          }
+                        ],
+                        "range": [
+                          118,
+                          166
+                        ],
+                        "loc": {
+                          "start": {
+                            "line": 3,
+                            "column": 8
+                          },
+                          "end": {
+                            "line": 4,
+                            "column": 21
+                          }
+                        }
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "replace",
+                        "range": [
+                          169,
+                          176
+                        ],
+                        "loc": {
+                          "start": {
+                            "line": 5,
+                            "column": 2
+                          },
+                          "end": {
+                            "line": 5,
+                            "column": 9
+                          }
+                        }
+                      },
+                      "range": [
+                        118,
+                        176
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 3,
+                          "column": 8
+                        },
+                        "end": {
+                          "line": 5,
+                          "column": 9
+                        }
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "type": "Literal",
+                        "value": {},
+                        "raw": "/\\?/g",
+                        "regex": {
+                          "pattern": "\\?",
+                          "flags": "g"
+                        },
+                        "range": [
+                          177,
+                          182
+                        ],
+                        "loc": {
+                          "start": {
+                            "line": 5,
+                            "column": 10
+                          },
+                          "end": {
+                            "line": 5,
+                            "column": 15
+                          }
+                        }
+                      },
+                      {
+                        "type": "Literal",
+                        "value": "q",
+                        "raw": "'q'",
+                        "range": [
+                          184,
+                          187
+                        ],
+                        "loc": {
+                          "start": {
+                            "line": 5,
+                            "column": 17
+                          },
+                          "end": {
+                            "line": 5,
+                            "column": 20
+                          }
+                        }
+                      }
+                    ],
+                    "range": [
+                      118,
+                      188
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 3,
+                        "column": 8
+                      },
+                      "end": {
+                        "line": 5,
+                        "column": 21
+                      }
+                    }
+                  },
+                  "property": {
+                    "type": "Identifier",
+                    "name": "replace",
+                    "range": [
+                      191,
+                      198
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 6,
+                        "column": 2
+                      },
+                      "end": {
+                        "line": 6,
+                        "column": 9
+                      }
+                    }
+                  },
+                  "range": [
+                    118,
+                    198
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 3,
+                      "column": 8
+                    },
+                    "end": {
+                      "line": 6,
+                      "column": 9
+                    }
+                  }
+                },
+                "arguments": [
+                  {
+                    "type": "Literal",
+                    "value": {},
+                    "raw": "/\\$/g",
+                    "regex": {
+                      "pattern": "\\$",
+                      "flags": "g"
+                    },
+                    "range": [
+                      199,
+                      204
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 6,
+                        "column": 10
+                      },
+                      "end": {
+                        "line": 6,
+                        "column": 15
+                      }
+                    }
+                  },
+                  {
+                    "type": "Literal",
+                    "value": "cash",
+                    "raw": "'cash'",
+                    "range": [
+                      206,
+                      212
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 6,
+                        "column": 17
+                      },
+                      "end": {
+                        "line": 6,
+                        "column": 23
+                      }
+                    }
+                  }
+                ],
+                "range": [
+                  118,
+                  213
+                ],
+                "loc": {
+                  "start": {
+                    "line": 3,
+                    "column": 8
+                  },
+                  "end": {
+                    "line": 6,
+                    "column": 24
+                  }
+                }
+              },
+              "range": [
+                111,
+                214
+              ],
+              "loc": {
+                "start": {
+                  "line": 3,
+                  "column": 1
+                },
+                "end": {
+                  "line": 7,
+                  "column": 0
+                }
+              }
+            }
+          ],
+          "range": [
+            108,
+            215
+          ],
+          "loc": {
+            "start": {
+              "line": 2,
+              "column": 41
+            },
+            "end": {
+              "line": 7,
+              "column": 1
+            }
+          }
+        },
+        "generator": false,
+        "expression": false,
+        "range": [
+          82,
+          215
+        ],
+        "loc": {
+          "start": {
+            "line": 2,
+            "column": 15
+          },
+          "end": {
+            "line": 7,
+            "column": 1
+          }
+        },
+        "leadingComments": [
+          {
+            "type": "Block",
+            "value": "* Some Mason modules have names that don't work as URl paths. ",
+            "range": [
+              0,
+              66
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 66
+              }
+            }
+          }
+        ],
+        "trailingComments": []
+      },
+      "range": [
+        67,
+        215
+      ],
+      "loc": {
+        "start": {
+          "line": 2,
+          "column": 0
+        },
+        "end": {
+          "line": 7,
+          "column": 1
+        }
+      },
+      "leadingComments": [
+        {
+          "type": "Block",
+          "value": "* Some Mason modules have names that don't work as URl paths. ",
+          "range": [
+            0,
+            66
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 0
+            },
+            "end": {
+              "line": 1,
+              "column": 66
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "sourceType": "module",
+  "range": [
+    67,
+    215
+  ],
+  "loc": {
+    "start": {
+      "line": 2,
+      "column": 0
+    },
+    "end": {
+      "line": 7,
+      "column": 1
+    }
+  },
+  "comments": [
+    {
+      "type": "Block",
+      "value": "* Some Mason modules have names that don't work as URl paths. ",
+      "range": [
+        0,
+        66
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 66
+        }
+      }
+    }
+  ]
+}
