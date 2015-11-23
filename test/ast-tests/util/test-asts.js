@@ -1,5 +1,6 @@
 import {Module} from '../../../dist/private/MsAst'
-import {parseAst} from '../../../dist/compile'
+import Compiler from '../../../dist/Compiler'
+import CompileOptions from '../../../dist/private/CompileOptions'
 import {setContext} from '../../../dist/private/context'
 import render from '../../../dist/private/render'
 import transpile from '../../../dist/private/transpile/transpile'
@@ -15,7 +16,8 @@ export function test(ms, ast, js, opts = {}) {
 	const name = opts.name || `\`${ms.replace(/\n\t+/g, '; ')}\``
 
 	it(name, () => {
-		const {warnings: actualWarnings, result: parsedAst} = parseAst(ms, compileOptions)
+		const compiler = new Compiler(compileOptions)
+		const {warnings: actualWarnings, result: parsedAst} = compiler.parse(ms, filename)
 
 		if (parsedAst instanceof Error)
 			throw parsedAst
@@ -28,7 +30,9 @@ export function test(ms, ast, js, opts = {}) {
 			throw new Error(
 				`Different AST.\nExpected: ${toJSON(ast)}\nParsed: ${toJSON(parsedAst)}`)
 
-		setContext(compileOptions)
+		// TODO:ES6 Just use regular compiler.render
+		// (currently just renering lines[0] to avoid module boilerplate)
+		setContext(new CompileOptions(compileOptions), filename)
 		const renderAst = ast.lines[0]
 		let rendered = render(transpile(renderAst, verify(ast)))
 		if (rendered instanceof Error)
@@ -55,10 +59,10 @@ export function test(ms, ast, js, opts = {}) {
 }
 
 const compileOptions = {
-	inFile: './test-compile.ms',
 	includeSourceMap: false,
 	useStrict: false
 }
+const filename = 'test-compile.ms'
 
 function equalAsts(a, b) {
 	if (a === b)

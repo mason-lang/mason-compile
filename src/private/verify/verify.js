@@ -1,5 +1,5 @@
 import {code} from '../../CompileError'
-import {check, options, warn} from '../context'
+import {check, options, pathOptions, warn} from '../context'
 import * as MsAstTypes from '../MsAst'
 import {Block, Class, Constructor, Fun, Funs, Kind, LocalDeclare, Method, Pattern} from '../MsAst'
 import {Keywords, showKeyword} from '../Token'
@@ -391,7 +391,7 @@ implementMany(MsAstTypes, 'verify', {
 	Module() {
 		// No need to verify this.doImports.
 		verifyEach(this.imports)
-		withName(options.moduleName(), () => {
+		withName(pathOptions.moduleName(), () => {
 			verifyModuleLines(this.lines, this.loc)
 		})
 	},

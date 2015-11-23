@@ -1,24 +1,24 @@
 import {Pos, singleCharLoc} from 'esast/dist/Loc'
 import CompileError, {Warning} from '../CompileError'
-import CompileOptions from './CompileOptions'
+import PathOptions from './PathOptions'
 
-/**
-Options that were passed in at the call to {@link compile}.
-@type {CompileOptions}
-*/
+/** @type {CompileOptions} */
 export let options
 /**
 Array of all warnings produced during compilation.
 (Please use {@warn} instead of writing to this directly.)
 */
 export let warnings
+/** @type {PathOptions} */
+export let pathOptions
 
 /**
 Write to {@link options} and {@link warnings}.
 Remember to call {@link unsetContext}!
 */
-export function setContext(opts) {
-	options = new CompileOptions(opts)
+export function setContext(_options, filename) {
+	options = _options
+	pathOptions = new PathOptions(filename)
 	warnings = []
 }
 

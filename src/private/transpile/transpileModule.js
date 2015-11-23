@@ -3,7 +3,7 @@ import {ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryEx
 	VariableDeclaration, VariableDeclarator, ReturnStatement, UnaryExpression
 	} from 'esast/dist/ast'
 import {identifier, loc, member, toStatement} from 'esast/dist/util'
-import {options} from '../context'
+import {options, pathOptions} from '../context'
 import manglePath from '../manglePath'
 import {Import, LocalDeclare} from '../MsAst'
 import {cat, flatMap, isEmpty, last, opIf, opMap, rtail} from '../util'
@@ -59,7 +59,7 @@ function moduleBody(kind, lines) {
 }
 
 export function exportNamedOrDefault(val, name) {
-	if (name === options.moduleName())
+	if (name === pathOptions.moduleName())
 		return exportDefault(val)
 	else
 		return exportNamed(val, name)

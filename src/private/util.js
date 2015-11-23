@@ -138,9 +138,3 @@ export function tail(array) {
 export function toArray(value) {
 	return value instanceof Array ? value : [value]
 }
-
-/** Asserts the type of a variable. */
-export function type(instance, itsType) {
-	if (!(Object(instance) instanceof itsType))
-		throw new Error(`${instance} is not a ${itsType.name}`)
-}

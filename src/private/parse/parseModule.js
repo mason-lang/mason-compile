@@ -1,4 +1,4 @@
-import {check, options} from '../context'
+import {check, pathOptions} from '../context'
 import {ImportDo, Import, LocalDeclare, LocalDeclares, Module} from '../MsAst'
 import {Groups, isGroup, isKeyword, Keyword, Keywords, showKeyword} from '../Token'
 import {ifElse} from '../util'
@@ -24,7 +24,7 @@ export default function parseModule(tokens) {
 	const [lazyImports, rest3] = takeImports(Keywords.ImportLazy, rest2)
 	const lines = parseLines(rest3)
 	const imports = plainImports.concat(lazyImports)
-	return new Module(tokens.loc, options.moduleName(), opComment, doImports, imports, lines)
+	return new Module(tokens.loc, pathOptions.moduleName(), opComment, doImports, imports, lines)
 }
 
 function takeImports(importKeywordKind, lines) {

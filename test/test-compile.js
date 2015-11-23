@@ -4,7 +4,8 @@ import {readFileSync} from 'fs'
 import numeral from 'numeral'
 import {argv} from 'process'
 import {install} from 'source-map-support'
-import compile from '../dist/compile'
+import Compiler from '../dist/Compiler'
+import CompileOptions from '../dist/private/CompileOptions'
 import {setContext, warnings} from '../dist/private/context'
 import lex from '../dist/private/lex/lex'
 import MsAst from '../dist/private/MsAst'
@@ -17,9 +18,9 @@ install()
 const logSize = false
 
 function doTest(isPerfTest) {
-	const source = readFileSync('test/test-compile.ms', 'utf-8')
+	const filename = 'test/test-compile.ms'
+	const source = readFileSync(filename, 'utf-8')
 	const opts = {
-		inFile: './test-compile.ms',
 		includeSourceMap: true,
 		useStrict: false,
 		builtins: {
@@ -30,7 +31,7 @@ function doTest(isPerfTest) {
 		}
 	}
 
-	setContext(opts)
+	setContext(new CompileOptions(opts), filename)
 
 	try {
 		const rootToken = lex(source)
@@ -42,6 +43,8 @@ function doTest(isPerfTest) {
 		const esAst = transpile(msAst, verifyResults)
 		// console.log(`==>\n${esAst}`)
 		const {code} = render(esAst)
+
+		const compiler = new Compiler(opts)
 
 		for (const _ of warnings)
 			console.log(_)
@@ -64,7 +67,7 @@ function doTest(isPerfTest) {
 					render(esAst)
 				},
 				all() {
-					compile(source, opts)
+					compiler.compile(source, filename)
 				}
 			})
 		else {

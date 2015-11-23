@@ -1,5 +1,5 @@
 import defaultBuiltins from './defaultBuiltins'
-import {last, type} from './util'
+import {cat, last} from './util'
 
 /**
 Stores `opts` parameter to compile methods and supplies defaults.
@@ -22,7 +22,7 @@ export default class CompileOptions {
 			indent: '\t'
 		}
 
-		const allOpts = new Set(Object.keys(defaults).concat(['inFile', 'builtins']))
+		const allOpts = new Set(cat(Object.keys(defaults), 'builtins'))
 
 		for (const _ in defaults)
 			define(_, defaults[_])
@@ -30,15 +30,6 @@ export default class CompileOptions {
 		for (const _ in opts)
 			if (!allOpts.has(_))
 				throw new Error(`Unrecognized option ${_}`)
-
-		const inFile = opts.inFile
-		if (inFile === undefined) {
-			if (this._includeSourceMap)
-				throw new Error('Either supply `inFile` option or make `includeSourceMap` false.')
-		} else {
-			type(inFile, String)
-			this._inFile = inFile
-		}
 
 		const minIndent = 2, maxIndent = 8
 		if (!(this._indent === '\t' || minIndent <= this._indent && this._indent <= maxIndent))
@@ -52,13 +43,6 @@ export default class CompileOptions {
 		return this._indent
 	}
 
-	moduleName() {
-		return this._inFile === undefined ? 'anonymous' : noExt(basename(this._inFile))
-	}
-
-	jsBaseName() { return `${this.moduleName()}.js` }
-	modulePath() { return this._inFile }
-
 	includeChecks() { return this._checks }
 
 	includeAmdefine() { return this._includeAmdefine }
@@ -69,19 +53,6 @@ export default class CompileOptions {
 
 	importBoot() { return this._importBoot }
 	bootPath() { return `${this._mslPath}/private/boot` }
-}
-
-function basename(path) {
-	return last(path.split('/'))
-}
-
-function extname(path) {
-	return last(path.split('.'))
-}
-
-function noExt(path) {
-	// - 1 for the '.'
-	return path.substring(0, path.length - 1 - extname(path).length)
 }
 
 function getDefaultBuiltins(mslPath) {
