@@ -1,11 +1,11 @@
 import {ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryExpression,
 	BlockStatement, BreakStatement, CallExpression, ClassBody, ClassExpression,
 	ConditionalExpression, DebuggerStatement, ForOfStatement, ForStatement, FunctionExpression,
-	Identifier, IfStatement, Literal, LogicalExpression, MemberExpression, MethodDefinition,
-	NewExpression, ObjectExpression, Property, ReturnStatement, SpreadElement, SwitchCase,
-	SwitchStatement, TaggedTemplateExpression, TemplateElement, TemplateLiteral, ThisExpression,
-	ThrowStatement, VariableDeclaration, UnaryExpression, VariableDeclarator, YieldExpression
-	} from 'esast/dist/ast'
+	Identifier, IfStatement, LabeledStatement, Literal, LogicalExpression, MemberExpression,
+	MethodDefinition, NewExpression, ObjectExpression, Property, ReturnStatement, SpreadElement,
+	SwitchCase, SwitchStatement, TaggedTemplateExpression, TemplateElement, TemplateLiteral,
+	ThisExpression, ThrowStatement, VariableDeclaration, UnaryExpression, VariableDeclarator,
+	YieldExpression} from 'esast/dist/ast'
 import {identifier, member, propertyIdOrLiteral} from 'esast/dist/util'
 import {options} from '../context'
 import * as MsAstTypes from '../MsAst'
@@ -15,17 +15,18 @@ import {assert, cat, flatMap, flatOpMap, ifElse, implementMany, isEmpty, last, o
 	tail} from '../util'
 import {Blocks} from '../VerifyResults'
 import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, DeclareLexicalThis,
-	IdArguments, IdBuilt, IdExtract, IdFocus, IdLexicalThis, IdSuper, GlobalError, GlobalInfinity,
-	LetLexicalThis, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt, ReturnFocus,
-	SetLexicalThis, SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
+	IdArguments, IdBuilt, IdExtract, IdFocus, IdLexicalThis, IdLoop, IdSuper, GlobalError,
+	GlobalInfinity, LetLexicalThis, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt,
+	ReturnFocus, SetLexicalThis, SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch
+	} from './ast-constants'
 import {setup, tearDown, verifyResults, withFunKind} from './context'
 import transpileExcept, {transpileCatch} from './transpileExcept'
 import {transpileMethodToDefinition, transpileMethodToProperty} from './transpileMethod'
 import transpileModule, {exportNamedOrDefault} from './transpileModule'
 import {accessLocalDeclare, blockWrap, blockWrapIfBlock, blockWrapIfVal, callFocusFun, declare,
 	doThrow, focusFun, idForDeclareCached, lazyWrap, makeDeclarator, makeDestructureDeclarators,
-	maybeWrapInCheckContains, memberStringOrVal, msCall, msMember, opTypeCheckForLocalDeclare, t0,
-	t1, t2, t3, tLines, transpileName} from './util'
+	maybeWrapInCheckContains, memberStringOrVal, msCall, msMember, opTypeCheckForLocalDeclare,
+	plainLet, t0, t1, t2, t3, tLines, transpileName} from './util'
 
 /** Transform a {@link MsAst} into an esast. **/
 export default function transpile(moduleExpression, verifyResults) {
@@ -120,7 +121,7 @@ implementMany(MsAstTypes, 'transpile', {
 	Break() {
 		return ifElse(this.opValue,
 			_ => new ReturnStatement(t0(_)),
-			() => new BreakStatement())
+			() => new BreakStatement(verifyResults.isBreakInSwitch(this) ? IdLoop : null))
 	},
 
 	Call() {
@@ -140,8 +141,7 @@ implementMany(MsAstTypes, 'transpile', {
 	CasePart(alternate) {
 		if (this.test instanceof Pattern) {
 			const {type, patterned, locals} = this.test
-			const decl = new VariableDeclaration('let', [
-				new VariableDeclarator(IdExtract, msCall('extract', t0(type), t0(patterned)))])
+			const decl = plainLet(IdExtract, msCall('extract', t0(type), t0(patterned)))
 			const test = new BinaryExpression('!==', IdExtract, LitNull)
 			const extract = new VariableDeclaration('let', locals.map((_, idx) =>
 				new VariableDeclarator(
@@ -167,8 +167,7 @@ implementMany(MsAstTypes, 'transpile', {
 			return classExpr
 		else {
 			const lead = cat(
-				new VariableDeclaration('let', [
-					new VariableDeclarator(IdFocus, classExpr)]),
+				plainLet(IdFocus, classExpr),
 				this.kinds.map(_ => msCall('kindDo', IdFocus, t0(_))))
 			const block = ifElse(this.opDo,
 				_ => t3(_.block, lead, null, ReturnFocus),
@@ -208,7 +207,11 @@ implementMany(MsAstTypes, 'transpile', {
 	Except: transpileExcept,
 
 	For() {
-		return blockWrapIfVal(this, forLoop(this.opIteratee, this.block))
+		const loop = forLoop(this.opIteratee, this.block)
+		return verifyResults.isStatement(this) ?
+			maybeLabelLoop(this, loop) :
+			// use `return` instead of `break`, so no label needed
+			blockWrap(new BlockStatement([loop]))
 	},
 
 	ForAsync() {
@@ -219,11 +222,8 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	ForBag() {
-		return blockWrap(new BlockStatement([
-			DeclareBuiltBag,
-			forLoop(this.opIteratee, this.block),
-			ReturnBuilt
-		]))
+		const loop = maybeLabelLoop(this, forLoop(this.opIteratee, this.block))
+		return blockWrap(new BlockStatement([DeclareBuiltBag, loop, ReturnBuilt]))
 	},
 
 	// leadStatements comes from constructor members
@@ -283,13 +283,9 @@ implementMany(MsAstTypes, 'transpile', {
 			new ObjectExpression(_.map(transpileMethodToProperty))
 		const kind = msCall('kind', name, supers, methods(this.statics), methods(this.methods))
 
-		if (this.opDo === null)
-			return kind
-		else {
-			const lead = new VariableDeclaration('let',
-				[new VariableDeclarator(IdFocus, kind)])
-			return blockWrap(t3(this.opDo.block, lead, null, ReturnFocus))
-		}
+		return ifElse(this.opDo,
+			_ => blockWrap(t3(_.block, plainLet(IdFocus, kind), null, ReturnFocus)),
+			() => kind)
 	},
 
 	Lazy() {
@@ -571,7 +567,7 @@ implementMany(MsAstTypes, 'transpile', {
 	With() {
 		const idDeclare = idForDeclareCached(this.declare)
 		const val = t0(this.value)
-		const lead = new VariableDeclaration('let', [new VariableDeclarator(idDeclare, val)])
+		const lead = plainLet(idDeclare, val)
 		return verifyResults.isStatement(this) ?
 			t1(this.block, lead) :
 			blockWrap(t3(this.block, lead, null, new ReturnStatement(idDeclare)))
@@ -601,13 +597,18 @@ function constructorSetMembers(constructor) {
 }
 
 function forLoop(opIteratee, block) {
+	const jsBlock = t0(block)
 	return ifElse(opIteratee,
-		({element, bag}) => {
-			const declare = new VariableDeclaration('let',
-				[new VariableDeclarator(t0(element))])
-			return new ForOfStatement(declare, t0(bag), t0(block))
-		},
-		() => new ForStatement(null, null, null, t0(block)))
+		({element, bag}) =>
+			new ForOfStatement(
+				new VariableDeclaration('let', [new VariableDeclarator(t0(element))]),
+				t0(bag),
+				jsBlock),
+		() => new ForStatement(null, null, null, jsBlock))
+}
+
+function maybeLabelLoop(ast, loop) {
+	return verifyResults.loopNeedsLabel(ast) ? new LabeledStatement(IdLoop, loop) : loop
 }
 
 function transpileBlockReturn(returned, lines, lead, opReturnType) {

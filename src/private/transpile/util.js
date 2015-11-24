@@ -181,3 +181,7 @@ export function blockWrapIfVal(ast, statement) {
 export function focusFun(value) {
 	return new ArrowFunctionExpression([IdFocus], value)
 }
+
+export function plainLet(identifier, value) {
+	return new VariableDeclaration('let', [new VariableDeclarator(identifier, value)])
+}

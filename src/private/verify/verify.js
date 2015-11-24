@@ -1,11 +1,13 @@
 import {code} from '../../CompileError'
 import {check, options, pathOptions, warn} from '../context'
 import * as MsAstTypes from '../MsAst'
-import {Block, Class, Constructor, Fun, Funs, Kind, LocalDeclare, Method, Pattern} from '../MsAst'
+import {Block, Class, Constructor, For, ForBag, Fun, Funs, Kind, LocalDeclare, Method, Pattern
+	} from '../MsAst'
 import {Keywords, showKeyword} from '../Token'
-import {cat, ifElse, implementMany, isEmpty, opEach} from '../util'
-import {funKind, locals, method, opLoop, results, setup, tearDown, withFun, withIife, withIifeIf,
-	withIifeIfVal, withInFunKind, withMethod, withLoop, withName} from './context'
+import {assert, cat, ifElse, implementMany, isEmpty, opEach} from '../util'
+import {funKind, isInSwitch, locals, method, opLoop, results, setup, tearDown, withFun, withIife,
+	withIifeIf, withIifeIfVal, withInFunKind, withInSwitch, withMethod, withLoop, withName
+	} from './context'
 import {accessLocal, failMissingLocal, plusLocals, registerAndPlusLocal, setDeclareAccessed,
 	setLocal, verifyAndPlusLocal, verifyAndPlusLocals, verifyLocalDeclare, warnUnusedLocals,
 	withBlockLocals} from './locals'
@@ -93,13 +95,31 @@ implementMany(MsAstTypes, 'verify', {
 
 	Break(sk) {
 		checkDo(this, sk)
-		verifyInLoop(this)
 		verifyOp(this.opValue, SK.Val)
-		check(results.isStatement(opLoop) === (this.opValue === null), this.loc, () =>
-			this.opValue === null ?
-				`${showKeyword(Keywords.For)} in expression position must break with a value.` :
-				`${showKeyword(Keywords.Break)} with value is only valid in ` +
-				`${showKeyword(Keywords.For)} in expression position.`)
+		check(opLoop !== null, this.loc, 'Not in a loop.')
+		const loop = opLoop
+
+		if (loop instanceof For)
+			if (results.isStatement(loop))
+				check(this.opValue === null, this.loc, () =>
+					`${showKeyword(Keywords.Break)} with value is only valid in ` +
+					`${showKeyword(Keywords.For)} in expression position.`)
+			else
+				check(this.opValue !== null, this.loc, () =>
+					`${showKeyword(Keywords.For)} in expression position must ` +
+					`${showKeyword(Keywords.Break)} with a value.`)
+		else {
+			// (ForAsync isn't really a loop)
+			assert(loop instanceof ForBag)
+			check(this.opValue === null, this.loc, () =>
+				`${showKeyword(Keywords.Break)} in ${showKeyword(Keywords.ForBag)} ` +
+				`may not have value.`)
+		}
+
+		if (isInSwitch) {
+			results.loopsNeedingLabel.add(loop)
+			results.breaksInSwitch.add(this)
+		}
 	},
 
 	Call(_sk) {
@@ -518,9 +538,11 @@ implementMany(MsAstTypes, 'verify', {
 	Switch(sk) {
 		markStatement(this, sk)
 		withIifeIfVal(sk, () => {
-			this.switched.verify(SK.Val)
-			verifyEach(this.parts, sk)
-			verifyOp(this.opElse, sk)
+			withInSwitch(true, () => {
+				this.switched.verify(SK.Val)
+				verifyEach(this.parts, sk)
+				verifyOp(this.opElse, sk)
+			})
 		})
 	},
 
@@ -589,10 +611,6 @@ function withVerifyIteratee({element, bag}, action) {
 	bag.verify(SK.Val)
 	verifyNotLazy(element, 'Iteration element can not be lazy.')
 	verifyAndPlusLocal(element, action)
-}
-
-function verifyInLoop(loopUser) {
-	check(opLoop !== null, loopUser.loc, 'Not in a loop.')
 }
 
 function verifyMethodImpl(_, doVerify) {

@@ -44,6 +44,10 @@ export default class VerifyResults {
 		this.objEntryExports = new Set()
 		/** @type {Modules} */
 		this.moduleKind = null
+		/** Set of {@link Loop}s with at least one {@link Break} in a {@link Switch}. */
+		this.loopsNeedingLabel = new Set()
+		/** Set of {@link Break}s that are inside {@link Switch}es. */
+		this.breaksInSwitch = new Set()
 	}
 
 	/** Gets the LocalDeclare that was verified to be the one accessed. */
@@ -85,6 +89,16 @@ export default class VerifyResults {
 
 	constructorHasSuper(ctr) {
 		return this.constructorToSuper.has(ctr)
+	}
+
+	/** Whether some `break` in this loop is in a `switch`. */
+	loopNeedsLabel(loop) {
+		return this.loopsNeedingLabel.has(loop)
+	}
+
+	/** Returns whether there is a `switch` in between this `break` and its loop. */
+	isBreakInSwitch(breakAst) {
+		return this.breaksInSwitch.has(breakAst)
 	}
 }
 

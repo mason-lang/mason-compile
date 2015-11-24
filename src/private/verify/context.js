@@ -34,6 +34,11 @@ export let method
 export let results
 /** Name of the closest AssignSingle. */
 export let name
+/**
+Whether we're in a `switch` inside of a `for`.
+If there's a `break` statement, the loop will need a label.
+*/
+export let isInSwitch
 
 export function setup() {
 	locals = new Map()
@@ -80,7 +85,9 @@ export function withName(newName, action) {
 
 /** Can't break out of loop inside of IIFE. */
 export function withIife(action) {
-	withLoop(null, action)
+	withLoop(null, () => {
+		withInSwitch(false, action)
+	})
 }
 
 export function withIifeIf(cond, action) {
@@ -98,6 +105,13 @@ export function withIifeIfVal(sk, action) {
 // TODO:ES6 Shouldn't need this
 export function setPendingBlockLocals(val) {
 	pendingBlockLocals = val
+}
+
+export function withInSwitch(newInSwitch, action) {
+	const oldInSwitch = isInSwitch
+	isInSwitch = newInSwitch
+	action()
+	isInSwitch = oldInSwitch
 }
 
 export function withFun(funKind, action) {

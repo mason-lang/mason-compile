@@ -13,8 +13,8 @@ export const
 	IdExports = new Identifier('exports'),
 	IdExtract = new Identifier('_$'),
 	IdFocus = new Identifier('_'),
-	// TODO:ES6 Shouldn't need, just use arrow functions.
 	IdLexicalThis = new Identifier('_this'),
+	IdLoop = new Identifier('loop'),
 	IdSuper = new Identifier('super'),
 	LitEmptyArray = new ArrayExpression([]),
 	LitEmptyString = new Literal(''),
