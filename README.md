@@ -6,5 +6,7 @@ In case you're wondering how the compiler works, the [generated documentation](h
 
 ## Build
 
+[![Join the chat at https://gitter.im/mason-lang/mason-compile](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mason-lang/mason-compile?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 	npm install
 	npm run [build|lint|test|doc]
