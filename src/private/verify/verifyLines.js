@@ -49,11 +49,12 @@ export default function verifyLines(lines) {
 	const shadowed = []
 
 	for (const line of lines) {
+		line.verify(SK.Do)
 		for (const newLocal of lineNewLocals(line)) {
-			const name = newLocal.name
+			const {name, loc} = newLocal
 			const oldLocal = locals.get(name)
 			if (oldLocal !== undefined) {
-				check(!thisBlockLocalNames.has(name), newLocal.loc,
+				check(!thisBlockLocalNames.has(name), loc,
 					() => `A local ${code(name)} is already in this block.`)
 				shadowed.push(oldLocal)
 			}
@@ -65,7 +66,6 @@ export default function verifyLines(lines) {
 			const popped = pendingBlockLocals.pop()
 			assert(popped === newLocal)
 		}
-		line.verify(SK.Do)
 	}
 
 	newLocals.forEach(deleteLocal)
