@@ -5,5 +5,5 @@ import {options, pathOptions} from './context'
 export default function render(esAst) {
 	return options.includeSourceMap() ?
 		renderWithSourceMap(esAst, pathOptions.modulePath(), `./${pathOptions.jsBaseName()}`) :
-		esRender(esAst)
+		{code: esRender(esAst), sourceMap: ''}
 }

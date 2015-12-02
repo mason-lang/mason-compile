@@ -31,13 +31,11 @@ export default class Compiler {
 
 	/**
 	@param {string} source Mason source code for a single module.
-	@return {{warnings: Array<Warning>, result: CompileError | string | {code, sourceMap}}}
+	@param {string} filename Path of the source file.
+	@return {{warnings: Array<Warning>, result: CompileError | {code: string, sourceMap: string}}}
 		`CompileError`s are not thrown, but returned.
 		This allows us to return `warnings` as well.
-
-		If there is no error:
-		`result` will be `{code: string, sourceMap: string}` if `opts.includeSourceMap`.
-		Otherwise, it will just be the code (a string).
+		`sourceMap` will be empty unless `opts.includeSourceMap`.
 	*/
 	compile(source, filename) {
 		return this._doInContext(filename, () => {
