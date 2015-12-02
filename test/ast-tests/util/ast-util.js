@@ -8,6 +8,7 @@ export const
 	bDeclare = LocalDeclare.plain(loc, 'b'),
 	aAccess = new LocalAccess(loc, 'a'),
 	bAccess = new LocalAccess(loc, 'b'),
+	objectAccess = new LocalAccess(loc, 'Object'),
 	focusAccess = new LocalAccess(loc, '_'),
 	focusDeclare = LocalDeclare.focus(loc),
 

@@ -1,5 +1,5 @@
 import {code} from '../../CompileError'
-import {check, options, pathOptions, warn} from '../context'
+import {check, fail, options, pathOptions, warn} from '../context'
 import * as MsAstTypes from '../MsAst'
 import {Block, Class, Constructor, For, ForBag, Fun, Funs, Kind, LocalDeclare, Method, Pattern
 	} from '../MsAst'
@@ -416,6 +416,22 @@ implementMany(MsAstTypes, 'verify', {
 		})
 	},
 
+	MsRegExp(sk) {
+		checkVal(this, sk)
+		this.parts.forEach(verifyName)
+		// Check RegExp validity; only possible if this has a single part.
+		if (this.parts.length === 1 && typeof this.parts[0] === 'string')
+			try {
+				/* eslint-disable no-new */
+				new RegExp(this.parts[0])
+			} catch (err) {
+				if (!(err instanceof SyntaxError))
+					// This should never happen.
+					throw err
+				fail(this.loc, err.message)
+			}
+	},
+
 	New(sk) {
 		checkVal(this, sk)
 		this.type.verify(SK.Val)
@@ -464,8 +480,7 @@ implementMany(MsAstTypes, 'verify', {
 
 	QuotePlain(sk) {
 		checkVal(this, sk)
-		for (const _ of this.parts)
-			verifyName(_)
+		this.parts.forEach(verifyName)
 	},
 
 	QuoteSimple(sk) {

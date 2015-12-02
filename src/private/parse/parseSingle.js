@@ -3,7 +3,7 @@ import {Group, Groups, Name, opKeywordKindToSpecialValueKind, Keyword, Keywords}
 import {ifElse} from '../util'
 import {unexpected} from './checks'
 import {parseBlockWrap} from './parseBlock'
-import parseQuote from './parseQuote'
+import parseQuote, {parseRegExp} from './parseQuote'
 import {parseExpr, parseExprParts, parseSpaced} from './parse*'
 import Slice from './Slice'
 
@@ -25,6 +25,9 @@ export default function parseSingle(token) {
 				return parseBlockWrap(slice)
 			case Groups.Quote:
 				return parseQuote(slice)
+			case Groups.RegExp:
+				return parseRegExp(slice, token.flags)
+			// Groups.Interpolation handled by parseQuote
 			default:
 				throw new Error(token.kind)
 		}

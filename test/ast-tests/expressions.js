@@ -1,6 +1,7 @@
-import {BagSimple, Block, Call, Member, New, ObjPair, ObjSimple, QuotePlain, QuoteSimple,
+import {BagSimple, Block, Call, Member, MsRegExp, New, ObjPair, ObjSimple, QuotePlain, QuoteSimple,
 	QuoteTaggedTemplate, SpecialVal, SpecialVals, Spread, With} from '../../dist/private/MsAst'
-import {aDeclare, blockPass, focusAccess, focusDeclare, loc, one, two, zero} from './util/ast-util'
+import {aDeclare, blockPass, focusAccess, focusDeclare, loc, objectAccess, one, two, zero
+	} from './util/ast-util'
 import {test} from './util/test-asts'
 
 describe('expressions', () => {
@@ -103,19 +104,47 @@ describe('expressions', () => {
 			'`a\n\tb\nc`')
 
 		test(
-			'"a\\{\\n"',
-			new QuotePlain(loc, ['a\\{\\n']),
-			'`a\\{\\n`')
+			'"a`\\"\\#\\n"',
+			new QuotePlain(loc, ['a\\`"#\\n']),
+			'\`a\\`"#\\n\`')
 
 		test(
-			'"a{0}b"',
+			'"a#(0)b"',
 			new QuotePlain(loc, ['a', zero, 'b']),
 			'`a${0}b`')
 
 		test(
-			'0"a{0}b"',
+			'"a#Object"',
+			new QuotePlain(loc, ['a', objectAccess]),
+			'`a${Object}`')
+
+		test(
+			'0"a#(0)b"',
 			new QuoteTaggedTemplate(loc, zero, new QuotePlain(loc, ['a', zero, 'b'])),
 			'0`a${0}b`')
+
+		test(
+			'``g',
+			new MsRegExp(loc, [], 'g'),
+			'/(?:)/g')
+
+		test(
+			'`a`im',
+			new MsRegExp(loc, ['a'], 'im'),
+			'/a/im')
+
+		test(
+			'`a#(0)#Object`g',
+			new MsRegExp(loc, ['a', zero, objectAccess], 'g'),
+			'_ms.regexp(["a",0,Object],"g")')
+
+		test(
+			`
+				\`
+					a
+					b`,
+			new MsRegExp(loc, ['a\nb']),
+			'/a\\nb/')
 	})
 
 	describe('With', () => {
@@ -163,3 +192,4 @@ describe('expressions', () => {
 // GetterFun
 // Method
 // Pipe
+// Literal (NumberLiteral, RegExpLiteral)

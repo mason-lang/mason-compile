@@ -97,9 +97,20 @@ export function openParenthesis(loc) {
 	openGroup(loc.end, Groups.Space)
 }
 
-export function closeParenthesis(loc) {
+export function openInterpolation(loc) {
+	openGroup(loc.start, Groups.Interpolation)
+	openGroup(loc.end, Groups.Space)
+}
+
+/**
+Close a Groups.Interpolation or Groups.Parenthesis,
+returning whether it was an interpolation.
+*/
+export function closeInterpolationOrParenthesis(loc) {
 	closeGroupNoCheck(loc.start, Groups.Space)
-	closeGroup(loc.end, Groups.Parenthesis)
+	const kind = curGroup.kind
+	closeGroup(loc.end, kind)
+	return kind === Groups.Interpolation
 }
 
 export function closeGroupsForDedent(pos) {

@@ -2,18 +2,17 @@ import Loc, {Pos} from 'esast/dist/Loc'
 import {code} from '../../CompileError'
 import {check, fail, options, warn} from '../context'
 import {NumberLiteral} from '../MsAst'
-import {DocComment, Group, Groups, isKeyword, Keyword, Keywords, Name, opKeywordKindFromName
-	} from '../Token'
-import {ifElse, isEmpty, last} from '../util'
+import {DocComment, Group, Groups, isKeyword, Keyword, Keywords} from '../Token'
+import {assert, isEmpty, last} from '../util'
 import {Chars, isDigit, isDigitBinary, isDigitHex, isDigitOctal, isNameCharacter, showChar
 	} from './chars'
-import {addToCurrentGroup, closeGroup, closeGroupsForDedent, closeLine,
-	closeParenthesis, closeSpaceOKIfEmpty, curGroup, openGroup, openLine, openParenthesis, space
+import {addToCurrentGroup, closeGroup, closeGroupsForDedent, closeInterpolationOrParenthesis,
+	closeLine, closeSpaceOKIfEmpty, curGroup, openGroup, openLine, openParenthesis, space
 	} from './groupContext'
 import {lexQuote} from './lex*'
+import lexName from './lexName'
 import {column, eat, eatRestOfLine, index, line, peek, pos, sourceString, skip, skipNewlines,
-	skipRestOfLine, skipWhile, skipWhileEquals, takeWhileWithPrev, tryEat, tryEat2, tryEat3
-	} from './sourceContext'
+	skipRestOfLine, skipWhile, skipWhileEquals, tryEat, tryEat2, tryEat3} from './sourceContext'
 
 /*
 In the case of quote interpolation ("a{b}c") we'll recurse back into here.
@@ -91,56 +90,19 @@ export default function lexPlain(isInQuote) {
 			return spaces / optIndent
 		}
 	}
-
-
 	function handleName() {
-		check(isNameCharacter(peek(-1)), loc(), () =>
-			`Reserved character ${showChar(peek(-1))}`)
-
-		// All other characters should be handled in a case above.
-		const name = takeWhileWithPrev(isNameCharacter)
-
-		if (name.endsWith('_')) {
-			if (name.length > 1)
-				handleNameText(name.slice(0, name.length - 1))
-			keyword(Keywords.Focus)
-		} else
-			handleNameText(name)
-	}
-	function handleNameText(name) {
-		ifElse(opKeywordKindFromName(name),
-			kind => {
-				switch (kind) {
-					case Keywords.Region:
-						skipRestOfLine()
-						keyword(Keywords.Region)
-						break
-					case Keywords.Todo:
-						// TODO: warn
-						skipRestOfLine()
-						break
-					default:
-						keyword(kind)
-				}
-			},
-			() => {
-				addToCurrentGroup(new Name(loc(), name))
-			})
+		lexName(startPos(), false)
 	}
 
-	for (;;) {
+	loop: for (;;) {
 		startColumn = column
 		const characterEaten = eat()
 		// Generally, the type of a token is determined by the first character.
 		switch (characterEaten) {
 			case Chars.Null:
-				return
-			case Chars.CloseBrace:
-				check(isInQuote, loc, () =>
-					`Reserved character ${showChar(Chars.CloseBrace)}`)
-				return
-			case Chars.Quote:
-				lexQuote(indent)
+				break loop
+			case Chars.Backtick: case Chars.Quote:
+				lexQuote(indent, characterEaten === Chars.Backtick)
 				break
 
 			// GROUPS
@@ -160,7 +122,10 @@ export default function lexPlain(isInQuote) {
 				}
 				break
 			case Chars.CloseParenthesis:
-				closeParenthesis(loc())
+				if (closeInterpolationOrParenthesis(loc())) {
+					assert(isInQuote)
+					break loop
+				}
 				break
 			case Chars.CloseBracket:
 				closeGroup(startPos(), Groups.Space)
@@ -307,12 +272,14 @@ export default function lexPlain(isInQuote) {
 				keyword(Keywords.Ampersand)
 				break
 
-			case Chars.Backslash: case Chars.Backtick: case Chars.Caret:
-			case Chars.Comma: case Chars.Percent: case Chars.Semicolon:
+			case Chars.Backslash: case Chars.Caret: case Chars.Comma: case Chars.Percent:
+			case Chars.Semicolon:
 				fail(loc(), `Reserved character ${showChar(characterEaten)}`)
 				break
 
 			default:
+				check(isNameCharacter(peek(-1)), loc(), () =>
+					`Reserved character ${showChar(peek(-1))}`)
 				handleName()
 		}
 	}

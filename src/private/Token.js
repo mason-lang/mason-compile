@@ -34,6 +34,7 @@ export class Group extends Token {
 		this.subTokens = subTokens
 		/** @type {Groups} */
 		this.kind = kind
+		// if this.kind === Groups.RegExp, this will also be given a `flags` field.
 	}
 
 	toString() {
@@ -128,11 +129,6 @@ export const Groups = {
 	*/
 	Block: g('indented block'),
 	/**
-	Tokens within a quote.
-	`subTokens` may be strings, or G_Parenthesis groups.
-	*/
-	Quote: g('quote'),
-	/**
 	Tokens on a line.
 	The indented block following the end of the line is considered to be a part of the line!
 	This means that in this code:
@@ -149,7 +145,19 @@ export const Groups = {
 	`a[b].c` is an example.
 	A single token on its own will not be given a `Space` group.
 	*/
-	Space: g('space')
+	Space: g('space'),
+	/**
+	Tokens within a quote.
+	`subTokens` may be plain strings, Names (for `#foo`), or Interpolation groups (for `#(0)`).
+	*/
+	Quote: g('quote'),
+	/**
+	Tokens within a RegExp.
+	`subTokens` are same as for Quote.
+	*/
+	RegExp: g('regexp'),
+	/** Interpolated tokens in a Quote or RegExp using `#()`. */
+	Interpolation: g('interpolation')
 }
 
 /**

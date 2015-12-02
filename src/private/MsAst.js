@@ -963,6 +963,23 @@ export default class MsAst {
 		}
 	}
 
+	/**
+	RegExp expression, like `\`foo\``..
+	Like QuotePlain, may contain interpolation.
+	*/
+	export class MsRegExp extends Val {
+		constructor(loc, parts, flags = '') {
+			super(loc)
+			/** @type {Array<string | Val>} */
+			this.parts = parts
+			/**
+			Some selection of the letters in 'gimy' (in that order).
+			@type {string}
+			*/
+			this.flags = flags
+		}
+	}
+
 	/** {@link Quote} or {@link QuoteSimple}. */
 	export class QuoteAbstract extends Val {}
 
@@ -976,7 +993,6 @@ export default class MsAst {
 			/**
 			`parts` are Strings interleaved with Vals.
 			part Strings are raw values, meaning "\n" is two characters.
-			Since "\{" is special to Mason, that's only one character.
 			@type {Array<string | Val>}
 			*/
 			this.parts = parts

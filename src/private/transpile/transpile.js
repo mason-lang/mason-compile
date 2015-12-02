@@ -368,6 +368,15 @@ implementMany(MsAstTypes, 'transpile', {
 
 	Module: transpileModule,
 
+	MsRegExp() {
+		return this.parts.length === 0 ?
+			new Literal(new RegExp('', this.flags)) :
+			this.parts.length === 1 && typeof this.parts[0] === 'string' ?
+			new Literal(new RegExp(this.parts[0].replace('\n', '\\n'), this.flags)) :
+			msCall('regexp',
+				new ArrayExpression(this.parts.map(transpileName)), new Literal(this.flags))
+	},
+
 	New() {
 		return new NewExpression(t0(this.type), this.args.map(t0))
 	},
@@ -406,7 +415,7 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	QuotePlain() {
-		if (this.parts.length === 0)
+		if (isEmpty(this.parts))
 			return LitEmptyString
 		else {
 			const quasis = [], expressions = []
@@ -419,7 +428,9 @@ implementMany(MsAstTypes, 'transpile', {
 				if (typeof part === 'string')
 					quasis.push(TemplateElement.forRawString(part))
 				else {
-					// "{1}{1}" needs an empty quasi in the middle (and on the ends)
+					// "{1}{1}" needs an empty quasi in the middle (and on the ends).
+					// There are never more than 2 string parts in a row,
+					// so quasis.length === expressions.length or is exactly 1 more.
 					if (quasis.length === expressions.length)
 						quasis.push(TemplateElement.empty)
 					expressions.push(t0(part))

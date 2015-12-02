@@ -10,14 +10,13 @@ export default function autoBlockKind(lines, loc) {
 
 export function opBlockBuildKind(lines, loc) {
 	let isBag = false, isMap = false, isObj = false
-	for (const line of lines) {
+	for (const line of lines)
 		if (line instanceof BagEntry)
 			isBag = true
 		else if (line instanceof MapEntry)
 			isMap = true
 		else if (line instanceof ObjEntry)
 			isObj = true
-	}
 
 	check(!(isBag && isMap) && !(isMap && isObj) && !(isBag && isObj), loc,
 		'Block has mixed bag/map/obj entries — can not infer type.')
