@@ -108,6 +108,7 @@ export default function lexPlain(isInQuote) {
 			// GROUPS
 
 			case Chars.OpenParenthesis:
+				// Handle `()` specially to avoid warnings about an empty spaced group inside.
 				if (tryEat(Chars.CloseParenthesis))
 					addToCurrentGroup(new Group(loc(), [], Groups.Parenthesis))
 				else
