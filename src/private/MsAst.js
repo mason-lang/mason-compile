@@ -181,7 +181,9 @@ export default class MsAst {
 		}
 
 		/** @override */
-		allAssignees() { return [this.assignee] }
+		allAssignees() {
+			return [this.assignee]
+		}
 	}
 
 	/** `{assignees} =/:=/::= {value}` */

@@ -619,7 +619,11 @@ function verifyFor(forLoop) {
 			forLoop.block.verify(SK.Do)
 		})
 	}
-	ifElse(forLoop.opIteratee, _ => { withVerifyIteratee(_, verifyForBlock) }, verifyForBlock)
+	ifElse(forLoop.opIteratee,
+		_ => {
+			withVerifyIteratee(_, verifyForBlock)
+		},
+		verifyForBlock)
 }
 
 function withVerifyIteratee({element, bag}, action) {

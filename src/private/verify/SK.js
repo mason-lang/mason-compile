@@ -46,17 +46,29 @@ export function getSK(_) {
 
 // `null` means can't determine whether this must be a statement or value.
 implementMany(MsAstTypes, 'opSK', {
-	Do() { return SK.Do },
-	Val() { return SK.Val },
-	Call() { return null },
-	Yield() { return null },
-	YieldTo() { return null },
+	Do() {
+		return SK.Do
+	},
+	Val() {
+		return SK.Val
+	},
+	Call() {
+		return null
+	},
+	Yield() {
+		return null
+	},
+	YieldTo() {
+		return null
+	},
 	Block() {
 		return autoBlockKind(this.lines, this.loc) === Blocks.Return ?
 			isEmpty(this.lines) ? SK.Do : last(this.lines).opSK() :
 			SK.Val
 	},
-	Conditional() { return this.result.opSK() },
+	Conditional() {
+		return this.result.opSK()
+	},
 	Except() {
 		const catches = this.allCatches.map(_ => _.block)
 		// If there's opElse, `try` is always SK.Do and `else` may be SK.Val.
@@ -77,12 +89,18 @@ function caseSwitchSK() {
 }
 
 implementMany(MsAstTypes, 'opForSK', {
-	default() { return null },
+	default() {
+		return null
+	},
 	Break() {
 		return this.opValue === null ? SK.Do : SK.Val
 	},
-	Block() { return isEmpty(this.lines) ? null : composite(this.loc, 'opForSK', this.lines) },
-	Conditional() { return this.result.opForSK() },
+	Block() {
+		return isEmpty(this.lines) ? null : composite(this.loc, 'opForSK', this.lines)
+	},
+	Conditional() {
+		return this.result.opForSK()
+	},
 	Case: caseSwitchForSK,
 	Except() {
 		const catches = this.allCatches.map(_ => _.block)

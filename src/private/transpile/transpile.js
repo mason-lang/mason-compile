@@ -311,7 +311,9 @@ implementMany(MsAstTypes, 'transpile', {
 		}
 	},
 
-	LocalDeclare() { return new Identifier(idForDeclareCached(this).name) },
+	LocalDeclare() {
+		return new Identifier(idForDeclareCached(this).name)
+	},
 
 	LocalMutate() {
 		return new AssignmentExpression('=', identifier(this.name), t0(this.value))
@@ -324,7 +326,9 @@ implementMany(MsAstTypes, 'transpile', {
 			t0(this.args[0]))
 	},
 
-	MapEntry() { return msCall('setSub', IdBuilt, t0(this.key), t0(this.val)) },
+	MapEntry() {
+		return msCall('setSub', IdBuilt, t0(this.key), t0(this.val))
+	},
 
 	Member() {
 		return memberStringOrVal(t0(this.object), this.name)
@@ -381,7 +385,9 @@ implementMany(MsAstTypes, 'transpile', {
 		return new NewExpression(t0(this.type), this.args.map(t0))
 	},
 
-	Not() { return new UnaryExpression('!', t0(this.arg)) },
+	Not() {
+		return new UnaryExpression('!', t0(this.arg))
+	},
 
 	ObjEntryAssign() {
 		if (this.assign instanceof AssignSingle && !this.assign.assignee.isLazy()) {

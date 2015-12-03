@@ -43,16 +43,30 @@ export default class CompileOptions {
 		return this._indent
 	}
 
-	includeChecks() { return this._checks }
+	includeChecks() {
+		return this._checks
+	}
 
-	includeAmdefine() { return this._includeAmdefine }
-	includeSourceMap() { return this._includeSourceMap }
-	includeUseStrict() { return this._useStrict }
+	includeAmdefine() {
+		return this._includeAmdefine
+	}
+	includeSourceMap() {
+		return this._includeSourceMap
+	}
+	includeUseStrict() {
+		return this._useStrict
+	}
 
-	lazyModule() { return this._lazyModules }
+	lazyModule() {
+		return this._lazyModules
+	}
 
-	importBoot() { return this._importBoot }
-	bootPath() { return `${this._mslPath}/private/boot` }
+	importBoot() {
+		return this._importBoot
+	}
+	bootPath() {
+		return `${this._mslPath}/private/boot`
+	}
 }
 
 function getDefaultBuiltins(mslPath) {
