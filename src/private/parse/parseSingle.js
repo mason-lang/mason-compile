@@ -1,5 +1,7 @@
+import {warn} from '../context'
 import {BagSimple, LocalAccess, NumberLiteral, SpecialVal} from '../MsAst'
-import {Group, Groups, Name, opKeywordKindToSpecialValueKind, Keyword, Keywords} from '../Token'
+import {Group, Groups, Name, opKeywordKindToSpecialValueKind, Keyword, Keywords, showGroup
+	} from '../Token'
 import {ifElse} from '../util'
 import {unexpected} from './checks'
 import {parseBlockWrap} from './parseBlock'
@@ -8,7 +10,7 @@ import {parseExpr, parseExprParts, parseSpaced} from './parse*'
 import Slice from './Slice'
 
 /** Parse a single token. */
-export default function parseSingle(token) {
+export default function parseSingle(token, isInSpaced = false) {
 	const {loc} = token
 	if (token instanceof Name)
 		return new LocalAccess(loc, token.name)
@@ -18,6 +20,11 @@ export default function parseSingle(token) {
 			case Groups.Space:
 				return parseSpaced(slice)
 			case Groups.Parenthesis:
+				// todo: `isInSpaced` is a kludge
+				// Normally parens are unnecessary for `(1..10)`, but not for `(1..10).by 2`.
+				// However, this kludge means we won't catch expressions like `(2):number`.
+				if (slice.size() === 1 && !isInSpaced)
+					warn(slice.loc, `Unnecessary ${showGroup(Groups.Parenthesis)}.`)
 				return parseExpr(slice)
 			case Groups.Bracket:
 				return new BagSimple(loc, parseExprParts(slice))

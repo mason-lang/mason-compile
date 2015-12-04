@@ -38,7 +38,7 @@ export class Group extends Token {
 	}
 
 	toString() {
-		return `${groupKindToName.get(this.kind)}`
+		return groupName(this.kind)
 	}
 }
 
@@ -327,8 +327,16 @@ export function keywordName(kind) {
 	return keywordKindToName.get(kind)
 }
 
+function groupName(kind) {
+	return groupKindToName.get(kind)
+}
+
 export function showKeyword(kind) {
 	return code(keywordName(kind))
+}
+
+export function showGroup(kind) {
+	return code(groupName(kind))
 }
 
 /**

@@ -76,7 +76,7 @@ export default function parseSpaced(tokens) {
 			default:
 				// fall through
 		}
-	return parseSpacedFold(parseSingle(h), rest)
+	return parseSpacedFold(parseSingle(h, true), rest)
 }
 
 function parseSpacedFold(start, rest) {
