@@ -37,6 +37,7 @@ export function test(ms, ast, js, opts = {}) {
 		let rendered = render(transpile(renderAst, verify(ast)))
 		if (rendered instanceof Error)
 			throw rendered
+		rendered = rendered.code
 
 		if (isMultiLineTest)
 			// remove leading '{' and closing '\n}'

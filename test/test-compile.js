@@ -79,8 +79,8 @@ function doTest(isPerfTest) {
 			console.log(`==>\n${code}`)
 		}
 	} catch (err) {
-		if (err.warning)
-			console.log(err.warning.loc)
+		if (err.errorMessage)
+			console.log(err.errorMessage.loc)
 		console.log(err.stack)
 	}
 }

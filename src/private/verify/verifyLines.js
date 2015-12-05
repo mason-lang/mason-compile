@@ -1,4 +1,3 @@
-import {code} from '../../CompileError'
 import {check} from '../context'
 import {AssignDestructure, AssignSingle, ObjEntry} from '../MsAst'
 import {assert, reverseIter} from '../util'
@@ -54,8 +53,7 @@ export default function verifyLines(lines) {
 			const {name, loc} = newLocal
 			const oldLocal = locals.get(name)
 			if (oldLocal !== undefined) {
-				check(!thisBlockLocalNames.has(name), loc,
-					() => `A local ${code(name)} is already in this block.`)
+				check(!thisBlockLocalNames.has(name), loc, 'duplicateLocal', name)
 				shadowed.push(oldLocal)
 			}
 			thisBlockLocalNames.add(name)

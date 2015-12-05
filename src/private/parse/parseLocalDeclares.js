@@ -57,7 +57,7 @@ export function parseLocalName(token) {
 	if (isKeyword(Keywords.Focus, token))
 		return '_'
 	else {
-		check(token instanceof Name, token.loc, () => `Expected a local name, not ${token}.`)
+		check(token instanceof Name, token.loc, 'expectedLocalName', token)
 		return token.name
 	}
 }
@@ -72,7 +72,7 @@ export function parseLocalDeclareOrFocus(tokens) {
 	if (tokens.isEmpty())
 		return LocalDeclare.focus(tokens.loc)
 	else {
-		check(tokens.size() === 1, tokens.loc, 'Expected only one local declare.')
+		check(tokens.size() === 1, tokens.loc, 'expectedOneLocal')
 		const token = tokens.head()
 		if (isGroup(Groups.Space, token)) {
 			const slice = Slice.group(token)
@@ -105,7 +105,7 @@ function _parseLocalDeclareFromSpaced(tokens, orMember = false) {
 		const colon = rest2.head()
 		checkKeyword(Keywords.Colon, colon)
 		const tokensType = rest2.tail()
-		checkNonEmpty(tokensType, () => `Expected something after ${colon}`)
+		checkNonEmpty(tokensType, 'expectedAfterColon')
 		return parseSpaced(tokensType)
 	})
 	const declare = new LocalDeclare(tokens.loc, name, opType, kind)

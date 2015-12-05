@@ -2,18 +2,18 @@
 Any error thrown by the compiler due to a problem with the input source code.
 */
 export default class CompileError extends Error {
-	constructor(warning) {
-		super(warning.message)
+	constructor(errorMessage) {
+		super(errorMessage.message)
 		/** Location and description of the error. */
-		this.warning = warning
+		this.errorMessage = errorMessage
 	}
 }
 
 /**
 Any problem with source code.
-Despite the name, this is used for both warnings and errors.
+Used for both errors and warnings.
 */
-export class Warning {
+export class ErrorMessage {
 	constructor(loc, message) {
 		/**
 		Source location of the problem.
@@ -52,6 +52,6 @@ export class Warning {
 	}
 }
 
-/** Used when generating warning messages to highlight a part of that message. */
+/** Used when generating messages to highlight a part of that message. */
 export const code = str =>
 	`{{${str}}}`

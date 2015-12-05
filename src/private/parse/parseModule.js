@@ -1,6 +1,6 @@
 import {check, pathOptions} from '../context'
 import {ImportDo, Import, LocalDeclare, LocalDeclares, Module} from '../MsAst'
-import {Groups, isGroup, isKeyword, Keyword, Keywords, showKeyword} from '../Token'
+import {Groups, isGroup, isKeyword, Keyword, Keywords} from '../Token'
 import {ifElse} from '../util'
 import {checkEmpty, checkNonEmpty, checkKeyword} from './checks'
 import {justBlock} from './parseBlock'
@@ -42,8 +42,7 @@ function parseImports(importKeywordKind, tokens) {
 		const {path, name} = parseRequire(line.head())
 		const rest = line.tail()
 		if (importKeywordKind === Keywords.ImportDo) {
-			checkEmpty(rest, () =>
-				`This is an ${showKeyword(Keywords.ImportDo)}, so you can't import any values.`)
+			checkEmpty(rest, 'unexpectedAfterImportDo')
 			return new ImportDo(line.loc, path)
 		} else {
 			const {imported, opImportDefault} =
@@ -67,8 +66,7 @@ function parseThingsImported(name, isLazy, tokens) {
 			[importDefault(), tokens.tail()] :
 			[null, tokens]
 		const imported = parseLocalDeclaresJustNames(rest).map(l => {
-			check(l.name !== '_', l.pos, () =>
-				`${showKeyword(Keywords.Focus)} not allowed as import name.`)
+			check(l.name !== '_', l.pos, () => 'noImportFocus')
 			if (isLazy)
 				l.kind = LocalDeclares.Lazy
 			return l
@@ -81,7 +79,7 @@ function parseRequire(token) {
 	return ifElse(tryParseName(token),
 		name => ({path: name, name}),
 		() => {
-			check(isGroup(Groups.Space, token), token.loc, 'Not a valid module name.')
+			check(isGroup(Groups.Space, token), token.loc, 'invalidImportModule')
 			const tokens = Slice.group(token)
 
 			// Take leading dots.
@@ -106,7 +104,7 @@ function parseRequire(token) {
 
 			// Take name, then any number of dot-then-name (`.x`)
 			for (;;) {
-				checkNonEmpty(rest)
+				checkNonEmpty(rest, 'expectedImportModuleName')
 				parts.push(parseName(rest.head()))
 				rest = rest.tail()
 

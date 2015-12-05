@@ -24,6 +24,9 @@ export default class Compiler {
 		Most mason modules include `msl/private/boot`, which `msl`.
 		If you don't want to do this, much of the language will not work.
 		This is only intended for compiling `msl` itself.
+	@param {string} language
+		Language to use for errors and warnings.
+		Currently must be `'english'`.
 	*/
 	constructor(options = {}) {
 		this.options = new CompileOptions(options)

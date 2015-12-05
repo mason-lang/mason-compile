@@ -1,6 +1,6 @@
 import Loc, {StartPos} from 'esast/dist/Loc'
 import {check, warn} from '../context'
-import {Group, Groups, showGroupKind} from '../Token'
+import {Group, Groups} from '../Token'
 import {assert, isEmpty} from '../util'
 
 let groupStack
@@ -49,9 +49,7 @@ export function maybeCloseGroup(closePos, closeKind) {
 }
 
 export function closeGroup(closePos, closeKind) {
-	check(closeKind === curGroup.kind, closePos, () =>
-		`Trying to close ${showGroupKind(closeKind)}, ` +
-		`but last opened ${showGroupKind(curGroup.kind)}`)
+	check(closeKind === curGroup.kind, closePos, 'mismatchedGroupClose', closeKind, curGroup.kind)
 	closeGroupNoCheck(closePos, closeKind)
 }
 
@@ -63,7 +61,7 @@ function closeGroupNoCheck(closePos, closeKind) {
 		case Groups.Space: {
 			const size = justClosed.subTokens.length
 			if (size === 0)
-				warn(justClosed.loc, 'Unnecessary space.')
+				warn(justClosed.loc, 'extraSpace')
 			else
 				// Spaced should always have at least two elements.
 				addToCurrentGroup(size === 1 ? justClosed.subTokens[0] : justClosed)
@@ -76,7 +74,7 @@ function closeGroupNoCheck(closePos, closeKind) {
 				addToCurrentGroup(justClosed)
 			break
 		case Groups.Block:
-			check(!isEmpty(justClosed.subTokens), closePos, 'Empty block.')
+			check(!isEmpty(justClosed.subTokens), closePos, 'emptyBlock')
 			addToCurrentGroup(justClosed)
 			break
 		default:

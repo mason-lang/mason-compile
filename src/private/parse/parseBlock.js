@@ -1,6 +1,6 @@
 import {check} from '../context'
 import {Block, BlockWrap} from '../MsAst'
-import {Groups, isGroup, showKeyword} from '../Token'
+import {Groups, isGroup} from '../Token'
 import {checkEmpty} from './checks'
 import {parseLines} from './parseLine'
 import tryTakeComment from './tryTakeComment'
@@ -18,7 +18,7 @@ Tokens on the line before a block, and tokens for the block itself.
 */
 export function beforeAndBlock(tokens) {
 	const [before, opBlock] = beforeAndOpBlock(tokens)
-	check(opBlock !== null, tokens.loc, 'Expected an indented block at the end.')
+	check(opBlock !== null, tokens.loc, 'expectedBlock')
 	return [before, opBlock]
 }
 
@@ -47,8 +47,7 @@ Parse a block, failing if there's something preceding it.
 */
 export function justBlock(keywordKind, tokens) {
 	const [before, block] = beforeAndBlock(tokens)
-	checkEmpty(before, () =>
-		`Did not expect anything between ${showKeyword(keywordKind)} and block.`)
+	checkEmpty(before, 'unexpectedAfterKind', keywordKind)
 	return block
 }
 

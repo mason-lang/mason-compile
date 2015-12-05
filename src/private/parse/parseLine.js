@@ -2,8 +2,7 @@ import {check} from '../context'
 import {Assert, AssignSingle, AssignDestructure, BagEntry, Break, Call, Ignore, LocalAccess,
 	LocalMutate, MapEntry, MemberSet, ObjEntryAssign, ObjEntryPlain, QuoteSimple, SetSub, Setters,
 	SpecialDo, SpecialDos, SpecialVal, SpecialVals, Throw} from '../MsAst'
-import {Groups, isGroup, isAnyKeyword, isKeyword, Keyword, keywordName, Keywords, showKeyword
-	} from '../Token'
+import {Groups, isGroup, isAnyKeyword, isKeyword, Keyword, keywordName, Keywords} from '../Token'
 import {ifElse, tail} from '../util'
 import {checkEmpty, checkNonEmpty, unexpected} from './checks'
 import {justBlock} from './parseBlock'
@@ -21,7 +20,7 @@ export default function parseLine(tokens) {
 	const rest = () => tokens.tail()
 
 	const noRest = () => {
-		checkEmpty(rest(), () => `Did not expect anything after ${head}.`)
+		checkEmpty(rest(), 'unexpectedAfter', head)
 	}
 
 	// We only deal with mutable expressions here, otherwise we fall back to parseExpr.
@@ -155,7 +154,7 @@ function setKind(keyword) {
 
 function parseLocalMutate(localsTokens, value, loc) {
 	const locals = parseLocalDeclaresJustNames(localsTokens)
-	check(locals.length === 1, loc, 'TODO: LocalDestructureMutate')
+	check(locals.length === 1, loc, 'todoMutateDestructure')
 	return new LocalMutate(loc, locals[0].name, value)
 }
 
@@ -164,18 +163,16 @@ function parseAssign(localsTokens, kind, value, loc) {
 	if (locals.length === 1)
 		return new AssignSingle(loc, locals[0], value)
 	else {
-		check(locals.length > 1, localsTokens.loc, 'Assignment to nothing.')
+		check(locals.length > 1, localsTokens.loc, 'assignNothing')
 		const kind = locals[0].kind
 		for (const _ of locals)
-			check(_.kind === kind, _.loc,
-				'All locals of destructuring assignment must be of the same kind.')
+			check(_.kind === kind, _.loc, 'destructureAllLazy')
 		return new AssignDestructure(loc, locals, value, kind)
 	}
 }
 
 function parseAssert(negate, tokens) {
-	checkNonEmpty(tokens, () => `Expected something after ${showKeyword(Keywords.Assert)}.`)
-
+	checkNonEmpty(tokens, 'expectedAfterAssert')
 	const [condTokens, opThrown] =
 		ifElse(tokens.opSplitOnce(_ => isKeyword(Keywords.Throw, _)),
 			({before, after}) => [before, parseExpr(after)],

@@ -1,5 +1,6 @@
 import defaultBuiltins from './defaultBuiltins'
 import {cat, last} from './util'
+import allLanguages from './languages/allLanguages'
 
 /**
 Stores `opts` parameter to compile methods and supplies defaults.
@@ -19,7 +20,8 @@ export default class CompileOptions {
 			checks: true,
 			importBoot: true,
 			mslPath: 'msl',
-			indent: '\t'
+			indent: '\t',
+			language: 'english'
 		}
 
 		const allOpts = new Set(cat(Object.keys(defaults), 'builtins'))
@@ -29,7 +31,7 @@ export default class CompileOptions {
 
 		for (const _ in opts)
 			if (!allOpts.has(_))
-				throw new Error(`Unrecognized option ${_}`)
+				throw new Error(`Unrecognized option: ${_}`)
 
 		const minIndent = 2, maxIndent = 8
 		if (!(this._indent === '\t' || minIndent <= this._indent && this._indent <= maxIndent))
@@ -37,6 +39,10 @@ export default class CompileOptions {
 
 		const builtins = opts.builtins || getDefaultBuiltins(this._mslPath)
 		this.builtinNameToPath = generateBuiltinsMap(builtins)
+
+		this._language = allLanguages[this._language]
+		if (this._language === undefined)
+			throw new Error(`Bad language: ${this._language}`)
 	}
 
 	indent() {
@@ -66,6 +72,10 @@ export default class CompileOptions {
 	}
 	bootPath() {
 		return `${this._mslPath}/private/boot`
+	}
+
+	language() {
+		return this._language
 	}
 }
 

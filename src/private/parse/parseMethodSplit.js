@@ -4,7 +4,7 @@ import {isAnyKeyword, Keywords} from '../Token'
 /** Split on a function keyword. */
 export default function parseMethodSplit(tokens) {
 	const baa = tokens.opSplitOnce(_ => isAnyKeyword(funKeywords, _))
-	check(baa !== null, tokens.loc, 'Expected a function keyword somewhere.')
+	check(baa !== null, tokens.loc, 'expectedMethodSplit')
 	const {before, at, after} = baa
 	const kind = methodFunKind(at)
 	return {before, kind, after}
@@ -27,10 +27,10 @@ function methodFunKind(funKindToken) {
 		case Keywords.FunThis: case Keywords.FunThisDo:
 		case Keywords.FunThisAsync: case Keywords.FunThisAsyncDo:
 		case Keywords.FunThisGen: case Keywords.FunThisGenDo:
-			fail(funKindToken.loc, 'Function `.` is implicit for methods.')
+			fail(funKindToken.loc, 'implicitFunctionDot')
 			break
 		default:
-			fail(funKindToken.loc, `Expected function kind, got ${funKindToken}.`)
+			fail(funKindToken.loc, 'expectedFuncKind', funKindToken)
 	}
 }
 

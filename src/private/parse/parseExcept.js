@@ -1,6 +1,6 @@
 import {check} from '../context'
 import {Catch, Except} from '../MsAst'
-import {isKeyword, Keywords, showKeyword} from '../Token'
+import {isKeyword, Keywords} from '../Token'
 import {checkKeyword} from './checks'
 import parseBlock, {beforeAndBlock, justBlock, parseJustBlock} from './parseBlock'
 import {parseLocalDeclareOrFocus} from './parseLocalDeclares'
@@ -62,7 +62,6 @@ function parseOpFinally(lines) {
 
 	const line = lines.headSlice()
 	checkKeyword(Keywords.Finally, line.head())
-	check(lines.size() === 1, lines.loc, () =>
-		`Nothing may come after ${showKeyword(Keywords.Finally)}.`)
+	check(lines.size() === 1, lines.loc, () => 'nothingAfterFinally')
 	return parseJustBlock(Keywords.Finally, line.tail())
 }

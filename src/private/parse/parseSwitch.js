@@ -1,6 +1,6 @@
 import {check} from '../context'
 import {LocalAccess, Switch, SwitchPart} from '../MsAst'
-import {isKeyword, Keywords, showKeyword} from '../Token'
+import {isKeyword, Keywords} from '../Token'
 import {checkEmpty} from './checks'
 import {parseExpr, parseExprParts} from './parse*'
 import parseBlock, {beforeAndBlock, parseJustBlock} from './parseBlock'
@@ -11,7 +11,7 @@ export default function parseSwitch(switchedFromFun, tokens) {
 	const [before, block] = beforeAndBlock(tokens)
 
 	if (switchedFromFun)
-		checkEmpty(before, 'Value to switch on is `_`, the function\'s implicit argument.')
+		checkEmpty(before, 'switchArgIsImplicit')
 	const switched = switchedFromFun ? LocalAccess.focus(tokens.loc) : parseExpr(before)
 
 	const lastLine = Slice.group(block.last())
@@ -23,7 +23,6 @@ export default function parseSwitch(switchedFromFun, tokens) {
 		const [before, block] = beforeAndBlock(line)
 		return new SwitchPart(line.loc, parseExprParts(before), parseBlock(block))
 	})
-	check(parts.length > 0, tokens.loc, () =>
-		`Must have at least 1 non-${showKeyword(Keywords.Else)} test.`)
+	check(parts.length > 0, tokens.loc, 'caseSwitchNeedsParts')
 	return new Switch(tokens.loc, switched, parts, opElse)
 }

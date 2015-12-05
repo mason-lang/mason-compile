@@ -2,8 +2,7 @@ import Loc from 'esast/dist/Loc'
 import {check, warn} from '../context'
 import {Await, Call, Cond, Conditional, LocalDeclare, Logic, Logics, New, Not, ObjPair, ObjSimple,
 	Pipe, SuperCall, With, Yield, YieldTo} from '../MsAst'
-import {Groups, isAnyKeyword, isGroup, isKeyword, Keywords, Name, showGroup, showKeyword
-	} from '../Token'
+import {Groups, isAnyKeyword, isGroup, isKeyword, Keywords, Name} from '../Token'
 import {cat, head, ifElse, opIf, tail} from '../util'
 import {checkNonEmpty} from './checks'
 import {parseClass, parseExcept, parseSingle, parseSwitch} from './parse*'
@@ -23,14 +22,13 @@ export default function parseExpr(tokens) {
 		splits => {
 			// Short object form, such as (a. 1, b. 2)
 			const first = splits[0].before
-			checkNonEmpty(first, () => `Unexpected ${splits[0].at}`)
+			checkNonEmpty(first, 'unexpected', splits[0].at)
 			const tokensCaller = first.rtail()
 
 			const pairs = []
 			for (let i = 0; i < splits.length - 1; i = i + 1) {
 				const name = splits[i].before.last()
-				check(name instanceof Name, name.loc, () =>
-					`Expected a name, not ${name}`)
+				check(name instanceof Name, name.loc, 'expectedName', name)
 				const tokensValue = i === splits.length - 2 ?
 					splits[i + 1].before :
 					splits[i + 1].before.rtail()
@@ -71,7 +69,7 @@ export function parseExprParts(tokens) {
 			if (isGroup(Groups.Parenthesis, last)) {
 				const h = Slice.group(last).head()
 				if (isSplitKeyword(h))
-					warn(h.loc, `Unnecessary ${showGroup(Groups.Parenthesis)}`)
+					warn(h.loc, 'extraParens')
 			}
 			return tokens.map(parseSingle)
 		})
@@ -149,7 +147,7 @@ function isSplitKeyword(_) {
 }
 
 function parseExprPlain(tokens) {
-	checkNonEmpty(tokens, 'Expected an expression, got nothing.')
+	checkNonEmpty(tokens, 'expectedExpression')
 	const parts = parseExprParts(tokens)
 	if (parts.length === 1) {
 		/*
@@ -160,7 +158,7 @@ function parseExprPlain(tokens) {
 		// todo: this is a good reason to change the ObjSimple syntax.
 		// `a. 1 b. 2` is interpreted as the ObjEntry `a. 1 (b. 2)`, so it needs parentheses.
 		if (isGroup(Groups.Parenthesis, tokens.head()) && !head(parts) instanceof ObjSimple)
-			warn(tokens.loc, `Unnecessary ${showGroup(Groups.Parenthesis)}.`)
+			warn(tokens.loc, 'extraParens')
 		return head(parts)
 	} else
 		return new Call(tokens.loc, head(parts), tail(parts))
@@ -168,8 +166,7 @@ function parseExprPlain(tokens) {
 
 function parseCond(tokens) {
 	const parts = parseExprParts(tokens)
-	check(parts.length === 3, tokens.loc, () =>
-		`${showKeyword(Keywords.Cond)} takes exactly 3 arguments.`)
+	check(parts.length === 3, tokens.loc, () => 'condArguments')
 	return new Cond(tokens.loc, ...parts)
 }
 
@@ -179,8 +176,7 @@ function parseConditional(kind, tokens) {
 		_ => [parseExprPlain(before), parseBlock(_)],
 		() => {
 			const parts = parseExprParts(before)
-			check(parts.length === 2, tokens.loc, () =>
-				`${showKeyword(kind)} with no block takes exactly 2 arguments.`)
+			check(parts.length === 2, tokens.loc, 'conditionalArguments')
 			return parts
 		})
 	return new Conditional(tokens.loc, condition, result, kind === Keywords.Unless)
@@ -198,8 +194,7 @@ function parseWith(tokens) {
 
 	const [val, declare] = ifElse(before.opSplitOnce(_ => isKeyword(Keywords.As, _)),
 		({before, after}) => {
-			check(after.size() === 1, () =>
-				`Expected only 1 token after ${showKeyword(Keywords.As)}.`)
+			check(after.size() === 1, 'asToken')
 			return [parseExprPlain(before), parseLocalDeclare(after.head())]
 		},
 		() => [parseExprPlain(before), LocalDeclare.focus(tokens.loc)])

@@ -1,11 +1,9 @@
 import Loc, {Pos} from 'esast/dist/Loc'
-import {code} from '../../CompileError'
 import {check, fail, options, warn} from '../context'
 import {NumberLiteral} from '../MsAst'
 import {DocComment, Group, Groups, isKeyword, Keyword, Keywords} from '../Token'
 import {assert, isEmpty, last} from '../util'
-import {Chars, isDigit, isDigitBinary, isDigitHex, isDigitOctal, isNameCharacter, showChar
-	} from './chars'
+import {Chars, isDigit, isDigitBinary, isDigitHex, isDigitOctal} from './chars'
 import {addToCurrentGroup, closeGroup, closeGroupsForDedent, closeInterpolationOrParenthesis,
 	closeLine, closeSpaceOKIfEmpty, curGroup, openGroup, openLine, openParenthesis, space
 	} from './groupContext'
@@ -81,12 +79,11 @@ export default function lexPlain(isInQuote) {
 		const optIndent = options.indent()
 		if (optIndent === '\t') {
 			const indent = skipWhileEquals(Chars.Tab)
-			check(peek() !== Chars.Space, pos, 'Line begins in a space')
+			check(peek() !== Chars.Space, pos, 'leadingSpace')
 			return indent
 		} else {
 			const spaces = skipWhileEquals(Chars.Space)
-			check(spaces % optIndent === 0, pos, () =>
-				`Indentation spaces must be a multiple of ${optIndent}`)
+			check(spaces % optIndent === 0, pos, 'badSpacedIndent', optIndent)
 			return spaces / optIndent
 		}
 	}
@@ -136,17 +133,16 @@ export default function lexPlain(isInQuote) {
 				space(loc())
 				break
 			case Chars.Newline: {
-				check(!isInQuote, loc, 'Quote interpolation cannot contain newline')
+				check(!isInQuote, loc, 'noNewlineInInterpolation')
 				if (peek(-2) === Chars.Space)
-					warn(pos, 'Line ends in a space.')
+					warn(pos, 'trailingSpace')
 
 				// Skip any blank lines.
 				skipNewlines()
 				const oldIndent = indent
 				indent = eatIndent()
 				if (indent > oldIndent) {
-					check(indent === oldIndent + 1, loc,
-						'Line is indented more than once')
+					check(indent === oldIndent + 1, loc, 'tooMuchIndent')
 					const l = loc()
 					// Block at end of line goes in its own spaced group.
 					// However, `~` preceding a block goes in a group with it.
@@ -170,7 +166,7 @@ export default function lexPlain(isInQuote) {
 			case Chars.Tab:
 				// We always eat tabs in the Newline handler,
 				// so this will only happen in the middle of a line.
-				fail(loc(), 'Tab may only be used to indent')
+				fail(loc(), 'nonLeadingTab')
 				break
 
 			// FUN
@@ -202,8 +198,7 @@ export default function lexPlain(isInQuote) {
 					const text = eatRestOfLine()
 					closeSpaceOKIfEmpty(startPos())
 					if (!(curGroup.kind === Groups.Line && curGroup.subTokens.length === 0))
-						fail(loc,
-							`Doc comment must go on its own line. Did you mean ${code('||')}?`)
+						fail(loc, 'trailingDocComment')
 					addToCurrentGroup(new DocComment(loc(), text))
 				} else if (tryEat(Chars.Bar))
 					// non-doc comment
@@ -273,14 +268,12 @@ export default function lexPlain(isInQuote) {
 				keyword(Keywords.Ampersand)
 				break
 
-			case Chars.Backslash: case Chars.Caret: case Chars.Comma: case Chars.Percent:
-			case Chars.Semicolon:
-				fail(loc(), `Reserved character ${showChar(characterEaten)}`)
+			case Chars.Backslash: case Chars.Caret: case Chars.CloseBrace: case Chars.Comma:
+			case Chars.Hash: case Chars.OpenBrace: case Chars.Percent: case Chars.Semicolon:
+				fail(loc(), 'reservedChar', characterEaten)
 				break
 
 			default:
-				check(isNameCharacter(peek(-1)), loc(), () =>
-					`Reserved character ${showChar(peek(-1))}`)
 				handleName()
 		}
 	}

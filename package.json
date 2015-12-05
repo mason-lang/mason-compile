@@ -19,11 +19,11 @@
 		"esast": "mason-lang/esast"
 	},
 	"devDependencies": {
-		"babel-cli": "6.2.0",
-		"babel-plugin-transform-es2015-destructuring": "6.1.18",
-		"babel-plugin-transform-es2015-modules-umd": "6.1.18",
-		"babel-plugin-transform-es2015-parameters": "6.1.18",
-		"babel-plugin-transform-strict-mode": "6.2.0",
+		"babel-cli": "6.3.13",
+		"babel-plugin-transform-es2015-destructuring": "6.3.13",
+		"babel-plugin-transform-es2015-modules-umd": "6.3.13",
+		"babel-plugin-transform-es2015-parameters": "6.3.13",
+		"babel-plugin-transform-strict-mode": "6.3.13",
 		"benchmark": "1.0.0",
 			"microtime": "2.0.0",
 		"esdoc": "0.4.3",

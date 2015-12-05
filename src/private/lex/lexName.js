@@ -1,6 +1,6 @@
 import Loc from 'esast/dist/Loc'
 import {check} from '../context'
-import {Name, Keyword, Keywords, opKeywordKindFromName, showKeyword} from '../Token'
+import {Name, Keyword, Keywords, opKeywordKindFromName} from '../Token'
 import {ifElse} from '../util'
 import {isNameCharacter} from './chars'
 import {addToCurrentGroup} from './groupContext'
@@ -27,8 +27,7 @@ function handleNameText(startPos, name, allowSpecialKeywords) {
 		kind => {
 			switch (kind) {
 				case Keywords.Region: case Keywords.Todo:
-					check(allowSpecialKeywords, startPos, () =>
-						`${showKeyword(kind)} is not allowed here.`)
+					check(allowSpecialKeywords, startPos, 'noSpecialKeyword', kind)
 					skipRestOfLine()
 					if (kind === Keywords.Region)
 						keyword(startPos, Keywords.Region)

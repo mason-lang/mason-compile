@@ -1,6 +1,6 @@
 import {check} from '../context'
 import {AssignSingle, Case, CasePart, Pattern} from '../MsAst'
-import {Groups, isGroup, isKeyword, Keywords, showKeyword} from '../Token'
+import {Groups, isGroup, isKeyword, Keywords} from '../Token'
 import {opMap} from '../util'
 import {checkEmpty} from './checks'
 import {opParseExpr, parseExpr} from './parse*'
@@ -15,7 +15,7 @@ export default function parseCase(casedFromFun, tokens) {
 
 	let opCased
 	if (casedFromFun) {
-		checkEmpty(before, 'Can\'t make focus — is implicitly provided as first argument.')
+		checkEmpty(before, 'caseFocusIsImplicit')
 		opCased = null
 	} else
 		opCased = opMap(opParseExpr(before), _ => AssignSingle.focus(_.loc, _))
@@ -29,8 +29,7 @@ export default function parseCase(casedFromFun, tokens) {
 		const [before, block] = beforeAndBlock(line)
 		return new CasePart(line.loc, parseCaseTest(before), parseBlock(block))
 	})
-	check(parts.length > 0, tokens.loc, () =>
-		`Must have at least 1 non-${showKeyword(Keywords.Else)} test.`)
+	check(parts.length > 0, tokens.loc, () => 'caseNeedsParts')
 
 	return new Case(tokens.loc, opCased, parts, opElse)
 }

@@ -12,7 +12,7 @@ export default function verifyBlock(sk) {
 	if (sk === SK.Do)
 		verifyDoBlock(this)
 	else {
-		check(!isEmpty(this.lines), 'Value block must have some content.')
+		check(!isEmpty(this.lines), 'blockNeedsContent')
 		const kind = autoBlockKind(this.lines, this.loc)
 		switch (kind) {
 			case Blocks.Bag: case Blocks.Map: case Blocks.Obj:

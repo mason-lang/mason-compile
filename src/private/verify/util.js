@@ -46,6 +46,6 @@ export function setName(expr) {
 	results.names.set(expr, name)
 }
 
-export function verifyNotLazy(localDeclare, message) {
-	check(!localDeclare.isLazy(), localDeclare.loc, message)
+export function verifyNotLazy(localDeclare, code) {
+	check(!localDeclare.isLazy(), localDeclare.loc, code)
 }

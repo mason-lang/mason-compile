@@ -58,8 +58,7 @@ export default class VerifyResults {
 	/** Get closest assignment name to an expression. */
 	name(expr) {
 		const name = this.names.get(expr)
-		check(name !== undefined, expr.loc,
-			'Expression must be placed in a position where name can be determined.')
+		check(name !== undefined, expr.loc, 'cantDetermineName')
 		return name
 	}
 

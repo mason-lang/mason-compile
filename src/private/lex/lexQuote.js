@@ -1,5 +1,4 @@
 import {singleCharLoc} from 'esast/dist/Loc'
-import {code} from '../../CompileError'
 import {check, warn} from '../context'
 import {Groups} from '../Token'
 import {assert} from '../util'
@@ -18,8 +17,7 @@ export default function lexQuote(indent, isRegExp) {
 	const isIndented = tryEatNewline()
 	if (isIndented) {
 		const actualIndent = skipWhileEquals(Chars.Tab)
-		check(actualIndent === quoteIndent, pos,
-			'Indented quote must have exactly one more indent than previous line.')
+		check(actualIndent === quoteIndent, pos, 'tooMuchIndentQuote')
 	}
 
 	// Current string literal part of quote we are reading.
@@ -73,8 +71,7 @@ export default function lexQuote(indent, isRegExp) {
 				} else {
 					const startPos = pos()
 					const firstChar = eat()
-					check(isNameCharacter(firstChar), pos, () =>
-						`${code('#')} must be followed by ${code('(')}, ${code('#')}, or a name.`)
+					check(isNameCharacter(firstChar), pos, 'badInterpolation')
 					lexName(startPos, true)
 				}
 				break
@@ -84,7 +81,7 @@ export default function lexQuote(indent, isRegExp) {
 				// Go back to before we ate it.
 				originalPos.column = originalPos.column - 1
 
-				check(isIndented, pos, 'Unclosed quote.')
+				check(isIndented, pos, 'unclosedQuote')
 				// Allow extra blank lines.
 				const numNewlines = skipNewlines()
 				const newIndent = skipWhileEquals(Chars.Tab)
@@ -134,7 +131,7 @@ function warnForSimpleQuote(quoteGroup) {
 	if (tokens.length === 1) {
 		const name = tokens[0]
 		if (typeof name === 'string' && isName(name))
-			warn(pos(), `Quoted text could be a simple quote ${code(`'${name}`)}.`)
+			warn(pos(), 'suggestSimpleQuote', name)
 	}
 }
 

@@ -22,7 +22,7 @@ function parseIteratee(tokens) {
 	const [element, bag] =
 		ifElse(tokens.opSplitOnce(_ => isKeyword(Keywords.Of, _)),
 			({before, after}) => {
-				check(before.size() === 1, before.loc, 'TODO: pattern in for')
+				check(before.size() === 1, before.loc, 'forPattern')
 				return [parseLocalDeclaresJustNames(before)[0], parseExpr(after)]
 			},
 			() => [LocalDeclare.focus(tokens.loc), parseExpr(tokens)])

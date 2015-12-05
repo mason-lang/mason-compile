@@ -1,6 +1,5 @@
 import {check, warn} from '../context'
 import * as MsAstTypes from '../MsAst'
-import {Keywords, showKeyword} from '../Token'
 import {cat, ifElse, implementMany, isEmpty, last, opOr} from '../util'
 import {Blocks} from '../VerifyResults'
 import autoBlockKind from './autoBlockKind'
@@ -17,14 +16,13 @@ export default SK
 
 /** This MsAst must be a statement. */
 export function checkDo(_, sk) {
-	check(sk === SK.Do, _.loc,
-		'This can only be used as a statement, but appears in expression context.')
+	check(sk === SK.Do, _.loc, 'statementAsValue')
 }
 
 /** This MsAst must be a value. */
 export function checkVal(_, sk) {
 	if (sk === SK.Do)
-		warn(_.loc, 'Value appears in statement context, so it does nothing.')
+		warn(_.loc, 'valueAsStatement')
 }
 
 /**
@@ -96,7 +94,7 @@ implementMany(MsAstTypes, 'opForSK', {
 		return this.opValue === null ? SK.Do : SK.Val
 	},
 	Block() {
-		return isEmpty(this.lines) ? null : composite(this.loc, 'opForSK', this.lines)
+		return isEmpty(this.lines) ? null : compositeForSK(this.loc, this.lines)
 	},
 	Conditional() {
 		return this.result.opForSK()
@@ -119,8 +117,7 @@ function caseSwitchParts(_) {
 }
 
 function compositeSK(loc, parts) {
-	return composite(loc, 'opSK', parts,
-		'Can\'t tell if this is a statement. Some parts are statements but others are values.')
+	return composite(loc, 'opSK', parts, 'ambiguousSK')
 }
 
 /**
@@ -137,19 +134,17 @@ The error occurs if it looks like:
 Meaning that it can't be determined whether it's a statement or value.
 */
 function compositeForSK(loc, parts) {
-	return composite(loc, 'opForSK', parts, () =>
-		`Can't tell if ${showKeyword(Keywords.For)} is a statement. ` +
-		`Some ${showKeyword(Keywords.Break)}s have a value, others don't.`)
+	return composite(loc, 'opForSK', parts, 'ambiguousForSK')
 }
 
-function composite(loc, method, parts, errorMessage) {
+function composite(loc, method, parts, errorCode) {
 	let sk = parts[0][method]()
 	for (let i = 1; i < parts.length; i = i + 1) {
 		const otherSK = parts[i][method]()
 		if (sk === null)
 			sk = otherSK
 		else
-			check(otherSK === null || otherSK === sk, loc, errorMessage)
+			check(otherSK === null || otherSK === sk, loc, errorCode)
 	}
 	return sk
 }

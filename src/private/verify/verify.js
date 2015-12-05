@@ -1,9 +1,8 @@
-import {code} from '../../CompileError'
 import {check, fail, options, pathOptions, warn} from '../context'
 import * as MsAstTypes from '../MsAst'
 import {Block, Class, Constructor, For, ForBag, Fun, Funs, Kind, LocalDeclare, Method, Pattern
 	} from '../MsAst'
-import {Keywords, showKeyword} from '../Token'
+import {Keywords} from '../Token'
 import {assert, cat, ifElse, implementMany, isEmpty, opEach} from '../util'
 import {funKind, isInSwitch, locals, method, opLoop, results, setup, tearDown, withFun, withIife,
 	withIifeIf, withIifeIfVal, withInFunKind, withInSwitch, withMethod, withLoop, withName
@@ -70,8 +69,7 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	Await(_sk) {
-		check(funKind === Funs.Async, this.loc, () =>
-			`Cannot ${showKeyword(Keywords.Await)} outside of async function.`)
+		check(funKind === Funs.Async, this.loc, 'misplacedAwait')
 		this.value.verify(SK.Val)
 	},
 
@@ -96,24 +94,18 @@ implementMany(MsAstTypes, 'verify', {
 	Break(sk) {
 		checkDo(this, sk)
 		verifyOp(this.opValue, SK.Val)
-		check(opLoop !== null, this.loc, 'Not in a loop.')
+		check(opLoop !== null, this.loc, 'misplacedBreak')
 		const loop = opLoop
 
 		if (loop instanceof For)
 			if (results.isStatement(loop))
-				check(this.opValue === null, this.loc, () =>
-					`${showKeyword(Keywords.Break)} with value is only valid in ` +
-					`${showKeyword(Keywords.For)} in expression position.`)
+				check(this.opValue === null, this.loc, 'breakCantHaveValue')
 			else
-				check(this.opValue !== null, this.loc, () =>
-					`${showKeyword(Keywords.For)} in expression position must ` +
-					`${showKeyword(Keywords.Break)} with a value.`)
+				check(this.opValue !== null, this.loc, 'breakNeedsValue')
 		else {
 			// (ForAsync isn't really a loop)
 			assert(loop instanceof ForBag)
-			check(this.opValue === null, this.loc, () =>
-				`${showKeyword(Keywords.Break)} in ${showKeyword(Keywords.ForBag)} ` +
-				`may not have value.`)
+			check(this.opValue === null, this.loc, 'breakValInForBag')
 		}
 
 		if (isInSwitch) {
@@ -157,7 +149,7 @@ implementMany(MsAstTypes, 'verify', {
 	Catch(sk) {
 		// No need to do anything with `sk` except pass it to my block.
 		makeUseOptionalIfFocus(this.caught)
-		verifyNotLazy(this.caught, 'Caught error can not be lazy.')
+		verifyNotLazy(this.caught, 'noLazyCatch')
 		verifyAndPlusLocal(this.caught, () => {
 			this.block.verify(sk)
 		})
@@ -202,11 +194,9 @@ implementMany(MsAstTypes, 'verify', {
 		const superCall = results.constructorToSuper.get(this)
 
 		if (classHasSuper)
-			check(superCall !== undefined, this.loc, () =>
-				`Constructor must contain ${showKeyword(Keywords.Super)}`)
+			check(superCall !== undefined, this.loc, 'superNeeded')
 		else
-			check(superCall === undefined, () => superCall.loc, () =>
-				`Class has no superclass, so ${showKeyword(Keywords.Super)} is not allowed.`)
+			check(superCall === undefined, () => superCall.loc, 'superForbidden')
 
 		for (const _ of this.memberArgs)
 			setDeclareAccessed(_, this)
@@ -219,13 +209,11 @@ implementMany(MsAstTypes, 'verify', {
 		else {
 			plusLocals(verifyDoBlock(this.try), () => this.opElse.verify(sk))
 			if (isEmpty(this.allCatches))
-				warn(this.loc,
-					`${showKeyword(Keywords.Else)} must come after ${showKeyword(Keywords.Catch)}.`)
+				warn(this.loc, 'elseRequiresCatch')
 		}
 
 		if (isEmpty(this.allCatches) && this.opFinally === null)
-			warn(this.loc, `${showKeyword(Keywords.Except)} is pointless without ` +
-				`${showKeyword(Keywords.Catch)} or ${showKeyword(Keywords.Finally)}.`)
+			warn(this.loc, 'uselessExcept')
 
 		verifyEach(this.typedCatches, sk)
 		verifyOp(this.opCatchAll, sk)
@@ -239,9 +227,7 @@ implementMany(MsAstTypes, 'verify', {
 
 	ForAsync(sk) {
 		markStatement(this, sk)
-		check(sk !== SK.Do || funKind === Funs.Async, this.loc, () =>
-			`${showKeyword(Keywords.ForAsync)} as statement must be inside an async function.`)
-
+		check(sk !== SK.Do || funKind === Funs.Async, this.loc, 'forAsyncNeedsAsync')
 		withVerifyIteratee(this.iteratee, () => {
 			withFun(Funs.Async, () => {
 				// Default block to returning a value, but OK if it doesn't.
@@ -259,8 +245,7 @@ implementMany(MsAstTypes, 'verify', {
 
 	Fun(sk) {
 		checkVal(this, sk)
-		check(this.opReturnType === null || !this.isDo, this.loc,
-			'Function with return type must return something.')
+		check(this.opReturnType === null || !this.isDo, this.loc, 'doFuncCantHaveType')
 		verifyOp(this.opReturnType, SK.Val)
 		const args = cat(this.opDeclareThis, this.args, this.opRestArg)
 		withFun(this.kind, () => {
@@ -326,7 +311,7 @@ implementMany(MsAstTypes, 'verify', {
 	LocalDeclare() {
 		const builtinPath = options.builtinNameToPath.get(this.name)
 		if (builtinPath !== undefined)
-			warn(this.loc, `Local ${code(this.name)} overrides builtin from ${code(builtinPath)}.`)
+			warn(this.loc, 'overriddenBuiltin', this.name, builtinPath)
 		verifyOp(this.opType, SK.Val)
 	},
 
@@ -337,7 +322,7 @@ implementMany(MsAstTypes, 'verify', {
 
 	Logic(sk) {
 		checkVal(this, sk)
-		check(this.args.length > 1, this.loc, 'Logic expression needs at least 2 arguments.')
+		check(this.args.length > 1, this.loc, 'logicNeedsArgs')
 		verifyEach(this.args, SK.Val)
 	},
 
@@ -428,7 +413,7 @@ implementMany(MsAstTypes, 'verify', {
 				if (!(err instanceof SyntaxError))
 					// This should never happen.
 					throw err
-				fail(this.loc, err.message)
+				fail(this.loc, 'badRegExp', this.parts[0])
 			}
 	},
 
@@ -450,8 +435,7 @@ implementMany(MsAstTypes, 'verify', {
 	ObjEntryPlain(sk) {
 		checkDo(this, sk)
 		if (results.isObjEntryExport(this))
-			check(typeof this.name === 'string', this.loc,
-				'Module export must have a constant name.')
+			check(typeof this.name === 'string', this.loc, 'exportName')
 		else {
 			accessLocal(this, 'built')
 			verifyName(this.name)
@@ -463,7 +447,7 @@ implementMany(MsAstTypes, 'verify', {
 		checkVal(this, sk)
 		const keys = new Set()
 		for (const {key, value, loc} of this.pairs) {
-			check(!keys.has(key), loc, () => `Duplicate key ${key}`)
+			check(!keys.has(key), loc, 'duplicateKey', key)
 			keys.add(key)
 			value.verify(SK.Val)
 		}
@@ -532,12 +516,11 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	SuperCall(sk) {
-		check(method !== null, this.loc, 'Must be in a method.')
+		check(method !== null, this.loc, 'superNeedsMethod')
 		results.superCallToMethod.set(this, method)
 
 		if (method instanceof Constructor) {
-			check(sk === SK.Do, this.loc, () =>
-				`${showKeyword(Keywords.Super)} in constructor must appear as a statement.'`)
+			check(sk === SK.Do, this.loc, 'superMustBeStatement')
 			results.constructorToSuper.set(method, this)
 		}
 
@@ -546,7 +529,7 @@ implementMany(MsAstTypes, 'verify', {
 
 	SuperMember(sk) {
 		checkVal(this, sk)
-		check(method !== null, this.loc, 'Must be in method.')
+		check(method !== null, this.loc, 'superNeedsMethod')
 		verifyName(this.name)
 	},
 
@@ -576,8 +559,8 @@ implementMany(MsAstTypes, 'verify', {
 		// So we mutate `locals` directly.
 		function addUseLocal(_) {
 			const prev = locals.get(_.name)
-			check(prev === undefined, _.loc, () =>
-				`${code(_.name)} already imported at ${prev.loc}`)
+			if (prev !== undefined)
+				fail(_.loc, 'duplicateImport', _.name, prev.loc)
 			verifyLocalDeclare(_)
 			setLocal(_)
 		}
@@ -599,14 +582,12 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	Yield(_sk) {
-		check(funKind === Funs.Generator, this.loc, () =>
-			`Cannot ${showKeyword(Keywords.Yield)} outside of generator function.`)
+		check(funKind === Funs.Generator, this.loc, 'misplacedYield', Keywords.Yield)
 		verifyOp(this.opValue, SK.Val)
 	},
 
 	YieldTo(_sk) {
-		check(funKind === Funs.Generator, this.loc, () =>
-			`Cannot ${showKeyword(Keywords.YieldTo)} outside of generator function.`)
+		check(funKind === Funs.Generator, this.loc, 'misplacedYield', Keywords.YieldTo)
 		this.value.verify(SK.Val)
 	}
 })
@@ -628,7 +609,7 @@ function verifyFor(forLoop) {
 
 function withVerifyIteratee({element, bag}, action) {
 	bag.verify(SK.Val)
-	verifyNotLazy(element, 'Iteration element can not be lazy.')
+	verifyNotLazy(element, 'noLazyIteratee')
 	verifyAndPlusLocal(element, action)
 }
 

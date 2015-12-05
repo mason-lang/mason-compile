@@ -1,4 +1,3 @@
-import {code} from '../../CompileError'
 import {check, fail, warn} from '../context'
 import {isEmpty} from '../util'
 import {locals, okToNotUse, results, pendingBlockLocals, setPendingBlockLocals} from './context'
@@ -72,7 +71,7 @@ export function verifyAndPlusLocals(addedLocals, action) {
 	addedLocals.forEach(verifyLocalDeclare)
 	const names = new Set()
 	for (const _ of addedLocals) {
-		check(!names.has(_.name), _.loc, () => `Duplicate local ${code(_.name)}`)
+		check(!names.has(_.name), _.loc, 'duplicateLocal', _.name)
 		names.add(_.name)
 	}
 	plusLocals(addedLocals, action)
@@ -93,12 +92,11 @@ function getLocalDeclare(name, accessLoc) {
 }
 
 export function failMissingLocal(loc, name) {
-	const showLocals = code(Array.from(locals.keys()).join(' '))
-	fail(loc, `No such local ${code(name)}.\nLocals are:\n${showLocals}.`)
+	fail(loc, 'missingLocal', name)
 }
 
 export function warnUnusedLocals() {
 	for (const [local, accesses] of results.localDeclareToAccesses)
 		if (isEmpty(accesses) && local.name !== 'built' && !okToNotUse.has(local))
-			warn(local.loc, `Unused local variable ${code(local.name)}.`)
+			warn(local.loc, 'unusedLocal', local.name)
 }

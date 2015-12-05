@@ -18,8 +18,7 @@ export function opBlockBuildKind(lines, loc) {
 		else if (line instanceof ObjEntry)
 			isObj = true
 
-	check(!(isBag && isMap) && !(isMap && isObj) && !(isBag && isObj), loc,
-		'Block has mixed bag/map/obj entries — can not infer type.')
+	check(!(isBag && isMap) && !(isMap && isObj) && !(isBag && isObj), loc, 'cantInferBlockKind')
 
 	return isBag ? Blocks.Bag : isMap ? Blocks.Map : isObj ? Blocks.Obj : null
 }
