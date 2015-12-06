@@ -230,7 +230,7 @@ export default function lexPlain(isInQuote) {
 					// We can't just create a new Group here because we want to
 					// ensure it's not part of the preceding or following spaced group.
 					closeSpaceOKIfEmpty(startPos())
-					keyword(Keywords.ObjAssign)
+					keyword(Keywords.ObjEntry)
 				} else if (tryEat(Chars.Bar))
 					funKeyword(Keywords.FunThis)
 				else if (tryEat2(Chars.Bang, Chars.Bar))

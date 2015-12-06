@@ -96,7 +96,7 @@ function parseSpacedFold(start, rest) {
 					break
 				case Keywords.Dot: {
 					// If this were the last one,
-					// it would not be a Keywords.Dot but a Keywords.ObjAssign
+					// it would not be a Keywords.Dot but a Keywords.ObjEntry
 					assert(i < rest._end - 1)
 					i = i + 1
 					acc = new Member(token.loc, acc, parseMemberName(rest._tokens[i]))

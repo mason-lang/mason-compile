@@ -293,7 +293,8 @@ export const Keywords = {
 	New: kw('new'),
 	Not: kw('not'),
 	Null: kw('null'),
-	ObjAssign: kwNotName('. '),
+	// Also works as BagEntry
+	ObjEntry: kwNotName('. '),
 	Of: kw('of'),
 	Or: kw('or'),
 	Pass: kw('pass'),

@@ -18,7 +18,7 @@ import Slice from './Slice'
 
 /** Parse a {@link Val}. */
 export default function parseExpr(tokens) {
-	return ifElse(tokens.opSplitMany(_ => isKeyword(Keywords.ObjAssign, _)),
+	return ifElse(tokens.opSplitMany(_ => isKeyword(Keywords.ObjEntry, _)),
 		splits => {
 			// Short object form, such as (a. 1, b. 2)
 			const first = splits[0].before

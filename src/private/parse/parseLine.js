@@ -37,7 +37,7 @@ export default function parseLine(tokens) {
 				return new BagEntry(loc, parseExpr(rest()), true)
 			case Keywords.Ignore:
 				return new Ignore(loc, rest().map(parseLocalName))
-			case Keywords.ObjAssign:
+			case Keywords.ObjEntry:
 				return new BagEntry(loc, parseExpr(rest()))
 			case Keywords.Pass:
 				return ifElse(opParseExpr(rest()), _ => new Pass(tokens.loc, _), () => [])
@@ -54,7 +54,7 @@ export default function parseLine(tokens) {
 			switch (at.kind) {
 				case Keywords.MapEntry:
 					return new MapEntry(loc, parseExpr(before), parseExpr(after))
-				case Keywords.ObjAssign:
+				case Keywords.ObjEntry:
 					return parseObjEntry(before, after, loc)
 				default:
 					return parseAssignLike(before, at, parseExpr(after), loc)
@@ -63,7 +63,7 @@ export default function parseLine(tokens) {
 		() => parseExpr(tokens))
 }
 const lineSplitKeywords = new Set(
-	[Keywords.Assign, Keywords.LocalMutate, Keywords.MapEntry, Keywords.ObjAssign])
+	[Keywords.Assign, Keywords.LocalMutate, Keywords.MapEntry, Keywords.ObjEntry])
 
 export function parseLines(lineTokens) {
 	const lines = []
@@ -136,7 +136,7 @@ function parseObjEntry(before, after, loc) {
 		}
 	}
 
-	const assign = parseAssign(before, Keywords.ObjAssign, parseExpr(after), loc)
+	const assign = parseAssign(before, Keywords.ObjEntry, parseExpr(after), loc)
 	return new ObjEntryAssign(loc, assign)
 }
 
