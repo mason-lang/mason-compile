@@ -4,9 +4,10 @@ import {readFileSync} from 'fs'
 import numeral from 'numeral'
 import {argv} from 'process'
 import {install} from 'source-map-support'
+import CompileError from '../dist/CompileError'
 import Compiler from '../dist/Compiler'
 import CompileOptions from '../dist/private/CompileOptions'
-import {setContext, warnings} from '../dist/private/context'
+import {withContext} from '../dist/private/context'
 import lex from '../dist/private/lex/lex'
 import MsAst from '../dist/private/MsAst'
 import parse from '../dist/private/parse/parse'
@@ -15,12 +16,10 @@ import transpile from '../dist/private/transpile/transpile'
 import verify from '../dist/private/verify/verify'
 install()
 
-const logSize = false
-
 function doTest(isPerfTest) {
 	const filename = 'test/test-compile.ms'
 	const source = readFileSync(filename, 'utf-8')
-	const opts = {
+	const opts = new CompileOptions({
 		includeSourceMap: true,
 		useStrict: false,
 		builtins: {
@@ -29,11 +28,9 @@ function doTest(isPerfTest) {
 				'Number', 'Object', 'Promise', 'String', 'Symbol'
 			]
 		}
-	}
+	})
 
-	setContext(new CompileOptions(opts), filename)
-
-	try {
+	const {warnings, result} = withContext(opts, filename, () => {
 		const rootToken = lex(source)
 		// console.log(`==>\n${require('util').inspect(rootToken, {depth: null})}`)
 		const msAst = parse(rootToken)
@@ -43,45 +40,51 @@ function doTest(isPerfTest) {
 		const esAst = transpile(msAst, verifyResults)
 		// console.log(`==>\n${esAst}`)
 		const {code} = render(esAst)
+		return {rootToken, msAst, verifyResults, esAst, code}
+	})
 
+	if (result instanceof CompileError) {
+		console.log(result.errorMessage.loc)
+		throw result
+	}
+
+	const {rootToken, msAst, verifyResults, esAst, code} = result
+
+	if (isPerfTest) {
 		const compiler = new Compiler(opts)
+		/* eslint-disable no-undef */
+		Object.assign(global, {withContext, lex, parse, verify, transpile, render})
 
+		benchmark({
+			lex() {
+				withContext(opts, filename, () => lex(source))
+			},
+			parse() {
+				withContext(opts, filename, () => parse(rootToken))
+			},
+			verify() {
+				withContext(opts, filename, () => verify(msAst))
+			},
+			transpile() {
+				withContext(opts, filename, () => transpile(msAst, verifyResults))
+			},
+			render() {
+				withContext(opts, filename, () => render(esAst))
+			},
+			all() {
+				compiler.compile(source, filename)
+			}
+		})
+	} else {
+		const logSize = false
+		if (logSize) {
+			console.log(`Expression tree size: ${treeSize(msAst, MsAst).size}.`)
+			console.log(`ES AST size: ${treeSize(esAst, Node).size}.`)
+			console.log(`Output size: ${code.length} characters.`)
+		}
 		for (const _ of warnings)
 			console.log(_)
-
-		if (isPerfTest)
-			benchmark({
-				lex() {
-					lex(source)
-				},
-				parse() {
-					parse(rootToken)
-				},
-				verify() {
-					verify(msAst)
-				},
-				transpile() {
-					transpile(msAst, verifyResults)
-				},
-				render() {
-					render(esAst)
-				},
-				all() {
-					compiler.compile(source, filename)
-				}
-			})
-		else {
-			if (logSize) {
-				console.log(`Expression tree size: ${treeSize(msAst, MsAst).size}.`)
-				console.log(`ES AST size: ${treeSize(esAst, Node).size}.`)
-				console.log(`Output size: ${code.length} characters.`)
-			}
-			console.log(`==>\n${code}`)
-		}
-	} catch (err) {
-		if (err.errorMessage)
-			console.log(err.errorMessage.loc)
-		console.log(err.stack)
+		console.log(`==>\n${code}`)
 	}
 }
 

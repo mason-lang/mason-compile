@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 
-import {cat, opIf} from './util'
+import {applyDefaults, cat, opIf} from './util'
 
 /**
 Any Mason AST.
@@ -457,17 +457,24 @@ export default class MsAst {
 	*/
 	export class Fun extends FunLike {
 		constructor(loc, args, opRestArg, block, opts = {}) {
+			const {kind, isThisFun, isDo, opReturnType} = applyDefaults(opts, {
+				kind: Funs.Plain,
+				isThisFun: false,
+				isDo: false,
+				opReturnType: null
+			})
+
 			super(loc, args, opRestArg)
 			/** @type {Block} */
 			this.block = block
 			/** @type {Funs} */
-			this.kind = opts.kind || Funs.Plain
+			this.kind = kind
 			/** @type {?LocalDeclareThis} */
-			this.opDeclareThis = opIf(opts.isThisFun, () => LocalDeclare.this(this.loc))
+			this.opDeclareThis = opIf(isThisFun, () => LocalDeclare.this(this.loc))
 			/** @type {boolean} */
-			this.isDo = opts.isDo || false
+			this.isDo = isDo || false
 			/** @type {?Val} */
-			this.opReturnType = opts.opReturnType || null
+			this.opReturnType = opReturnType
 		}
 	}
 	/**

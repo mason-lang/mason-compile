@@ -39,7 +39,7 @@ describe('locals', () => {
 		'a b = 0',
 		new AssignDestructure(loc, [aDeclare, bDeclare], zero),
 		'let _$0=0,a=_$0.a,b=_$0.b',
-		{warnings: ['Unused local variable {{b}}.', 'Unused local variable {{a}}.']})
+		{warnings: ['Unused local variable {{a}}.', 'Unused local variable {{b}}.']})
 
 	// TODO: multi-line test
 	/*

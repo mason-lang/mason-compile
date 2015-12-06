@@ -155,6 +155,7 @@ export default {
 	'msl.Function': ['Action', 'identity'],
 	'msl.js': [
 		'defined?',
+		'exists?',
 		'id=?',
 		'null?'
 	],
@@ -178,5 +179,6 @@ export default {
 	'msl.Type.Method': ['_', 'impl!', 'impl-for', 'self-impl!'],
 	'msl.Type.Kind': ['_', 'kind!', 'self-kind!'],
 	'msl.Type.Pred-Type': ['_', 'Any', 'ObjLit'],
+	'msl.Type.primitive': ['Bool', 'Num', 'Str', 'Sym'],
 	'msl.Type.Type': ['_', '=>', 'contains?', 'extract']
 }

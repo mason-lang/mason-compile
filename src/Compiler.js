@@ -1,6 +1,6 @@
 import CompileError from './CompileError'
 import CompileOptions from './private/CompileOptions'
-import {setContext, unsetContext, warnings} from './private/context'
+import {withContext} from './private/context'
 import lex from './private/lex/lex'
 import parse from './private/parse/parse'
 import render from './private/render'
@@ -9,7 +9,8 @@ import verify from './private/verify/verify'
 
 export default class Compiler {
 	/**
-	@param {object} options
+	@param {object|CompileOptions} options
+		Argument for CompileOptions constructor, or a CompileOptions.
 	@param {'\t'|Number} [options.indent='\t']
 		Mason does not allow mixed kinds of indentation,
 		so indent type must be set once here and used consistently.
@@ -29,7 +30,7 @@ export default class Compiler {
 		Currently must be `'english'`.
 	*/
 	constructor(options = {}) {
-		this.options = new CompileOptions(options)
+		this.options = options instanceof CompileOptions ? options : new CompileOptions(options)
 	}
 
 	/**
@@ -41,7 +42,7 @@ export default class Compiler {
 		`sourceMap` will be empty unless `opts.includeSourceMap`.
 	*/
 	compile(source, filename) {
-		return this._doInContext(filename, () => {
+		return withContext(this.options, filename, () => {
 			const ast = parse(lex(source))
 			return render(transpile(ast, verify(ast)))
 		})
@@ -53,7 +54,7 @@ export default class Compiler {
 	@return {{warnings: Array<Warning>, result: CompileError|MsAst}}
 	*/
 	parse(source, filename) {
-		return this._doInContext(filename, () => {
+		return withContext(this.options, filename, () => {
 			const ast = parse(lex(source))
 			verify(ast)
 			return ast
@@ -66,19 +67,5 @@ export default class Compiler {
 	*/
 	get CompileError() {
 		return CompileError
-	}
-
-	_doInContext(filename, getResult) {
-		setContext(this.options, filename)
-		try {
-			const result = getResult()
-			return {warnings, result}
-		} catch (error) {
-			if (!(error instanceof CompileError))
-				throw error
-			return {warnings, result: error}
-		} finally {
-			unsetContext()
-		}
 	}
 }

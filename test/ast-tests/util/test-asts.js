@@ -1,7 +1,7 @@
 import {Module} from '../../../dist/private/MsAst'
 import Compiler from '../../../dist/Compiler'
 import CompileOptions from '../../../dist/private/CompileOptions'
-import {setContext} from '../../../dist/private/context'
+import {withContext} from '../../../dist/private/context'
 import render from '../../../dist/private/render'
 import transpile from '../../../dist/private/transpile/transpile'
 import verify from '../../../dist/private/verify/verify'
@@ -32,12 +32,11 @@ export function test(ms, ast, js, opts = {}) {
 
 		// TODO:ES6 Just use regular compiler.render
 		// (currently just renering lines[0] to avoid module boilerplate)
-		setContext(new CompileOptions(compileOptions), filename)
-		const renderAst = ast.lines[0]
-		let rendered = render(transpile(renderAst, verify(ast)))
-		if (rendered instanceof Error)
-			throw rendered
-		rendered = rendered.code
+		let rendered
+		withContext(new CompileOptions(compileOptions), filename, () => {
+			const renderAst = ast.lines[0]
+			rendered = render(transpile(renderAst, verify(ast))).code
+		})
 
 		if (isMultiLineTest)
 			// remove leading '{' and closing '\n}'

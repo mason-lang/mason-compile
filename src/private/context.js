@@ -9,24 +9,42 @@ export let options
 Array of all warnings produced during compilation.
 (Please use {@warn} instead of writing to this directly.)
 */
-export let warnings
+let warnings
 /** @type {PathOptions} */
 export let pathOptions
 
 /**
-Write to {@link options} and {@link warnings}.
-Remember to call {@link unsetContext}!
+`options` and `pathOptions` will be set while running `getResult`.
+When done, returns warnings along with the result.
+@param {CompileOptions} _options
+@param {string} filename
+@param {function(): any} getResult
+@return {{warnings, result}}
 */
-export function setContext(_options, filename) {
+export function withContext(_options, filename, getResult) {
 	options = _options
 	pathOptions = new PathOptions(filename)
 	warnings = []
-}
 
-/** Release {@link options} and {@link warnings} for garbage collection. */
-export function unsetContext() {
-	options = null
-	warnings = null
+	try {
+		let result
+		try {
+			result = getResult()
+		} catch (error) {
+			if (!(error instanceof CompileError))
+				throw error
+			result = error
+		}
+
+		// Sort warnings to make them easier to read.
+		warnings.sort((a, b) => a.loc.compare(b.loc))
+		return {warnings, result}
+	} finally {
+		// Release for garbage collection.
+		options = null
+		pathOptions = null
+		warnings = null
+	}
 }
 
 /**
