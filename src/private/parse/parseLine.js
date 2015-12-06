@@ -1,7 +1,7 @@
 import {check} from '../context'
 import {Assert, AssignSingle, AssignDestructure, BagEntry, Break, Call, Ignore, LocalAccess,
-	LocalMutate, MapEntry, MemberSet, ObjEntryAssign, ObjEntryPlain, QuoteSimple, SetSub, Setters,
-	SpecialDo, SpecialDos, SpecialVal, SpecialVals, Throw} from '../MsAst'
+	LocalMutate, MapEntry, MemberSet, ObjEntryAssign, ObjEntryPlain, Pass, QuoteSimple, SetSub,
+	Setters, SpecialDo, SpecialDos, SpecialVal, SpecialVals, Throw} from '../MsAst'
 import {Groups, isGroup, isAnyKeyword, isKeyword, Keyword, keywordName, Keywords} from '../Token'
 import {ifElse, tail} from '../util'
 import {checkEmpty, checkNonEmpty, unexpected} from './checks'
@@ -40,8 +40,7 @@ export default function parseLine(tokens) {
 			case Keywords.ObjAssign:
 				return new BagEntry(loc, parseExpr(rest()))
 			case Keywords.Pass:
-				noRest()
-				return []
+				return ifElse(opParseExpr(rest()), _ => new Pass(tokens.loc, _), () => [])
 			case Keywords.Region:
 				return parseLines(justBlock(Keywords.Region, rest()))
 			case Keywords.Throw:

@@ -426,6 +426,10 @@ implementMany(MsAstTypes, 'transpile', {
 			new Property('init', propertyIdOrLiteral(pair.key), t0(pair.value))))
 	},
 
+	Pass() {
+		return t0(this.ignored)
+	},
+
 	Pipe() {
 		return this.pipes.reduce((expr, pipe) => callFocusFun(t0(pipe), expr), t0(this.value))
 	},

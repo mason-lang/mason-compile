@@ -1,4 +1,4 @@
-import {MemberSet, Setters, SpecialDo, SpecialDos} from '../../dist/private/MsAst'
+import {MemberSet, Pass, Setters, SpecialDo, SpecialDos} from '../../dist/private/MsAst'
 import {loc, one, zero} from './util/ast-util'
 import {test} from './util/test-asts'
 
@@ -19,4 +19,9 @@ describe('statements', () => {
 		'0.x := 1',
 		new MemberSet(loc, zero, 'x', null, Setters.Mutate, one),
 		'0..x=1')
+
+	test(
+		'pass 1',
+		new Pass(loc, one),
+		'1')
 })

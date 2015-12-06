@@ -466,6 +466,11 @@ implementMany(MsAstTypes, 'verify', {
 		}
 	},
 
+	Pass(sk) {
+		checkDo(this, sk)
+		this.ignored.verify(SK.Val)
+	},
+
 	Pipe(sk) {
 		checkVal(this, sk)
 		this.value.verify()

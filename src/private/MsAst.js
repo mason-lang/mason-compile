@@ -1191,3 +1191,15 @@ export default class MsAst {
 			this.ignoredNames = ignoredNames
 		}
 	}
+
+	/**
+	`pass` statement.
+	Keeps the compiler from complaining about Vals used as Dos.
+	*/
+	export class Pass extends Do {
+		constructor(loc, ignored) {
+			super(loc)
+			/** @type {?Val} */
+			this.ignored = ignored
+		}
+	}
