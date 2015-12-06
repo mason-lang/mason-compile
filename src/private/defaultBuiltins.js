@@ -89,6 +89,8 @@ export default {
 		'iterator',
 		'@keep',
 		'@keep~',
+		'@toss',
+		'@toss~',
 		'@map',
 		'@map~'
 	],
