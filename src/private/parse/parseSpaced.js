@@ -1,6 +1,6 @@
 import {check, fail} from '../context'
-import {Call, GetterFun, Lazy, LocalAccess, Member, MemberFun, QuoteSimple, QuoteTaggedTemplate,
-	Range, SimpleFun, Spread, SuperCall, SuperMember} from '../MsAst'
+import {Call, GetterFun, InstanceOf, Lazy, LocalAccess, Member, MemberFun, QuoteSimple,
+	QuoteTaggedTemplate, Range, SimpleFun, Spread, Sub, SuperCall, SuperMember} from '../MsAst'
 import {Group, Groups, isGroup, isKeyword, Keyword, Keywords} from '../Token'
 import {assert, opIf} from '../util'
 import {checkEmpty, unexpected} from './checks'
@@ -70,7 +70,7 @@ export default function parseSpaced(tokens) {
 				return parseSpacedFold(quote, rest.tail())
 			}
 			case Keywords.Colon:
-				return Call.contains(h.loc, parseSpaced(rest), LocalAccess.focus(h.loc))
+				return new InstanceOf(h.loc, LocalAccess.focus(h.loc), parseSpaced(rest))
 			default:
 				// fall through
 		}
@@ -111,7 +111,7 @@ function parseSpacedFold(start, rest) {
 					acc = new Call(token.loc, acc, [LocalAccess.focus(loc)])
 					break
 				case Keywords.Colon:
-					return Call.contains(token.loc, restVal(), acc)
+					return new InstanceOf(token.loc, acc, restVal())
 				default:
 					unexpected(token)
 			}
@@ -119,7 +119,7 @@ function parseSpacedFold(start, rest) {
 			const slice = Slice.group(token)
 			switch (token.kind) {
 				case Groups.Bracket:
-					acc = Call.sub(loc, acc, parseExprParts(slice))
+					acc = new Sub(loc, acc, parseExprParts(slice))
 					break
 				case Groups.Parenthesis:
 					checkEmpty(slice, 'parensOutsideCall')

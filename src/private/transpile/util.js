@@ -61,7 +61,7 @@ export function opTypeCheckForLocalDeclare(localDeclare) {
 	return opIf(!localDeclare.isLazy(), () =>
 		opMap(localDeclare.opType, type =>
 			new ExpressionStatement(msCall(
-				'checkContains',
+				'checkInstance',
 				t0(type),
 				accessLocalDeclare(localDeclare),
 				new Literal(localDeclare.name)))))
@@ -78,15 +78,15 @@ export function makeDeclarator(assignee, value, valueIsAlreadyLazy) {
 	const isLazy = assignee.isLazy()
 	// TODO: assert(assignee.opType === null)
 	// or TODO: Allow type check on lazy value?
-	value = isLazy ? value : maybeWrapInCheckContains(value, opType, name)
+	value = isLazy ? value : maybeWrapInCheckInstance(value, opType, name)
 	const val = isLazy && !valueIsAlreadyLazy ? lazyWrap(value) : value
 	assert(isLazy || !valueIsAlreadyLazy)
 	return new VariableDeclarator(idForDeclareCached(assignee), val)
 }
 
-export function maybeWrapInCheckContains(ast, opType, name) {
+export function maybeWrapInCheckInstance(ast, opType, name) {
 	return options.includeChecks() && opType !== null ?
-		msCall('checkContains', t0(opType), ast, new Literal(name)) :
+		msCall('checkInstance', t0(opType), ast, new Literal(name)) :
 		ast
 }
 

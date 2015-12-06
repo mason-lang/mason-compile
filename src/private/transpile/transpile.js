@@ -25,7 +25,7 @@ import {transpileMethodToDefinition, transpileMethodToProperty} from './transpil
 import transpileModule, {exportNamedOrDefault} from './transpileModule'
 import {accessLocalDeclare, blockWrap, blockWrapIfBlock, blockWrapIfVal, callFocusFun, declare,
 	doThrow, focusFun, idForDeclareCached, lazyWrap, makeDeclarator, makeDestructureDeclarators,
-	maybeWrapInCheckContains, memberStringOrVal, msCall, msMember, opTypeCheckForLocalDeclare,
+	maybeWrapInCheckInstance, memberStringOrVal, msCall, msMember, opTypeCheckForLocalDeclare,
 	plainLet, t0, t1, t2, t3, tLines, transpileName} from './util'
 
 /** Transform a {@link MsAst} into an esast. **/
@@ -141,7 +141,8 @@ implementMany(MsAstTypes, 'transpile', {
 	CasePart(alternate) {
 		if (this.test instanceof Pattern) {
 			const {type, patterned, locals} = this.test
-			const decl = plainLet(IdExtract, msCall('extract', t0(type), t0(patterned)))
+			const decl = plainLet(IdExtract,
+				msCall('extract', t0(type), t0(patterned), new Literal(locals.length)))
 			const test = new BinaryExpression('!==', IdExtract, LitNull)
 			const extract = new VariableDeclaration('let', locals.map((_, idx) =>
 				new VariableDeclarator(
@@ -203,6 +204,10 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	Catch: transpileCatch,
+
+	Del() {
+		return msCall('del', t0(this.subbed), ...this.args.map(t0))
+	},
 
 	Except: transpileExcept,
 
@@ -276,6 +281,11 @@ implementMany(MsAstTypes, 'transpile', {
 		return []
 	},
 
+	InstanceOf() {
+		// TODO:ES6 new BinaryExpression('instanceof', t0(this.instance), t0(this.type))
+		return msCall('hasInstance', t0(this.type), t0(this.instance))
+	},
+
 	Kind() {
 		const name = new Literal(verifyResults.name(this))
 		const supers = new ArrayExpression(this.superKinds.map(t0))
@@ -343,7 +353,7 @@ implementMany(MsAstTypes, 'transpile', {
 
 	MemberSet() {
 		const obj = t0(this.object)
-		const val = maybeWrapInCheckContains(t0(this.value), this.opType, this.name)
+		const val = maybeWrapInCheckInstance(t0(this.value), this.opType, this.name)
 		switch (this.kind) {
 			case Setters.Init:
 				return msCall('newProperty', obj, transpileName(this.name), val)
@@ -479,7 +489,7 @@ implementMany(MsAstTypes, 'transpile', {
 			'setSub',
 			t0(this.object),
 			this.subbeds.length === 1 ? t0(this.subbeds[0]) : this.subbeds.map(t0),
-			maybeWrapInCheckContains(t0(this.value), this.opType, 'value'),
+			maybeWrapInCheckInstance(t0(this.value), this.opType, 'value'),
 			new Literal(kind))
 	},
 
@@ -497,18 +507,12 @@ implementMany(MsAstTypes, 'transpile', {
 	SpecialVal() {
 		// Make new objects because we will assign `loc` to them.
 		switch (this.kind) {
-			case SpecialVals.Contains:
-				return msMember('contains')
-			case SpecialVals.DelSub:
-				return msMember('delSub')
 			case SpecialVals.False:
 				return new Literal(false)
 			case SpecialVals.Name:
 				return new Literal(verifyResults.name(this))
 			case SpecialVals.Null:
 				return new Literal(null)
-			case SpecialVals.Sub:
-				return msMember('sub')
 			case SpecialVals.True:
 				return new Literal(true)
 			case SpecialVals.Undefined:
@@ -520,6 +524,10 @@ implementMany(MsAstTypes, 'transpile', {
 
 	Spread() {
 		return new SpreadElement(t0(this.spreaded))
+	},
+
+	Sub() {
+		return msCall('sub', t0(this.subbed), ...this.args.map(t0))
 	},
 
 	SuperCall() {
@@ -630,6 +638,6 @@ function maybeLabelLoop(ast, loop) {
 
 function transpileBlockReturn(returned, lines, lead, opReturnType) {
 	const ret = new ReturnStatement(
-		maybeWrapInCheckContains(returned, opReturnType, 'returned value'))
+		maybeWrapInCheckInstance(returned, opReturnType, 'returned value'))
 	return new BlockStatement(cat(lead, lines, ret))
 }

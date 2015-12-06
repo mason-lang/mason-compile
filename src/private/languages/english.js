@@ -171,8 +171,8 @@ export default {
 		'Caught error can not be lazy.',
 	noLazyIteratee:
 		'Iteration element can not be lazy.',
-	overriddenBuilder: (name, builtinPath) =>
-		`Local ${code(this.name)} overrides builtin from ${code(builtinPath)}.`,
+	overriddenBuiltin: (name, builtinPath) =>
+		`Local ${code(name)} overrides builtin from ${code(builtinPath)}.`,
 	statementAsValue:
 		'This can only be used as a statement, but appears in expression context.',
 	superForbidden:

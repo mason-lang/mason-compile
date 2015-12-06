@@ -115,7 +115,7 @@ describe('case', () => {
 			(()=>{
 				let _=0;
 				{
-					let _$=_ms.extract(1,_);
+					let _$=_ms.extract(1,_,1);
 					if((_$!==null)){
 						let b=_$[0];
 						return b

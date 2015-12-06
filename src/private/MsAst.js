@@ -679,21 +679,6 @@ export default class MsAst {
 // Calls
 	/** `{called} {args}` */
 	export class Call extends Val {
-		/** `{tested}:{testType}` */
-		static contains(loc, testType, tested) {
-			return new Call(loc, new SpecialVal(loc, SpecialVals.Contains), [testType, tested])
-		}
-
-		/** `{subbed}[{args}]` */
-		static sub(loc, subbed, args) {
-			return new Call(loc, new SpecialVal(loc, SpecialVals.Sub), cat(subbed, args))
-		}
-
-		/** `del! {subbed}[{args}]` */
-		static delSub(loc, subbed, args) {
-			return new Call(loc, new SpecialVal(loc, SpecialVals.DelSub), cat(subbed, args))
-		}
-
 		constructor(loc, called, args) {
 			super(loc)
 			/** @type {Val} */
@@ -1107,6 +1092,39 @@ export default class MsAst {
 	}
 
 // Special
+	/** `{instance}:{type}` */
+	export class InstanceOf extends Val {
+		constructor(loc, instance, type) {
+			super(loc)
+			/** @type {Val} */
+			this.instance = instance
+			/** @type {Val} */
+			this.type = type
+		}
+	}
+
+	/** `{subbed}[{args}]` */
+	export class Sub extends Val {
+		constructor(loc, subbed, args) {
+			super(loc)
+			/** @type {Val} */
+			this.subbed = subbed
+			/** @type {Array<Val>} */
+			this.args = args
+		}
+	}
+
+	/** `del {subbed}[{args}]` */
+	export class Del extends LineContent {
+		constructor(loc, subbed, args) {
+			super(loc)
+			/** @type {Val} */
+			this.subbed = subbed
+			/** @type {Array<Val>} */
+			this.args = args
+		}
+	}
+
 	/**
 	A special action.
 	All SpecialDos are atomic and do not rely on context.
@@ -1143,12 +1161,8 @@ export default class MsAst {
 	@enum {number}
 	*/
 	export const SpecialVals = {
-		/** `_ms.contains` used for {@link Call.contains} */
-		Contains: 0,
-		/** `_ms.delSub` used for {@link Call.delSub} */
-		DelSub: 1,
 		/** `false` literal */
-		False: 2,
+		False: 0,
 		/**
 		`name` value is the name of the nearest assigned value. In:
 
@@ -1157,15 +1171,13 @@ export default class MsAst {
 
 		`name` will be "x".
 		*/
-		Name: 3,
+		Name: 1,
 		/** `null` literal */
-		Null: 4,
-		/** `_ms.sub` used for {@link Call.sub} */
-		Sub: 5,
+		Null: 2,
 		/** `true` literal */
-		True: 6,
+		True: 3,
 		/** `void 0` */
-		Undefined: 7
+		Undefined: 4
 	}
 
 	/**

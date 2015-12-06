@@ -1,5 +1,5 @@
 import {check} from '../context'
-import {Call} from '../MsAst'
+import {Del} from '../MsAst'
 import {unexpected} from './checks'
 import {Groups, isGroup} from '../Token'
 import {parseExprParts, parseSpaced} from './parse*'
@@ -16,7 +16,7 @@ export default function parseDel(tokens) {
 	if (isGroup(Groups.Bracket, last)) {
 		const object = parseSpaced(parts.rtail())
 		const args = parseExprParts(Slice.group(last))
-		return Call.delSub(tokens.loc, object, args)
+		return new Del(tokens.loc, object, args)
 	} else
 		unexpected(spaced)
 }

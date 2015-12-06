@@ -53,6 +53,9 @@ implementMany(MsAstTypes, 'opSK', {
 	Call() {
 		return null
 	},
+	Del() {
+		return null
+	},
 	Yield() {
 		return null
 	},

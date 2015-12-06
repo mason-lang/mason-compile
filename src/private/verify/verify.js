@@ -115,6 +115,7 @@ implementMany(MsAstTypes, 'verify', {
 	},
 
 	Call(_sk) {
+		// Call can be either SK.Val or SK.Do
 		this.called.verify(SK.Val)
 		verifyEach(this.args, SK.Val)
 	},
@@ -202,6 +203,12 @@ implementMany(MsAstTypes, 'verify', {
 			setDeclareAccessed(_, this)
 	},
 
+	Del(_sk) {
+		// DelSub can be either SK.Val or SK.Do
+		this.subbed.verify(SK.Val)
+		verifyEach(this.args, SK.Val)
+	},
+
 	Except(sk) {
 		markStatement(this, sk)
 		if (this.opElse === null)
@@ -271,6 +278,12 @@ implementMany(MsAstTypes, 'verify', {
 		checkDo(this, sk)
 		for (const _ of this.ignoredNames)
 			accessLocal(this, _)
+	},
+
+	InstanceOf(sk) {
+		checkVal(this, sk)
+		this.instance.verify(SK.Val)
+		this.type.verify(SK.Val)
 	},
 
 	Kind(sk) {
@@ -513,6 +526,12 @@ implementMany(MsAstTypes, 'verify', {
 
 	Spread() {
 		this.spreaded.verify(SK.Val)
+	},
+
+	Sub(sk) {
+		checkVal(this, sk)
+		this.subbed.verify(SK.Val)
+		verifyEach(this.args, SK.Val)
 	},
 
 	SuperCall(sk) {

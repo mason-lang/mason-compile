@@ -180,5 +180,5 @@ export default {
 	'msl.Type.Kind': ['_', 'kind!', 'self-kind!'],
 	'msl.Type.Pred-Type': ['_', 'Any', 'ObjLit'],
 	'msl.Type.primitive': ['Bool', 'Num', 'Str', 'Sym'],
-	'msl.Type.Type': ['_', '=>', 'contains?', 'extract']
+	'msl.Type.Type': ['_', '=>', 'has-instance?', 'extract']
 }

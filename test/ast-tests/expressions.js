@@ -1,6 +1,6 @@
 import {BagSimple, Block, Call, Member, MsRegExp, New, ObjPair, ObjSimple, QuotePlain, QuoteSimple,
 	QuoteTaggedTemplate, SpecialVal, SpecialVals, Spread, With} from '../../dist/private/MsAst'
-import {aDeclare, blockPass, focusAccess, focusDeclare, loc, objectAccess, one, two, zero
+import {aDeclare, blockPass, focusAccess, focusDeclare, loc, objectAccess, one, zero
 	} from './util/ast-util'
 import {test} from './util/test-asts'
 
@@ -47,34 +47,19 @@ describe('expressions', () => {
 			'0 ...1',
 			new Call(loc, zero, [new Spread(loc, one)]),
 			'0(...1)')
-
-		test(
-			'0[1 2]',
-			Call.sub(loc, zero, [one, two]),
-			'_ms.sub(0,1,2)')
-
-		test(
-			'0:1',
-			Call.contains(loc, one, zero),
-			'_ms.contains(1,0)')
-
-		test(
-			'new 0',
-			new New(loc, zero, []),
-			'new (0)()')
 	})
 
+	test(
+		'new 0',
+		new New(loc, zero, []),
+		'new (0)()')
+
 	describe('SpecialVal', () => {
-		// TODO: Move to types test?
-		test(
-			`0:1`,
-			Call.contains(loc, one, zero),
-			'_ms.contains(1,0)')
 		test('false', new SpecialVal(loc, SpecialVals.False), 'false')
 		test('null', new SpecialVal(loc, SpecialVals.Null), 'null')
 		test('true', new SpecialVal(loc, SpecialVals.True), 'true')
 		test('undefined', new SpecialVal(loc, SpecialVals.Undefined), 'void 0')
-		// todo: other special vals
+		// todo: SpecialVals.Name
 	})
 
 	describe('Quote', () => {
@@ -193,3 +178,4 @@ describe('expressions', () => {
 // Method
 // Pipe
 // Literal (NumberLiteral, RegExpLiteral)
+// InstanceOf, Sub, Del
