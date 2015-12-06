@@ -163,6 +163,10 @@ export default {
 		`Cannot ${kw(Keywords.Await)} outside of async function.`,
 	misplacedBreak:
 		'Not in a loop.',
+	misplacedSpreadDo:
+		`Can not spread here. Did you forget the space after ${kw(Keywords.Dot3)}?`,
+	misplacedSpreadVal:
+		`Can only spread in call, ${kw(Keywords.New)}, or ${code('[]')}.`,
 	misplacedYield: kind =>
 		`Cannot ${kw(kind)} outside of generator function.`,
 	missingLocal: name =>

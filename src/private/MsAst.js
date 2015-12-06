@@ -699,8 +699,11 @@ export default class MsAst {
 		}
 	}
 
-	/** `...{spreaded}` */
-	export class Spread extends MsAst {
+	/**
+	`...{spreaded}`
+	This can only be used in Call, New, or BagSimple.
+	*/
+	export class Spread extends Val {
 		constructor(loc, spreaded) {
 			super(loc)
 			/** @type {Val} */

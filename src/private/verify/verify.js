@@ -11,8 +11,8 @@ import {accessLocal, failMissingLocal, plusLocals, registerAndPlusLocal, setDecl
 	setLocal, verifyAndPlusLocal, verifyAndPlusLocals, verifyLocalDeclare, warnUnusedLocals,
 	withBlockLocals} from './locals'
 import SK, {checkDo, checkVal, getSK, markStatement} from './SK'
-import {makeUseOptional, makeUseOptionalIfFocus, setName, verifyEach, verifyName, verifyNotLazy,
-	verifyOp} from './util'
+import {makeUseOptional, makeUseOptionalIfFocus, setName, verifyEach, verifyEachValOrSpread,
+	verifyName, verifyNotLazy, verifyOp} from './util'
 import verifyBlock, {verifyDoBlock, verifyModuleLines} from './verifyBlock'
 
 /**
@@ -81,7 +81,7 @@ implementMany(MsAstTypes, 'verify', {
 
 	BagSimple(sk) {
 		checkVal(this, sk)
-		verifyEach(this.parts, SK.Val)
+		verifyEachValOrSpread(this.parts, SK.Val)
 	},
 
 	Block: verifyBlock,
@@ -117,7 +117,7 @@ implementMany(MsAstTypes, 'verify', {
 	Call(_sk) {
 		// Call can be either SK.Val or SK.Do
 		this.called.verify(SK.Val)
-		verifyEach(this.args, SK.Val)
+		verifyEachValOrSpread(this.args)
 	},
 
 	Case(sk) {
@@ -433,7 +433,7 @@ implementMany(MsAstTypes, 'verify', {
 	New(sk) {
 		checkVal(this, sk)
 		this.type.verify(SK.Val)
-		verifyEach(this.args, SK.val)
+		verifyEachValOrSpread(this.args, SK.val)
 	},
 
 	ObjEntryAssign(sk) {
@@ -529,7 +529,9 @@ implementMany(MsAstTypes, 'verify', {
 		setName(this)
 	},
 
-	Spread() {
+	Spread(sk) {
+		if (sk !== null)
+			fail(this.loc, sk === SK.Val ? 'misplacedSpreadVal' : 'misplacedSpreadDo')
 		this.spreaded.verify(SK.Val)
 	},
 

@@ -1,4 +1,5 @@
 import {check} from '../context'
+import {Spread} from '../MsAst'
 import {name, okToNotUse, results} from './context'
 import SK from './SK'
 
@@ -24,6 +25,13 @@ Verify each of asts.
 export function verifyEach(asts, sk) {
 	for (const _ of asts)
 		_.verify(sk)
+}
+
+/** Verify values, accepting Spreads. */
+export function verifyEachValOrSpread(asts) {
+	for (const _ of asts)
+		// `null` signifies to Spread that we recognize it
+		_.verify(_ instanceof Spread ? null : SK.Val)
 }
 
 /**
