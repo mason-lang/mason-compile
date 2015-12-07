@@ -21,13 +21,7 @@ function doTest(isPerfTest) {
 	const source = readFileSync(filename, 'utf-8')
 	const opts = new CompileOptions({
 		includeSourceMap: true,
-		useStrict: false,
-		builtins: {
-			global: [
-				'Array', 'Boolean', 'Error', 'Function',
-				'Number', 'Object', 'Promise', 'String', 'Symbol'
-			]
-		}
+		useStrict: false
 	})
 
 	const {warnings, result} = withContext(opts, filename, () => {
