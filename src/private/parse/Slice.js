@@ -1,4 +1,5 @@
 import Loc from 'esast/dist/Loc'
+import {isKeyword} from '../Token'
 import {isEmpty, opIf} from '../util'
 
 /**
@@ -128,6 +129,41 @@ export default class Slice {
 			out.push({before: this._chopStart(iLast)})
 			return out
 		})
+	}
+
+	/*
+	Split on a given list of keywords.
+	Keywords must come in order and appear 0 or 1 times.
+	Examples:
+		When keywords are `foo` and `bar`:
+		`a foo b bar c`: [`a`, `b`, `c`]
+		`a`: `[a, null, null]`
+		`a bar b`: `[a, null, b]`
+	@param {Array<Keywords>} keywords
+	@return {Array<?Slice>}
+		For each keyword, an optional slice for whether that keyword is present.
+		An additional slice is put at the front for all tokens appearing before the first keyword.
+		Returned length is keywords.length + 1.
+		It's recommended to destructure on this value.
+	*/
+	getKeywordSections(keywords) {
+		const out = new Array(keywords.length + 1).fill(null)
+
+		let iNextKeyword = 0
+		let iTokenPrev = this._start
+
+		for (let iToken = this._start; iToken < this._end; iToken = iToken + 1)
+			for (let iKeyword = iNextKeyword; iKeyword < keywords.length; iKeyword = iKeyword + 1)
+				if (isKeyword(keywords[iKeyword], this._tokens[iToken])) {
+					// iNextKeyword happens to equal the previous matched keyword + 1,
+					// so this is the index for that keyword.
+					out[iNextKeyword] = this._chop(iTokenPrev, iToken)
+					iNextKeyword = iKeyword + 1
+					iTokenPrev = iToken + 1
+				}
+
+		out[iNextKeyword] = this._chopStart(iTokenPrev)
+		return out
 	}
 
 	/** Iterate over every Token. */

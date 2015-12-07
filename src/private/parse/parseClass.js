@@ -1,7 +1,8 @@
 import {Class, ClassKindDo, Constructor, Fun} from '../MsAst'
 import {isKeyword, Keywords} from '../Token'
-import {ifElse} from '../util'
-import {opParseExpr, parseExprParts} from './parse*'
+import {ifElse, opMap} from '../util'
+import {checkEmpty} from './checks'
+import {parseExpr, parseExprParts} from './parse*'
 import {beforeAndOpBlock, parseJustBlock} from './parseBlock'
 import {funArgsAndBlock} from './parseFun'
 import parseMethodImpls, {parseStatics} from './parseMethodImpls'
@@ -56,12 +57,13 @@ export default function parseClass(tokens) {
 }
 
 function parseClassHeader(tokens) {
-	const [extendedTokens, kinds] =
-		ifElse(tokens.opSplitOnce(_ => isKeyword(Keywords.Kind, _)),
-			({before, after}) => [before, parseExprParts(after)],
-			() => [tokens, []])
-	const opSuperClass = opParseExpr(extendedTokens)
-	return {opSuperClass, kinds}
+	const [fieldsTokens, extendsTokens, kindTokens] =
+		tokens.getKeywordSections([Keywords.Extends, Keywords.Kind])
+	checkEmpty(fieldsTokens, 'todoClassFields')
+	return {
+		opSuperClass: opMap(extendsTokens, parseExpr),
+		kinds: ifElse(kindTokens, parseExprParts, () => [])
+	}
 }
 
 function parseConstructor(tokens) {

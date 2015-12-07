@@ -99,6 +99,8 @@ export default {
 		'Value to switch on is `_`, the function\'s implicit argument.',
 	tokenAfterSuper:
 		`Expected ${kw(Keywords.Dot)} or ${code('()')} after ${kw(Keywords.Super)}`,
+	todoClassFields:
+		`TODO: class fields in header (did you mean to write ${kw(Keywords.Extends)}?)`,
 	todoForPattern:
 		'TODO: pattern in for',
 	todoMutateDestructure:

@@ -262,6 +262,7 @@ export const Keywords = {
 	Dot3: kwNotName('... '),
 	Else: kw('else'),
 	Except: kw('except'),
+	Extends: kw('extends'),
 	False: kw('false'),
 	Finally: kw('finally'),
 	Focus: kw('_'),
