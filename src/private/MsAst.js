@@ -566,9 +566,11 @@ export default class MsAst {
 	*/
 	export class Class extends Val {
 		constructor(
-			loc, opSuperClass, kinds,
+			loc, opFields, opSuperClass, kinds,
 			opComment = null, opDo = null, statics = [], opConstructor = null, methods = []) {
 			super(loc)
+			/** @type {?Array<LocalDeclare>} */
+			this.opFields = opFields
 			/** @type {?Val} */
 			this.opSuperClass = opSuperClass
 			/** @type {Array<Val>} */
@@ -583,6 +585,21 @@ export default class MsAst {
 			this.opConstructor = opConstructor
 			/** @type {Array<MethodImplLike>} */
 			this.methods = methods
+		}
+
+		get isRecord() {
+			return this.opFields !== null
+		}
+	}
+
+	/** Single field specification for a record class. */
+	export class Field extends MsAst {
+		constructor(loc, name, opType = null) {
+			super(loc)
+			/** @type {string} */
+			this.name = name
+			/** @type {?Val} */
+			this.opType = opType
 		}
 	}
 

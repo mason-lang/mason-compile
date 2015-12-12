@@ -158,6 +158,7 @@ implementMany(MsAstTypes, 'verify', {
 
 	Class(sk) {
 		checkVal(this, sk)
+		opEach(this.opFields, verifyEach)
 		verifyOp(this.opSuperClass, SK.Val)
 		verifyEach(this.kinds, SK.Val)
 		verifyOp(this.opDo)
@@ -225,6 +226,10 @@ implementMany(MsAstTypes, 'verify', {
 		verifyEach(this.typedCatches, sk)
 		verifyOp(this.opCatchAll, sk)
 		verifyOp(this.opFinally, SK.Do)
+	},
+
+	Field() {
+		verifyOp(this.opType, SK.Val)
 	},
 
 	For(sk) {

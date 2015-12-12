@@ -27,6 +27,7 @@ export const
 	SwitchCaseNoMatch = new SwitchCase(undefined, [
 		throwErrorFromString('No branch of `switch` matches.')]),
 	SymbolIterator = member(new Identifier('Symbol'), 'iterator'),
+	This = new ThisExpression(),
 	ThrowAssertFail = throwErrorFromString('Assertion failed.'),
 	ThrowNoCaseMatch = throwErrorFromString('No branch of `case` matches.'),
 
@@ -41,6 +42,6 @@ export const
 	ExportsDefault = member(IdExports, 'default'),
 
 	DeclareLexicalThis = new VariableDeclaration('let',
-		[new VariableDeclarator(IdLexicalThis, new ThisExpression())]),
+		[new VariableDeclarator(IdLexicalThis, This)]),
 	LetLexicalThis = new VariableDeclaration('let', [new VariableDeclarator(IdLexicalThis)]),
-	SetLexicalThis = new AssignmentExpression('=', IdLexicalThis, new ThisExpression())
+	SetLexicalThis = new AssignmentExpression('=', IdLexicalThis, This)

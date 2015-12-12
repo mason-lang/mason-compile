@@ -78,8 +78,9 @@ export default {
 		'any?',
 		'count',
 		'each!',
-		'empty?',
+		'empty',
 		'empty!',
+		'empty?',
 		'?find',
 		'fold',
 		'@flat-map',
@@ -94,7 +95,6 @@ export default {
 		'@map',
 		'@map~'
 	],
-	'msl.@.@-Type': ['empty'],
 	'msl.@.Map.Id-Map': ['_'],
 	'msl.@.Map.Hash-Map': ['_'],
 	'msl.@.Map.Map': [

@@ -24,12 +24,14 @@ export function parseLocalDeclaresJustNames(tokens) {
 
 /** Parse a single local declare. */
 export function parseLocalDeclare(token) {
-	return _parseLocalDeclare(token)
+	const {name, opType, kind} = parseLocalParts(token)
+	return new LocalDeclare(token.loc, name, opType, kind)
 }
 
 /** Parse a single local declare from the tokens in a {@link Groups.Space}. */
 export function parseLocalDeclareFromSpaced(tokens) {
-	return _parseLocalDeclareFromSpaced(tokens)
+	const {name, opType, kind} = parseLocalPartsFromSpaced(tokens)
+	return new LocalDeclare(tokens.loc, name, opType, kind)
 }
 
 /**
@@ -40,7 +42,8 @@ For constructor. Parse local declares while allowing `.x`-style arguments.
 export function parseLocalDeclaresAndMemberArgs(tokens) {
 	const declares = [], memberArgs = []
 	for (const token of tokens) {
-		const {declare, isMember} = _parseLocalDeclare(token, true)
+		const {name, opType, kind, isMember} = parseLocalParts(token, true)
+		const declare = new LocalDeclare(token.loc, name, opType, kind)
 		declares.push(declare)
 		if (isMember)
 			memberArgs.push(declare)
@@ -83,16 +86,17 @@ export function parseLocalDeclareOrFocus(tokens) {
 	}
 }
 
-function _parseLocalDeclare(token, orMember = false) {
-	if (isGroup(Groups.Space, token))
-		return _parseLocalDeclareFromSpaced(Slice.group(token), orMember)
-	else {
-		const declare = LocalDeclare.plain(token.loc, parseLocalName(token))
-		return orMember ? {declare, isMember: false} : declare
-	}
+/**
+@param {boolean} orMember If true, parse locals like `.x` and return `isMember` with result.
+@return {{name, opType, kind, isMember}}
+*/
+export function parseLocalParts(token, orMember = false) {
+	return isGroup(Groups.Space, token) ?
+		parseLocalPartsFromSpaced(Slice.group(token), orMember) :
+		{name: parseLocalName(token), opType: null, kind: LocalDeclares.Eager, isMember: false}
 }
 
-function _parseLocalDeclareFromSpaced(tokens, orMember = false) {
+function parseLocalPartsFromSpaced(tokens, orMember = false) {
 	const [rest, kind, isMember] =
 		isKeyword(Keywords.Lazy, tokens.head()) ?
 			[tokens.tail(), LocalDeclares.Lazy, false] :
@@ -108,6 +112,5 @@ function _parseLocalDeclareFromSpaced(tokens, orMember = false) {
 		checkNonEmpty(tokensType, 'expectedAfterColon')
 		return parseSpaced(tokensType)
 	})
-	const declare = new LocalDeclare(tokens.loc, name, opType, kind)
-	return orMember ? {declare, isMember} : declare
+	return {name, opType, kind, isMember}
 }

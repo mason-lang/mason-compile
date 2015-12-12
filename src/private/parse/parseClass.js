@@ -1,21 +1,22 @@
-import {Class, ClassKindDo, Constructor, Fun} from '../MsAst'
+import {Class, ClassKindDo, Constructor, Field, Fun, LocalDeclares} from '../MsAst'
+import {check} from '../context'
 import {isKeyword, Keywords} from '../Token'
-import {ifElse, opMap} from '../util'
-import {checkEmpty} from './checks'
+import {ifElse, opIf, opMap} from '../util'
 import {parseExpr, parseExprParts} from './parse*'
 import {beforeAndOpBlock, parseJustBlock} from './parseBlock'
 import {funArgsAndBlock} from './parseFun'
 import parseMethodImpls, {parseStatics} from './parseMethodImpls'
+import {parseLocalParts} from './parseLocalDeclares'
 import tryTakeComment from './tryTakeComment'
 
 /** Parse a {@link Class}. */
 export default function parseClass(tokens) {
 	const [before, opBlock] = beforeAndOpBlock(tokens)
-	const {opSuperClass, kinds} = parseClassHeader(before)
+	const {opFields, opSuperClass, kinds} = parseClassHeader(before)
 
 	let opComment = null, opDo = null, statics = [], opConstructor = null, methods = []
 	const finish = () => new Class(tokens.loc,
-			opSuperClass, kinds, opComment, opDo, statics, opConstructor, methods)
+		opFields, opSuperClass, kinds, opComment, opDo, statics, opConstructor, methods)
 
 	if (opBlock === null)
 		return finish()
@@ -59,8 +60,12 @@ export default function parseClass(tokens) {
 function parseClassHeader(tokens) {
 	const [fieldsTokens, extendsTokens, kindTokens] =
 		tokens.getKeywordSections([Keywords.Extends, Keywords.Kind])
-	checkEmpty(fieldsTokens, 'todoClassFields')
 	return {
+		opFields: opIf(!fieldsTokens.isEmpty(), () => fieldsTokens.map(_ => {
+			const {name, opType, kind} = parseLocalParts(_)
+			check(kind === LocalDeclares.Eager, _.loc, 'todoLazyField')
+			return new Field(_.loc, name, opType)
+		})),
 		opSuperClass: opMap(extendsTokens, parseExpr),
 		kinds: ifElse(kindTokens, parseExprParts, () => [])
 	}

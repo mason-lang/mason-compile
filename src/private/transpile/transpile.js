@@ -1,11 +1,10 @@
 import {ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryExpression,
-	BlockStatement, BreakStatement, CallExpression, ClassBody, ClassExpression,
-	ConditionalExpression, DebuggerStatement, ForOfStatement, ForStatement, FunctionExpression,
-	Identifier, IfStatement, LabeledStatement, Literal, LogicalExpression, MemberExpression,
-	MethodDefinition, NewExpression, ObjectExpression, Property, ReturnStatement, SpreadElement,
-	SwitchCase, SwitchStatement, TaggedTemplateExpression, TemplateElement, TemplateLiteral,
-	ThisExpression, ThrowStatement, VariableDeclaration, UnaryExpression, VariableDeclarator,
-	YieldExpression} from 'esast/dist/ast'
+	BlockStatement, BreakStatement, CallExpression, ConditionalExpression, DebuggerStatement,
+	ForOfStatement, ForStatement, FunctionExpression, Identifier, IfStatement, LabeledStatement,
+	Literal, LogicalExpression, MemberExpression, NewExpression, ObjectExpression, Property,
+	ReturnStatement, SpreadElement, SwitchCase, SwitchStatement, TaggedTemplateExpression,
+	TemplateElement, TemplateLiteral, ThrowStatement, VariableDeclaration, UnaryExpression,
+	VariableDeclarator, YieldExpression} from 'esast/dist/ast'
 import {identifier, member, propertyIdOrLiteral} from 'esast/dist/util'
 import {options} from '../context'
 import * as MsAstTypes from '../MsAst'
@@ -16,12 +15,12 @@ import {assert, cat, flatMap, flatOpMap, ifElse, implementMany, isEmpty, last, o
 import {Blocks} from '../VerifyResults'
 import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, DeclareLexicalThis,
 	IdArguments, IdBuilt, IdExtract, IdFocus, IdLexicalThis, IdLoop, IdSuper, GlobalError,
-	GlobalInfinity, LetLexicalThis, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt,
-	ReturnFocus, SetLexicalThis, SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch
-	} from './ast-constants'
+	GlobalInfinity, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt, ReturnFocus,
+	SetLexicalThis, SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
 import {setup, tearDown, verifyResults, withFunKind} from './context'
+import transpileClass, {constructorSetMembers, transpileConstructor} from './transpileClass'
 import transpileExcept, {transpileCatch} from './transpileExcept'
-import {transpileMethodToDefinition, transpileMethodToProperty} from './transpileMethod'
+import {transpileMethodToProperty} from './transpileMethod'
 import transpileModule, {exportNamedOrDefault} from './transpileModule'
 import {accessLocalDeclare, blockWrap, blockWrapIfBlock, blockWrapIfVal, callFocusFun, declare,
 	doThrow, focusFun, idForDeclareCached, lazyWrap, makeDeclarator, makeDestructureDeclarators,
@@ -155,27 +154,9 @@ implementMany(MsAstTypes, 'transpile', {
 			return new IfStatement(t0(this.test), t0(this.result), alternate)
 	},
 
-	Class() {
-		const methods = cat(
-			this.statics.map(_ => transpileMethodToDefinition(_, true)),
-			opMap(this.opConstructor, t0),
-			this.methods.map(_ => transpileMethodToDefinition(_, false)))
-		const opName = opMap(verifyResults.opName(this), identifier)
-		const classExpr = new ClassExpression(opName,
-			opMap(this.opSuperClass, t0), new ClassBody(methods))
+	Catch: transpileCatch,
 
-		if (this.opDo === null && isEmpty(this.kinds))
-			return classExpr
-		else {
-			const lead = cat(
-				plainLet(IdFocus, classExpr),
-				this.kinds.map(_ => msCall('kindDo', IdFocus, t0(_))))
-			const block = ifElse(this.opDo,
-				_ => t3(_.block, lead, null, ReturnFocus),
-				() => new BlockStatement(cat(lead, ReturnFocus)))
-			return blockWrap(block)
-		}
-	},
+	Class: transpileClass,
 
 	Cond() {
 		return new ConditionalExpression(t0(this.test), t0(this.ifTrue), t0(this.ifFalse))
@@ -194,16 +175,7 @@ implementMany(MsAstTypes, 'transpile', {
 		}
 	},
 
-	Constructor() {
-		// If there is a `super`, `this` will not be defined until then,
-		// so must wait until then.
-		// Otherwise, do it at the beginning.
-		return MethodDefinition.constructor(verifyResults.constructorHasSuper(this) ?
-			t2(this.fun, LetLexicalThis, true) :
-			t1(this.fun, constructorSetMembers(this)))
-	},
-
-	Catch: transpileCatch,
+	Constructor: transpileConstructor,
 
 	Del() {
 		return msCall('del', t0(this.subbed), ...this.args.map(t0))
@@ -618,11 +590,6 @@ function caseBody(parts, opElse) {
 	for (let i = parts.length - 1; i >= 0; i = i - 1)
 		acc = t1(parts[i], acc)
 	return acc
-}
-
-function constructorSetMembers(constructor) {
-	return constructor.memberArgs.map(_ =>
-		msCall('newProperty', new ThisExpression(), new Literal(_.name), idForDeclareCached(_)))
 }
 
 function forLoop(opIteratee, block) {
