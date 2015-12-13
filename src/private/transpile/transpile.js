@@ -16,11 +16,11 @@ import transpileClass, {constructorSetMembers, transpileConstructor} from './tra
 import transpileExcept, {transpileCatch} from './transpileExcept'
 import {transpileBreak, transpileFor, transpileForAsync, transpileForBag} from './transpileFor'
 import transpileFun from './transpileFun'
-import transpileKind from './transpileKind'
 import transpileModule, {exportNamedOrDefault} from './transpileModule'
 import transpileQuotePlain from './transpileQuotePlain'
 import {transpileSpecialDo, transpileSpecialVal} from './transpileSpecial'
 import transpileSwitch, {transpileSwitchPart} from './transpileSwitch'
+import transpileTrait from './transpileTrait'
 import {accessLocalDeclare, blockWrap, blockWrapIfBlock, callFocusFun, doThrow, focusFun,
 	idForDeclareCached, lazyWrap, makeDeclarator, makeDestructureDeclarators,
 	maybeWrapInCheckInstance, memberStringOrVal, msCall, msMember, plainLet, t0, t1, t3,
@@ -124,8 +124,6 @@ implementMany(MsAstTypes, 'transpile', {
 		// TODO:ES6 new BinaryExpression('instanceof', t0(this.instance), t0(this.type))
 		return msCall('hasInstance', t0(this.type), t0(this.instance))
 	},
-
-	Kind: transpileKind,
 
 	Lazy() {
 		return lazyWrap(t0(this.value))
@@ -337,6 +335,8 @@ implementMany(MsAstTypes, 'transpile', {
 			_ => doThrow(_),
 			() => new ThrowStatement(new NewExpression(GlobalError, [LitStrThrow])))
 	},
+
+	Trait: transpileTrait,
 
 	With() {
 		const idDeclare = idForDeclareCached(this.declare)

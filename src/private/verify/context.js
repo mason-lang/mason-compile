@@ -55,13 +55,6 @@ export function tearDown() {
 	locals = okToNotUse = opLoop = pendingBlockLocals = method = results = null
 }
 
-export function withInFunKind(newFunKind, action) {
-	const oldFunKind = funKind
-	funKind = newFunKind
-	action()
-	funKind = oldFunKind
-}
-
 export function withLoop(newLoop, action) {
 	const oldLoop = opLoop
 	opLoop = newLoop
@@ -120,4 +113,15 @@ export function withFun(funKind, action) {
 			withIife(action)
 		})
 	})
+}
+
+export function withMethods(action) {
+	withFun(Funs.Plain, action)
+}
+
+function withInFunKind(newFunKind, action) {
+	const oldFunKind = funKind
+	funKind = newFunKind
+	action()
+	funKind = oldFunKind
 }

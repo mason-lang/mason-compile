@@ -538,14 +538,14 @@ export default class MsAst {
 	}
 
 // Class
-	export class Kind extends Val {
-		constructor(loc, superKinds, opComment = null, opDo = null, statics = [], methods = []) {
+	export class Trait extends Val {
+		constructor(loc, superTraits, opComment = null, opDo = null, statics = [], methods = []) {
 			super(loc)
 			/** @type {Array<Val>} */
-			this.superKinds = superKinds
+			this.superTraits = superTraits
 			/** @type {?string} */
 			this.opComment = opComment
-			/** @type {?ClassKindDo} */
+			/** @type {?ClassTraitDo} */
 			this.opDo = opDo
 			/** @type {Array<MethodImplLike>} */
 			this.statics = statics
@@ -566,7 +566,7 @@ export default class MsAst {
 	*/
 	export class Class extends Val {
 		constructor(
-			loc, opFields, opSuperClass, kinds,
+			loc, opFields, opSuperClass, traits,
 			opComment = null, opDo = null, statics = [], opConstructor = null, methods = []) {
 			super(loc)
 			/** @type {?Array<LocalDeclare>} */
@@ -574,10 +574,10 @@ export default class MsAst {
 			/** @type {?Val} */
 			this.opSuperClass = opSuperClass
 			/** @type {Array<Val>} */
-			this.kinds = kinds
+			this.traits = traits
 			/** @type {?string} */
 			this.opComment = opComment
-			/** @type {?ClassKindDo} */
+			/** @type {?ClassTraitDo} */
 			this.opDo = opDo
 			/** @type {Array<MethodImplLike>} */
 			this.statics = statics
@@ -603,8 +603,8 @@ export default class MsAst {
 		}
 	}
 
-	/** `do!` part of {@link Class} or {@link Kind}. */
-	export class ClassKindDo extends MsAst {
+	/** `do!` part of {@link Class} or {@link Trait}. */
+	export class ClassTraitDo extends MsAst {
 		constructor(loc, block) {
 			super(loc)
 			/** @type {Block} */

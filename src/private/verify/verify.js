@@ -1,11 +1,11 @@
 import {check, fail, options, pathOptions, warn} from '../context'
 import * as MsAstTypes from '../MsAst'
-import {Block, Class, Constructor, For, ForBag, Fun, Funs, Kind, LocalDeclare, Method, Pattern
+import {Block, Class, Constructor, For, ForBag, Fun, Funs, LocalDeclare, Method, Pattern, Trait
 	} from '../MsAst'
 import {Keywords} from '../Token'
 import {assert, cat, ifElse, implementMany, isEmpty, opEach} from '../util'
 import {funKind, isInSwitch, locals, method, opLoop, results, setup, tearDown, withFun, withIife,
-	withIifeIf, withIifeIfVal, withInFunKind, withInSwitch, withMethod, withLoop, withName
+	withIifeIf, withIifeIfVal, withInSwitch, withMethod, withMethods, withLoop, withName
 	} from './context'
 import {accessLocal, failMissingLocal, plusLocals, registerAndPlusLocal, setDeclareAccessed,
 	setLocal, verifyAndPlusLocal, verifyAndPlusLocals, verifyLocalDeclare, warnUnusedLocals,
@@ -47,7 +47,7 @@ implementMany(MsAstTypes, 'verify', {
 				if (this.value instanceof Class ||
 					this.value instanceof Fun ||
 					this.value instanceof Method ||
-					this.value instanceof Kind)
+					this.value instanceof Trait)
 					setName(this.value)
 
 				// Assignee registered by verifyLines.
@@ -160,15 +160,22 @@ implementMany(MsAstTypes, 'verify', {
 		checkVal(this, sk)
 		opEach(this.opFields, verifyEach)
 		verifyOp(this.opSuperClass, SK.Val)
-		verifyEach(this.kinds, SK.Val)
-		verifyOp(this.opDo)
-		verifyEach(this.statics)
-		verifyOp(this.opConstructor, this.opSuperClass !== null)
-		verifyEach(this.methods)
+		verifyEach(this.traits, SK.Val)
+
+		withIife(() => {
+			verifyOp(this.opDo)
+		})
+
+		// Class acts like a Fun: loop/generator context is lost and we get block locals.
+		withMethods(() => {
+			verifyEach(this.statics)
+			verifyOp(this.opConstructor, this.opSuperClass !== null)
+			verifyEach(this.methods)
+		})
 		// name set by AssignSingle
 	},
 
-	ClassKindDo() {
+	ClassTraitDo() {
 		verifyAndPlusLocal(this.declareFocus, () => this.block.verify(SK.Do))
 	},
 
@@ -285,19 +292,25 @@ implementMany(MsAstTypes, 'verify', {
 			accessLocal(this, _)
 	},
 
+	Import() {
+		// Since Uses are always in the outermost scope, don't have to worry about shadowing.
+		// So we mutate `locals` directly.
+		function addUseLocal(_) {
+			const prev = locals.get(_.name)
+			if (prev !== undefined)
+				fail(_.loc, 'duplicateImport', _.name, prev.loc)
+			verifyLocalDeclare(_)
+			setLocal(_)
+		}
+		for (const _ of this.imported)
+			addUseLocal(_)
+		opEach(this.opImportDefault, addUseLocal)
+	},
+
 	InstanceOf(sk) {
 		checkVal(this, sk)
 		this.instance.verify(SK.Val)
 		this.type.verify(SK.Val)
-	},
-
-	Kind(sk) {
-		checkVal(this, sk)
-		verifyEach(this.superKinds, SK.Val)
-		verifyOp(this.opDo, SK.Do)
-		verifyEach(this.statics)
-		verifyEach(this.methods)
-		// name set by AssignSingle
 	},
 
 	Lazy(sk) {
@@ -516,11 +529,9 @@ implementMany(MsAstTypes, 'verify', {
 
 	SimpleFun(sk) {
 		checkVal(this, sk)
-		withBlockLocals(() => {
-			withInFunKind(Funs.Plain, () => {
-				registerAndPlusLocal(LocalDeclare.focus(this.loc), () => {
-					this.value.verify()
-				})
+		withFun(Funs.Plain, () => {
+			registerAndPlusLocal(LocalDeclare.focus(this.loc), () => {
+				this.value.verify()
 			})
 		})
 	},
@@ -585,19 +596,15 @@ implementMany(MsAstTypes, 'verify', {
 		verifyOp(this.opThrown, SK.Val)
 	},
 
-	Import() {
-		// Since Uses are always in the outermost scope, don't have to worry about shadowing.
-		// So we mutate `locals` directly.
-		function addUseLocal(_) {
-			const prev = locals.get(_.name)
-			if (prev !== undefined)
-				fail(_.loc, 'duplicateImport', _.name, prev.loc)
-			verifyLocalDeclare(_)
-			setLocal(_)
-		}
-		for (const _ of this.imported)
-			addUseLocal(_)
-		opEach(this.opImportDefault, addUseLocal)
+	Trait(sk) {
+		checkVal(this, sk)
+		verifyEach(this.superTraits, SK.Val)
+		verifyOp(this.opDo, SK.Do)
+		withMethods(() => {
+			verifyEach(this.statics)
+			verifyEach(this.methods)
+		})
+		// name set by AssignSingle
 	},
 
 	With(sk) {

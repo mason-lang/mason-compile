@@ -1,18 +1,18 @@
-import {ClassKindDo, Kind} from '../MsAst'
+import {ClassTraitDo, Trait} from '../MsAst'
 import {isKeyword, Keywords} from '../Token'
 import {parseExprParts} from './parse*'
 import {beforeAndOpBlock, parseJustBlock} from './parseBlock'
 import parseMethodImpls, {parseStatics} from './parseMethodImpls'
 import tryTakeComment from './tryTakeComment'
 
-/** Parse a {@link Kind}. */
-export default function parseKind(tokens) {
+/** Parse a {@link Trait}. */
+export default function parseTrait(tokens) {
 	const [before, opBlock] = beforeAndOpBlock(tokens)
-	const superKinds = parseExprParts(before)
+	const superTraits = parseExprParts(before)
 
 	let opComment = null, opDo = null, statics = [], methods = []
-	const finish = () => new Kind(tokens.loc,
-		superKinds, opComment, opDo, statics, methods)
+	const finish = () => new Trait(tokens.loc,
+		superTraits, opComment, opDo, statics, methods)
 
 	if (opBlock === null)
 		return finish()
@@ -27,7 +27,7 @@ export default function parseKind(tokens) {
 	const line1 = rest.headSlice()
 	if (isKeyword(Keywords.Do, line1.head())) {
 		const done = parseJustBlock(Keywords.Do, line1.tail())
-		opDo = new ClassKindDo(line1.loc, done)
+		opDo = new ClassTraitDo(line1.loc, done)
 		rest = rest.tail()
 	}
 

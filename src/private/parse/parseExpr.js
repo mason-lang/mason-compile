@@ -12,7 +12,7 @@ import parseDel from './parseDel'
 import parseFor from './parseFor'
 import parseFun from './parseFun'
 import parseMethod from './parseMethod'
-import parseKind from './parseKind'
+import parseTrait from './parseTrait'
 import {parseLocalDeclare} from './parseLocalDeclares'
 import Slice from './Slice'
 
@@ -105,8 +105,8 @@ function keywordExpr(at, after) {
 			return parseFun(at.kind, after)
 		case Keywords.If: case Keywords.Unless:
 			return parseConditional(at.kind, after)
-		case Keywords.Kind:
-			return parseKind(after)
+		case Keywords.Trait:
+			return parseTrait(after)
 		case Keywords.Method:
 			return parseMethod(after)
 		case Keywords.New: {
@@ -137,8 +137,8 @@ const exprSplitKeywords = new Set([
 	Keywords.Except, Keywords.For, Keywords.ForAsync, Keywords.ForBag, Keywords.Fun, Keywords.FunDo,
 	Keywords.FunThis, Keywords.FunThisDo, Keywords.FunAsync, Keywords.FunAsyncDo,
 	Keywords.FunThisAsync, Keywords.FunThisAsyncDo, Keywords.FunGen, Keywords.FunGenDo,
-	Keywords.FunThisGen, Keywords.FunThisGenDo, Keywords.If, Keywords.Kind, Keywords.Method,
-	Keywords.New, Keywords.Not, Keywords.Or, Keywords.Pipe, Keywords.Super, Keywords.Switch,
+	Keywords.FunThisGen, Keywords.FunThisGenDo, Keywords.If, Keywords.Method, Keywords.New,
+	Keywords.Not, Keywords.Or, Keywords.Pipe, Keywords.Super, Keywords.Switch, Keywords.Trait,
 	Keywords.Unless, Keywords.With, Keywords.Yield, Keywords.YieldTo
 ])
 

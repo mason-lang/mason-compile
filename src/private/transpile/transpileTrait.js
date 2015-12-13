@@ -7,11 +7,11 @@ import {blockWrap, msCall, plainLet, t0, t3} from './util'
 
 export default function() {
 	const name = new Literal(verifyResults.name(this))
-	const supers = new ArrayExpression(this.superKinds.map(t0))
-	const kind = msCall('kind', name, supers, methods(this.statics), methods(this.methods))
+	const supers = new ArrayExpression(this.superTraits.map(t0))
+	const trait = msCall('trait', name, supers, methods(this.statics), methods(this.methods))
 	return ifElse(this.opDo,
-		_ => blockWrap(t3(_.block, plainLet(IdFocus, kind), null, ReturnFocus)),
-		() => kind)
+		_ => blockWrap(t3(_.block, plainLet(IdFocus, trait), null, ReturnFocus)),
+		() => trait)
 }
 
 function methods(_) {

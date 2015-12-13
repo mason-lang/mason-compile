@@ -22,13 +22,13 @@ export default function transpileClass() {
 	const classExpr = new ClassExpression(opName,
 		opMap(this.opSuperClass, t0), new ClassBody(methods))
 
-	if (this.opDo === null && !this.isRecord && isEmpty(this.kinds))
+	if (this.opDo === null && !this.isRecord && isEmpty(this.traits))
 		return classExpr
 	else {
 		const lead = cat(
 			plainLet(IdFocus, classExpr),
 			opMap(this.opFields, beRecord),
-			this.kinds.map(_ => msCall('kindDo', IdFocus, t0(_))))
+			this.traits.map(_ => msCall('traitDo', IdFocus, t0(_))))
 		const block = ifElse(this.opDo,
 			_ => t3(_.block, lead, null, ReturnFocus),
 			() => new BlockStatement(cat(lead, ReturnFocus)))

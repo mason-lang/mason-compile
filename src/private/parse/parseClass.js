@@ -1,4 +1,4 @@
-import {Class, ClassKindDo, Constructor, Field, Fun, LocalDeclares} from '../MsAst'
+import {Class, ClassTraitDo, Constructor, Field, Fun, LocalDeclares} from '../MsAst'
 import {check} from '../context'
 import {isKeyword, Keywords} from '../Token'
 import {ifElse, opIf, opMap} from '../util'
@@ -12,11 +12,11 @@ import tryTakeComment from './tryTakeComment'
 /** Parse a {@link Class}. */
 export default function parseClass(tokens) {
 	const [before, opBlock] = beforeAndOpBlock(tokens)
-	const {opFields, opSuperClass, kinds} = parseClassHeader(before)
+	const {opFields, opSuperClass, traits} = parseClassHeader(before)
 
 	let opComment = null, opDo = null, statics = [], opConstructor = null, methods = []
 	const finish = () => new Class(tokens.loc,
-		opFields, opSuperClass, kinds, opComment, opDo, statics, opConstructor, methods)
+		opFields, opSuperClass, traits, opComment, opDo, statics, opConstructor, methods)
 
 	if (opBlock === null)
 		return finish()
@@ -31,7 +31,7 @@ export default function parseClass(tokens) {
 	const line1 = rest.headSlice()
 	if (isKeyword(Keywords.Do, line1.head())) {
 		const done = parseJustBlock(Keywords.Do, line1.tail())
-		opDo = new ClassKindDo(line1.loc, done)
+		opDo = new ClassTraitDo(line1.loc, done)
 		rest = rest.tail()
 	}
 
@@ -58,8 +58,8 @@ export default function parseClass(tokens) {
 }
 
 function parseClassHeader(tokens) {
-	const [fieldsTokens, extendsTokens, kindTokens] =
-		tokens.getKeywordSections([Keywords.Extends, Keywords.Kind])
+	const [fieldsTokens, extendsTokens, traitTokens] =
+		tokens.getKeywordSections([Keywords.Extends, Keywords.Trait])
 	return {
 		opFields: opIf(!fieldsTokens.isEmpty(), () => fieldsTokens.map(_ => {
 			const {name, opType, kind} = parseLocalParts(_)
@@ -67,7 +67,7 @@ function parseClassHeader(tokens) {
 			return new Field(_.loc, name, opType)
 		})),
 		opSuperClass: opMap(extendsTokens, parseExpr),
-		kinds: ifElse(kindTokens, parseExprParts, () => [])
+		traits: ifElse(traitTokens, parseExprParts, () => [])
 	}
 }
 
