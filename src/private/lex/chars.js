@@ -71,4 +71,4 @@ export const
 
 // Anything not explicitly reserved is a valid name character.
 const reservedCharacters = '#%^\\;,'
-export const isNameCharacter = charPred(`\`&()[]{}|:". \n\t${reservedCharacters}`, true)
+export const isNameCharacter = charPred(`\`&()[]{}|:'". \n\t${reservedCharacters}`, true)
