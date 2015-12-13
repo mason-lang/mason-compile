@@ -1,31 +1,30 @@
-import {ArrayExpression, ArrowFunctionExpression, AssignmentExpression, BinaryExpression,
-	BlockStatement, BreakStatement, CallExpression, ConditionalExpression, DebuggerStatement,
-	ForOfStatement, ForStatement, FunctionExpression, Identifier, IfStatement, LabeledStatement,
-	Literal, LogicalExpression, MemberExpression, NewExpression, ObjectExpression, Property,
-	ReturnStatement, SpreadElement, SwitchCase, SwitchStatement, TaggedTemplateExpression,
-	TemplateElement, TemplateLiteral, ThrowStatement, VariableDeclaration, UnaryExpression,
-	VariableDeclarator, YieldExpression} from 'esast/dist/ast'
+import {ArrayExpression, AssignmentExpression, CallExpression, ConditionalExpression,
+	Identifier, IfStatement, Literal, LogicalExpression, NewExpression, ObjectExpression, Property,
+	ReturnStatement, SpreadElement, TaggedTemplateExpression, ThrowStatement, UnaryExpression,
+	VariableDeclaration, YieldExpression} from 'esast/dist/ast'
 import {identifier, member, propertyIdOrLiteral} from 'esast/dist/util'
-import {options} from '../context'
 import * as MsAstTypes from '../MsAst'
-import {AssignSingle, Call, Constructor, Fun, Funs, Logics, Member, LocalDeclares, Pattern, Setters,
-	SpecialDos, SpecialVals} from '../MsAst'
-import {assert, cat, flatMap, flatOpMap, ifElse, implementMany, isEmpty, last, opIf, opMap, rtail,
-	tail} from '../util'
-import {Blocks} from '../VerifyResults'
-import {ArraySliceCall, DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, DeclareLexicalThis,
-	IdArguments, IdBuilt, IdExtract, IdFocus, IdLexicalThis, IdLoop, IdSuper, GlobalError,
-	GlobalInfinity, LitEmptyString, LitNull, LitStrThrow, LitZero, ReturnBuilt, ReturnFocus,
-	SetLexicalThis, SwitchCaseNoMatch, ThrowAssertFail, ThrowNoCaseMatch} from './ast-constants'
-import {setup, tearDown, verifyResults, withFunKind} from './context'
+import {AssignSingle, Constructor, Fun, Logics, LocalDeclares, Setters} from '../MsAst'
+import {cat, ifElse, implementMany, opMap, tail} from '../util'
+import {IdBuilt, IdFocus, IdLexicalThis, IdSuper, GlobalError, SetLexicalThis
+	} from './ast-constants'
+import {setup, tearDown, verifyResults} from './context'
+import transpileAssert from './transpileAssert'
+import transpileBlock from './transpileBlock'
+import transpileCase, {transpileCasePart} from './transpileCase'
 import transpileClass, {constructorSetMembers, transpileConstructor} from './transpileClass'
 import transpileExcept, {transpileCatch} from './transpileExcept'
-import {transpileMethodToProperty} from './transpileMethod'
+import {transpileBreak, transpileFor, transpileForAsync, transpileForBag} from './transpileFor'
+import transpileFun from './transpileFun'
+import transpileKind from './transpileKind'
 import transpileModule, {exportNamedOrDefault} from './transpileModule'
-import {accessLocalDeclare, blockWrap, blockWrapIfBlock, blockWrapIfVal, callFocusFun, declare,
-	doThrow, focusFun, idForDeclareCached, lazyWrap, makeDeclarator, makeDestructureDeclarators,
-	maybeWrapInCheckInstance, memberStringOrVal, msCall, msMember, opTypeCheckForLocalDeclare,
-	plainLet, t0, t1, t2, t3, tLines, transpileName} from './util'
+import transpileQuotePlain from './transpileQuotePlain'
+import {transpileSpecialDo, transpileSpecialVal} from './transpileSpecial'
+import transpileSwitch, {transpileSwitchPart} from './transpileSwitch'
+import {accessLocalDeclare, blockWrap, blockWrapIfBlock, callFocusFun, doThrow, focusFun,
+	idForDeclareCached, lazyWrap, makeDeclarator, makeDestructureDeclarators,
+	maybeWrapInCheckInstance, memberStringOrVal, msCall, msMember, plainLet, t0, t1, t3,
+	transpileName} from './util'
 
 /** Transform a {@link MsAst} into an esast. **/
 export default function transpile(moduleExpression, verifyResults) {
@@ -36,36 +35,13 @@ export default function transpile(moduleExpression, verifyResults) {
 }
 
 implementMany(MsAstTypes, 'transpile', {
-	Assert() {
-		const failCond = () => {
-			const cond = t0(this.condition)
-			return this.negate ? cond : new UnaryExpression('!', cond)
-		}
-
-		return ifElse(this.opThrown,
-			_ => new IfStatement(failCond(), doThrow(_)),
-			() => {
-				if (this.condition instanceof Call) {
-					const call = this.condition
-					const called = call.called
-					const args = call.args.map(t0)
-					if (called instanceof Member) {
-						const ass = this.negate ? 'assertNotMember' : 'assertMember'
-						return msCall(ass, t0(called.object), transpileName(called.name), ...args)
-					} else {
-						const ass = this.negate ? 'assertNot' : 'assert'
-						return msCall(ass, t0(called), ...args)
-					}
-				} else
-					return new IfStatement(failCond(), ThrowAssertFail)
-			})
-	},
+	Assert: transpileAssert,
 
 	AssignSingle(valWrap) {
 		const val = valWrap === undefined ? t0(this.value) : valWrap(t0(this.value))
-		const declare = makeDeclarator(this.assignee, val, false)
-		return new VariableDeclaration('let', [declare])
+		return new VariableDeclaration('let', [makeDeclarator(this.assignee, val, false)])
 	},
+
 	// TODO:ES6 Just use native destructuring assign
 	AssignDestructure() {
 		return new VariableDeclaration(
@@ -89,73 +65,21 @@ implementMany(MsAstTypes, 'transpile', {
 		return new ArrayExpression(this.parts.map(t0))
 	},
 
-	Block(lead = null, opReturnType = null, follow = null) {
-		const kind = verifyResults.blockKind(this)
-		switch (kind) {
-			case Blocks.Do:
-				assert(opReturnType === null)
-				return new BlockStatement(cat(lead, tLines(this.lines), follow))
-			case Blocks.Throw:
-				return new BlockStatement(
-					cat(lead, tLines(rtail(this.lines)), t0(last(this.lines))))
-			case Blocks.Return:
-				return transpileBlockReturn(
-					t0(last(this.lines)), tLines(rtail(this.lines)), lead, opReturnType)
-			case Blocks.Bag: case Blocks.Map: case Blocks.Obj: {
-				const declare = kind === Blocks.Bag ?
-					DeclareBuiltBag :
-					kind === Blocks.Map ? DeclareBuiltMap : DeclareBuiltObj
-				const body = cat(declare, tLines(this.lines))
-				return transpileBlockReturn(IdBuilt, body, lead, opReturnType)
-			}
-			default:
-				throw new Error(kind)
-		}
-	},
+	Block: transpileBlock,
 
 	BlockWrap() {
 		return blockWrap(t0(this.block))
 	},
 
-	Break() {
-		return ifElse(this.opValue,
-			_ => new ReturnStatement(t0(_)),
-			() => new BreakStatement(verifyResults.isBreakInSwitch(this) ? IdLoop : null))
-	},
+	Break: transpileBreak,
 
 	Call() {
 		return new CallExpression(t0(this.called), this.args.map(t0))
 	},
 
-	Case() {
-		const body = caseBody(this.parts, this.opElse)
-		if (verifyResults.isStatement(this))
-			return ifElse(this.opCased, _ => new BlockStatement([t0(_), body]), () => body)
-		else {
-			const block = ifElse(this.opCased, _ => [t0(_), body], () => [body])
-			return blockWrap(new BlockStatement(block))
-		}
-	},
-
-	CasePart(alternate) {
-		if (this.test instanceof Pattern) {
-			const {type, patterned, locals} = this.test
-			const decl = plainLet(IdExtract,
-				msCall('extract', t0(type), t0(patterned), new Literal(locals.length)))
-			const test = new BinaryExpression('!==', IdExtract, LitNull)
-			const extract = new VariableDeclaration('let', locals.map((_, idx) =>
-				new VariableDeclarator(
-					idForDeclareCached(_),
-					new MemberExpression(IdExtract, new Literal(idx)))))
-			const res = t1(this.result, extract)
-			return new BlockStatement([decl, new IfStatement(test, res, alternate)])
-		} else
-			// alternate written to by `caseBody`.
-			return new IfStatement(t0(this.test), t0(this.result), alternate)
-	},
-
+	Case: transpileCase,
+	CasePart: transpileCasePart,
 	Catch: transpileCatch,
-
 	Class: transpileClass,
 
 	Cond() {
@@ -182,67 +106,10 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	Except: transpileExcept,
-
-	For() {
-		const loop = forLoop(this.opIteratee, this.block)
-		return verifyResults.isStatement(this) ?
-			maybeLabelLoop(this, loop) :
-			// use `return` instead of `break`, so no label needed
-			blockWrap(new BlockStatement([loop]))
-	},
-
-	ForAsync() {
-		const {element, bag} = this.iteratee
-		const func = new FunctionExpression(null, [t0(element)], t0(this.block), true)
-		const call = msCall('$for', t0(bag), func)
-		return verifyResults.isStatement(this) ? new YieldExpression(call) : call
-	},
-
-	ForBag() {
-		const loop = maybeLabelLoop(this, forLoop(this.opIteratee, this.block))
-		return blockWrap(new BlockStatement([DeclareBuiltBag, loop, ReturnBuilt]))
-	},
-
-	// leadStatements comes from constructor members
-	// dontDeclareThis: applies if this is the fun for a Constructor,
-	// which may declare `this` at a `super` call.
-	Fun(leadStatements = null, dontDeclareThis = false) {
-		return withFunKind(this.kind, () => {
-			// TODO:ES6 use `...`f
-			const nArgs = new Literal(this.args.length)
-			const opDeclareRest = opMap(this.opRestArg, rest =>
-				declare(rest, new CallExpression(ArraySliceCall, [IdArguments, nArgs])))
-			const argChecks = opIf(options.includeChecks(), () =>
-				flatOpMap(this.args, opTypeCheckForLocalDeclare))
-
-			const opDeclareThis = opIf(this.opDeclareThis !== null && !dontDeclareThis, () =>
-				DeclareLexicalThis)
-
-			const lead = cat(opDeclareRest, opDeclareThis, argChecks, leadStatements)
-
-			const body = () => t2(this.block, lead, this.opReturnType)
-			const args = this.args.map(t0)
-			const id = opMap(verifyResults.opName(this), identifier)
-
-			switch (this.kind) {
-				case Funs.Plain:
-					// TODO:ES6 Should be able to use rest args in arrow function
-					return id === null && this.opDeclareThis === null && opDeclareRest === null ?
-						new ArrowFunctionExpression(args, body()) :
-						new FunctionExpression(id, args, body())
-				case Funs.Async: {
-					const plainBody = t2(this.block, null, this.opReturnType)
-					const genFunc = new FunctionExpression(null, [], plainBody, true)
-					const ret = new ReturnStatement(msCall('async', genFunc))
-					return new FunctionExpression(id, args, new BlockStatement(cat(lead, ret)))
-				}
-				case Funs.Generator:
-					return new FunctionExpression(id, args, body(), true)
-				default:
-					throw new Error(this.kind)
-			}
-		})
-	},
+	For: transpileFor,
+	ForAsync: transpileForAsync,
+	ForBag: transpileForBag,
+	Fun: transpileFun,
 
 	GetterFun() {
 		// _ => _.foo
@@ -258,17 +125,7 @@ implementMany(MsAstTypes, 'transpile', {
 		return msCall('hasInstance', t0(this.type), t0(this.instance))
 	},
 
-	Kind() {
-		const name = new Literal(verifyResults.name(this))
-		const supers = new ArrayExpression(this.superKinds.map(t0))
-		const methods = _ =>
-			new ObjectExpression(_.map(transpileMethodToProperty))
-		const kind = msCall('kind', name, supers, methods(this.statics), methods(this.methods))
-
-		return ifElse(this.opDo,
-			_ => blockWrap(t3(_.block, plainLet(IdFocus, kind), null, ReturnFocus)),
-			() => kind)
-	},
+	Kind: transpileKind,
 
 	Lazy() {
 		return lazyWrap(t0(this.value))
@@ -338,7 +195,6 @@ implementMany(MsAstTypes, 'transpile', {
 
 	Method() {
 		const name = new Literal(verifyResults.name(this))
-
 		const args = this.fun.opRestArg === null ?
 			new ArrayExpression(this.fun.args.map(arg => {
 				const name = new Literal(arg.name)
@@ -406,35 +262,7 @@ implementMany(MsAstTypes, 'transpile', {
 		return this.pipes.reduce((expr, pipe) => callFocusFun(t0(pipe), expr), t0(this.value))
 	},
 
-	QuotePlain() {
-		if (isEmpty(this.parts))
-			return LitEmptyString
-		else {
-			const quasis = [], expressions = []
-
-			// TemplateLiteral must start with a TemplateElement
-			if (typeof this.parts[0] !== 'string')
-				quasis.push(TemplateElement.empty)
-
-			for (const part of this.parts)
-				if (typeof part === 'string')
-					quasis.push(TemplateElement.forRawString(part))
-				else {
-					// "{1}{1}" needs an empty quasi in the middle (and on the ends).
-					// There are never more than 2 string parts in a row,
-					// so quasis.length === expressions.length or is exactly 1 more.
-					if (quasis.length === expressions.length)
-						quasis.push(TemplateElement.empty)
-					expressions.push(t0(part))
-				}
-
-			// TemplateLiteral must end with a TemplateElement, so one more quasi than expression.
-			if (quasis.length === expressions.length)
-				quasis.push(TemplateElement.empty)
-
-			return new TemplateLiteral(quasis, expressions)
-		}
-	},
+	QuotePlain: transpileQuotePlain,
 
 	QuoteSimple() {
 		return new Literal(this.name)
@@ -473,30 +301,8 @@ implementMany(MsAstTypes, 'transpile', {
 		return focusFun(t0(this.value))
 	},
 
-	SpecialDo() {
-		switch (this.kind) {
-			case SpecialDos.Debugger: return new DebuggerStatement()
-			default: throw new Error(this.kind)
-		}
-	},
-
-	SpecialVal() {
-		// Make new objects because we will assign `loc` to them.
-		switch (this.kind) {
-			case SpecialVals.False:
-				return new Literal(false)
-			case SpecialVals.Name:
-				return new Literal(verifyResults.name(this))
-			case SpecialVals.Null:
-				return new Literal(null)
-			case SpecialVals.True:
-				return new Literal(true)
-			case SpecialVals.Undefined:
-				return new UnaryExpression('void', LitZero)
-			default:
-				throw new Error(this.kind)
-		}
-	},
+	SpecialDo: transpileSpecialDo,
+	SpecialVal: transpileSpecialVal,
 
 	Spread() {
 		return new SpreadElement(t0(this.spreaded))
@@ -523,41 +329,8 @@ implementMany(MsAstTypes, 'transpile', {
 		return memberStringOrVal(IdSuper, this.name)
 	},
 
-	Switch() {
-		const parts = flatMap(this.parts, t0)
-		parts.push(ifElse(this.opElse,
-			_ => new SwitchCase(undefined, t0(_).body),
-			() => SwitchCaseNoMatch))
-		return blockWrapIfVal(this, new SwitchStatement(t0(this.switched), parts))
-	},
-
-	SwitchPart() {
-		const follow = opIf(verifyResults.isStatement(this), () => new BreakStatement)
-		/*
-		We could just pass block.body for the switch lines, but instead
-		enclose the body of the switch case in curly braces to ensure a new scope.
-		That way this code works:
-			switch (0) {
-				case 0: {
-					const a = 0
-					return a
-				}
-				default: {
-					// Without curly braces this would conflict with the other `a`.
-					const a = 1
-					a
-				}
-			}
-		*/
-		const block = t3(this.result, null, null, follow)
-		// If switch has multiple values, build up a statement like: `case 1: case 2: { doBlock() }`
-		const x = []
-		for (let i = 0; i < this.values.length - 1; i = i + 1)
-			// These cases fallthrough to the one at the end.
-			x.push(new SwitchCase(t0(this.values[i]), []))
-		x.push(new SwitchCase(t0(this.values[this.values.length - 1]), [block]))
-		return x
-	},
+	Switch: transpileSwitch,
+	SwitchPart: transpileSwitchPart,
 
 	Throw() {
 		return ifElse(this.opThrown,
@@ -583,32 +356,5 @@ implementMany(MsAstTypes, 'transpile', {
 	}
 })
 
-// Functions specific to certain expressions
-
-function caseBody(parts, opElse) {
-	let acc = ifElse(opElse, t0, () => ThrowNoCaseMatch)
-	for (let i = parts.length - 1; i >= 0; i = i - 1)
-		acc = t1(parts[i], acc)
-	return acc
-}
-
-function forLoop(opIteratee, block) {
-	const jsBlock = t0(block)
-	return ifElse(opIteratee,
-		({element, bag}) =>
-			new ForOfStatement(
-				new VariableDeclaration('let', [new VariableDeclarator(t0(element))]),
-				t0(bag),
-				jsBlock),
-		() => new ForStatement(null, null, null, jsBlock))
-}
-
-function maybeLabelLoop(ast, loop) {
-	return verifyResults.loopNeedsLabel(ast) ? new LabeledStatement(IdLoop, loop) : loop
-}
-
-function transpileBlockReturn(returned, lines, lead, opReturnType) {
-	const ret = new ReturnStatement(
-		maybeWrapInCheckInstance(returned, opReturnType, 'returned value'))
-	return new BlockStatement(cat(lead, lines, ret))
-}
+const GlobalInfinity = new Identifier('Infinity')
+const LitStrThrow = new Literal('An error occurred.')

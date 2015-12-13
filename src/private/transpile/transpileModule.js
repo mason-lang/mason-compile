@@ -8,11 +8,11 @@ import manglePath from '../manglePath'
 import {Import, LocalDeclare} from '../MsAst'
 import {cat, flatMap, isEmpty, last, opIf, opMap, rtail} from '../util'
 import {Modules} from '../VerifyResults'
-import {DeclareBuiltBag, DeclareBuiltMap, ExportsDefault, IdBuilt, IdExports} from './ast-constants'
+import {DeclareBuiltBag, DeclareBuiltMap, IdBuilt, IdExports} from './ast-constants'
 import {verifyResults} from './context'
 import {idForDeclareCached, lazyWrap, makeDestructureDeclarators, msCall, t0, tLines} from './util'
 
-export default function transpileModule() {
+export default function() {
 	const body = moduleBody(verifyResults.moduleKind, this.lines)
 
 	const imports = this.imports.filter(_ => _.path !== 'global')
@@ -157,3 +157,5 @@ const AmdefineHeader = new IfStatement(
 		new VariableDeclarator(IdDefine, new CallExpression(
 			new CallExpression(new Identifier('require'), [new Literal('amdefine')]),
 			[new Identifier('module')]))]))
+
+const ExportsDefault = member(IdExports, 'default')
