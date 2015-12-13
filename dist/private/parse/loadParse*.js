@@ -2,17 +2,17 @@
 
 (function (global, factory) {
 	if (typeof define === "function" && define.amd) {
-		define(['./parseClass', './parseExcept', './parseExpr', './parseSingle', './parseSpaced', './parseSwitch', './parse*'], factory);
+		define(['./parseClass', './parseExcept', './parseExpr', './parseSingle', './parseSpaced', './parseSwitch', './parseTraitDo', './parse*'], factory);
 	} else if (typeof exports !== "undefined") {
-		factory(require('./parseClass'), require('./parseExcept'), require('./parseExpr'), require('./parseSingle'), require('./parseSpaced'), require('./parseSwitch'), require('./parse*'));
+		factory(require('./parseClass'), require('./parseExcept'), require('./parseExpr'), require('./parseSingle'), require('./parseSpaced'), require('./parseSwitch'), require('./parseTraitDo'), require('./parse*'));
 	} else {
 		var mod = {
 			exports: {}
 		};
-		factory(global.parseClass, global.parseExcept, global.parseExpr, global.parseSingle, global.parseSpaced, global.parseSwitch, global.parse);
+		factory(global.parseClass, global.parseExcept, global.parseExpr, global.parseSingle, global.parseSpaced, global.parseSwitch, global.parseTraitDo, global.parse);
 		global.loadParse = mod.exports;
 	}
-})(this, function (_parseClass, _parseExcept, _parseExpr, _parseSingle, _parseSpaced, _parseSwitch, _parse) {
+})(this, function (_parseClass, _parseExcept, _parseExpr, _parseSingle, _parseSpaced, _parseSwitch, _parseTraitDo, _parse) {
 	var _parseClass2 = _interopRequireDefault(_parseClass);
 
 	var _parseExcept2 = _interopRequireDefault(_parseExcept);
@@ -24,6 +24,8 @@
 	var _parseSpaced2 = _interopRequireDefault(_parseSpaced);
 
 	var _parseSwitch2 = _interopRequireDefault(_parseSwitch);
+
+	var _parseTraitDo2 = _interopRequireDefault(_parseTraitDo);
 
 	function _interopRequireDefault(obj) {
 		return obj && obj.__esModule ? obj : {
@@ -37,9 +39,11 @@
 		parseExcept: _parseExcept2.default,
 		parseExpr: _parseExpr2.default,
 		parseExprParts: _parseExpr.parseExprParts,
+		parseNExprParts: _parseExpr.parseNExprParts,
 		parseSingle: _parseSingle2.default,
 		parseSpaced: _parseSpaced2.default,
-		parseSwitch: _parseSwitch2.default
+		parseSwitch: _parseSwitch2.default,
+		parseTraitDo: _parseTraitDo2.default
 	});
 });
 //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJsb2FkUGFyc2UqLmpzIiwic291cmNlc0NvbnRlbnQiOltdfQ==

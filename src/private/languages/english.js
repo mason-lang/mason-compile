@@ -39,6 +39,14 @@ export default {
 
 	// Parse:
 
+	argsCond:
+		`${kw(Keywords.Cond)} takes exactly 3 arguments.`,
+	argsConditional: kind =>
+		`${kw(kind)} with no block takes exactly 2 arguments.`,
+	argsDel:
+		`${kw(Keywords.Del)} takes only one argument.`,
+	argsTraitDo:
+		`${kw(Keywords.TraitDo)} takes 2 arguments: implementor and trait.`,
 	assignNothing:
 		'Assignment to nothing.',
 	asToken:
@@ -47,12 +55,6 @@ export default {
 		'Can\'t make focus — is implicitly provided as first argument.',
 	caseSwitchNeedsParts:
 		`Must have at least 1 non-${kw(Keywords.Else)} test.`,
-	condArguments:
-		`${kw(Keywords.Cond)} takes exactly 3 arguments.`,
-	conditionalArguments: kind =>
-		`${kw(kind)} with no block takes exactly 2 arguments.`,
-	delArgument:
-		`${kw(Keywords.Del)} takes only one argument.`,
 	destructureAllLazy:
 		'All locals of destructuring assignment must all lazy or all non-lazy.',
 	expectedAfterAssert:
@@ -123,6 +125,8 @@ export default {
 	ambiguousForSK:
 		`Can't tell if ${kw(Keywords.For)} is a statement. ` +
 		`Some ${kw(Keywords.Break)}s have a value, others don't.`,
+	argsLogic:
+		'Logic expression needs at least 2 arguments.',
 	badRegExp: source => {
 		try {
 			/* eslint-disable no-new */
@@ -159,8 +163,6 @@ export default {
 		'Module export must have a constant name.',
 	forAsyncNeedsAsync:
 		`${kw(Keywords.ForAsync)} as statement must be inside an async function.`,
-	logicNeedsArgs:
-		'Logic expression needs at least 2 arguments.',
 	misplacedAwait:
 		`Cannot ${kw(Keywords.Await)} outside of async function.`,
 	misplacedBreak:

@@ -1,11 +1,11 @@
-import {Class, ClassTraitDo, Constructor, Field, Fun, LocalDeclares} from '../MsAst'
+import {Class, Constructor, Field, Fun, LocalDeclares} from '../MsAst'
 import {check} from '../context'
 import {isKeyword, Keywords} from '../Token'
 import {ifElse, opIf, opMap} from '../util'
 import {parseExpr, parseExprParts} from './parse*'
-import {beforeAndOpBlock, parseJustBlock} from './parseBlock'
+import {beforeAndOpBlock} from './parseBlock'
 import {funArgsAndBlock} from './parseFun'
-import parseMethodImpls, {parseStatics} from './parseMethodImpls'
+import parseMethodImpls, {opTakeDo, takeStatics} from './parseMethodImpls'
 import {parseLocalParts} from './parseLocalDeclares'
 import tryTakeComment from './tryTakeComment'
 
@@ -13,48 +13,23 @@ import tryTakeComment from './tryTakeComment'
 export default function parseClass(tokens) {
 	const [before, opBlock] = beforeAndOpBlock(tokens)
 	const {opFields, opSuperClass, traits} = parseClassHeader(before)
-
-	let opComment = null, opDo = null, statics = [], opConstructor = null, methods = []
-	const finish = () => new Class(tokens.loc,
+	const [opComment, opDo, statics, opConstructor, methods] = ifElse(opBlock,
+		_ => {
+			const [opComment, rest] = tryTakeComment(opBlock)
+			if (rest.isEmpty())
+				return [opComment, null, [], null, []]
+			const [opDo, rest2] = opTakeDo(rest)
+			if (rest2.isEmpty())
+				return [opComment, opDo, [], null, []]
+			const [statics, rest3] = takeStatics(rest2)
+			if (rest3.isEmpty())
+				return [opComment, opDo, statics, null, []]
+			const [opConstructor, rest4] = opTakeConstructor(rest3)
+			return [opComment, opDo, statics, opConstructor, parseMethodImpls(rest4)]
+		},
+		() => [null, null, [], null, []])
+	return new Class(tokens.loc,
 		opFields, opSuperClass, traits, opComment, opDo, statics, opConstructor, methods)
-
-	if (opBlock === null)
-		return finish()
-
-	const [_opComment, _rest] = tryTakeComment(opBlock)
-	opComment = _opComment
-	let rest = _rest
-
-	if (rest.isEmpty())
-		return finish()
-
-	const line1 = rest.headSlice()
-	if (isKeyword(Keywords.Do, line1.head())) {
-		const done = parseJustBlock(Keywords.Do, line1.tail())
-		opDo = new ClassTraitDo(line1.loc, done)
-		rest = rest.tail()
-	}
-
-	if (rest.isEmpty())
-		return finish()
-
-	const line2 = rest.headSlice()
-	if (isKeyword(Keywords.Static, line2.head())) {
-		statics = parseStatics(line2.tail())
-		rest = rest.tail()
-	}
-
-	if (rest.isEmpty())
-		return finish()
-
-	const line3 = rest.headSlice()
-	if (isKeyword(Keywords.Construct, line3.head())) {
-		opConstructor = parseConstructor(line3.tail())
-		rest = rest.tail()
-	}
-	methods = parseMethodImpls(rest)
-
-	return finish()
 }
 
 function parseClassHeader(tokens) {
@@ -69,6 +44,13 @@ function parseClassHeader(tokens) {
 		opSuperClass: opMap(extendsTokens, parseExpr),
 		traits: ifElse(traitTokens, parseExprParts, () => [])
 	}
+}
+
+function opTakeConstructor(tokens) {
+	const line = tokens.headSlice()
+	return isKeyword(Keywords.Construct, line.head()) ?
+		[parseConstructor(line.tail()), tokens.tail()] :
+		[null, tokens]
 }
 
 function parseConstructor(tokens) {

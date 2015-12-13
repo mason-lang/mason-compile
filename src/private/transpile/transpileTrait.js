@@ -14,6 +14,11 @@ export default function() {
 		() => trait)
 }
 
+export function transpileTraitDo() {
+	return msCall('traitWithDefs',
+		t0(this.implementor), t0(this.trait), methods(this.statics), methods(this.methods))
+}
+
 function methods(_) {
 	return new ObjectExpression(_.map(transpileMethodToProperty))
 }

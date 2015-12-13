@@ -20,7 +20,7 @@ import transpileModule, {exportNamedOrDefault} from './transpileModule'
 import transpileQuotePlain from './transpileQuotePlain'
 import {transpileSpecialDo, transpileSpecialVal} from './transpileSpecial'
 import transpileSwitch, {transpileSwitchPart} from './transpileSwitch'
-import transpileTrait from './transpileTrait'
+import transpileTrait, {transpileTraitDo} from './transpileTrait'
 import {accessLocalDeclare, blockWrap, blockWrapIfBlock, callFocusFun, doThrow, focusFun,
 	idForDeclareCached, lazyWrap, makeDeclarator, makeDestructureDeclarators,
 	maybeWrapInCheckInstance, memberStringOrVal, msCall, msMember, plainLet, t0, t1, t3,
@@ -337,6 +337,7 @@ implementMany(MsAstTypes, 'transpile', {
 	},
 
 	Trait: transpileTrait,
+	TraitDo: transpileTraitDo,
 
 	With() {
 		const idDeclare = idForDeclareCached(this.declare)

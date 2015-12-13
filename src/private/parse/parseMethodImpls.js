@@ -1,7 +1,7 @@
-import {MethodImpl, MethodGetter, MethodSetter, QuoteSimple} from '../MsAst'
+import {ClassTraitDo, MethodImpl, MethodGetter, MethodSetter, QuoteSimple} from '../MsAst'
 import {isKeyword, Keywords} from '../Token'
 import {parseExpr} from './parse*'
-import parseBlock, {beforeAndBlock, justBlock} from './parseBlock'
+import parseBlock, {beforeAndBlock, justBlock, parseJustBlock} from './parseBlock'
 import parseFun from './parseFun'
 import parseMethodSplit from './parseMethodSplit'
 
@@ -9,8 +9,24 @@ export default function parseMethodImpls(tokens) {
 	return tokens.mapSlices(parseMethodImpl)
 }
 
-export function parseStatics(tokens) {
-	return parseMethodImpls(justBlock(Keywords.Static, tokens))
+export function takeStatics(tokens) {
+	const line = tokens.headSlice()
+	return isKeyword(Keywords.Static, line.head()) ?
+		[parseMethodImpls(justBlock(Keywords.Static, line.tail())), tokens.tail()] :
+		[[], tokens]
+}
+
+export function parseStaticsAndMethods(tokens) {
+	const [statics, rest] = takeStatics(tokens)
+	return [statics, parseMethodImpls(rest)]
+}
+
+/** Take a {@link ClassTraitDo}. */
+export function opTakeDo(tokens) {
+	const line = tokens.headSlice()
+	return isKeyword(Keywords.Do, line.head()) ?
+		[new ClassTraitDo(line.loc, parseJustBlock(Keywords.Do, line.tail())), tokens.tail()] :
+		[null, tokens]
 }
 
 function parseMethodImpl(tokens) {

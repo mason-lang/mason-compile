@@ -538,6 +538,7 @@ export default class MsAst {
 	}
 
 // Class
+	/** `trait`: create a new trait. */
 	export class Trait extends Val {
 		constructor(loc, superTraits, opComment = null, opDo = null, statics = [], methods = []) {
 			super(loc)
@@ -547,6 +548,21 @@ export default class MsAst {
 			this.opComment = opComment
 			/** @type {?ClassTraitDo} */
 			this.opDo = opDo
+			/** @type {Array<MethodImplLike>} */
+			this.statics = statics
+			/** @type {Array<MethodImplLike>} */
+			this.methods = methods
+		}
+	}
+
+	/** `trait!`: implement a trait for an existing type. */
+	export class TraitDo extends Do {
+		constructor(loc, implementor, trait, statics = [], methods = []) {
+			super(loc)
+			/** @type {Val} */
+			this.implementor = implementor
+			/** @type {Val} */
+			this.trait = trait
 			/** @type {Array<MethodImplLike>} */
 			this.statics = statics
 			/** @type {Array<MethodImplLike>} */

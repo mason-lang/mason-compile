@@ -308,6 +308,7 @@ export const Keywords = {
 	Throw: kw('throw'),
 	Todo: kw('todo'),
 	Trait: kw('trait'),
+	TraitDo: kw('trait!'),
 	True: kw('true'),
 	Try: kw('try'),
 	Undefined: kw('undefined'),

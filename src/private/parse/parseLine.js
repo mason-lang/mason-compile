@@ -10,7 +10,7 @@ import parseLocalDeclares, {parseLocalDeclaresJustNames, parseLocalName} from '.
 import parseMemberName from './parseMemberName'
 import parseName from './parseName'
 import parseQuote from './parseQuote'
-import {opParseExpr, parseExpr, parseExprParts, parseSpaced} from './parse*'
+import {opParseExpr, parseExpr, parseExprParts, parseSpaced, parseTraitDo} from './parse*'
 import Slice from './Slice'
 
 /** Parse the content of a line. */
@@ -45,6 +45,8 @@ export default function parseLine(tokens) {
 				return parseLines(justBlock(Keywords.Region, rest()))
 			case Keywords.Throw:
 				return new Throw(loc, opParseExpr(rest()))
+			case Keywords.TraitDo:
+				return parseTraitDo(rest())
 			default:
 				// fall through
 		}

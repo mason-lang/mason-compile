@@ -6,7 +6,7 @@ import {parseExprParts, parseSpaced} from './parse*'
 import Slice from './Slice'
 
 export default function parseDel(tokens) {
-	check(tokens.size() === 1, tokens.loc, 'delArgument')
+	check(tokens.size() === 1, tokens.loc, 'argsDel')
 	const spaced = tokens.head()
 	if (!isGroup(Groups.Space, spaced))
 		unexpected(spaced)

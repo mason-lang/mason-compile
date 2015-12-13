@@ -353,7 +353,7 @@ implementMany(MsAstTypes, 'verify', {
 
 	Logic(sk) {
 		checkVal(this, sk)
-		check(this.args.length > 1, this.loc, 'logicNeedsArgs')
+		check(this.args.length > 1, this.loc, 'argsLogic')
 		verifyEach(this.args, SK.Val)
 	},
 
@@ -605,6 +605,16 @@ implementMany(MsAstTypes, 'verify', {
 			verifyEach(this.methods)
 		})
 		// name set by AssignSingle
+	},
+
+	TraitDo(sk) {
+		checkDo(this, sk)
+		this.implementor.verify(SK.Val)
+		this.trait.verify(SK.Val)
+		withMethods(() => {
+			verifyEach(this.statics)
+			verifyEach(this.methods)
+		})
 	},
 
 	With(sk) {

@@ -75,6 +75,13 @@ export function parseExprParts(tokens) {
 		})
 }
 
+/** Parse exactly `n` Vals, or fail with `errorCode`. */
+export function parseNExprParts(tokens, n, errorCode) {
+	const parts = parseExprParts(tokens)
+	check(parts.length === n, tokens.loc, errorCode)
+	return parts
+}
+
 /** The keyword `at` groups with everything after it. */
 function keywordExpr(at, after) {
 	switch (at.kind) {
@@ -165,28 +172,20 @@ function parseExprPlain(tokens) {
 }
 
 function parseCond(tokens) {
-	const parts = parseExprParts(tokens)
-	check(parts.length === 3, tokens.loc, () => 'condArguments')
-	return new Cond(tokens.loc, ...parts)
+	return new Cond(tokens.loc, ...parseNExprParts(tokens, 3, 'argsCond'))
 }
 
 function parseConditional(kind, tokens) {
 	const [before, opBlock] = beforeAndOpBlock(tokens)
 	const [condition, result] = ifElse(opBlock,
 		_ => [parseExprPlain(before), parseBlock(_)],
-		() => {
-			const parts = parseExprParts(before)
-			check(parts.length === 2, tokens.loc, 'conditionalArguments')
-			return parts
-		})
+		() => parseNExprParts(before, 2, 'argsConditional'))
 	return new Conditional(tokens.loc, condition, result, kind === Keywords.Unless)
 }
 
 function parsePipe(tokens) {
 	const [before, block] = beforeAndBlock(tokens)
-	const val = parseExpr(before)
-	const pipes = block.mapSlices(parseExpr)
-	return new Pipe(tokens.loc, val, pipes)
+	return new Pipe(tokens.loc, parseExpr(before), block.mapSlices(parseExpr))
 }
 
 function parseWith(tokens) {

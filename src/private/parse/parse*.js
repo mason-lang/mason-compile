@@ -5,9 +5,11 @@ export let parseClass
 export let parseExcept
 export let parseExpr
 export let parseExprParts
+export let parseNExprParts
 export let parseSingle
 export let parseSpaced
 export let parseSwitch
+export let parseTraitDo
 
 export function load(_) {
 	opParseExpr = _.opParseExpr
@@ -15,7 +17,9 @@ export function load(_) {
 	parseExcept = _.parseExcept
 	parseExpr = _.parseExpr
 	parseExprParts = _.parseExprParts
+	parseNExprParts = _.parseNExprParts
 	parseSingle = _.parseSingle
 	parseSpaced = _.parseSpaced
 	parseSwitch = _.parseSwitch
+	parseTraitDo = _.parseTraitDo
 }
