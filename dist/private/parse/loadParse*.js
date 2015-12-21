@@ -1,49 +1,23 @@
-'use strict';
+(function (factory) {
+    if (typeof module === 'object' && typeof module.exports === 'object') {
+        var v = factory(require, exports);if (v !== undefined) module.exports = v;
+    } else if (typeof define === 'function' && define.amd) {
+        define(["require", "exports", './parseClass', './parseExcept', './parseExpr', './parseSingle', './parseSpaced', './parseSwitch', './parseTraitDo', './parse*'], factory);
+    }
+})(function (require, exports) {
+    "use strict";
 
-(function (global, factory) {
-	if (typeof define === "function" && define.amd) {
-		define(['./parseClass', './parseExcept', './parseExpr', './parseSingle', './parseSpaced', './parseSwitch', './parseTraitDo', './parse*'], factory);
-	} else if (typeof exports !== "undefined") {
-		factory(require('./parseClass'), require('./parseExcept'), require('./parseExpr'), require('./parseSingle'), require('./parseSpaced'), require('./parseSwitch'), require('./parseTraitDo'), require('./parse*'));
-	} else {
-		var mod = {
-			exports: {}
-		};
-		factory(global.parseClass, global.parseExcept, global.parseExpr, global.parseSingle, global.parseSpaced, global.parseSwitch, global.parseTraitDo, global.parse);
-		global.loadParse = mod.exports;
-	}
-})(this, function (_parseClass, _parseExcept, _parseExpr, _parseSingle, _parseSpaced, _parseSwitch, _parseTraitDo, _parse) {
-	var _parseClass2 = _interopRequireDefault(_parseClass);
-
-	var _parseExcept2 = _interopRequireDefault(_parseExcept);
-
-	var _parseExpr2 = _interopRequireDefault(_parseExpr);
-
-	var _parseSingle2 = _interopRequireDefault(_parseSingle);
-
-	var _parseSpaced2 = _interopRequireDefault(_parseSpaced);
-
-	var _parseSwitch2 = _interopRequireDefault(_parseSwitch);
-
-	var _parseTraitDo2 = _interopRequireDefault(_parseTraitDo);
-
-	function _interopRequireDefault(obj) {
-		return obj && obj.__esModule ? obj : {
-			default: obj
-		};
-	}
-
-	(0, _parse.load)({
-		opParseExpr: _parseExpr.opParseExpr,
-		parseClass: _parseClass2.default,
-		parseExcept: _parseExcept2.default,
-		parseExpr: _parseExpr2.default,
-		parseExprParts: _parseExpr.parseExprParts,
-		parseNExprParts: _parseExpr.parseNExprParts,
-		parseSingle: _parseSingle2.default,
-		parseSpaced: _parseSpaced2.default,
-		parseSwitch: _parseSwitch2.default,
-		parseTraitDo: _parseTraitDo2.default
-	});
+    var parseClass_1 = require('./parseClass');
+    var parseExcept_1 = require('./parseExcept');
+    var parseExpr_1 = require('./parseExpr');
+    var parseSingle_1 = require('./parseSingle');
+    var parseSpaced_1 = require('./parseSpaced');
+    var parseSwitch_1 = require('./parseSwitch');
+    var parseTraitDo_1 = require('./parseTraitDo');
+    var parse_1 = require('./parse*');
+    parse_1.load({
+        opParseExpr: parseExpr_1.opParseExpr, parseClass: parseClass_1.default, parseExcept: parseExcept_1.default, parseExpr: parseExpr_1.default, parseExprParts: parseExpr_1.parseExprParts, parseNExprParts: parseExpr_1.parseNExprParts, parseSingle: parseSingle_1.default,
+        parseSpaced: parseSpaced_1.default, parseSwitch: parseSwitch_1.default, parseTraitDo: parseTraitDo_1.default
+    });
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJsb2FkUGFyc2UqLmpzIiwic291cmNlc0NvbnRlbnQiOltdfQ==
+//# sourceMappingURL=loadParse*.js.map

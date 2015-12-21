@@ -1,0 +1,17 @@
+import Loc, { Pos } from 'esast/lib/Loc';
+import Token, { Group, GroupType } from '../Token';
+export declare let curGroup: Group<Token>;
+export declare function setupGroupContext(): void;
+export declare function tearDownGroupContext(endPos: Pos): Group<Token>;
+export declare function addToCurrentGroup(token: Token): void;
+export declare function openGroup(openPos: Pos, groupType: GroupType): void;
+export declare function maybeCloseGroup(closePos: Pos, closeType: GroupType): void;
+export declare function closeGroup(closePos: Pos, closeType: GroupType): void;
+export declare function closeSpaceOKIfEmpty(pos: Pos): void;
+export declare function openParenthesis(loc: Loc): void;
+export declare function openInterpolation(loc: Loc): void;
+export declare function closeInterpolationOrParenthesis(loc: Loc): boolean;
+export declare function closeGroupsForDedent(pos: Pos): void;
+export declare function openLine(pos: Pos): void;
+export declare function closeLine(pos: Pos): void;
+export declare function space(loc: Loc): void;

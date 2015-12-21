@@ -1,0 +1,12 @@
+import Loc, { Pos } from 'esast/lib/Loc';
+import CompileError from '../CompileError';
+import { WarningsAnd } from '../Compiler';
+import Language from './languages/Language';
+import CompileOptions from './CompileOptions';
+import PathOptions from './PathOptions';
+export declare let options: CompileOptions;
+export declare let pathOptions: PathOptions;
+export declare function withContext<A>(_options: CompileOptions, filename: string, getResult: () => A): WarningsAnd<A>;
+export declare function check(cond: boolean, loc: Pos | Loc | (() => Pos | Loc), message: (_: Language) => string): void;
+export declare function fail(loc: Pos | Loc, message: (_: Language) => string): CompileError;
+export declare function warn(loc: Loc | Pos, message: (_: Language) => string): void;

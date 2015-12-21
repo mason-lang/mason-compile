@@ -2,44 +2,42 @@
 	"name": "mason-compile",
 	"version": "0.0.0",
 	"files": ["dist", "src"],
-	"license": "WTFPL",
+	"license": "Unlicense",
 	"repository": "mason-lang/mason-compile",
+	"typings": "lib",
 	"scripts": {
-		"build": "babel src --out-dir dist --source-maps inline",
-		"watch": "babel src --out-dir dist --source-maps inline --watch",
-		"doc": "esdoc -c esdoc.json",
-		"lint": "eslint src test",
-		"compile-test": "babel test --out-dir compiled-test --source-maps inline",
-		"watch-compile-test": "babel test --out-dir compiled-test --source-maps inline --watch",
-		"test": "npm run compile-test && mocha compiled-test/*.js compiled-test/*/*.js",
-		"test-compile": "npm run compile-test && node compiled-test/test-compile",
-		"perf-test-compile": "npm run compile-test && node compiled-test/test-compile perf"
+		"build": "gulp build-src",
+		"watch": "gulp watch-src",
+		"build-test": "gulp build-test",
+		"watch-test": "gulp watch-test",
+		"test": "mocha compiled-test/*.js compiled-test/*/*.js",
+		"test-compile": "npm run build-test && node compiled-test/test-compile",
+		"perf-test-compile": "npm run build-test && node compiled-test/test-compile perf",
+		"TODO-lint": "tslint src/*.ts src/*/*.ts src/*/*/*.ts",
+		"TODO-doc": "typedoc src --out doc",
+		"TODO-all": "npm run build && npm run build-test && npm run test && npm run lint && npm run doc"
 	},
 	"dependencies": {
-		"esast": "mason-lang/esast"
+		"esast": "esast/esast",
+		"esast-create-util": "esast/esast-create-util",
+		"esast-render-fast": "esast/esast-render-fast",
+		"op": "esast/op"
 	},
 	"devDependencies": {
-		"babel-cli": "6.3.13",
-		"babel-plugin-transform-es2015-destructuring": "6.3.13",
-		"babel-plugin-transform-es2015-modules-umd": "6.3.13",
-		"babel-plugin-transform-es2015-parameters": "6.3.13",
-		"babel-plugin-transform-strict-mode": "6.3.13",
-		"benchmark": "1.0.0",
-			"microtime": "2.0.0",
-		"esdoc": "0.4.3",
-		"eslint": "1.10.3",
-		"eslint-config-mason": "mason-lang/eslint-config-mason",
+		"babel-plugin-transform-es2015-destructuring": "6.3.15",
+		"babel-plugin-transform-es2015-parameters": "6.3.26",
+		"gulp": "3.9.0",
+		"gulp-babel": "6.1.1",
+		"gulp-sourcemaps": "1.6.0",
+		"gulp-typescript": "2.10.0",
+		"merge2": "0.3.6",
 		"mocha": "2.3.4",
-		"numeral": "1.5.3",
+		"tslint": "3.2.1",
+		"typedoc": "0.3.12",
+		"typescript": "1.8.0-dev.20151231",
+
+		"benchmark": "1.0.0",
+		"microtime": "2.0.0",
 		"source-map-support": "0.4.0"
-	},
-	"babel": {
-		"plugins": [
-			"transform-es2015-destructuring",
-			"transform-es2015-modules-umd",
-			"transform-es2015-parameters",
-			"transform-strict-mode"
-		]
-	},
-	"eslintConfig": {"extends": "eslint-config-mason"}
+	}
 }

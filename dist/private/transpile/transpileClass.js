@@ -1,57 +1,51 @@
-'use strict';
+(function (factory) {
+    if (typeof module === 'object' && typeof module.exports === 'object') {
+        var v = factory(require, exports);if (v !== undefined) module.exports = v;
+    } else if (typeof define === 'function' && define.amd) {
+        define(["require", "exports", 'esast/lib/ast', 'esast-create-util/lib/util', 'op/Op', '../util', './ast-constants', './context', './transpileMethod', './util'], factory);
+    }
+})(function (require, exports) {
+    "use strict";
 
-(function (global, factory) {
-	if (typeof define === "function" && define.amd) {
-		define(['exports', 'esast/dist/ast', 'esast/dist/util', '../util', './ast-constants', './context', './transpileMethod', './util'], factory);
-	} else if (typeof exports !== "undefined") {
-		factory(exports, require('esast/dist/ast'), require('esast/dist/util'), require('../util'), require('./ast-constants'), require('./context'), require('./transpileMethod'), require('./util'));
-	} else {
-		var mod = {
-			exports: {}
-		};
-		factory(mod.exports, global.ast, global.util, global.util, global.astConstants, global.context, global.transpileMethod, global.util);
-		global.transpileClass = mod.exports;
-	}
-})(this, function (exports, _ast, _util, _util2, _astConstants, _context, _transpileMethod, _util3) {
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.default = transpileClass;
-	exports.transpileConstructor = transpileConstructor;
-	exports.constructorSetMembers = constructorSetMembers;
-
-	function transpileClass() {
-		const opName = (0, _util2.opMap)(_context.verifyResults.opName(this), _util.identifier);
-		const methods = (0, _util2.cat)(this.statics.map(_ => (0, _transpileMethod.transpileMethodToDefinition)(_, true)), (0, _util2.ifElse)(this.opConstructor, _util3.t0, () => (0, _util2.opMap)(this.opFields, _ => defaultConstructor(_, this.opSuperClass !== null))), this.methods.map(_ => (0, _transpileMethod.transpileMethodToDefinition)(_, false)));
-		const classExpr = new _ast.ClassExpression(opName, (0, _util2.opMap)(this.opSuperClass, _util3.t0), new _ast.ClassBody(methods));
-		if (this.opDo === null && !this.isRecord && (0, _util2.isEmpty)(this.traits)) return classExpr;else {
-			const lead = (0, _util2.cat)((0, _util3.plainLet)(_astConstants.IdFocus, classExpr), (0, _util2.opMap)(this.opFields, beRecord), this.traits.map(_ => (0, _util3.msCall)('traitDo', _astConstants.IdFocus, (0, _util3.t0)(_))));
-			const block = (0, _util2.ifElse)(this.opDo, _ => (0, _util3.t3)(_.block, lead, null, _astConstants.ReturnFocus), () => new _ast.BlockStatement((0, _util2.cat)(lead, _astConstants.ReturnFocus)));
-			return (0, _util3.blockWrap)(block);
-		}
-	}
-
-	function transpileConstructor() {
-		return _ast.MethodDefinition.constructor(_context.verifyResults.constructorHasSuper(this) ? (0, _util3.t2)(this.fun, _astConstants.LetLexicalThis, true) : (0, _util3.t1)(this.fun, constructorSetMembers(this)));
-	}
-
-	function constructorSetMembers(constructor) {
-		return constructor.memberArgs.map(_ => (0, _util3.msCall)('newProperty', _astConstants.This, new _ast.Literal(_.name), (0, _util3.idForDeclareCached)(_)));
-	}
-
-	function beRecord(fields) {
-		const fieldNames = new _ast.ArrayExpression(fields.map(_ => new _ast.Literal(_.name)));
-		return (0, _util3.msCall)('beRecord', _astConstants.IdFocus, fieldNames);
-	}
-
-	function defaultConstructor(fields, classHasSuper) {
-		const args = fields.map(_ => (0, _util.identifier)(_.name));
-		const opSuper = (0, _util2.opIf)(classHasSuper, () => new _ast.CallExpression(_astConstants.IdSuper, []));
-		const fieldSetters = fields.map((_, i) => new _ast.AssignmentExpression('=', (0, _util.member)(_astConstants.This, _.name), (0, _util3.maybeWrapInCheckInstance)(args[i], _.opType, _.name)));
-		const body = new _ast.BlockStatement((0, _util2.cat)(opSuper, fieldSetters, FreezeThis));
-		return _ast.MethodDefinition.constructor(new _ast.FunctionExpression(null, args, body));
-	}
-
-	const FreezeThis = new _ast.ExpressionStatement(new _ast.CallExpression(new _ast.MemberExpression(new _ast.Identifier('Object'), new _ast.Identifier('freeze')), [_astConstants.This]));
+    var ast_1 = require('esast/lib/ast');
+    var util_1 = require('esast-create-util/lib/util');
+    var Op_1 = require('op/Op');
+    var util_2 = require('../util');
+    var ast_constants_1 = require('./ast-constants');
+    var context_1 = require('./context');
+    var transpileMethod_1 = require('./transpileMethod');
+    var util_3 = require('./util');
+    function transpileClass() {
+        const opName = Op_1.opMap(context_1.verifyResults.opName(this), util_1.identifier);
+        const methods = util_2.cat(this.statics.map(_ => transpileMethod_1.transpileMethodToDefinition(_, true)), Op_1.caseOp(this.opConstructor, util_3.t0, () => Op_1.opMap(this.opFields, _ => defaultConstructor(_, this.opSuperClass !== null))), this.methods.map(_ => transpileMethod_1.transpileMethodToDefinition(_, false)));
+        const classExpr = new ast_1.ClassExpression(opName, Op_1.opMap(this.opSuperClass, util_3.t0), new ast_1.ClassBody(methods));
+        if (this.opDo === null && !this.isRecord && util_2.isEmpty(this.traits)) return classExpr;else {
+            const lead = util_2.cat(util_3.plainLet(ast_constants_1.IdFocus, classExpr), Op_1.opMap(this.opFields, beRecord), this.traits.map(_ => util_3.msCall('traitDo', ast_constants_1.IdFocus, util_3.t0(_))));
+            const block = Op_1.caseOp(this.opDo, _ => util_3.t3(_.block, lead, null, ast_constants_1.ReturnFocus), () => new ast_1.BlockStatement(util_2.cat(lead, ast_constants_1.ReturnFocus)));
+            return util_3.blockWrap(block);
+        }
+    }
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.default = transpileClass;
+    function transpileConstructor() {
+        return new ast_1.MethodDefinitionConstructor(context_1.verifyResults.constructorHasSuper(this) ? util_3.t2(this.fun, ast_constants_1.LetLexicalThis, true) : util_3.t1(this.fun, constructorSetMembers(this)));
+    }
+    exports.transpileConstructor = transpileConstructor;
+    function constructorSetMembers(constructor) {
+        return constructor.memberArgs.map(_ => util_3.msCall('newProperty', ast_constants_1.This, new ast_1.LiteralString(_.name), util_3.idForDeclareCached(_)));
+    }
+    exports.constructorSetMembers = constructorSetMembers;
+    function beRecord(fields) {
+        const fieldNames = new ast_1.ArrayExpression(fields.map(_ => new ast_1.LiteralString(_.name)));
+        return util_3.msCall('beRecord', ast_constants_1.IdFocus, fieldNames);
+    }
+    function defaultConstructor(fields, classHasSuper) {
+        const args = fields.map(_ => util_1.identifier(_.name));
+        const opSuper = Op_1.opIf(classHasSuper, () => new ast_1.ExpressionStatement(new ast_1.CallExpression(ast_constants_1.IdSuper, [])));
+        const fieldSetters = fields.map((_, i) => new ast_1.ExpressionStatement(new ast_1.AssignmentExpression('=', util_1.member(ast_constants_1.This, _.name), util_3.maybeWrapInCheckInstance(args[i], _.opType, _.name))));
+        const body = new ast_1.BlockStatement(util_2.cat(opSuper, fieldSetters, FreezeThis));
+        return new ast_1.MethodDefinitionConstructor(new ast_1.FunctionExpression(null, args, body));
+    }
+    const FreezeThis = new ast_1.ExpressionStatement(new ast_1.CallExpression(new ast_1.MemberExpressionPlain(new ast_1.Identifier('Object'), new ast_1.Identifier('freeze')), [ast_constants_1.This]));
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9wcml2YXRlL3RyYW5zcGlsZS90cmFuc3BpbGVDbGFzcy5qcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7bUJBV3dCLGNBQWM7U0EyQnRCLG9CQUFvQixHQUFwQixvQkFBb0I7U0FTcEIscUJBQXFCLEdBQXJCLHFCQUFxQjs7VUFwQ2IsY0FBYzs7Ozs7Ozs7Ozs7VUEyQnRCLG9CQUFvQjs7OztVQVNwQixxQkFBcUIiLCJmaWxlIjoidHJhbnNwaWxlQ2xhc3MuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQge0FycmF5RXhwcmVzc2lvbiwgQXNzaWdubWVudEV4cHJlc3Npb24sIEJsb2NrU3RhdGVtZW50LCBDYWxsRXhwcmVzc2lvbiwgQ2xhc3NCb2R5LFxuXHRDbGFzc0V4cHJlc3Npb24sIEV4cHJlc3Npb25TdGF0ZW1lbnQsIEZ1bmN0aW9uRXhwcmVzc2lvbiwgSWRlbnRpZmllciwgTGl0ZXJhbCwgTWVtYmVyRXhwcmVzc2lvbixcblx0TWV0aG9kRGVmaW5pdGlvbn0gZnJvbSAnZXNhc3QvZGlzdC9hc3QnXG5pbXBvcnQge2lkZW50aWZpZXIsIG1lbWJlcn0gZnJvbSAnZXNhc3QvZGlzdC91dGlsJ1xuaW1wb3J0IHtjYXQsIGlmRWxzZSwgaXNFbXB0eSwgb3BJZiwgb3BNYXB9IGZyb20gJy4uL3V0aWwnXG5pbXBvcnQge0lkRm9jdXMsIElkU3VwZXIsIExldExleGljYWxUaGlzLCBSZXR1cm5Gb2N1cywgVGhpc30gZnJvbSAnLi9hc3QtY29uc3RhbnRzJ1xuaW1wb3J0IHt2ZXJpZnlSZXN1bHRzfSBmcm9tICcuL2NvbnRleHQnXG5pbXBvcnQge3RyYW5zcGlsZU1ldGhvZFRvRGVmaW5pdGlvbn0gZnJvbSAnLi90cmFuc3BpbGVNZXRob2QnXG5pbXBvcnQge2Jsb2NrV3JhcCwgaWRGb3JEZWNsYXJlQ2FjaGVkLCBtYXliZVdyYXBJbkNoZWNrSW5zdGFuY2UsIG1zQ2FsbCwgcGxhaW5MZXQsIHQwLCB0MSwgdDIsIHQzXG5cdH0gZnJvbSAnLi91dGlsJ1xuXG5leHBvcnQgZGVmYXVsdCBmdW5jdGlvbiB0cmFuc3BpbGVDbGFzcygpIHtcblx0Y29uc3Qgb3BOYW1lID0gb3BNYXAodmVyaWZ5UmVzdWx0cy5vcE5hbWUodGhpcyksIGlkZW50aWZpZXIpXG5cblx0Y29uc3QgbWV0aG9kcyA9IGNhdChcblx0XHR0aGlzLnN0YXRpY3MubWFwKF8gPT4gdHJhbnNwaWxlTWV0aG9kVG9EZWZpbml0aW9uKF8sIHRydWUpKSxcblx0XHRpZkVsc2UodGhpcy5vcENvbnN0cnVjdG9yLCB0MCxcblx0XHRcdCgpID0+IG9wTWFwKHRoaXMub3BGaWVsZHMsIF8gPT5cblx0XHRcdFx0ZGVmYXVsdENvbnN0cnVjdG9yKF8sIHRoaXMub3BTdXBlckNsYXNzICE9PSBudWxsKSkpLFxuXHRcdHRoaXMubWV0aG9kcy5tYXAoXyA9PiB0cmFuc3BpbGVNZXRob2RUb0RlZmluaXRpb24oXywgZmFsc2UpKSlcblxuXHRjb25zdCBjbGFzc0V4cHIgPSBuZXcgQ2xhc3NFeHByZXNzaW9uKG9wTmFtZSxcblx0XHRvcE1hcCh0aGlzLm9wU3VwZXJDbGFzcywgdDApLCBuZXcgQ2xhc3NCb2R5KG1ldGhvZHMpKVxuXG5cdGlmICh0aGlzLm9wRG8gPT09IG51bGwgJiYgIXRoaXMuaXNSZWNvcmQgJiYgaXNFbXB0eSh0aGlzLnRyYWl0cykpXG5cdFx0cmV0dXJuIGNsYXNzRXhwclxuXHRlbHNlIHtcblx0XHRjb25zdCBsZWFkID0gY2F0KFxuXHRcdFx0cGxhaW5MZXQoSWRGb2N1cywgY2xhc3NFeHByKSxcblx0XHRcdG9wTWFwKHRoaXMub3BGaWVsZHMsIGJlUmVjb3JkKSxcblx0XHRcdHRoaXMudHJhaXRzLm1hcChfID0+IG1zQ2FsbCgndHJhaXREbycsIElkRm9jdXMsIHQwKF8pKSkpXG5cdFx0Y29uc3QgYmxvY2sgPSBpZkVsc2UodGhpcy5vcERvLFxuXHRcdFx0XyA9PiB0MyhfLmJsb2NrLCBsZWFkLCBudWxsLCBSZXR1cm5Gb2N1cyksXG5cdFx0XHQoKSA9PiBuZXcgQmxvY2tTdGF0ZW1lbnQoY2F0KGxlYWQsIFJldHVybkZvY3VzKSkpXG5cdFx0cmV0dXJuIGJsb2NrV3JhcChibG9jaylcblx0fVxufVxuXG5leHBvcnQgZnVuY3Rpb24gdHJhbnNwaWxlQ29uc3RydWN0b3IoKSB7XG5cdC8vIElmIHRoZXJlIGlzIGEgYHN1cGVyYCwgYHRoaXNgIHdpbGwgbm90IGJlIGRlZmluZWQgdW50aWwgdGhlbixcblx0Ly8gc28gbXVzdCB3YWl0IHVudGlsIHRoZW4uXG5cdC8vIE90aGVyd2lzZSwgZG8gaXQgYXQgdGhlIGJlZ2lubmluZy5cblx0cmV0dXJuIE1ldGhvZERlZmluaXRpb24uY29uc3RydWN0b3IodmVyaWZ5UmVzdWx0cy5jb25zdHJ1Y3Rvckhhc1N1cGVyKHRoaXMpID9cblx0XHR0Mih0aGlzLmZ1biwgTGV0TGV4aWNhbFRoaXMsIHRydWUpIDpcblx0XHR0MSh0aGlzLmZ1biwgY29uc3RydWN0b3JTZXRNZW1iZXJzKHRoaXMpKSlcbn1cblxuZXhwb3J0IGZ1bmN0aW9uIGNvbnN0cnVjdG9yU2V0TWVtYmVycyhjb25zdHJ1Y3Rvcikge1xuXHRyZXR1cm4gY29uc3RydWN0b3IubWVtYmVyQXJncy5tYXAoXyA9PlxuXHRcdG1zQ2FsbCgnbmV3UHJvcGVydHknLCBUaGlzLCBuZXcgTGl0ZXJhbChfLm5hbWUpLCBpZEZvckRlY2xhcmVDYWNoZWQoXykpKVxufVxuXG5mdW5jdGlvbiBiZVJlY29yZChmaWVsZHMpIHtcblx0Y29uc3QgZmllbGROYW1lcyA9IG5ldyBBcnJheUV4cHJlc3Npb24oZmllbGRzLm1hcChfID0+IG5ldyBMaXRlcmFsKF8ubmFtZSkpKVxuXHRyZXR1cm4gbXNDYWxsKCdiZVJlY29yZCcsIElkRm9jdXMsIGZpZWxkTmFtZXMpXG59XG5cbi8qXG5lLmcuIGZvciBgY2xhc3MgeDpOdW0geTpOdW1gOlxuY29uc3RydWN0b3IoeCwgeSkge1xuXHR0aGlzLnggPSBfbXMuY2hlY2tJbnN0YW5jZShOdW0sIHgpXG5cdHRoaXMueSA9IF9tcy5jaGVja0luc3RhbmNlKE51bSwgeSlcblx0T2JqZWN0LmZyZWV6ZSh0aGlzKVxufVxuKi9cbmZ1bmN0aW9uIGRlZmF1bHRDb25zdHJ1Y3RvcihmaWVsZHMsIGNsYXNzSGFzU3VwZXIpIHtcblx0Y29uc3QgYXJncyA9IGZpZWxkcy5tYXAoXyA9PiBpZGVudGlmaWVyKF8ubmFtZSkpXG5cdGNvbnN0IG9wU3VwZXIgPSBvcElmKGNsYXNzSGFzU3VwZXIsICgpID0+XG5cdFx0bmV3IENhbGxFeHByZXNzaW9uKElkU3VwZXIsIFtdKSlcblx0Y29uc3QgZmllbGRTZXR0ZXJzID0gZmllbGRzLm1hcCgoXywgaSkgPT5cblx0XHRuZXcgQXNzaWdubWVudEV4cHJlc3Npb24oXG5cdFx0XHQnPScsXG5cdFx0XHRtZW1iZXIoVGhpcywgXy5uYW1lKSxcblx0XHRcdG1heWJlV3JhcEluQ2hlY2tJbnN0YW5jZShhcmdzW2ldLCBfLm9wVHlwZSwgXy5uYW1lKSkpXG5cdGNvbnN0IGJvZHkgPSBuZXcgQmxvY2tTdGF0ZW1lbnQoY2F0KG9wU3VwZXIsIGZpZWxkU2V0dGVycywgRnJlZXplVGhpcykpXG5cdHJldHVybiBNZXRob2REZWZpbml0aW9uLmNvbnN0cnVjdG9yKG5ldyBGdW5jdGlvbkV4cHJlc3Npb24obnVsbCwgYXJncywgYm9keSkpXG59XG5jb25zdCBGcmVlemVUaGlzID0gbmV3IEV4cHJlc3Npb25TdGF0ZW1lbnQoXG5cdG5ldyBDYWxsRXhwcmVzc2lvbihcblx0XHRuZXcgTWVtYmVyRXhwcmVzc2lvbihuZXcgSWRlbnRpZmllcignT2JqZWN0JyksIG5ldyBJZGVudGlmaWVyKCdmcmVlemUnKSksXG5cdFx0W1RoaXNdKSlcbiJdfQ==
+//# sourceMappingURL=transpileClass.js.map

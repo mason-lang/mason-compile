@@ -1,0 +1,17 @@
+import Loc from 'esast/lib/Loc';
+import CompileError from '../../CompileError';
+import MsAst, { LocalDeclare } from '../MsAst';
+export declare function deleteLocal(localDeclare: LocalDeclare): void;
+export declare function setLocal(localDeclare: LocalDeclare): void;
+export declare function accessLocal(access: MsAst, name: string): void;
+export declare function setDeclareAccessed(declare: LocalDeclare, access: MsAst): void;
+export declare function verifyLocalDeclare(localDeclare: LocalDeclare): void;
+export declare function registerLocal(localDeclare: LocalDeclare): void;
+export declare function registerAndPlusLocal(localDeclare: LocalDeclare, action: () => void): void;
+export declare function plusLocal(addedLocal: LocalDeclare, action: () => void): void;
+export declare function plusLocals(addedLocals: Array<LocalDeclare>, action: () => void): void;
+export declare function verifyAndPlusLocal(addedLocal: LocalDeclare, action: () => void): void;
+export declare function verifyAndPlusLocals(addedLocals: Array<LocalDeclare>, action: () => void): void;
+export declare function withBlockLocals(action: () => void): void;
+export declare function missingLocalFail(loc: Loc, name: string): CompileError;
+export declare function warnUnusedLocals(): void;

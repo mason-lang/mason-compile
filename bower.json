@@ -1,11 +1,12 @@
 {
 	"name": "mason-compile",
-	"main": "dist/**/*",
-	"ignore": [ "dist/node-only" ],
 	"dependencies": {
-		"esast": "andy-hanson/esast"
+		"esast": "esast/esast",
+		"esast-create-util": "esast/esast-create-util",
+		"esast-render-fast": "esast/esast-render-fast",
+		"op": "esast/op"
 	},
+	"ignore": ["package.json", "readme.md"],
 	"moduleType": "amd",
-	"license": "WTFPL",
-	"private": true
+	"license": "Unlicense"
 }

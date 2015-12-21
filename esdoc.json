@@ -1,5 +1,0 @@
-{
-	"title": "mason-compile",
-	"source": "./src",
-	"destination": "./esdoc"
-}
