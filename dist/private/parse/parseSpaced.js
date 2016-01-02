@@ -2,7 +2,7 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../context', '../MsAst', '../Token', '../util', './checks', './parse*', './parseMemberName', './parseName', './parseQuote', './parseSingle', './Slice'], factory);
+        define(["require", "exports", 'op/Op', '../context', '../MsAst', '../Token', '../util', './checks', './parseExpr', './parseMemberName', './parseName', './parseQuote', './parseSingle', './Slice'], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -13,7 +13,7 @@
     var Token_1 = require('../Token');
     var util_1 = require('../util');
     var checks_1 = require('./checks');
-    var parse_1 = require('./parse*');
+    var parseExpr_1 = require('./parseExpr');
     var parseMemberName_1 = require('./parseMemberName');
     var parseName_1 = require('./parseName');
     var parseQuote_1 = require('./parseQuote');
@@ -26,7 +26,7 @@
             case 35:
                 {
                     const h2 = rest.head();
-                    if (h2 instanceof Token_1.GroupParenthesis) return new MsAst_1.SimpleFun(tokens.loc, parse_1.parseExpr(Slice_1.Tokens.of(h2)));else if (Token_1.isKeyword(52, h2)) {
+                    if (h2 instanceof Token_1.GroupParenthesis) return new MsAst_1.SimpleFun(tokens.loc, parseExpr_1.default(Slice_1.Tokens.of(h2)));else if (Token_1.isKeyword(52, h2)) {
                         const tail = rest.tail();
                         const h3 = tail.head();
                         const fun = new MsAst_1.GetterFun(h3.loc, parseMemberName_1.default(h3));
@@ -114,7 +114,7 @@
                     return new MsAst_1.InstanceOf(token.loc, acc, restVal());
                 default:
                     throw checks_1.unexpected(token);
-            } else if (token instanceof Token_1.GroupBracket) acc = new MsAst_1.Sub(loc, acc, parse_1.parseExprParts(Slice_1.Tokens.of(token)));else if (token instanceof Token_1.GroupParenthesis) {
+            } else if (token instanceof Token_1.GroupBracket) acc = new MsAst_1.Sub(loc, acc, parseExpr_1.parseExprParts(Slice_1.Tokens.of(token)));else if (token instanceof Token_1.GroupParenthesis) {
                 checks_1.checkEmpty(Slice_1.Tokens.of(token), _ => _.parensOutsideCall);
                 acc = new MsAst_1.Call(loc, acc, []);
             } else if (token instanceof Token_1.GroupQuote) acc = new MsAst_1.QuoteTaggedTemplate(loc, acc, parseQuote_1.default(Slice_1.default.of(token)));else throw checks_1.unexpected(token);

@@ -4,15 +4,15 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../MsAst', './parse*', './parseBlock', './parseMethodImpls', './tryTakeComment'], factory);
+        define(["require", "exports", 'op/Op', '../MsAst', './parseBlock', './parseExpr', './parseMethodImpls', './tryTakeComment'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Op_1 = require('op/Op');
     var MsAst_1 = require('../MsAst');
-    var parse_1 = require('./parse*');
     var parseBlock_1 = require('./parseBlock');
+    var parseExpr_1 = require('./parseExpr');
     var parseMethodImpls_1 = require('./parseMethodImpls');
     var tryTakeComment_1 = require('./tryTakeComment');
     function parseTrait(tokens) {
@@ -23,7 +23,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const before = _parseBlock_1$beforeA2[0];
         const opBlock = _parseBlock_1$beforeA2[1];
 
-        const superTraits = parse_1.parseExprParts(before);
+        const superTraits = parseExpr_1.parseExprParts(before);
 
         var _Op_1$caseOp = Op_1.caseOp(opBlock, _ => {
             var _tryTakeComment_1$def = tryTakeComment_1.default(_);

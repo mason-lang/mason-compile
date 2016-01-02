@@ -1,4 +1,3 @@
-import './loadLex*'
 import {Pos} from 'esast/lib/Loc'
 import {GroupBlock} from '../Token'
 import {openLine, setupGroupContext, tearDownGroupContext} from './groupContext'

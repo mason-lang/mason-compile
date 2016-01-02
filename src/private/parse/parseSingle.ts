@@ -4,8 +4,9 @@ import {BagSimple, Val, LocalAccess, NumberLiteral, SpecialVal} from '../MsAst'
 import Token, {Group, GroupBlock, GroupBracket, GroupParenthesis, GroupQuote, GroupRegExp, GroupSpace, Keyword, Keywords, Name, NumberToken, opKeywordKindToSpecialValueKind} from '../Token'
 import {unexpected} from './checks'
 import {parseBlockWrap} from './parseBlock'
+import parseExpr, {parseExprParts} from './parseExpr'
 import parseQuote, {parseRegExp} from './parseQuote'
-import {parseExpr, parseExprParts, parseSpaced} from './parse*'
+import parseSpaced from './parseSpaced'
 import Slice, {Lines, Tokens} from './Slice'
 
 /** Parse a single token. */

@@ -1,7 +1,7 @@
 import Op, {caseOp} from 'op/Op'
 import {ClassTraitDo, MethodImplLike, Trait} from '../MsAst'
-import {parseExprParts} from './parse*'
 import {beforeAndOpBlock} from './parseBlock'
+import {parseExprParts} from './parseExpr'
 import {opTakeDo, parseStaticsAndMethods} from './parseMethodImpls'
 import tryTakeComment from './tryTakeComment'
 import {Lines, Tokens} from './Slice'

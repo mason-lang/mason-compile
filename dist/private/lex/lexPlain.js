@@ -2,7 +2,7 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'esast/lib/Loc', '../context', '../Token', '../util', './chars', './groupContext', './lex*', './lexName', './sourceContext'], factory);
+        define(["require", "exports", 'esast/lib/Loc', '../context', '../Token', '../util', './chars', './groupContext', './lexName', './lexQuote', './sourceContext'], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -13,8 +13,8 @@
     var util_1 = require('../util');
     var chars_1 = require('./chars');
     var groupContext_1 = require('./groupContext');
-    var lex_1 = require('./lex*');
     var lexName_1 = require('./lexName');
+    var lexQuote_1 = require('./lexQuote');
     var sourceContext_1 = require('./sourceContext');
     function lexPlain(isInQuote) {
         let indent = 0;
@@ -88,7 +88,7 @@
                     break loop;
                 case chars_1.Char.Backtick:
                 case chars_1.Char.Quote:
-                    lex_1.lexQuote(indent, characterEaten === chars_1.Char.Backtick);
+                    lexQuote_1.default(indent, characterEaten === chars_1.Char.Backtick);
                     break;
                 case chars_1.Char.OpenParenthesis:
                     if (sourceContext_1.tryEat(chars_1.Char.CloseParenthesis)) groupContext_1.addToCurrentGroup(new Token_1.GroupParenthesis(loc(), []));else groupContext_1.openParenthesis(loc());

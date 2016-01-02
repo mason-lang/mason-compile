@@ -60,6 +60,7 @@ Implement a method `methodName` on many types at once.
 	Keys are names of types in `types`.
 	Values are implementations of the method.
 */
+//kill!!!
 export function implementMany(types: any, methodName: string, impls: {[key: string]: Function}): void {
 	for (const name in impls)
 		types[name].prototype[methodName] = impls[name]

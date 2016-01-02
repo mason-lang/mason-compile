@@ -3,7 +3,7 @@ import {check, fail} from '../context'
 import {Val, LocalDeclare, LocalDeclares} from '../MsAst'
 import Token, {GroupSpace, isKeyword, Keywords, Name} from '../Token'
 import {checkNonEmpty, checkKeyword} from './checks'
-import {parseSpaced} from './parse*'
+import parseSpaced from './parseSpaced'
 import {Tokens} from './Slice'
 
 /** Parse locals (`a` or `a:b`). */

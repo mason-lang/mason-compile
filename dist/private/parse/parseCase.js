@@ -4,7 +4,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../context', '../MsAst', '../Token', './checks', './parse*', './parseBlock', './parseLocalDeclares', './parseSpaced', './Slice'], factory);
+        define(["require", "exports", 'op/Op', '../context', '../MsAst', '../Token', './checks', './parseBlock', './parseExpr', './parseLocalDeclares', './parseSpaced', './Slice'], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -14,8 +14,8 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     var MsAst_1 = require('../MsAst');
     var Token_1 = require('../Token');
     var checks_1 = require('./checks');
-    var parse_1 = require('./parse*');
     var parseBlock_1 = require('./parseBlock');
+    var parseExpr_1 = require('./parseExpr');
     var parseLocalDeclares_1 = require('./parseLocalDeclares');
     var parseSpaced_1 = require('./parseSpaced');
     var Slice_1 = require('./Slice');
@@ -31,7 +31,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         if (casedFromFun) {
             checks_1.checkEmpty(before, _ => _.caseFocusIsImplicit);
             opCased = null;
-        } else opCased = Op_1.opMap(parse_1.opParseExpr(before), _ => MsAst_1.AssignSingle.focus(_.loc, _));
+        } else opCased = Op_1.opMap(parseExpr_1.opParseExpr(before), _ => MsAst_1.AssignSingle.focus(_.loc, _));
         const lastLine = Slice_1.Tokens.of(block.last());
 
         var _ref = Token_1.isKeyword(55, lastLine.head()) ? [block.rtail(), parseBlock_1.parseJustBlock(55, lastLine.tail())] : [block, null];
@@ -66,7 +66,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
                 return new MsAst_1.Pattern(tokens.loc, type, locals);
             }
         }
-        return parse_1.parseExpr(tokens);
+        return parseExpr_1.default(tokens);
     }
 });
 //# sourceMappingURL=parseCase.js.map

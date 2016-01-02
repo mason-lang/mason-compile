@@ -5,6 +5,7 @@ import {check, fail, warn} from '../context'
 import MsAst, {LocalAccess, LocalDeclare} from '../MsAst'
 import {isEmpty} from '../util'
 import {locals, okToNotUse, results, pendingBlockLocals, setPendingBlockLocals} from './context'
+import {verifyLocalDeclare} from './verifyLocalDeclare'
 
 export function deleteLocal(localDeclare: LocalDeclare): void {
 	locals.delete(localDeclare.name)
@@ -21,14 +22,6 @@ export function accessLocal(access: MsAst, name: string): void {
 
 export function setDeclareAccessed(declare: LocalDeclare, access: MsAst): void {
 	results.localDeclareToAccesses.get(declare).push(access)
-}
-
-// For expressions affecting lineNewLocals, they will be registered before being verified.
-// So, LocalDeclare.verify just the type.
-// For locals not affecting lineNewLocals, use this instead of just declare.verify()
-export function verifyLocalDeclare(localDeclare: LocalDeclare): void {
-	registerLocal(localDeclare)
-	localDeclare.verify()
 }
 
 export function registerLocal(localDeclare: LocalDeclare): void {

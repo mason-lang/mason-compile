@@ -14,7 +14,7 @@ export declare let isInSwitch: boolean;
 export declare function setup(): void;
 export declare function tearDown(): void;
 export declare function withLoop(newLoop: Op<Loop>, action: () => void): void;
-export declare function withMethod(newMethod: MethodImplLike, action: () => void): void;
+export declare function withMethod(newMethod: Constructor | MethodImplLike, action: () => void): void;
 export declare function withName(newName: string, action: () => void): void;
 export declare function withIife(action: () => void): void;
 export declare function withIifeIf(cond: boolean, action: () => void): void;

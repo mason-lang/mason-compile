@@ -2,9 +2,10 @@ import Loc from 'esast/lib/Loc'
 import Op, {caseOp, orDefault} from 'op/Op'
 import {check, warn} from '../context'
 import Language from '../languages/Language'
-import MsAst, {Block, Case, CasePart, Catch, DoOnly, Switch, SwitchPart, ValOnly, ValOrDo} from '../MsAst'
+import MsAst, {Block, Break, Case, CasePart, Catch, Conditional, DoOnly, Except, For, ForAsync, LineContent,
+	Switch, SwitchPart, ValOnly, ValOrDo, With} from '../MsAst'
 import * as MsAstTypes from '../MsAst'
-import {cat, implementMany, isEmpty, last} from '../util'
+import {cat, isEmpty, last} from '../util'
 import {Blocks} from '../VerifyResults'
 import autoBlockKind from './autoBlockKind'
 import {results} from './context'
@@ -18,117 +19,94 @@ const enum SK {
 }
 export default SK
 
-/** This MsAst must be a statement. */
-export function checkDo(_: DoOnly, sk: SK) {
-	check(sk === SK.Do, _.loc, _ => _.statementAsValue)
-}
-
-/** This MsAst must be a value. */
-export function checkVal(_: ValOnly, sk: SK) {
-	if (sk === SK.Do)
-		warn(_.loc, _ => _.valueAsStatement)
-}
-
 /**
 This is an MsAst that is sometimes a statement, sometimes an expression.
 Mark it using `sk` so that it can transpile correctly.
 */
-export function markStatement(_: ValOrDo, sk: SK) {
+export function markStatement(_: ValOrDo | CasePart | SwitchPart | ForAsync, sk: SK): void {
 	if (sk === SK.Do)
 		results.statements.add(_)
 }
 
 /**
-Infers whether the last line of a module is a statement or a value.
-Prefers to make it a value, such as in the case of a Call.
+Infer whether a block has a value.
+Prefer to make it a value, such as in the case of a Call.
 */
-export function getSK(_: MsAst) {
-	return orDefault(_.opSK(), () => SK.Val)
+export function getBlockSK(_: Block): SK {
+	return orDefault(opBlockSK(_), () => SK.Val)
 }
 
-// `null` means can't determine whether this must be a statement or value.
-implementMany(MsAstTypes, 'opSK', {
-	DoOnly(): Op<SK> {
+/**
+Infer whether the last line of a module is a statement or a value.
+Prefer to make it a value, such as in the case of a Call.
+*/
+export function getLineSK(_: LineContent) {
+	return orDefault(opSK(_), () => SK.Val)
+}
+
+// `null` means: can't determine whether this must be a statement or value.
+function opBlockSK({lines, loc}: Block): Op<SK> {
+	return autoBlockKind(lines, loc) === Blocks.Return ?
+		isEmpty(lines) ? SK.Do : opSK(last(lines)) :
+		SK.Val
+}
+
+function opSK(_: LineContent): Op<SK> {
+	if (_ instanceof DoOnly)
 		return SK.Do
-	},
-	ValOnly(): Op<SK> {
+	else if (_ instanceof ValOnly)
 		return SK.Val
-	},
-	Call(): Op<SK> {
-		return null
-	},
-	Del(): Op<SK> {
-		return null
-	},
-	Yield(): Op<SK> {
-		return null
-	},
-	YieldTo(): Op<SK> {
-		return null
-	},
-	Block(): Op<SK> {
-		// todo
-		const {lines, loc} = <Block> this
-		return autoBlockKind(lines, loc) === Blocks.Return ?
-			isEmpty(lines) ? SK.Do : last(lines).opSK() :
-			SK.Val
-	},
-	Conditional(): Op<SK> {
-		return this.result.opSK()
-	},
-	Except(): Op<SK> {
-		const catches = this.allCatches.map((_: Catch) => _.block)
+	else if (_ instanceof Conditional) {
+		const {result} = _
+		return result instanceof Block ? opBlockSK(result) : opSK(result)
+	} else if (_ instanceof Except) {
+		const {loc, try: _try, allCatches, opElse} = _
+		const catches = allCatches.map((_: Catch) => _.block)
 		// If there's opElse, `try` is always SK.Do and `else` may be SK.Val.
-		const parts = caseOp(this.opElse, _ => cat(_, catches), () => cat(this.try, catches))
+		const parts = caseOp(opElse, _ => cat(_, catches), () => cat(_try, catches))
 		// opFinally is always SK.Do.
-		return compositeSK(this.loc, parts)
-	},
-	For(): Op<SK> {
+		return compositeSK(loc, parts.map(opBlockSK))
+	} else if (_ instanceof For)
 		// If opForSK is null, there are no breaks, so this is an infinite loop.
-		return orDefault(this.block.opForSK(), () => SK.Do)
-	},
-	Case: caseSwitchSK,
-	Switch: caseSwitchSK
-})
-
-function caseSwitchSK() {
-	return compositeSK(this.loc, caseSwitchParts(this))
-}
-
-implementMany(MsAstTypes, 'opForSK', {
-	default(): Op<SK> {
+		return orDefault(opForSKBlock(_.block), () => SK.Do)
+	else if (_ instanceof Case || _ instanceof Switch)
+		return compositeSK(_.loc, caseSwitchParts(_).map(opBlockSK))
+	else
+		//_ instanceof Call || _ instanceof Del || _ instanceof With || _ instanceof Yield || _ instanceof YieldTo
 		return null
-	},
-	Break(): Op<SK> {
-		return this.opValue === null ? SK.Do : SK.Val
-	},
-	Block(): Op<SK> {
-		return isEmpty(this.lines) ? null : compositeForSK(this.loc, this.lines)
-	},
-	Conditional(): Op<SK> {
-		return this.result.opForSK()
-	},
-	Case: caseSwitchForSK,
-	Except(): Op<SK> {
-		const catches = this.allCatches.map((_: Catch) => _.block)
+}
+
+function opForSKBlock({loc, lines}: Block): Op<SK> {
+	return isEmpty(lines) ? null : compositeForSK(loc, lines.map(opForSK))
+}
+
+function opForSK(_: LineContent): Op<SK> {
+	if (_ instanceof Break)
+		return _.opValue === null ? SK.Do : SK.Val
+	else if (_ instanceof Conditional) {
+		const {result} = _
+		return result instanceof Block ? opForSKBlock(result) : opForSK(result)
+	} else if (_ instanceof Except) {
+		const {loc, try: _try, allCatches, opElse, opFinally} = _
+		const catches = allCatches.map(_ => _.block)
 		// Do look at opFinally for break statements.
-		return compositeForSK(this.loc, cat(this.try, catches, this.opElse, this.opFinally))
-	},
-	Switch: caseSwitchForSK
-})
-
-function caseSwitchForSK(): Op<SK> {
-	return compositeForSK(this.loc, caseSwitchParts(this))
+		return compositeForSK(loc, cat(_try, catches, opElse, opFinally).map(opForSKBlock))
+	} else if (_ instanceof With)
+		return opForSKBlock(_.block)
+	else if (_ instanceof Case || _ instanceof Switch)
+		return compositeForSK(_.loc, caseSwitchParts(_).map(opForSKBlock))
+	else
+		return null
 }
 
-function caseSwitchParts(_: {parts: Array<{result: MsAst}>, opElse: MsAst}): Array<MsAst> {
-	return cat(
-		(<any> _.parts).map((_: CasePart | SwitchPart) => _.result),
-		_.opElse)
+function caseSwitchParts({parts, opElse}: Case | Switch): Array<Block> {
+	//todo: should not be necessary
+	const prts: Array<CasePart | SwitchPart> = parts
+	return cat(prts.map(_ => _.result), opElse)
 }
 
-function compositeSK(loc: Loc, parts: Array<MsAst>): Op<SK> {
-	return composite(loc, _ => _.opSK(), parts, _ => _.ambiguousSK)
+function compositeSK(loc: Loc, parts: Array<Op<SK>>): Op<SK> {
+	return composite(loc, parts, _ => _.ambiguousSK)
 }
 
 /**
@@ -144,14 +122,14 @@ The error occurs if it looks like:
 
 Meaning that it can't be determined whether it's a statement or value.
 */
-function compositeForSK(loc: Loc, parts: Array<MsAst>): Op<SK> {
-	return composite(loc, _ => _.opForSK(), parts, _ => _.ambiguousForSK)
+function compositeForSK(loc: Loc, parts: Array<Op<SK>>): Op<SK> {
+	return composite(loc, parts, _ => _.ambiguousForSK)
 }
 
-function composite(loc: Loc, method: (_: MsAst) => Op<SK>, parts: Array<MsAst>, errorMessage: (_: Language) => string): Op<SK> {
-	let opSk = method(parts[0])
-	for (let i = 1; i < parts.length; i = i + 1) {
-		const otherSK: Op<SK> = method(parts[i])
+function composite(loc: Loc, sks: Array<Op<SK>>, errorMessage: (_: Language) => string): Op<SK> {
+	let opSk = sks[0]
+	for (let i = 1; i < sks.length; i = i + 1) {
+		const otherSK = sks[i]
 		if (opSk === null)
 			opSk = otherSK
 		else

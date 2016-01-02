@@ -2,7 +2,7 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../context', '../MsAst', '../util', './autoBlockKind', './context', './locals', './SK', './verifyLines'], factory);
+        define(["require", "exports", 'op/Op', '../context', '../MsAst', '../util', './autoBlockKind', './context', './locals', './SK', './verifyLines', './verifyVal'], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -16,41 +16,40 @@
     var locals_1 = require('./locals');
     var SK_1 = require('./SK');
     var verifyLines_1 = require('./verifyLines');
-    function verifyBlock(sk) {
-        const _ = this;
+    var verifyVal_1 = require('./verifyVal');
+    function verifyBlockSK(_, sk) {
+        if (sk === 0) verifyBlockDo(_);else verifyBlockVal(_);
+    }
+    exports.verifyBlockSK = verifyBlockSK;
+    function verifyBlockVal(_) {
         const lines = _.lines;
         const loc = _.loc;
 
-        if (sk === 0) verifyDoBlock(_);else {
-            context_1.check(!util_1.isEmpty(lines), loc, _ => _.blockNeedsContent);
-            const kind = autoBlockKind_1.default(lines, loc);
-            switch (kind) {
-                case 3:
-                case 4:
-                case 5:
-                    verifyBuiltLines(lines, loc);
-                    break;
-                case 1:
-                    verifyLines_1.default(lines);
-                    break;
-                case 2:
-                    locals_1.plusLocals(verifyLines_1.default(util_1.rtail(lines)), () => {
-                        util_1.last(lines).verify(1);
-                    });
-                    break;
-                default:
-                    throw new Error(String(kind));
-            }
-            context_2.results.blockToKind.set(_, kind);
+        context_1.check(!util_1.isEmpty(lines), loc, _ => _.blockNeedsContent);
+        const kind = autoBlockKind_1.default(lines, loc);
+        switch (kind) {
+            case 3:
+            case 4:
+            case 5:
+                verifyBuiltLines(lines, loc);
+                break;
+            case 1:
+                verifyLines_1.default(lines);
+                break;
+            case 2:
+                locals_1.plusLocals(verifyLines_1.default(util_1.rtail(lines)), () => verifyVal_1.verifyValP(util_1.last(lines)));
+                break;
+            default:
+                throw new Error(String(kind));
         }
+        context_2.results.blockToKind.set(_, kind);
     }
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.default = verifyBlock;
-    function verifyDoBlock(_) {
+    exports.verifyBlockVal = verifyBlockVal;
+    function verifyBlockDo(_) {
         context_2.results.blockToKind.set(_, 0);
         return verifyLines_1.default(_.lines);
     }
-    exports.verifyDoBlock = verifyDoBlock;
+    exports.verifyBlockDo = verifyBlockDo;
     function verifyModuleLines(lines, loc) {
         context_2.results.moduleKind = Op_1.caseOp(autoBlockKind_1.opBlockBuildKind(lines, loc), buildKind => {
             if (buildKind === 5) {
@@ -64,15 +63,13 @@
         }, () => {
             if (util_1.isEmpty(lines)) return 0;else {
                 const l = util_1.last(lines);
-                const lastSK = SK_1.getSK(l);
+                const lastSK = SK_1.getLineSK(l);
                 if (lastSK === 0) {
                     verifyLines_1.default(lines);
                     return 0;
                 } else {
                     const newLocals = verifyLines_1.default(util_1.rtail(lines));
-                    locals_1.plusLocals(newLocals, () => {
-                        l.verify(lastSK);
-                    });
+                    locals_1.plusLocals(newLocals, () => verifyVal_1.verifyValP(l));
                     return 1;
                 }
             }

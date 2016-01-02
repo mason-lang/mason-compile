@@ -1,25 +1,24 @@
 import Loc from 'esast/lib/Loc';
 import Op from 'op/Op';
-import SK from './verify/SK';
 declare abstract class MsAst {
     loc: Loc;
     constructor(loc: Loc);
 }
 export default MsAst;
 interface MsAst {
-    opSK(): Op<SK>;
-    opForSK(): Op<SK>;
-    verify(sk?: any): void;
     transpile(arg1?: any, arg2?: any, arg3?: any): any;
 }
 export declare abstract class LineContent extends MsAst {
+    isLineContent(): void;
 }
-export interface Val extends MsAst {
+export interface Val extends LineContent {
     isVal(): void;
 }
-export interface Do extends MsAst {
+export declare function isVal(_: LineContent): _ is Val;
+export interface Do extends LineContent {
     isDo(): void;
 }
+export declare function isDo(_: LineContent): _ is Do;
 export declare abstract class ValOrDo extends LineContent implements Val, Do {
     isVal(): void;
     isDo(): void;
@@ -32,7 +31,7 @@ export declare abstract class ValOnly extends LineContent implements Val {
     isVal(): void;
     private isValOnly();
 }
-export declare type Named = Fun | Class | SpecialVal;
+export declare type Named = Class | Fun | Method | Trait | SpecialVal;
 export declare class Module extends MsAst {
     name: string;
     opComment: Op<string>;
@@ -183,12 +182,14 @@ export declare class Cond extends ValOnly {
     ifFalse: Val;
     constructor(loc: Loc, test: Val, ifTrue: Val, ifFalse: Val);
 }
-export declare abstract class FunLike extends ValOnly {
+export interface FunLike extends MsAst {
     args: Array<LocalDeclare>;
     opRestArg: Op<LocalDeclare>;
-    constructor(loc: Loc, args: Array<LocalDeclare>, opRestArg: Op<LocalDeclare>);
+    opReturnType: Op<Val>;
 }
-export declare class Fun extends FunLike {
+export declare class Fun extends ValOnly implements FunLike {
+    args: Array<LocalDeclare>;
+    opRestArg: Op<LocalDeclare>;
     block: Block;
     kind: Funs;
     opDeclareThis: Op<LocalDeclare>;
@@ -206,7 +207,9 @@ export declare const enum Funs {
     Async = 1,
     Generator = 2,
 }
-export declare class FunAbstract extends FunLike {
+export declare class FunAbstract extends MsAst implements FunLike {
+    args: Array<LocalDeclare>;
+    opRestArg: Op<LocalDeclare>;
     opReturnType: Op<Val>;
     opComment: Op<string>;
     constructor(loc: Loc, args: Array<LocalDeclare>, opRestArg: Op<LocalDeclare>, opReturnType: Op<Val>, opComment: Op<string>);
@@ -215,15 +218,15 @@ export declare class Method extends ValOnly {
     fun: FunLike;
     constructor(loc: Loc, fun: FunLike);
 }
-export declare class Await extends ValOnly {
+export declare class Await extends ValOrDo {
     value: Val;
     constructor(loc: Loc, value: Val);
 }
-export declare class Yield extends ValOnly {
+export declare class Yield extends ValOrDo {
     opValue: Op<Val>;
     constructor(loc: Loc, opValue?: Op<Val>);
 }
-export declare class YieldTo extends ValOnly {
+export declare class YieldTo extends ValOrDo {
     value: Val;
     constructor(loc: Loc, value: Val);
 }
@@ -298,7 +301,7 @@ export declare class SuperMember extends ValOnly {
     name: Name;
     constructor(loc: Loc, name: Name);
 }
-export declare class Call extends ValOnly {
+export declare class Call extends ValOrDo {
     called: Val;
     args: Args;
     constructor(loc: Loc, called: Val, args: Args);
@@ -436,7 +439,7 @@ export declare class Pipe extends ValOnly {
     pipes: Array<Val>;
     constructor(loc: Loc, startValue: Val, pipes: Array<Val>);
 }
-export declare class With extends ValOnly {
+export declare class With extends ValOrDo {
     declare: LocalDeclare;
     value: Val;
     block: Block;

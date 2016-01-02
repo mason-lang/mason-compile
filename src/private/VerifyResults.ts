@@ -1,6 +1,7 @@
 import Op, {caseOp} from 'op/Op'
 import {check, fail} from './context'
-import MsAst, {Block, Break, Do, Class, Constructor, Fun, LocalAccess, LocalDeclare, Loop, MethodImpl, MethodImplLike, Named, ObjEntry, SpecialVal, SuperCall} from './MsAst'
+import MsAst, {Block, Break, Do, CasePart, Class, Constructor, ForAsync, Fun, LocalAccess, LocalDeclare,
+	Loop, MethodImpl, MethodImplLike, Named, ObjEntry, SpecialVal, SuperCall, SwitchPart} from './MsAst'
 
 /**
 Results of [[verify]].
@@ -39,7 +40,7 @@ export default class VerifyResults {
 	Those which are always statements (like Throw) are not marked.
 	Use a set of statements because there are usually many more vals than statements.
 	*/
-	statements: Set<Do>
+	statements: Set<Do | CasePart | SwitchPart | ForAsync>
 	/** ObjEntry_s that are module exports */
 	objEntryExports: Set<ObjEntry>
 	moduleKind: Modules
@@ -86,7 +87,7 @@ export default class VerifyResults {
 	}
 
 	/** Certain expressions (such as `if`) are marked if they are statements. */
-	isStatement(expr: Do): boolean {
+	isStatement(expr: Do | CasePart | SwitchPart): boolean {
 		return this.statements.has(expr)
 	}
 

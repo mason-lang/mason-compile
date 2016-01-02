@@ -5,7 +5,7 @@ import {Call, Val, GetterFun, InstanceOf, Lazy, LocalAccess, Member, MemberFun, 
 import {Group, GroupBracket, GroupParenthesis, GroupQuote, isKeyword, Keyword, Keywords} from '../Token'
 import {assert} from '../util'
 import {checkEmpty, unexpected} from './checks'
-import {parseExpr, parseExprParts} from './parse*'
+import parseExpr, {parseExprParts} from './parseExpr'
 import parseMemberName from './parseMemberName'
 import parseName from './parseName'
 import parseQuote from './parseQuote'

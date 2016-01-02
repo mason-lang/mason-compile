@@ -5,6 +5,7 @@ import {assert, reverseIter} from '../util'
 import {locals, pendingBlockLocals} from './context'
 import {deleteLocal, registerLocal, setLocal} from './locals'
 import SK from './SK'
+import verifyDo, {verifyDoP} from './verifyDo'
 
 /**
 Verifies each line, accumulating locals.
@@ -49,7 +50,7 @@ export default function verifyLines(lines: Array<LineContent>): Array<LocalDecla
 	const shadowed: Array<LocalDeclare> = []
 
 	for (const line of lines) {
-		line.verify(SK.Do)
+		verifyDoP(line)
 		for (const newLocal of lineNewLocals(line)) {
 			const {name, loc} = newLocal
 			const oldLocal = locals.get(name)

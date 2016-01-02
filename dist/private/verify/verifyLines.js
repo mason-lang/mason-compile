@@ -2,7 +2,7 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", '../context', '../MsAst', '../util', './context', './locals'], factory);
+        define(["require", "exports", '../context', '../MsAst', '../util', './context', './locals', './verifyDo'], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -12,6 +12,7 @@
     var util_1 = require('../util');
     var context_2 = require('./context');
     var locals_1 = require('./locals');
+    var verifyDo_1 = require('./verifyDo');
     function verifyLines(lines) {
         const newLocals = [];
         for (const line of util_1.reverseIter(lines)) for (const _ of util_1.reverseIter(lineNewLocals(line))) {
@@ -22,7 +23,7 @@
         const thisBlockLocalNames = new Set();
         const shadowed = [];
         for (const line of lines) {
-            line.verify(0);
+            verifyDo_1.verifyDoP(line);
             for (const newLocal of lineNewLocals(line)) {
                 const name = newLocal.name;
                 const loc = newLocal.loc;

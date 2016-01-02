@@ -1,6 +1,5 @@
 import {Module} from '../MsAst'
 import {GroupBlock} from '../Token'
-import './loadParse*'
 import parseModule from './parseModule'
 import Slice, {Lines} from './Slice'
 

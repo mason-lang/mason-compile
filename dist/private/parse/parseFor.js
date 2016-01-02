@@ -4,7 +4,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../context', '../MsAst', '../Token', './parse*', './parseBlock', './parseLocalDeclares'], factory);
+        define(["require", "exports", 'op/Op', '../context', '../MsAst', '../Token', './parseBlock', './parseExpr', './parseLocalDeclares'], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -13,8 +13,8 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     var context_1 = require('../context');
     var MsAst_1 = require('../MsAst');
     var Token_1 = require('../Token');
-    var parse_1 = require('./parse*');
     var parseBlock_1 = require('./parseBlock');
+    var parseExpr_1 = require('./parseExpr');
     var parseLocalDeclares_1 = require('./parseLocalDeclares');
     function parseFor(tokens) {
         var _parseBlock_1$beforeA = parseBlock_1.beforeAndBlock(tokens);
@@ -58,8 +58,8 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
             let after = _ref.after;
 
             context_1.check(before.size() === 1, before.loc, _ => _.todoForPattern);
-            return [parseLocalDeclares_1.parseLocalDeclaresJustNames(before)[0], parse_1.parseExpr(after)];
-        }, () => [MsAst_1.LocalDeclare.focus(tokens.loc), parse_1.parseExpr(tokens)]);
+            return [parseLocalDeclares_1.parseLocalDeclaresJustNames(before)[0], parseExpr_1.default(after)];
+        }, () => [MsAst_1.LocalDeclare.focus(tokens.loc), parseExpr_1.default(tokens)]);
 
         var _Op_1$caseOp2 = _slicedToArray(_Op_1$caseOp, 2);
 

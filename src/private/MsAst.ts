@@ -12,10 +12,7 @@ abstract class MsAst {
 }
 export default MsAst
 interface MsAst {
-	opSK(): Op<SK>
-	opForSK(): Op<SK>
 	//todo
-	verify(sk?: any): void
 	transpile(arg1?: any, arg2?: any, arg3?: any): any
 }
 
@@ -24,16 +21,25 @@ interface MsAst {
 	Any valid part of a Block.
 	Note that some [[Val]]s will still cause warnings if they appear as a line.
 	*/
-	export abstract class LineContent extends MsAst {}
+	export abstract class LineContent extends MsAst {
+		// Make this a nominal type
+		isLineContent(): void {}
+	}
 
-	export interface Val extends MsAst {
+	export interface Val extends LineContent {
 		// Make this a nominal type
 		isVal(): void
 	}
+	export function isVal(_: LineContent): _ is Val {
+		return 'isVal' in _
+	}
 
-	export interface Do extends MsAst {
+	export interface Do extends LineContent {
 		// Make this a nominal type
 		isDo(): void
+	}
+	export function isDo(_: LineContent): _ is Do {
+		return 'isDo' in _
 	}
 
 	/** Could act as either a Val or Do. */
@@ -56,7 +62,7 @@ interface MsAst {
 		private isValOnly() {}
 	}
 
-	export type Named = Fun | Class | SpecialVal
+	export type Named = Class | Fun | Method | Trait | SpecialVal
 
 // Module
 	/** Whole source file. */
@@ -389,18 +395,25 @@ interface MsAst {
 	}
 
 // Fun
-	export abstract class FunLike extends ValOnly {
+	/*export abstract class FunLike extends ValOnly {
+		opReturnType: Op<Val>
+
 		constructor(loc: Loc, public args: Array<LocalDeclare>, public opRestArg: Op<LocalDeclare>) {
 			super(loc)
 			// TODO: opReturnType should be common too
 		}
+	}*/
+	export interface FunLike extends MsAst {
+		args: Array<LocalDeclare>
+		opRestArg: Op<LocalDeclare>
+		opReturnType: Op<Val>
 	}
 
 	/**
 	```|:{opDeclareRes} {args} ...{opRestArg}
 		{block}```
 	*/
-	export class Fun extends FunLike {
+	export class Fun extends ValOnly implements FunLike {
 		kind: Funs
 		opDeclareThis: Op<LocalDeclare>
 		isDo: boolean
@@ -408,11 +421,11 @@ interface MsAst {
 
 		constructor(
 			loc: Loc,
-			args: Array<LocalDeclare>,
-			opRestArg: Op<LocalDeclare>,
+			public args: Array<LocalDeclare>,
+			public opRestArg: Op<LocalDeclare>,
 			public block: Block,
 			opts: {kind?: Funs, isThisFun?: boolean, isDo?: boolean, opReturnType?: Op<Val>} = {}) {
-			super(loc, args, opRestArg)
+			super(loc)
 			const {kind, isThisFun, isDo, opReturnType} = applyDefaults(opts, {
 				kind: Funs.Plain,
 				isThisFun: false,
@@ -436,14 +449,15 @@ interface MsAst {
 		Generator
 	}
 
-	export class FunAbstract extends FunLike {
+	export class FunAbstract extends MsAst implements FunLike {
 		constructor(
 			loc: Loc,
-			args: Array<LocalDeclare>,
-			opRestArg: Op<LocalDeclare>,
+			public args: Array<LocalDeclare>,
+			public opRestArg: Op<LocalDeclare>,
 			public opReturnType: Op<Val>,
 			public opComment: Op<string>) {
-			super(loc, args, opRestArg)
+			super(loc)
+			this.opReturnType = opReturnType
 		}
 	}
 
@@ -456,21 +470,21 @@ interface MsAst {
 // Async / Generator
 
 	/** `$ {value} `*/
-	export class Await extends ValOnly {
+	export class Await extends ValOrDo {
 		constructor(loc: Loc, public value: Val) {
 			super(loc)
 		}
 	}
 
 	/** `yield {opValue}` */
-	export class Yield extends ValOnly {
+	export class Yield extends ValOrDo {
 		constructor(loc: Loc, public opValue: Op<Val> = null) {
 			super(loc)
 		}
 	}
 
 	/** `yield* {value}` */
-	export class YieldTo extends ValOnly {
+	export class YieldTo extends ValOrDo {
 		constructor(loc: Loc, public value: Val) {
 			super(loc)
 		}
@@ -622,7 +636,7 @@ interface MsAst {
 
 // Calls
 	/** `{called} {args}` */
-	export class Call extends ValOnly {
+	export class Call extends ValOrDo {
 		constructor(loc: Loc, public called: Val, public args: Args) {
 			super(loc)
 		}
@@ -895,7 +909,8 @@ interface MsAst {
 	```with {value} [as {declare}]
 		{block}```
 	*/
-	export class With extends ValOnly {
+	//not ValOnly, so move?
+	export class With extends ValOrDo {
 		constructor(loc: Loc, public declare: LocalDeclare, public value: Val, public block: Block) {
 			super(loc)
 		}
@@ -927,6 +942,7 @@ interface MsAst {
 		constructor(loc: Loc,
 			public start: Val,
 			/** If null, this is an infinite Range. */
+			//opEnd
 			public end: Op<Val>,
 			public isExclusive: boolean) {
 			super(loc)

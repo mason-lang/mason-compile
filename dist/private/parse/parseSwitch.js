@@ -4,7 +4,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", '../context', '../MsAst', '../Token', './checks', './parse*', './parseBlock'], factory);
+        define(["require", "exports", '../context', '../MsAst', '../Token', './checks', './parseBlock', './parseExpr'], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -13,8 +13,8 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     var MsAst_1 = require('../MsAst');
     var Token_1 = require('../Token');
     var checks_1 = require('./checks');
-    var parse_1 = require('./parse*');
     var parseBlock_1 = require('./parseBlock');
+    var parseExpr_1 = require('./parseExpr');
     function parseSwitch(switchedFromFun, tokens) {
         var _parseBlock_1$beforeA = parseBlock_1.beforeAndBlock(tokens);
 
@@ -24,7 +24,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const block = _parseBlock_1$beforeA2[1];
 
         if (switchedFromFun) checks_1.checkEmpty(before, _ => _.switchArgIsImplicit);
-        const switched = switchedFromFun ? MsAst_1.LocalAccess.focus(tokens.loc) : parse_1.parseExpr(before);
+        const switched = switchedFromFun ? MsAst_1.LocalAccess.focus(tokens.loc) : parseExpr_1.default(before);
         const lastLine = block.lastSlice();
 
         var _ref = Token_1.isKeyword(55, lastLine.head()) ? [block.rtail(), parseBlock_1.parseJustBlock(55, lastLine.tail())] : [block, null];
@@ -42,7 +42,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
             const before = _parseBlock_1$beforeA4[0];
             const block = _parseBlock_1$beforeA4[1];
 
-            return new MsAst_1.SwitchPart(line.loc, parse_1.parseExprParts(before), parseBlock_1.default(block));
+            return new MsAst_1.SwitchPart(line.loc, parseExpr_1.parseExprParts(before), parseBlock_1.default(block));
         });
         context_1.check(parts.length > 0, tokens.loc, _ => _.caseSwitchNeedsParts);
         return new MsAst_1.Switch(tokens.loc, switched, parts, opElse);

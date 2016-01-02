@@ -2,12 +2,11 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", './loadLex*', 'esast/lib/Loc', './groupContext', './lexPlain', './sourceContext'], factory);
+        define(["require", "exports", 'esast/lib/Loc', './groupContext', './lexPlain', './sourceContext'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
-    require('./loadLex*');
     var Loc_1 = require('esast/lib/Loc');
     var groupContext_1 = require('./groupContext');
     var lexPlain_1 = require('./lexPlain');

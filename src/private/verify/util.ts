@@ -4,6 +4,7 @@ import {check} from '../context'
 import MsAst, {Val, LocalDeclare, Name, Named, Spread} from '../MsAst'
 import {name, okToNotUse, results} from './context'
 import SK from './SK'
+import verifyVal from './verifyVal'
 
 /** Mark a LocalDeclare as OK to not use. */
 export function makeUseOptional(localDeclare: LocalDeclare): void {
@@ -19,33 +20,27 @@ export function makeUseOptionalIfFocus(localDeclare: LocalDeclare): void {
 		makeUseOptional(localDeclare)
 }
 
-export function verifyEach(asts: Array<MsAst>, sk: SK): void {
-	for (const _ of asts)
-		_.verify(sk)
-}
-
 /** Verify values, accepting Spreads. */
 export function verifyEachValOrSpread(asts: Array<Val | Spread>) {
 	for (const _ of asts)
 		// `null` signifies to Spread that we recognize it
 		// todo: just have special function for verify spread
-		_.verify(_ instanceof Spread ? null : SK.Val)
+		if (_ instanceof Spread)
+			verifySpread(_)
+		else
+			verifyVal(_)
 }
-
-/**
-Verify opAst if it exists.
-@param opAst
-@param [arg] Argument to pass to _.verify. Usually an [[SK]].
-*/
-export function verifyOp(opAst: Op<MsAst>, sk: SK): void {
-	if (nonNull(opAst))
-		opAst.verify(sk)
+//move?
+function verifySpread({spreaded}: Spread) {
+	//check(sk === null, this.loc, _ => sk === SK.Val ? _.misplacedSpreadVal : _.misplacedSpreadDo)
+	verifyVal(spreaded)
 }
 
 /** Verify if it's not a string. */
+//move
 export function verifyName(_: Name): void {
 	if (typeof _ !== 'string')
-		_.verify(SK.Val)
+		verifyVal(_)
 }
 
 export function setName(expr: Named): void {

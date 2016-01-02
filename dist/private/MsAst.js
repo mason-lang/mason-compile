@@ -16,8 +16,18 @@
     }
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = MsAst;
-    class LineContent extends MsAst {}
+    class LineContent extends MsAst {
+        isLineContent() {}
+    }
     exports.LineContent = LineContent;
+    function isVal(_) {
+        return 'isVal' in _;
+    }
+    exports.isVal = isVal;
+    function isDo(_) {
+        return 'isDo' in _;
+    }
+    exports.isDo = isDo;
     class ValOrDo extends LineContent {
         isVal() {}
         isDo() {}
@@ -271,19 +281,13 @@
         }
     }
     exports.Cond = Cond;
-    class FunLike extends ValOnly {
-        constructor(loc, args, opRestArg) {
-            super(loc);
-            this.args = args;
-            this.opRestArg = opRestArg;
-        }
-    }
-    exports.FunLike = FunLike;
-    class Fun extends FunLike {
+    class Fun extends ValOnly {
         constructor(loc, args, opRestArg, block) {
             let opts = arguments.length <= 4 || arguments[4] === undefined ? {} : arguments[4];
 
-            super(loc, args, opRestArg);
+            super(loc);
+            this.args = args;
+            this.opRestArg = opRestArg;
             this.block = block;
 
             var _util_1$applyDefaults = util_1.applyDefaults(opts, {
@@ -306,11 +310,14 @@
         }
     }
     exports.Fun = Fun;
-    class FunAbstract extends FunLike {
+    class FunAbstract extends MsAst {
         constructor(loc, args, opRestArg, opReturnType, opComment) {
-            super(loc, args, opRestArg);
+            super(loc);
+            this.args = args;
+            this.opRestArg = opRestArg;
             this.opReturnType = opReturnType;
             this.opComment = opComment;
+            this.opReturnType = opReturnType;
         }
     }
     exports.FunAbstract = FunAbstract;
@@ -321,14 +328,14 @@
         }
     }
     exports.Method = Method;
-    class Await extends ValOnly {
+    class Await extends ValOrDo {
         constructor(loc, value) {
             super(loc);
             this.value = value;
         }
     }
     exports.Await = Await;
-    class Yield extends ValOnly {
+    class Yield extends ValOrDo {
         constructor(loc) {
             let opValue = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
@@ -337,7 +344,7 @@
         }
     }
     exports.Yield = Yield;
-    class YieldTo extends ValOnly {
+    class YieldTo extends ValOrDo {
         constructor(loc, value) {
             super(loc);
             this.value = value;
@@ -469,7 +476,7 @@
         }
     }
     exports.SuperMember = SuperMember;
-    class Call extends ValOnly {
+    class Call extends ValOrDo {
         constructor(loc, called, args) {
             super(loc);
             this.called = called;
@@ -688,7 +695,7 @@
         }
     }
     exports.Pipe = Pipe;
-    class With extends ValOnly {
+    class With extends ValOrDo {
         constructor(loc, declare, value, block) {
             super(loc);
             this.declare = declare;

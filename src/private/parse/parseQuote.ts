@@ -1,7 +1,7 @@
 import {LocalAccess, MsRegExp, QuotePart, QuotePlain} from '../MsAst'
 import Token, {GroupInterpolation, Keyword, Keywords, Name, StringToken} from '../Token'
 import {assert} from '../util'
-import {parseExpr} from './parse*'
+import parseExpr from './parseExpr'
 import {QuoteTokens, Tokens} from './Slice'
 
 /** Parse a [[QuotePlain]] from a [[GroupQuote]]. */

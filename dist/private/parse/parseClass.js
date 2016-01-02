@@ -4,7 +4,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../MsAst', '../context', '../Token', './parse*', './parseBlock', './parseFun', './parseMethodImpls', './parseLocalDeclares', './tryTakeComment'], factory);
+        define(["require", "exports", 'op/Op', '../MsAst', '../context', '../Token', './parseBlock', './parseExpr', './parseFun', './parseMethodImpls', './parseLocalDeclares', './tryTakeComment'], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -13,8 +13,8 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     var MsAst_1 = require('../MsAst');
     var context_1 = require('../context');
     var Token_1 = require('../Token');
-    var parse_1 = require('./parse*');
     var parseBlock_1 = require('./parseBlock');
+    var parseExpr_1 = require('./parseExpr');
     var parseFun_1 = require('./parseFun');
     var parseMethodImpls_1 = require('./parseMethodImpls');
     var parseLocalDeclares_1 = require('./parseLocalDeclares');
@@ -106,8 +106,8 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
                 context_1.check(kind === 0, _.loc, _ => _.todoLazyField);
                 return new MsAst_1.Field(_.loc, name, opType);
             })),
-            opSuperClass: Op_1.opMap(extendsTokens, parse_1.parseExpr),
-            traits: Op_1.caseOp(traitTokens, parse_1.parseExprParts, () => [])
+            opSuperClass: Op_1.opMap(extendsTokens, parseExpr_1.default),
+            traits: Op_1.caseOp(traitTokens, parseExpr_1.parseExprParts, () => [])
         };
     }
     function opTakeConstructor(tokens) {

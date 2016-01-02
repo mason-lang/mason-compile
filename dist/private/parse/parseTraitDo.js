@@ -4,15 +4,15 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../MsAst', './parse*', './parseBlock', './parseMethodImpls'], factory);
+        define(["require", "exports", 'op/Op', '../MsAst', './parseBlock', './parseExpr', './parseMethodImpls'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Op_1 = require('op/Op');
     var MsAst_1 = require('../MsAst');
-    var parse_1 = require('./parse*');
     var parseBlock_1 = require('./parseBlock');
+    var parseExpr_1 = require('./parseExpr');
     var parseMethodImpls_1 = require('./parseMethodImpls');
     function parseTraitDo(tokens) {
         var _parseBlock_1$beforeA = parseBlock_1.beforeAndOpBlock(tokens);
@@ -22,12 +22,12 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const before = _parseBlock_1$beforeA2[0];
         const opBlock = _parseBlock_1$beforeA2[1];
 
-        var _parse_1$parseNExprPa = parse_1.parseNExprParts(before, 2, 'argsTraitDo');
+        var _parseExpr_1$parseNEx = parseExpr_1.parseNExprParts(before, 2, _ => _.argsTraitDo);
 
-        var _parse_1$parseNExprPa2 = _slicedToArray(_parse_1$parseNExprPa, 2);
+        var _parseExpr_1$parseNEx2 = _slicedToArray(_parseExpr_1$parseNEx, 2);
 
-        const implementor = _parse_1$parseNExprPa2[0];
-        const trait = _parse_1$parseNExprPa2[1];
+        const implementor = _parseExpr_1$parseNEx2[0];
+        const trait = _parseExpr_1$parseNEx2[1];
 
         var _Op_1$caseOp = Op_1.caseOp(opBlock, parseMethodImpls_1.parseStaticsAndMethods, () => [[], []]);
 

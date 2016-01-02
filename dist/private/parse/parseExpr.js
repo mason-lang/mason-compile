@@ -4,7 +4,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', 'esast/lib/Loc', '../context', '../MsAst', '../Token', '../util', './checks', './parse*', './parseBlock', './parseCase', './parseDel', './parseFor', './parseFun', './parseMethod', './parseTrait', './parseLocalDeclares', './Slice'], factory);
+        define(["require", "exports", 'op/Op', 'esast/lib/Loc', '../context', '../MsAst', '../Token', '../util', './checks', './parseBlock', './parseClass', './parseCase', './parseDel', './parseExcept', './parseFor', './parseFun', './parseMethod', './parseSingle', './parseSwitch', './parseTrait', './parseLocalDeclares', './Slice'], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -16,13 +16,16 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     var Token_1 = require('../Token');
     var util_1 = require('../util');
     var checks_1 = require('./checks');
-    var parse_1 = require('./parse*');
     var parseBlock_1 = require('./parseBlock');
+    var parseClass_1 = require('./parseClass');
     var parseCase_1 = require('./parseCase');
     var parseDel_1 = require('./parseDel');
+    var parseExcept_1 = require('./parseExcept');
     var parseFor_1 = require('./parseFor');
     var parseFun_1 = require('./parseFun');
     var parseMethod_1 = require('./parseMethod');
+    var parseSingle_1 = require('./parseSingle');
+    var parseSwitch_1 = require('./parseSwitch');
     var parseTrait_1 = require('./parseTrait');
     var parseLocalDeclares_1 = require('./parseLocalDeclares');
     var Slice_1 = require('./Slice');
@@ -40,14 +43,14 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
             let before = _ref.before;
             let at = _ref.at;
             let after = _ref.after;
-            return util_1.cat(before.map(parse_1.parseSingle), keywordExpr(at, after));
+            return util_1.cat(before.map(parseSingle_1.default), keywordExpr(at, after));
         }, () => {
             const last = tokens.last();
             if (last instanceof Token_1.GroupParenthesis) {
                 const h = Slice_1.Tokens.of(last).head();
                 if (isSplitKeyword(h)) context_1.warn(h.loc, _ => _.extraParens);
             }
-            return tokens.map(parse_1.parseSingle);
+            return tokens.map(parseSingle_1.default);
         });
     }
     exports.parseExprParts = parseExprParts;
@@ -92,13 +95,13 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
             case 43:
                 return parseCase_1.default(false, after);
             case 46:
-                return parse_1.parseClass(after);
+                return parseClass_1.default(after);
             case 45:
                 return parseCond(after);
             case 50:
                 return parseDel_1.default(after);
             case 56:
-                return parse_1.parseExcept(after);
+                return parseExcept_1.default(after);
             case 61:
                 return parseFor_1.parseFor(after);
             case 62:
@@ -137,7 +140,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
             case 99:
                 return new MsAst_1.SuperCall(at.loc, parseExprParts(after));
             case 101:
-                return parse_1.parseSwitch(false, after);
+                return parseSwitch_1.default(false, after);
             case 111:
                 return parseWith(after);
             case 112:

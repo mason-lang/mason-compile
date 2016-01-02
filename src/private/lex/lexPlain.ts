@@ -6,8 +6,8 @@ import {Char, isDigit, isDigitBinary, isDigitHex, isDigitOctal} from './chars'
 import {addToCurrentGroup, closeGroup, closeGroupsForDedent, closeInterpolationOrParenthesis,
 	closeLine, closeSpaceOKIfEmpty, curGroup, openGroup, openLine, openParenthesis, space
 	} from './groupContext'
-import {lexQuote} from './lex*'
 import lexName from './lexName'
+import lexQuote from './lexQuote'
 import {column, eat, eatRestOfLine, index, line, peek, pos, sourceString, skip, skipNewlines,
 	skipRestOfLine, skipWhile, skipWhileEquals, tryEat, tryEat2, tryEat3} from './sourceContext'
 

@@ -1,5 +1,5 @@
 import Op from 'op/Op';
-import MsAst, { Block, Break, Do, Constructor, LocalAccess, LocalDeclare, Loop, MethodImplLike, Named, ObjEntry, SpecialVal, SuperCall } from './MsAst';
+import MsAst, { Block, Break, Do, CasePart, Constructor, ForAsync, LocalAccess, LocalDeclare, Loop, MethodImplLike, Named, ObjEntry, SpecialVal, SuperCall, SwitchPart } from './MsAst';
 export default class VerifyResults {
     localAccessToDeclare: Map<LocalAccess, LocalDeclare>;
     localDeclareToAccesses: Map<LocalDeclare, Array<MsAst>>;
@@ -8,7 +8,7 @@ export default class VerifyResults {
     superCallToMethod: Map<SuperCall, Constructor | MethodImplLike>;
     constructorToSuper: Map<Constructor, SuperCall>;
     blockToKind: Map<Block, Blocks>;
-    statements: Set<Do>;
+    statements: Set<Do | CasePart | SwitchPart | ForAsync>;
     objEntryExports: Set<ObjEntry>;
     moduleKind: Modules;
     loopsNeedingLabel: Set<Loop>;
@@ -17,7 +17,7 @@ export default class VerifyResults {
     localDeclareForAccess(localAccess: LocalAccess): LocalDeclare;
     name(expr: SpecialVal): string;
     opName(expr: Named): Op<string>;
-    isStatement(expr: Do): boolean;
+    isStatement(expr: Do | CasePart | SwitchPart): boolean;
     blockKind(block: Block): Blocks;
     isObjEntryExport(objEntry: ObjEntry): boolean;
     constructorHasSuper(ctr: Constructor): boolean;

@@ -4,7 +4,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../context', '../MsAst', '../Token', './checks', './parse*', './Slice'], factory);
+        define(["require", "exports", 'op/Op', '../context', '../MsAst', '../Token', './checks', './parseSpaced', './Slice'], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -14,7 +14,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     var MsAst_1 = require('../MsAst');
     var Token_1 = require('../Token');
     var checks_1 = require('./checks');
-    var parse_1 = require('./parse*');
+    var parseSpaced_1 = require('./parseSpaced');
     var Slice_1 = require('./Slice');
     function parseLocalDeclares(tokens) {
         return tokens.map(parseLocalDeclare);
@@ -73,7 +73,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
             const token = tokens.head();
             if (token instanceof Token_1.GroupSpace) {
                 const slice = Slice_1.Tokens.of(token);
-                if (Token_1.isKeyword(47, slice.head())) return MsAst_1.LocalDeclare.typedFocus(tokens.loc, parse_1.parseSpaced(slice.tail()));
+                if (Token_1.isKeyword(47, slice.head())) return MsAst_1.LocalDeclare.typedFocus(tokens.loc, parseSpaced_1.default(slice.tail()));
             }
             return parseLocalDeclare(token);
         }
@@ -103,7 +103,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
             checks_1.checkKeyword(47, colon);
             const tokensType = rest2.tail();
             checks_1.checkNonEmpty(tokensType, _ => _.expectedAfterColon);
-            return parse_1.parseSpaced(tokensType);
+            return parseSpaced_1.default(tokensType);
         });
         return { name: name, opType: opType, kind: kind, isMember: isMember };
     }

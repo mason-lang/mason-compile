@@ -2,7 +2,8 @@ import {check} from '../context'
 import {Del} from '../MsAst'
 import {unexpected} from './checks'
 import {GroupBracket, GroupSpace} from '../Token'
-import {parseExprParts, parseSpaced} from './parse*'
+import {parseExprParts} from './parseExpr'
+import parseSpaced from './parseSpaced'
 import {Tokens} from './Slice'
 
 export default function parseDel(tokens: Tokens) : Del{

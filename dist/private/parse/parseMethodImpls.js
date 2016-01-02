@@ -4,15 +4,15 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", '../MsAst', '../Token', './parse*', './parseBlock', './parseFun', './parseMethodSplit'], factory);
+        define(["require", "exports", '../MsAst', '../Token', './parseBlock', './parseExpr', './parseFun', './parseMethodSplit'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var MsAst_1 = require('../MsAst');
     var Token_1 = require('../Token');
-    var parse_1 = require('./parse*');
     var parseBlock_1 = require('./parseBlock');
+    var parseExpr_1 = require('./parseExpr');
     var parseFun_1 = require('./parseFun');
     var parseMethodSplit_1 = require('./parseMethodSplit');
     function parseMethodImpls(lines) {
@@ -78,7 +78,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         }
     }
     function parseExprOrQuoteSimple(tokens) {
-        const expr = parse_1.parseExpr(tokens);
+        const expr = parseExpr_1.default(tokens);
         return expr instanceof MsAst_1.QuoteSimple ? expr.value : expr;
     }
 });

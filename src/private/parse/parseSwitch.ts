@@ -2,8 +2,8 @@ import {check} from '../context'
 import {LocalAccess, Switch, SwitchPart} from '../MsAst'
 import {Group, isKeyword, Keywords} from '../Token'
 import {checkEmpty} from './checks'
-import {parseExpr, parseExprParts} from './parse*'
 import parseBlock, {beforeAndBlock, parseJustBlock} from './parseBlock'
+import parseExpr, {parseExprParts} from './parseExpr'
 import Slice, {Tokens} from './Slice'
 
 /** Parse a [[Switch]]. */

@@ -62,7 +62,7 @@ export function withLoop(newLoop: Op<Loop>, action: () => void): void {
 	opLoop = oldLoop
 }
 
-export function withMethod(newMethod: MethodImplLike, action: () => void): void {
+export function withMethod(newMethod: Constructor | MethodImplLike, action: () => void): void {
 	const oldMethod = method
 	method = newMethod
 	action()

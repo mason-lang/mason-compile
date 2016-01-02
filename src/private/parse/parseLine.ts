@@ -8,11 +8,13 @@ import Token, {GroupBracket, GroupQuote, GroupSpace, isAnyKeyword, isKeyword, Ke
 import {assert, tail} from '../util'
 import {checkEmpty, checkNonEmpty, unexpected} from './checks'
 import {justBlock} from './parseBlock'
+import parseExpr, {opParseExpr, parseExprParts} from './parseExpr'
 import parseLocalDeclares, {parseLocalDeclaresJustNames, parseLocalName} from './parseLocalDeclares'
 import parseMemberName from './parseMemberName'
 import parseName from './parseName'
 import parseQuote from './parseQuote'
-import {opParseExpr, parseExpr, parseExprParts, parseSpaced, parseTraitDo} from './parse*'
+import parseSpaced from './parseSpaced'
+import parseTraitDo from './parseTraitDo'
 import Slice, {Lines, Tokens} from './Slice'
 
 /** Parse the content of a line. */

@@ -4,7 +4,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", '../context', '../util', './context'], factory);
+        define(["require", "exports", '../context', '../util', './context', './verifyLocalDeclare'], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -12,6 +12,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     var context_1 = require('../context');
     var util_1 = require('../util');
     var context_2 = require('./context');
+    var verifyLocalDeclare_1 = require('./verifyLocalDeclare');
     function deleteLocal(localDeclare) {
         context_2.locals.delete(localDeclare.name);
     }
@@ -29,11 +30,6 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         context_2.results.localDeclareToAccesses.get(declare).push(access);
     }
     exports.setDeclareAccessed = setDeclareAccessed;
-    function verifyLocalDeclare(localDeclare) {
-        registerLocal(localDeclare);
-        localDeclare.verify();
-    }
-    exports.verifyLocalDeclare = verifyLocalDeclare;
     function registerLocal(localDeclare) {
         context_2.results.localDeclareToAccesses.set(localDeclare, []);
     }
@@ -63,12 +59,12 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     }
     exports.plusLocals = plusLocals;
     function verifyAndPlusLocal(addedLocal, action) {
-        verifyLocalDeclare(addedLocal);
+        verifyLocalDeclare_1.verifyLocalDeclare(addedLocal);
         plusLocal(addedLocal, action);
     }
     exports.verifyAndPlusLocal = verifyAndPlusLocal;
     function verifyAndPlusLocals(addedLocals, action) {
-        addedLocals.forEach(verifyLocalDeclare);
+        addedLocals.forEach(verifyLocalDeclare_1.verifyLocalDeclare);
         const names = new Set();
         for (const _ref of addedLocals) {
             const name = _ref.name;
