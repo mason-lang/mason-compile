@@ -1,5 +1,5 @@
-import { Expression, MethodDefinitionConstructor, Statement } from 'esast/lib/ast';
-import { Constructor } from '../MsAst';
-export default function transpileClass(): Expression;
-export declare function transpileConstructor(): MethodDefinitionConstructor;
+import Expression from 'esast/lib/Expression';
+import Statement from 'esast/lib/Statement';
+import Class, { Constructor } from '../ast/Class';
+export declare function transpileClassNoLoc(_: Class): Expression;
 export declare function constructorSetMembers(constructor: Constructor): Array<Statement>;

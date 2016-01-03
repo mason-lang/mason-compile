@@ -1,5 +1,8 @@
-import {Block, Case, CasePart, Conditional, Fun, Pattern, Switch, SwitchPart
-	} from '../../dist/private/MsAst'
+import Block from '../../dist/private/ast/Block'
+import {Conditional} from '../../dist/private/ast/booleans'
+import Case, {CasePart, Pattern} from '../../dist/private/ast/Case'
+import Fun from '../../dist/private/ast/Fun'
+import Switch, {SwitchPart} from '../../dist/private/ast/Switch'
 import {aAccess, assignAZero, assignFocusZero, bDeclare, bAccess, blockDbg, blockOne, blockTwo,
 	blockPass, focusAccess, focusDeclare, loc, one, zero} from './util/ast-util'
 import {test} from './util/test-asts'

@@ -1,8 +1,13 @@
 import {opIf} from 'op/Op'
 import {check, fail} from '../context'
-import {Call, Val, GetterFun, InstanceOf, Lazy, LocalAccess, Member, MemberFun, QuoteSimple,
-	QuoteTaggedTemplate, Range, SimpleFun, Spread, Sub, SuperCall, SuperMember} from '../MsAst'
-import {Group, GroupBracket, GroupParenthesis, GroupQuote, isKeyword, Keyword, Keywords} from '../Token'
+import Call, {Spread} from '../ast/Call'
+import {Val} from '../ast/LineContent'
+import {SuperCall, SuperMember} from '../ast/Class'
+import {GetterFun, MemberFun, SimpleFun} from '../ast/Fun'
+import {LocalAccess} from '../ast/locals'
+import {InstanceOf, Lazy, Member, QuoteSimple, QuoteTaggedTemplate, Range, Sub} from '../ast/Val'
+import Group, {GroupBracket, GroupParenthesis, GroupQuote} from '../token/Group'
+import Keyword, {isKeyword, Keywords} from '../token/Keyword'
 import {assert} from '../util'
 import {checkEmpty, unexpected} from './checks'
 import parseExpr, {parseExprParts} from './parseExpr'
@@ -37,6 +42,7 @@ export default function parseSpaced(tokens: Tokens): Val {
 					const tail = rest.tail()
 					const h3 = tail.head()
 					const name = parseMemberName(h3)
+					//MemberFunThis type
 					const fun = new MemberFun(h2.loc, LocalAccess.this(h2.loc), name)
 					return parseSpacedFold(fun, tail.tail())
 				} else {
@@ -75,7 +81,7 @@ export default function parseSpaced(tokens: Tokens): Val {
 	return parseSpacedFold(parseSingle(h, true), rest)
 }
 
-function parseSpacedFold(start: Val, rest: Tokens) {
+function parseSpacedFold(start: Val, rest: Tokens): Val {
 	let acc = start
 	for (let i = rest.start; i < rest.end; i = i + 1) {
 		function restVal() {

@@ -1,4 +1,6 @@
-import MsAst, {LineContent, Module} from '../../../dist/private/MsAst'
+import LineContent from '../../../dist/private/ast/LineContent'
+import Module from '../../../dist/private/ast/Module'
+import MsAst from '../../../dist/private/ast/MsAst'
 import Compiler from '../../../dist/Compiler'
 import CompileError from '../../../dist/CompileError'
 import CompileOptions from '../../../dist/private/CompileOptions'
@@ -41,8 +43,8 @@ export function test(
 			// (currently just renering lines[0] to avoid module boilerplate)
 			let rendered: string
 			withContext(new CompileOptions(compileOptions), filename, () => {
-				const renderAst = mdl.lines[0]
-				rendered = render(transpile(<any> renderAst, verify(mdl))).code
+				//const renderAst = mdl.lines[0]
+				rendered = render(transpile(mdl, verify(mdl))).code
 			})
 
 			if (isMultiLineTest)
@@ -68,7 +70,8 @@ export function test(
 
 const compileOptions = {
 	includeSourceMap: false,
-	useStrict: false
+	useStrict: false,
+	noModuleBoilerplate: true
 }
 const filename = 'test-compile.ms'
 

@@ -1,4 +1,4 @@
-import { Funs } from '../MsAst';
+import { Funs } from '../ast/Fun';
 import VerifyResults from '../VerifyResults';
 export declare let verifyResults: VerifyResults;
 export declare let funKind: Funs;

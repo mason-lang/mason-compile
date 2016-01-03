@@ -2,14 +2,14 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../context', '../MsAst', '../util', './context', './locals', './verifyBlock', './verifyLocalDeclare', './verifyVal'], factory);
+        define(["require", "exports", 'op/Op', '../context', '../ast/Fun', '../util', './context', './locals', './verifyBlock', './verifyLocalDeclare', './verifyVal'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Op_1 = require('op/Op');
     var context_1 = require('../context');
-    var MsAst_1 = require('../MsAst');
+    var Fun_1 = require('../ast/Fun');
     var util_1 = require('../util');
     var context_2 = require('./context');
     var locals_1 = require('./locals');
@@ -21,11 +21,11 @@
         const opRestArg = _.opRestArg;
         const opReturnType = _.opReturnType;
 
-        if (_ instanceof MsAst_1.FunAbstract) {
+        if (_ instanceof Fun_1.FunAbstract) {
             for (const _ of args) verifyLocalDeclare_1.justVerifyLocalDeclare(_);
             Op_1.opEach(opRestArg, verifyLocalDeclare_1.justVerifyLocalDeclare);
             verifyVal_1.verifyOpVal(opReturnType);
-        } else if (_ instanceof MsAst_1.Fun) {
+        } else if (_ instanceof Fun_1.default) {
             verifyFun(_);
         } else throw new Error();
     }

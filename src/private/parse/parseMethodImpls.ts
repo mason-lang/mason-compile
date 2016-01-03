@@ -1,6 +1,11 @@
+import Loc from 'esast/lib/Loc'
 import Op from 'op/Op'
-import {ClassTraitDo, MethodImpl, MethodImplLike, MethodGetter, MethodSetter, Name, QuoteSimple} from '../MsAst'
-import {isKeyword, Keywords} from '../Token'
+import {ClassTraitDo, MethodImpl, MethodImplKind, MethodImplLike, MethodGetter, MethodSetter} from '../ast/classTraitCommon'
+import MemberName from '../ast/MemberName'
+import {QuoteSimple} from '../ast/Val'
+import {check} from '../context'
+import Keyword, {isKeyword, Keywords} from '../token/Keyword'
+import Token from '../token/Token'
 import parseBlock, {beforeAndBlock, justBlock, parseJustBlock} from './parseBlock'
 import parseExpr from './parseExpr'
 import parseFun from './parseFun'
@@ -12,10 +17,14 @@ export default function parseMethodImpls(lines: Lines): Array<MethodImplLike> {
 }
 
 export function takeStatics(lines: Lines): [Array<MethodImplLike>, Lines] {
-	const line = lines.headSlice()
-	return isKeyword(Keywords.Static, line.head()) ?
-		[parseMethodImpls(justBlock(Keywords.Static, line.tail())), lines.tail()] :
-		[[], lines]
+	if (lines.isEmpty())
+		return [[], lines]
+	else {
+		const line = lines.headSlice()
+		return isKeyword(Keywords.Static, line.head()) ?
+			[parseMethodImpls(justBlock(Keywords.Static, line.tail())), lines.tail()] :
+			[[], lines]
+	}
 }
 
 export function parseStaticsAndMethods(lines: Lines): [Array<MethodImplLike>, Array<MethodImplLike>] {
@@ -31,29 +40,38 @@ export function opTakeDo(lines: Lines): [Op<ClassTraitDo>, Lines] {
 }
 
 function parseMethodImpl(tokens: Tokens): MethodImplLike {
-	let head = tokens.head()
-
-	const isMy = isKeyword(Keywords.My, head)
-	if (isMy) {
-		tokens = tokens.tail()
-		head = tokens.head()
-	}
-
-	if (isKeyword(Keywords.Get, head)) {
-		const [before, block] = beforeAndBlock(tokens.tail())
-		return new MethodGetter(tokens.loc, isMy, parseExprOrQuoteSimple(before), parseBlock(block))
-	} else if (isKeyword(Keywords.Set, head)) {
-		const [before, block] = beforeAndBlock(tokens.tail())
-		return new MethodSetter(tokens.loc, isMy, parseExprOrQuoteSimple(before), parseBlock(block))
+	const [[isMy, isVirtual, isOverride], rest] = tokens.takeKeywords(Keywords.My, Keywords.Virtual, Keywords.Override)
+	const kind = methodKind(tokens.loc, isMy, isVirtual, isOverride)
+	const head = rest.head()
+	if (isGetSet(head)) {
+		const [before, block] = beforeAndBlock(rest.tail())
+		const ctr = head.kind === Keywords.Get ? MethodGetter : MethodSetter
+		return new ctr(rest.loc, parseExprOrQuoteSimple(before), parseBlock(block), kind)
 	} else {
-		const {before, kind, after} = parseMethodSplit(tokens)
-		const fun = parseFun(kind, after)
-		return new MethodImpl(tokens.loc, isMy, parseExprOrQuoteSimple(before), fun)
+		const {before, kind: funKind, after} = parseMethodSplit(rest)
+		const fun = parseFun(funKind, after)
+		return new MethodImpl(rest.loc, parseExprOrQuoteSimple(before), fun, kind)
 	}
 }
 
+function methodKind(loc: Loc, isMy: boolean, isVirtual: boolean, isOverride: boolean): MethodImplKind {
+	check(!(isMy && isOverride), loc, _ => _.noMyOverride)
+	const m = isMy ? 0b100 : 0
+	const v = isVirtual ? 0b010 : 0
+	const o = isOverride ? 0b001 : 0
+	return m | v | o
+}
+
+function isGetSet(token: Token): token is Keyword {
+	//typescript makes me do this instead of `&&`
+	if (token instanceof Keyword)
+		return token.kind === Keywords.Get || token.kind === Keywords.Set
+	else
+		return null
+}
+
 // If symbol is just a quoted name, store it as a string, which is handled specially.
-function parseExprOrQuoteSimple(tokens: Tokens): Name {
+function parseExprOrQuoteSimple(tokens: Tokens): MemberName {
 	const expr = parseExpr(tokens)
 	return expr instanceof QuoteSimple ? expr.value : expr
 }

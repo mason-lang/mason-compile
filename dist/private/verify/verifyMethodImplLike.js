@@ -2,31 +2,31 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../MsAst', './context', './locals', './util', './verifyBlock', './verifyVal'], factory);
+        define(["require", "exports", 'op/Op', '../ast/classTraitCommon', './context', './locals', './util', './verifyBlock', './verifyFunLike'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Op_1 = require('op/Op');
-    var MsAst_1 = require('../MsAst');
+    var classTraitCommon_1 = require('../ast/classTraitCommon');
     var context_1 = require('./context');
     var locals_1 = require('./locals');
     var util_1 = require('./util');
     var verifyBlock_1 = require('./verifyBlock');
-    var verifyVal_1 = require('./verifyVal');
+    var verifyFunLike_1 = require('./verifyFunLike');
     function verifyMethodImplLike(_) {
         function doit(doVerify) {
-            util_1.verifyName(_.symbol);
+            util_1.verifyMemberName(_.symbol);
             context_1.withMethod(_, doVerify);
         }
-        if (_ instanceof MsAst_1.MethodImpl) {
+        if (_ instanceof classTraitCommon_1.MethodImpl) {
             const fun = _.fun;
 
             doit(() => {
                 util_1.makeUseOptional(Op_1.orThrow(fun.opDeclareThis));
-                verifyVal_1.default(fun);
+                verifyFunLike_1.verifyFun(fun);
             });
-        } else if (_ instanceof MsAst_1.MethodGetter) {
+        } else if (_ instanceof classTraitCommon_1.MethodGetter) {
             const declareThis = _.declareThis;
             const block = _.block;
 
@@ -36,7 +36,7 @@
                     verifyBlock_1.verifyBlockVal(block);
                 });
             });
-        } else if (_ instanceof MsAst_1.MethodSetter) {
+        } else if (_ instanceof classTraitCommon_1.MethodSetter) {
             const declareThis = _.declareThis;
             const declareFocus = _.declareFocus;
             const block = _.block;
@@ -46,7 +46,7 @@
                     verifyBlock_1.verifyBlockDo(block);
                 });
             });
-        } else throw new Error();
+        } else throw new Error(_.constructor.name);
     }
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = verifyMethodImplLike;

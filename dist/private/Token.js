@@ -123,12 +123,15 @@
         }
     }
     exports.Keyword = Keyword;
-    exports.reservedKeywords = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33];
-    const keywordKindToName = new Map([[0, 'enum'], [1, 'implements'], [2, 'interface'], [3, 'package'], [4, 'private'], [5, 'protected'], [6, 'public'], [7, 'arguments'], [8, 'delete'], [9, 'eval'], [10, 'in'], [11, 'instanceof'], [12, 'return'], [13, 'typeof'], [14, 'void'], [15, 'while'], [16, '!'], [17, '<'], [18, '<-'], [19, '>'], [20, 'actor'], [21, 'data'], [22, 'del?'], [23, 'do-while'], [24, 'do-until'], [25, 'final'], [26, 'is'], [27, 'meta'], [28, 'out'], [29, 'override'], [30, 'send'], [31, 'to'], [32, 'type'], [33, 'until'], [34, 'abstract'], [35, '&'], [36, 'and'], [37, 'as'], [38, 'assert'], [39, '='], [40, '$'], [41, 'break'], [42, 'built'], [43, 'case'], [44, 'catch'], [45, 'cond'], [46, 'class'], [47, ':'], [48, 'construct'], [49, 'debugger'], [50, 'del'], [51, 'do'], [52, '.'], [53, '..'], [54, '...'], [55, 'else'], [56, 'except'], [57, 'extends'], [58, 'false'], [59, 'finally'], [60, '_'], [61, 'for'], [62, '$for'], [63, '@for'], [64, 'forbid'], [65, '|'], [66, '!|'], [67, '.|'], [68, '.!|'], [69, '$|'], [70, '$!|'], [71, '.$|'], [72, '.$!|'], [73, '*|'], [74, '*!|'], [75, '.*|'], [76, '.*!|'], [77, 'get'], [78, 'if'], [79, 'ignore'], [80, 'import'], [81, 'import!'], [82, 'import~'], [83, '~'], [84, ':='], [85, '->'], [86, 'method'], [87, 'my'], [88, 'name'], [89, 'new'], [90, 'not'], [91, 'null'], [92, '. '], [93, 'of'], [94, 'or'], [95, 'pass'], [96, 'pipe'], [97, 'region'], [98, 'set'], [99, 'super'], [100, 'static'], [101, 'switch'], [102, '\''], [103, 'throw'], [104, 'todo'], [105, 'trait'], [106, 'trait!'], [107, 'true'], [108, 'try'], [109, 'undefined'], [110, 'unless'], [111, 'with'], [112, 'yield'], [113, 'yield*']]);
-    const notNameKeywords = new Set([35, 47, 52, 53, 54, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 83, 84, 92, 102]);
+    function* reservedKeywords() {
+        for (let i = 0; i < 77; i++) yield i;
+    }
+    exports.reservedKeywords = reservedKeywords;
+    const keywordKindToName = new Map([[0, 'enum'], [1, 'from'], [2, 'implements'], [3, 'interface'], [4, 'package'], [5, 'private'], [6, 'protected'], [7, 'public'], [8, 'arguments'], [9, 'continue'], [10, 'delete'], [11, 'eval'], [12, 'in'], [13, 'instanceof'], [14, 'return'], [15, 'typeof'], [16, 'void'], [17, 'while'], [18, '!'], [19, '<'], [20, '<-'], [21, '>'], [22, 'data'], [23, 'declare'], [24, 'del?'], [25, 'do-while'], [26, 'do-until'], [27, 'final'], [28, 'implicit'], [29, 'is'], [30, 'macro'], [31, 'meta'], [32, 'mut'], [33, 'native'], [34, 'on'], [35, 'operator'], [36, 'out'], [37, 'override'], [38, 'pure'], [39, 'readonly'], [40, 'sealed'], [41, 'sizeof'], [42, 'struct'], [43, 'throws'], [44, 'to'], [45, 'type'], [46, 'until'], [47, 'use'], [48, 'virtual'], [49, 'actor'], [50, 'move'], [51, 'send'], [52, 'shared'], [53, 'synchronized'], [54, 'transient'], [55, 'volatile'], [56, 'any'], [57, 'boolean'], [58, 'int'], [59, 'int8'], [60, 'int16'], [61, 'int32'], [62, 'int64'], [63, 'uint'], [64, 'uint8'], [65, 'uint16'], [66, 'uint32'], [67, 'uint64'], [68, 'float'], [69, 'float32'], [70, 'float64'], [71, 'float128'], [72, 'number'], [73, 'object'], [74, 'ptr'], [75, 'string'], [76, 'symbol'], [77, 'abstract'], [78, '&'], [79, 'and'], [80, 'as'], [81, 'assert'], [82, '='], [83, '$'], [84, 'break'], [85, 'built'], [86, 'case'], [87, 'catch'], [88, 'cond'], [89, 'class'], [90, ':'], [91, 'construct'], [92, 'debugger'], [93, 'del'], [94, 'do'], [95, '.'], [96, '..'], [97, '...'], [98, 'else'], [99, 'except'], [100, 'extends'], [101, 'false'], [102, 'finally'], [103, '_'], [104, 'for'], [105, '$for'], [106, '@for'], [107, 'forbid'], [108, '|'], [109, '!|'], [110, '.|'], [111, '.!|'], [112, '$|'], [113, '$!|'], [114, '.$|'], [115, '.$!|'], [116, '*|'], [117, '*!|'], [118, '.*|'], [119, '.*!|'], [120, 'get'], [121, 'if'], [122, 'ignore'], [123, 'import'], [124, 'import!'], [125, 'import~'], [126, '~'], [127, ':='], [128, '->'], [129, 'method'], [130, 'my'], [131, 'name'], [132, 'new'], [133, 'not'], [134, 'null'], [135, '. '], [136, 'of'], [137, 'or'], [138, 'pass'], [139, 'pipe'], [140, 'region'], [141, 'set'], [142, 'super'], [143, 'static'], [144, 'switch'], [145, '\''], [146, 'throw'], [147, 'todo'], [148, 'trait'], [149, 'trait!'], [150, 'true'], [151, 'try'], [152, 'undefined'], [153, 'unless'], [154, 'with'], [155, 'yield'], [156, 'yield*']]);
+    const notNameKeywords = new Set([78, 90, 95, 96, 97, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 126, 127, 135, 145]);
     exports.allKeywords = (() => {
         const ks = new Set(keywordKindToName.keys());
-        for (const _ of exports.reservedKeywords) ks.delete(_);
+        for (const _ of reservedKeywords()) ks.delete(_);
         return Array.from(ks);
     })();
     const nameKeywords = new Set(exports.allKeywords);
@@ -149,15 +152,15 @@
     exports.opKeywordKindFromName = opKeywordKindFromName;
     function opKeywordKindToSpecialValueKind(kind) {
         switch (kind) {
-            case 58:
+            case 101:
                 return 0;
-            case 88:
+            case 131:
                 return 1;
-            case 91:
+            case 134:
                 return 2;
-            case 107:
+            case 150:
                 return 3;
-            case 109:
+            case 152:
                 return 4;
             default:
                 return null;
@@ -180,6 +183,6 @@
         return token instanceof Keyword && reservedKeywordsSet.has(token.kind);
     }
     exports.isReservedKeyword = isReservedKeyword;
-    const reservedKeywordsSet = new Set(exports.reservedKeywords);
+    const reservedKeywordsSet = new Set(reservedKeywords());
 });
 //# sourceMappingURL=Token.js.map

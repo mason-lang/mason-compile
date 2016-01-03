@@ -1,8 +1,11 @@
 import Loc, {Pos} from 'esast/lib/Loc'
+import Char from 'typescript-char/Char'
 import {check, fail, options, warn} from '../context'
-import {DocComment, Group, GroupBlock, GroupBracket, GroupLine, GroupParenthesis, GroupSpace, isKeyword, Keyword, Keywords, NumberToken} from '../Token'
+import Group, {GroupBlock, GroupBracket, GroupLine, GroupParenthesis, GroupSpace} from '../token/Group'
+import Keyword, {isKeyword, Keywords} from '../token/Keyword'
+import {DocComment, NumberToken} from '../token/Token'
 import {assert, isEmpty, last} from '../util'
-import {Char, isDigit, isDigitBinary, isDigitHex, isDigitOctal} from './chars'
+import {isDigit, isDigitBinary, isDigitHex, isDigitOctal} from './chars'
 import {addToCurrentGroup, closeGroup, closeGroupsForDedent, closeInterpolationOrParenthesis,
 	closeLine, closeSpaceOKIfEmpty, curGroup, openGroup, openLine, openParenthesis, space
 	} from './groupContext'
@@ -41,21 +44,21 @@ export default function lexPlain(isInQuote: boolean): void {
 		const startIndex = index - 1
 
 		tryEat(Char.Hyphen)
-		if (peek(-1) === Char.N0) {
+		if (peek(-1) === Char._0) {
 			const p = peek()
 			switch (p) {
-				case Char.LetterB: case Char.LetterO: case Char.LetterX: {
+				case Char.B: case Char.O: case Char.X: {
 					skip()
 					const isDigitSpecial =
-						p === Char.LetterB ?
+						p === Char.B ?
 						isDigitBinary :
-						p === Char.LetterO ?
+						p === Char.O ?
 						isDigitOctal :
 						isDigitHex
 					skipWhile(isDigitSpecial)
 					break
 				}
-				case Char.Dot:
+				case Char.Period:
 					if (isDigit(peek(1))) {
 						skip()
 						skipWhile(isDigit)
@@ -65,7 +68,7 @@ export default function lexPlain(isInQuote: boolean): void {
 			}
 		} else {
 			skipWhile(isDigit)
-			if (peek() === Char.Dot && isDigit(peek(1))) {
+			if (peek() === Char.Period && isDigit(peek(1))) {
 				skip()
 				skipWhile(isDigit)
 			}
@@ -97,7 +100,7 @@ export default function lexPlain(isInQuote: boolean): void {
 		switch (characterEaten) {
 			case Char.Null:
 				break loop
-			case Char.Backtick: case Char.Quote:
+			case Char.Backtick: case Char.DoubleQuote:
 				lexQuote(indent, characterEaten === Char.Backtick)
 				break
 
@@ -131,7 +134,7 @@ export default function lexPlain(isInQuote: boolean): void {
 			case Char.Space:
 				space(loc())
 				break
-			case Char.Newline: {
+			case Char.LineFeed: {
 				check(!isInQuote, loc, _ => _.noNewlineInInterpolation)
 				if (peek(-2) === Char.Space)
 					warn(pos(), _ => _.trailingSpace)
@@ -163,28 +166,28 @@ export default function lexPlain(isInQuote: boolean): void {
 				break
 			}
 			case Char.Tab:
-				// We always eat tabs in the Newline handler,
+				// We always eat tabs in the Char.LineFeed handler,
 				// so this will only happen in the middle of a line.
 				throw fail(loc(), _ => _.nonLeadingTab)
 
 			// FUN
 
-			case Char.Bang:
+			case Char.ExclamationMark:
 				if (tryEat(Char.Bar))
 					funKeyword(Keywords.FunDo)
 				else
 					handleName()
 				break
-			case Char.Cash:
-				if (tryEat2(Char.Bang, Char.Bar))
+			case Char.$:
+				if (tryEat2(Char.ExclamationMark, Char.Bar))
 					funKeyword(Keywords.FunAsynDo)
 				else if (tryEat(Char.Bar))
 					funKeyword(Keywords.FunAsync)
 				else
 					handleName()
 				break
-			case Char.Star:
-				if (tryEat2(Char.Bang, Char.Bar))
+			case Char.Asterisk:
+				if (tryEat2(Char.ExclamationMark, Char.Bar))
 					funKeyword(Keywords.FunGenDo)
 				else if (tryEat(Char.Bar))
 					funKeyword(Keywords.FunGen)
@@ -213,16 +216,16 @@ export default function lexPlain(isInQuote: boolean): void {
 				else
 					handleName()
 				break
-			case Char.N0: case Char.N1: case Char.N2: case Char.N3: case Char.N4:
-			case Char.N5: case Char.N6: case Char.N7: case Char.N8: case Char.N9:
+			case Char._0: case Char._1: case Char._2: case Char._3: case Char._4:
+			case Char._5: case Char._6: case Char._7: case Char._8: case Char._9:
 				eatAndAddNumber()
 				break
 
 
 			// OTHER
 
-			case Char.Dot: {
-				if (peek() === Char.Space || peek() === Char.Newline) {
+			case Char.Period: {
+				if (peek() === Char.Space || peek() === Char.LineFeed) {
 					// Keywords.ObjEntry in its own spaced group.
 					// We can't just create a new Group here because we want to
 					// ensure it's not part of the preceding or following spaced group.
@@ -230,14 +233,14 @@ export default function lexPlain(isInQuote: boolean): void {
 					keyword(Keywords.ObjEntry)
 				} else if (tryEat(Char.Bar))
 					funKeyword(Keywords.FunThis)
-				else if (tryEat2(Char.Bang, Char.Bar))
+				else if (tryEat2(Char.ExclamationMark, Char.Bar))
 					funKeyword(Keywords.FunThisDo)
-				else if (tryEat2(Char.Star, Char.Bar))
+				else if (tryEat2(Char.Asterisk, Char.Bar))
 					funKeyword(Keywords.FunThisGen)
-				else if (tryEat3(Char.Star, Char.Bang, Char.Bar))
+				else if (tryEat3(Char.Asterisk, Char.ExclamationMark, Char.Bar))
 					funKeyword(Keywords.FunThisGenDo)
-				else if (tryEat(Char.Dot))
-					if (tryEat(Char.Dot))
+				else if (tryEat(Char.Period))
+					if (tryEat(Char.Period))
 						keyword(Keywords.Dot3)
 					else
 						keyword(Keywords.Dot2)
@@ -253,7 +256,7 @@ export default function lexPlain(isInQuote: boolean): void {
 					keyword(Keywords.Colon)
 				break
 
-			case Char.Tick:
+			case Char.SingleQuote:
 				keyword(Keywords.Tick)
 				break
 

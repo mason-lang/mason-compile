@@ -1,5 +1,5 @@
 import {Pos} from 'esast/lib/Loc'
-import {GroupBlock} from '../Token'
+import {GroupBlock} from '../token/Group'
 import {openLine, setupGroupContext, tearDownGroupContext} from './groupContext'
 import lexPlain from './lexPlain'
 import {pos, setupSourceContext} from './sourceContext'

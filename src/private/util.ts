@@ -53,19 +53,6 @@ export function head<A>(array: Array<A>): A {
 	return array[0]
 }
 
-/**
-Implement a method `methodName` on many types at once.
-@param types Object containing many types.
-@param impls
-	Keys are names of types in `types`.
-	Values are implementations of the method.
-*/
-//kill!!!
-export function implementMany(types: any, methodName: string, impls: {[key: string]: Function}): void {
-	for (const name in impls)
-		types[name].prototype[methodName] = impls[name]
-}
-
 /** False iff there are any elements in the array. */
 export function isEmpty<A>(array: Array<A>): boolean {
 	return array.length === 0

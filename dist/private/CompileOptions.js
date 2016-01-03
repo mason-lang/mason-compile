@@ -22,7 +22,8 @@
                 mslPath: 'msl',
                 indent: '\t',
                 language: 'english',
-                builtins: null
+                builtins: null,
+                noModuleBoilerplate: false
             });
             this.includeAmdefine = o.includeAmdefine;
             this.includeSourceMap = o.includeSourceMap;
@@ -32,6 +33,7 @@
             this.importBoot = o.importBoot;
             this.mslPath = o.mslPath;
             this.indent = o.indent;
+            this.noModuleBoilerplate = o.noModuleBoilerplate;
             const builtins = o.builtins === null ? getDefaultBuiltins(this.mslPath) : o.builtins;
             this.builtinNameToPath = generateBuiltinNameToPath(builtins);
             this.language = allLanguages_1.default[o.language];
@@ -60,8 +62,7 @@
     }
     function generateBuiltinNameToPath(builtins) {
         const m = new Map();
-        for (const _path in builtins) {
-            const path = _path;
+        for (const path in builtins) {
             const realPath = path.replace(/\./g, '/');
             for (let imported of builtins[path]) {
                 if (imported === '_') imported = util_1.last(path.split('.'));

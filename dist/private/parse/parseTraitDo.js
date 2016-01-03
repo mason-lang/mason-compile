@@ -4,13 +4,13 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../MsAst', './parseBlock', './parseExpr', './parseMethodImpls'], factory);
+        define(["require", "exports", 'op/Op', '../ast/Trait', './parseBlock', './parseExpr', './parseMethodImpls'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Op_1 = require('op/Op');
-    var MsAst_1 = require('../MsAst');
+    var Trait_1 = require('../ast/Trait');
     var parseBlock_1 = require('./parseBlock');
     var parseExpr_1 = require('./parseExpr');
     var parseMethodImpls_1 = require('./parseMethodImpls');
@@ -36,7 +36,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const statics = _Op_1$caseOp2[0];
         const methods = _Op_1$caseOp2[1];
 
-        return new MsAst_1.TraitDo(tokens.loc, implementor, trait, statics, methods);
+        return new Trait_1.TraitDo(tokens.loc, implementor, trait, statics, methods);
     }
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = parseTraitDo;

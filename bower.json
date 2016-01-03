@@ -4,7 +4,8 @@
 		"esast": "esast/esast",
 		"esast-create-util": "esast/esast-create-util",
 		"esast-render-fast": "esast/esast-render-fast",
-		"op": "esast/op"
+		"op": "esast/op",
+		"typescript-char": "mason-lang/typescript-char"
 	},
 	"ignore": ["package.json", "readme.md"],
 	"moduleType": "amd",

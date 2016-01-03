@@ -1,5 +1,5 @@
 import Op from 'op/Op'
-import {DocComment} from '../Token'
+import {DocComment} from '../token/Token'
 import {assert, isEmpty} from '../util'
 import {Lines} from './Slice'
 

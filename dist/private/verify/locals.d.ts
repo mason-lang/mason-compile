@@ -1,6 +1,7 @@
 import Loc from 'esast/lib/Loc';
 import CompileError from '../../CompileError';
-import MsAst, { LocalDeclare } from '../MsAst';
+import { LocalDeclare } from '../ast/locals';
+import MsAst from '../ast/MsAst';
 export declare function deleteLocal(localDeclare: LocalDeclare): void;
 export declare function setLocal(localDeclare: LocalDeclare): void;
 export declare function accessLocal(access: MsAst, name: string): void;

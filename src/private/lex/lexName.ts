@@ -1,7 +1,8 @@
 import Loc, {Pos} from 'esast/lib/Loc'
 import {caseOp} from 'op/Op'
 import {check} from '../context'
-import {Name, Keyword, Keywords, opKeywordKindFromName} from '../Token'
+import Keyword, {Keywords, opKeywordKindFromName} from '../token/Keyword'
+import {NameToken} from '../token/Token'
 import {isNameCharacter} from './chars'
 import {addToCurrentGroup} from './groupContext'
 import {pos, skipRestOfLine, takeWhileWithPrev} from './sourceContext'
@@ -37,7 +38,7 @@ function handleNameText(startPos: Pos, name: string, allowSpecialKeywords: boole
 			}
 		},
 		() => {
-			addToCurrentGroup(new Name(new Loc(startPos, pos()), name))
+			addToCurrentGroup(new NameToken(new Loc(startPos, pos()), name))
 		})
 }
 

@@ -1,4 +1,4 @@
-import { For, ForAsync, ForBag } from '../MsAst';
+import { For, ForAsync, ForBag } from '../ast/Loop';
 import { Tokens } from './Slice';
 export declare function parseFor(tokens: Tokens): For;
 export declare function parseForAsync(tokens: Tokens): ForAsync;

@@ -1,4 +1,4 @@
-import Node from 'esast/lib/ast'
+import Node from 'esast/lib/Node'
 import esRender, {renderWithSourceMap} from 'esast-render-fast/lib/render'
 import {options, pathOptions} from './context'
 

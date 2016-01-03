@@ -1,5 +1,6 @@
 import Loc, { Pos } from 'esast/lib/Loc';
-import Token, { Group, GroupType } from '../Token';
+import Group, { GroupType } from '../token/Group';
+import Token from '../token/Token';
 export declare let curGroup: Group<Token>;
 export declare function setupGroupContext(): void;
 export declare function tearDownGroupContext(endPos: Pos): Group<Token>;

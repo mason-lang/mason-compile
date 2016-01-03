@@ -1,6 +1,11 @@
 import Loc, {Pos} from 'esast/lib/Loc'
-import {AssignSingle, Block, Do, Fun, LocalAccess, LocalDeclare, NumberLiteral, QuoteSimple,
-	SpecialDo, SpecialDos} from '../../../dist/private/MsAst'
+import {AssignSingle} from '../../../dist/private/ast/locals'
+import Block from '../../../dist/private/ast/Block'
+import {SpecialDo, SpecialDos} from '../../../dist/private/ast/Do'
+import Fun from '../../../dist/private/ast/Fun'
+import {Do} from '../../../dist/private/ast/LineContent'
+import {LocalAccess, LocalDeclare} from '../../../dist/private/ast/locals'
+import {NumberLiteral, QuoteSimple} from '../../../dist/private/ast/Val'
 
 export const
 	loc = new Loc(Pos.start, Pos.start),

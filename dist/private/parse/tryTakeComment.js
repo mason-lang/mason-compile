@@ -2,12 +2,12 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", '../Token', '../util'], factory);
+        define(["require", "exports", '../token/Token', '../util'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
-    var Token_1 = require('../Token');
+    var Token_1 = require('../token/Token');
     var util_1 = require('../util');
     function tryTakeComment(lines) {
         const comments = [];

@@ -1,4 +1,8 @@
-import { Block, CasePart, ForAsync, LineContent, SwitchPart, ValOrDo } from '../MsAst';
+import Block from '../ast/Block';
+import { CasePart } from '../ast/Case';
+import LineContent, { ValOrDo } from '../ast/LineContent';
+import { ForAsync } from '../ast/Loop';
+import { SwitchPart } from '../ast/Switch';
 declare const enum SK {
     Do = 0,
     Val = 1,

@@ -1,5 +1,4 @@
-import {AssignDestructure, AssignSingle, LocalDeclare, LocalDeclares
-	} from '../../dist/private/MsAst'
+import {AssignDestructure, AssignSingle, LocalDeclare, LocalDeclares} from '../../dist/private/ast/locals'
 import {aDeclare, assignAZero, bDeclare, loc, zero} from './util/ast-util'
 import {test} from './util/test-asts'
 

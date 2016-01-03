@@ -1,10 +1,20 @@
 import Op, {caseOp, opIf, orThrow} from 'op/Op'
 import Loc from 'esast/lib/Loc'
+import Await from '../ast/Await'
+import {Cond, Conditional, Logic, Logics, Not} from '../ast/booleans'
+import Block from '../ast/Block'
+import Call, {New} from '../ast/Call'
+import {SuperCall} from '../ast/Class'
+import {Val} from '../ast/LineContent'
+import {LocalDeclare} from '../ast/locals'
+import {ObjPair, ObjSimple, Pipe} from '../ast/Val'
+import With from '../ast/With'
+import {Yield, YieldTo} from '../ast/Yield'
 import {check, fail, warn} from '../context'
 import Language from '../languages/Language'
-import {Await, Block, Call, Cond, Conditional, Val, LocalDeclare, Logic, Logics, New, Not, ObjPair, ObjSimple,
-	Pipe, SuperCall, With, Yield, YieldTo} from '../MsAst'
-import Token, {GroupParenthesis, isAnyKeyword, isKeyword, Keyword, Keywords, Name} from '../Token'
+import {GroupParenthesis} from '../token/Group'
+import Keyword, {isAnyKeyword, isKeyword, Keywords} from '../token/Keyword'
+import Token, {NameToken} from '../token/Token'
 import {cat, head, tail} from '../util'
 import {checkNonEmpty} from './checks'
 import parseBlock, {beforeAndBlock, beforeAndOpBlock} from './parseBlock'
@@ -89,8 +99,9 @@ function parseObjSimple(loc: Loc, splits: Array<{before: Tokens, at: Token}>): V
 	}
 }
 
+//todo: conflicts with parseName.ts
 function parseName(token: Token) {
-	if (token instanceof Name)
+	if (token instanceof NameToken)
 		return token.name
 	else
 		throw fail(token.loc, _ => _.expectedName(token))
@@ -209,7 +220,6 @@ function parsePipe(tokens: Tokens): Pipe {
 
 function parseWith(tokens: Tokens): With {
 	const [before, block] = beforeAndBlock(tokens)
-	// todo: https://github.com/Microsoft/TypeScript/issues/6310
 	const [val, declare] = caseOp<{before: Tokens, after: Tokens}, [Val, LocalDeclare]>(before.opSplitOnce(_ => isKeyword(Keywords.As, _)),
 		({before, after}) => {
 			check(after.size() === 1, after.loc, _ => _.asToken)

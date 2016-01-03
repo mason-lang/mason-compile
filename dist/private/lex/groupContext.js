@@ -2,18 +2,18 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'esast/lib/Loc', '../context', '../Token', '../util'], factory);
+        define(["require", "exports", 'esast/lib/Loc', '../context', '../token/Group', '../util'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Loc_1 = require('esast/lib/Loc');
     var context_1 = require('../context');
-    var Token_1 = require('../Token');
+    var Group_1 = require('../token/Group');
     var util_1 = require('../util');
     let groupStack;
     function setupGroupContext() {
-        exports.curGroup = new Token_1.GroupBlock(new Loc_1.default(Loc_1.Pos.start, null), []);
+        exports.curGroup = new Group_1.GroupBlock(new Loc_1.default(Loc_1.Pos.start, null), []);
         groupStack = [];
     }
     exports.setupGroupContext = setupGroupContext;
@@ -52,16 +52,16 @@
         dropGroup();
         justClosed.loc.end = closePos;
         switch (closeType) {
-            case Token_1.GroupSpace:
+            case Group_1.GroupSpace:
                 {
                     const size = justClosed.subTokens.length;
                     if (size === 0) context_1.warn(justClosed.loc, _ => _.extraSpace);else addToCurrentGroup(size === 1 ? justClosed.subTokens[0] : justClosed);
                     break;
                 }
-            case Token_1.GroupLine:
+            case Group_1.GroupLine:
                 if (!util_1.isEmpty(justClosed.subTokens)) addToCurrentGroup(justClosed);
                 break;
-            case Token_1.GroupBlock:
+            case Group_1.GroupBlock:
                 context_1.check(!util_1.isEmpty(justClosed.subTokens), closePos, _ => _.emptyBlock);
                 addToCurrentGroup(justClosed);
                 break;
@@ -70,46 +70,46 @@
         }
     }
     function closeSpaceOKIfEmpty(pos) {
-        util_1.assert(exports.curGroup instanceof Token_1.GroupSpace);
-        if (exports.curGroup.subTokens.length === 0) dropGroup();else closeGroupNoCheck(pos, Token_1.GroupSpace);
+        util_1.assert(exports.curGroup instanceof Group_1.GroupSpace);
+        if (exports.curGroup.subTokens.length === 0) dropGroup();else closeGroupNoCheck(pos, Group_1.GroupSpace);
     }
     exports.closeSpaceOKIfEmpty = closeSpaceOKIfEmpty;
     function openParenthesis(loc) {
-        openGroup(loc.start, Token_1.GroupParenthesis);
-        openGroup(loc.end, Token_1.GroupSpace);
+        openGroup(loc.start, Group_1.GroupParenthesis);
+        openGroup(loc.end, Group_1.GroupSpace);
     }
     exports.openParenthesis = openParenthesis;
     function openInterpolation(loc) {
-        openGroup(loc.start, Token_1.GroupInterpolation);
-        openGroup(loc.end, Token_1.GroupSpace);
+        openGroup(loc.start, Group_1.GroupInterpolation);
+        openGroup(loc.end, Group_1.GroupSpace);
     }
     exports.openInterpolation = openInterpolation;
     function closeInterpolationOrParenthesis(loc) {
-        closeGroupNoCheck(loc.start, Token_1.GroupSpace);
+        closeGroupNoCheck(loc.start, Group_1.GroupSpace);
         const group = exports.curGroup;
         closeGroup(loc.end, group.type);
-        return group instanceof Token_1.GroupInterpolation;
+        return group instanceof Group_1.GroupInterpolation;
     }
     exports.closeInterpolationOrParenthesis = closeInterpolationOrParenthesis;
     function closeGroupsForDedent(pos) {
         closeLine(pos);
-        closeGroup(pos, Token_1.GroupBlock);
-        while (exports.curGroup instanceof Token_1.GroupParenthesis || exports.curGroup instanceof Token_1.GroupSpace) closeGroupNoCheck(pos, exports.curGroup.type);
+        closeGroup(pos, Group_1.GroupBlock);
+        while (exports.curGroup instanceof Group_1.GroupParenthesis || exports.curGroup instanceof Group_1.GroupSpace) closeGroupNoCheck(pos, exports.curGroup.type);
     }
     exports.closeGroupsForDedent = closeGroupsForDedent;
     function openLine(pos) {
-        openGroup(pos, Token_1.GroupLine);
-        openGroup(pos, Token_1.GroupSpace);
+        openGroup(pos, Group_1.GroupLine);
+        openGroup(pos, Group_1.GroupSpace);
     }
     exports.openLine = openLine;
     function closeLine(pos) {
-        if (exports.curGroup instanceof Token_1.GroupSpace) closeSpaceOKIfEmpty(pos);
-        closeGroup(pos, Token_1.GroupLine);
+        if (exports.curGroup instanceof Group_1.GroupSpace) closeSpaceOKIfEmpty(pos);
+        closeGroup(pos, Group_1.GroupLine);
     }
     exports.closeLine = closeLine;
     function space(loc) {
-        maybeCloseGroup(loc.start, Token_1.GroupSpace);
-        openGroup(loc.end, Token_1.GroupSpace);
+        maybeCloseGroup(loc.start, Group_1.GroupSpace);
+        openGroup(loc.end, Group_1.GroupSpace);
     }
     exports.space = space;
 });

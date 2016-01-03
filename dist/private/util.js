@@ -41,10 +41,6 @@
         return array[0];
     }
     exports.head = head;
-    function implementMany(types, methodName, impls) {
-        for (const name in impls) types[name].prototype[methodName] = impls[name];
-    }
-    exports.implementMany = implementMany;
     function isEmpty(array) {
         return array.length === 0;
     }

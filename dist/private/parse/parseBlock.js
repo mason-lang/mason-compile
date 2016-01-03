@@ -4,15 +4,15 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../context', '../MsAst', '../Token', './checks', './parseLine', './tryTakeComment', './Slice'], factory);
+        define(["require", "exports", 'op/Op', '../ast/Block', '../context', '../token/Group', './checks', './parseLine', './tryTakeComment', './Slice'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Op_1 = require('op/Op');
+    var Block_1 = require('../ast/Block');
     var context_1 = require('../context');
-    var MsAst_1 = require('../MsAst');
-    var Token_1 = require('../Token');
+    var Group_1 = require('../token/Group');
     var checks_1 = require('./checks');
     var parseLine_1 = require('./parseLine');
     var tryTakeComment_1 = require('./tryTakeComment');
@@ -25,7 +25,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const opComment = _tryTakeComment_1$def2[0];
         const rest = _tryTakeComment_1$def2[1];
 
-        return new MsAst_1.Block(lineTokens.loc, opComment, parseLine_1.parseLines(rest));
+        return new Block_1.default(lineTokens.loc, opComment, parseLine_1.parseLines(rest));
     }
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = parseBlock;
@@ -44,12 +44,12 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     function beforeAndOpBlock(tokens) {
         if (tokens.isEmpty()) return [tokens, null];else {
             const block = tokens.last();
-            return block instanceof Token_1.GroupBlock ? [tokens.rtail(), Slice_1.Lines.of(block)] : [tokens, null];
+            return block instanceof Group_1.GroupBlock ? [tokens.rtail(), Slice_1.Lines.of(block)] : [tokens, null];
         }
     }
     exports.beforeAndOpBlock = beforeAndOpBlock;
     function parseBlockWrap(tokens) {
-        return new MsAst_1.BlockWrap(tokens.loc, parseBlock(tokens));
+        return new Block_1.BlockWrap(tokens.loc, parseBlock(tokens));
     }
     exports.parseBlockWrap = parseBlockWrap;
     function justBlock(keywordKind, tokens) {

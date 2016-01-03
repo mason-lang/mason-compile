@@ -2,13 +2,12 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'esast/lib/Loc', './chars'], factory);
+        define(["require", "exports", 'esast/lib/Loc'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Loc_1 = require('esast/lib/Loc');
-    var chars_1 = require('./chars');
     function setupSourceContext(_sourceString) {
         exports.sourceString = _sourceString;
         exports.index = 0;
@@ -58,7 +57,7 @@
     }
     exports.tryEat3 = tryEat3;
     function tryEatNewline() {
-        const canEat = peek() === chars_1.Char.Newline;
+        const canEat = peek() === 10;
         if (canEat) {
             exports.index = exports.index + 1;
             exports.line = exports.line + 1;
@@ -90,11 +89,11 @@
     }
     exports.skipWhileEquals = skipWhileEquals;
     function skipRestOfLine() {
-        return skipWhile(_ => _ !== chars_1.Char.Newline);
+        return skipWhile(_ => _ !== 10);
     }
     exports.skipRestOfLine = skipRestOfLine;
     function eatRestOfLine() {
-        return takeWhile(_ => _ !== chars_1.Char.Newline);
+        return takeWhile(_ => _ !== 10);
     }
     exports.eatRestOfLine = eatRestOfLine;
     function skipWhile(characterPredicate) {
@@ -108,7 +107,7 @@
     function skipNewlines() {
         const startLine = exports.line;
         exports.line = exports.line + 1;
-        while (peek() === chars_1.Char.Newline) {
+        while (peek() === 10) {
             exports.index = exports.index + 1;
             exports.line = exports.line + 1;
         }

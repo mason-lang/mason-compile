@@ -1,8 +1,20 @@
 import {caseOp, opEach, orThrow} from 'op/Op'
 import {check, fail, warn} from '../context'
-import {Await, Block, Call, Case, CasePart, Catch, Cond, Conditional, Constructor, Del, Except, For, ForAsync, Funs, LineContent, Pattern,
-	SuperCall, Switch, SwitchPart, Throw, With, Yield, YieldTo} from '../MsAst'
-import {Keywords} from '../Token'
+import Await from '../ast/Await'
+import Block from '../ast/Block'
+import {Cond, Conditional} from '../ast/booleans'
+import Call from '../ast/Call'
+import Case, {CasePart, Pattern} from '../ast/Case'
+import {Constructor, SuperCall} from '../ast/Class'
+import Del from '../ast/Del'
+import {Catch, Except, Throw} from '../ast/errors'
+import {Funs} from '../ast/Fun'
+import LineContent from '../ast/LineContent'
+import {For, ForAsync} from '../ast/Loop'
+import Switch, {SwitchPart} from '../ast/Switch'
+import With from '../ast/With'
+import {Yield, YieldTo} from '../ast/Yield'
+import {Keywords} from '../token/Keyword'
 import {isEmpty} from '../util'
 import {funKind, method, results, withFun, withIifeIf, withIifeIfVal, withInSwitch} from './context'
 import {plusLocals, verifyAndPlusLocal, verifyAndPlusLocals} from './locals'
@@ -16,17 +28,17 @@ import verifySK, {verifyEachSK, verifyOpSK} from './verifySK'
 import verifyVal, {verifyEachVal, verifyOpVal} from './verifyVal'
 
 //don't call directly, except through verifyVal or verifyDo
-export default function verifyValOrDo(_: LineContent, sk: SK) {
+export default function verifyValOrDo(_: LineContent, sk: SK): void {
 	if (_ instanceof Await) {
 		const {loc, value} = _
-		//ignore SK
 		check(funKind === Funs.Async, loc, _ => _.misplacedAwait)
 		verifyVal(value)
+
 	} else if (_ instanceof Call) {
 		const {called, args} = _
-		//Call can be either SK.Val or SK.Do
 		verifyVal(called)
 		verifyEachValOrSpread(args)
+
 	} else if (_ instanceof Case) {
 		const {opCased, parts, opElse} = _
 		markStatement(_, sk)
@@ -43,12 +55,13 @@ export default function verifyValOrDo(_: LineContent, sk: SK) {
 				},
 				doIt)
 		})
+
 	} else if (_ instanceof Cond) {
 		const {test, ifTrue, ifFalse} = _
-		//Could be a statement if both results are.
 		verifyVal(test)
 		verifySK(ifTrue, sk)
 		verifySK(ifFalse, sk)
+
 	} else if (_ instanceof Conditional) {
 		const {test, result} = _
 		markStatement(_, sk)
@@ -59,20 +72,24 @@ export default function verifyValOrDo(_: LineContent, sk: SK) {
 			else
 				verifySK(result, sk)
 		})
+
 	} else if (_ instanceof Del) {
 		const {subbed, args} = _
-		//DelSub can be either SK.Val or SK.Do
 		verifyVal(subbed)
 		verifyEachVal(args)
+
 	} else if (_ instanceof Except)
 		verifyExcept(_, sk)
+
 	else if (_ instanceof For) {
 		markStatement(_, sk)
 		verifyFor(_)
+
 	} else if (_ instanceof ForAsync) {
 		const {loc, iteratee, block} = _
 		markStatement(_, sk)
-		check(sk !== SK.Do || funKind === Funs.Async, loc, _ => _.forAsyncNeedsAsync)
+		if (sk === SK.Do)
+			check(funKind === Funs.Async, loc, _ => _.forAsyncNeedsAsync)
 		withVerifyIteratee(iteratee, () => {
 			withFun(Funs.Async, () => {
 				// Default block to returning a value, but OK if it doesn't.
@@ -81,6 +98,7 @@ export default function verifyValOrDo(_: LineContent, sk: SK) {
 				verifyBlockSK(block, getBlockSK(block))
 			})
 		})
+
 	} else if (_ instanceof SuperCall) {
 		const {loc, args} = _
 		const meth = orThrow(method, () => fail(loc, _ => _.superNeedsMethod))
@@ -92,6 +110,7 @@ export default function verifyValOrDo(_: LineContent, sk: SK) {
 		}
 
 		verifyEachVal(args)
+
 	} else if (_ instanceof Switch) {
 		const {switched, parts, opElse} = _
 		markStatement(_, sk)
@@ -103,8 +122,10 @@ export default function verifyValOrDo(_: LineContent, sk: SK) {
 				opEach(opElse, _ => verifyBlockSK(_, sk))
 			})
 		})
+
 	} else if (_ instanceof Throw) {
 		verifyOpVal(_.opThrown)
+
 	} else if (_ instanceof With) {
 		const {value, declare, block} = _
 		markStatement(_, sk)
@@ -116,19 +137,20 @@ export default function verifyValOrDo(_: LineContent, sk: SK) {
 				verifyBlockDo(block)
 			})
 		})
+
 	} else if (_ instanceof Yield) {
 		const {loc, opValue} = _
-		//todo: don't use Keywords, that should not be used by anything but lex/parse
 		check(funKind === Funs.Generator, loc, _ => _.misplacedYield(Keywords.Yield))
 		verifyOpVal(opValue)
+
 	} else if (_ instanceof YieldTo) {
 		const {loc, value} = _
 		check(funKind === Funs.Generator, loc, _ => _.misplacedYield(Keywords.YieldTo))
 		verifyVal(value)
-	} else {
-		//should have handled all types.
+
+	} else
+		// Should have handled all types.
 		throw new Error(_.constructor.name)
-	}
 }
 
 function verifyCasePart({test, result}: CasePart, sk: SK): void {
@@ -142,7 +164,7 @@ function verifyCasePart({test, result}: CasePart, sk: SK): void {
 	}
 }
 
-function verifySwitchPart(_: SwitchPart, sk: SK) {
+function verifySwitchPart(_: SwitchPart, sk: SK): void {
 	const {values, result} = _
 	markStatement(_, sk)
 	verifyEachVal(values)

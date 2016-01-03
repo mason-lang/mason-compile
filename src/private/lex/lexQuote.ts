@@ -1,8 +1,10 @@
 import Loc from 'esast/lib/Loc'
+import Char from 'typescript-char/Char'
 import {check, warn} from '../context'
-import {Group, GroupQuote, GroupRegExp, StringToken} from '../Token'
+import Group, {GroupQuote, GroupRegExp} from '../token/Group'
+import {StringToken} from '../token/Token'
 import {assert} from '../util'
-import {Char, isDigit, isNameCharacter} from './chars'
+import {isDigit, isNameCharacter} from './chars'
 import {addToCurrentGroup, closeGroup, curGroup, openGroup, openInterpolation} from './groupContext'
 import lexName from './lexName'
 import lexPlain from './lexPlain'
@@ -56,7 +58,7 @@ export default function lexQuote(indent: number, isRegExp: boolean): void {
 				const next = eat()
 				// \#, \`, and \" are special because they escape a mason special character,
 				// while others are escape sequences.
-				if (next === Char.Hash || next === (isRegExp ? Char.Backtick : Char.Quote))
+				if (next === Char.Hash || next === (isRegExp ? Char.Backtick : Char.DoubleQuote))
 					addChar(next)
 				else
 					add(`\\${String.fromCharCode(next)}`)
@@ -77,7 +79,7 @@ export default function lexQuote(indent: number, isRegExp: boolean): void {
 				}
 				break
 			// Don't need `case Char.Null:` because that's always preceded by a newline.
-			case Char.Newline: {
+			case Char.LineFeed: {
 				const originalPos = pos()
 				// Go back to before we ate it.
 				originalPos.column = originalPos.column - 1
@@ -90,7 +92,7 @@ export default function lexQuote(indent: number, isRegExp: boolean): void {
 					// Indented quote section is over.
 					// Undo reading the tabs and newline.
 					stepBackMany(originalPos, numNewlines + newIndent)
-					assert(peek() === Char.Newline)
+					assert(peek() === Char.LineFeed)
 					break eatChars
 				} else
 					add('\n'.repeat(numNewlines) + '\t'.repeat(newIndent - quoteIndent))
@@ -106,7 +108,7 @@ export default function lexQuote(indent: number, isRegExp: boolean): void {
 					// Since these compile to template literals, have to remember to escape.
 					add('\\\`')
 				break
-			case Char.Quote:
+			case Char.DoubleQuote:
 				if (!isRegExp && !isIndented)
 					break eatChars
 				else

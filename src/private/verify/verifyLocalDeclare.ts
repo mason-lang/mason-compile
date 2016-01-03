@@ -1,6 +1,6 @@
 import {opEach} from 'op/Op'
+import {LocalDeclare} from '../ast/locals'
 import {options, warn} from '../context'
-import {LocalDeclare} from '../MsAst'
 import {registerLocal} from './locals'
 import verifyVal from './verifyVal'
 

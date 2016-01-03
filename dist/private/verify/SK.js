@@ -2,14 +2,21 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../context', '../MsAst', '../util', './autoBlockKind', './context'], factory);
+        define(["require", "exports", 'op/Op', '../ast/Block', '../ast/booleans', '../ast/Case', '../ast/errors', '../ast/LineContent', '../ast/Loop', '../ast/Switch', '../ast/With', '../context', '../util', './autoBlockKind', './context'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Op_1 = require('op/Op');
+    var Block_1 = require('../ast/Block');
+    var booleans_1 = require('../ast/booleans');
+    var Case_1 = require('../ast/Case');
+    var errors_1 = require('../ast/errors');
+    var LineContent_1 = require('../ast/LineContent');
+    var Loop_1 = require('../ast/Loop');
+    var Switch_1 = require('../ast/Switch');
+    var With_1 = require('../ast/With');
     var context_1 = require('../context');
-    var MsAst_1 = require('../MsAst');
     var util_1 = require('../util');
     var autoBlockKind_1 = require('./autoBlockKind');
     var context_2 = require('./context');
@@ -32,11 +39,11 @@
         return autoBlockKind_1.default(lines, loc) === 2 ? util_1.isEmpty(lines) ? 0 : opSK(util_1.last(lines)) : 1;
     }
     function opSK(_) {
-        if (_ instanceof MsAst_1.DoOnly) return 0;else if (_ instanceof MsAst_1.ValOnly) return 1;else if (_ instanceof MsAst_1.Conditional) {
+        if (_ instanceof LineContent_1.DoOnly) return 0;else if (_ instanceof LineContent_1.ValOnly) return 1;else if (_ instanceof booleans_1.Conditional) {
             const result = _.result;
 
-            return result instanceof MsAst_1.Block ? opBlockSK(result) : opSK(result);
-        } else if (_ instanceof MsAst_1.Except) {
+            return result instanceof Block_1.default ? opBlockSK(result) : opSK(result);
+        } else if (_ instanceof errors_1.Except) {
             const loc = _.loc;
             const _try = _.try;
             const allCatches = _.allCatches;
@@ -45,7 +52,7 @@
             const catches = allCatches.map(_ => _.block);
             const parts = Op_1.caseOp(opElse, _ => util_1.cat(_, catches), () => util_1.cat(_try, catches));
             return compositeSK(loc, parts.map(opBlockSK));
-        } else if (_ instanceof MsAst_1.For) return Op_1.orDefault(opForSKBlock(_.block), () => 0);else if (_ instanceof MsAst_1.Case || _ instanceof MsAst_1.Switch) return compositeSK(_.loc, caseSwitchParts(_).map(opBlockSK));else return null;
+        } else if (_ instanceof Loop_1.For) return Op_1.orDefault(opForSKBlock(_.block), () => 0);else if (_ instanceof Case_1.default || _ instanceof Switch_1.default) return compositeSK(_.loc, caseSwitchParts(_).map(opBlockSK));else return null;
     }
     function opForSKBlock(_ref2) {
         let loc = _ref2.loc;
@@ -54,11 +61,11 @@
         return util_1.isEmpty(lines) ? null : compositeForSK(loc, lines.map(opForSK));
     }
     function opForSK(_) {
-        if (_ instanceof MsAst_1.Break) return _.opValue === null ? 0 : 1;else if (_ instanceof MsAst_1.Conditional) {
+        if (_ instanceof Loop_1.Break) return _.opValue === null ? 0 : 1;else if (_ instanceof booleans_1.Conditional) {
             const result = _.result;
 
-            return result instanceof MsAst_1.Block ? opForSKBlock(result) : opForSK(result);
-        } else if (_ instanceof MsAst_1.Except) {
+            return result instanceof Block_1.default ? opForSKBlock(result) : opForSK(result);
+        } else if (_ instanceof errors_1.Except) {
             const loc = _.loc;
             const _try = _.try;
             const allCatches = _.allCatches;
@@ -67,7 +74,7 @@
 
             const catches = allCatches.map(_ => _.block);
             return compositeForSK(loc, util_1.cat(_try, catches, opElse, opFinally).map(opForSKBlock));
-        } else if (_ instanceof MsAst_1.With) return opForSKBlock(_.block);else if (_ instanceof MsAst_1.Case || _ instanceof MsAst_1.Switch) return compositeForSK(_.loc, caseSwitchParts(_).map(opForSKBlock));else return null;
+        } else if (_ instanceof With_1.default) return opForSKBlock(_.block);else if (_ instanceof Case_1.default || _ instanceof Switch_1.default) return compositeForSK(_.loc, caseSwitchParts(_).map(opForSKBlock));else return null;
     }
     function caseSwitchParts(_ref3) {
         let parts = _ref3.parts;

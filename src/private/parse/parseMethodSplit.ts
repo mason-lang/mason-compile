@@ -1,6 +1,6 @@
 import {caseOp} from 'op/Op'
 import {check, fail} from '../context'
-import {isAnyKeyword, Keyword, Keywords} from '../Token'
+import Keyword, {isAnyKeyword, Keywords} from '../token/Keyword'
 import {Tokens} from './Slice'
 
 /** Split on a function keyword. */

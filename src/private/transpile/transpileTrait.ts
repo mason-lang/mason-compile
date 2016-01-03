@@ -1,25 +1,32 @@
-import {ArrayExpression, Expression, LiteralString, ObjectExpression, Statement} from 'esast/lib/ast'
+import Expression, {ArrayExpression, LiteralString} from 'esast/lib/Expression'
+import ObjectExpression from 'esast/lib/ObjectExpression'
+import Statement, {ExpressionStatement} from 'esast/lib/Statement'
 import {caseOp} from 'op/Op'
-import {MethodImplLike} from '../MsAst'
-import {IdFocus, ReturnFocus} from './ast-constants'
+import {MethodImplLike} from '../ast/classTraitCommon'
+import Trait, {TraitDo} from '../ast/Trait'
 import {verifyResults} from './context'
+import {IdFocus, ReturnFocus} from './esast-constants'
+import transpileBlock from './transpileBlock'
 import {transpileMethodToProperty} from './transpileMethod'
-import {blockWrap, msCall, plainLet, t0, t3} from './util'
+import transpileVal from './transpileVal'
+import {blockWrap, msCall, plainLet} from './util'
 
-export default function(): Expression {
-	const name = new LiteralString(verifyResults.name(this))
-	const supers = new ArrayExpression(this.superTraits.map(t0))
-	const trait = msCall('trait', name, supers, methods(this.statics), methods(this.methods))
-	return caseOp(this.opDo,
-		_ => blockWrap(<any> t3(_.block, plainLet(IdFocus, trait), null, ReturnFocus)),
+export function transpileTraitNoLoc(_: Trait): Expression {
+	const {superTraits, opDo, statics, methods} = _
+	const name = new LiteralString(verifyResults.name(_))
+	const supers = new ArrayExpression(superTraits.map(transpileVal))
+	const trait = msCall('trait', name, supers, methodsObject(statics), methodsObject(methods))
+	return caseOp(opDo,
+		_ => blockWrap(transpileBlock(_.block, plainLet(IdFocus, trait), null, ReturnFocus)),
 		() => trait)
 }
 
-export function transpileTraitDo(): Statement {
-	return msCall('traitWithDefs',
-		t0(this.implementor), t0(this.trait), methods(this.statics), methods(this.methods))
+export function transpileTraitDoNoLoc(_: TraitDo): Statement {
+	const {implementor, trait, statics, methods} = _
+	return new ExpressionStatement(msCall('traitWithDefs',
+		transpileVal(implementor), transpileVal(trait), methodsObject(statics), methodsObject(methods)))
 }
 
-function methods(_: Array<MethodImplLike>): ObjectExpression {
+function methodsObject(_: Array<MethodImplLike>): ObjectExpression {
 	return new ObjectExpression(_.map(transpileMethodToProperty))
 }

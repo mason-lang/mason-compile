@@ -1,10 +1,17 @@
 import Loc from 'esast/lib/Loc'
 import Op, {caseOp} from 'op/Op'
+import {BagEntry, MapEntry, ObjEntry, ObjEntryAssign, ObjEntryPlain} from '../ast/Block'
+import Call from '../ast/Call'
+import {Ignore, MemberSet, Pass, SetSub, Setters, SpecialDo, SpecialDos} from '../ast/Do'
+import {Assert, Throw} from '../ast/errors'
+import LineContent, {Do, Val} from '../ast/LineContent'
+import {Assign, AssignSingle, AssignDestructure, LocalAccess, LocalMutate} from '../ast/locals'
+import {Break} from '../ast/Loop'
+import {QuoteSimple, SpecialVal, SpecialVals} from '../ast/Val'
 import {check} from '../context'
-import {Assert, Assign, AssignSingle, AssignDestructure, BagEntry, Break, Call, Do, Val, Ignore, LineContent, LocalAccess,
-	LocalMutate, MapEntry, MemberSet, ObjEntry, ObjEntryAssign, ObjEntryPlain, Pass, QuoteSimple, SetSub,
-	Setters, SpecialDo, SpecialDos, SpecialVal, SpecialVals, Throw} from '../MsAst'
-import Token, {GroupBracket, GroupQuote, GroupSpace, isAnyKeyword, isKeyword, Keyword, keywordName, Keywords} from '../Token'
+import {GroupBracket, GroupQuote, GroupSpace} from '../token/Group'
+import Keyword, {isAnyKeyword, isKeyword, keywordName, Keywords} from '../token/Keyword'
+import Token from '../token/Token'
 import {assert, tail} from '../util'
 import {checkEmpty, checkNonEmpty, unexpected} from './checks'
 import {justBlock} from './parseBlock'
@@ -92,7 +99,6 @@ function parseAssignLike(before: Tokens, at: Keyword, value: Val, loc: Loc): Do 
 		// `a.b = c`, `.b = c`, `a."b" = c`, `."b" = c`, `a[b] = c`; and their `:=` variants.
 		if (token instanceof GroupSpace) {
 			const spaced = Tokens.of(token)
-			// todo: https://github.com/Microsoft/TypeScript/issues/6310
 			const [assignee, opType] = caseOp<{before: Tokens, after: Tokens}, [Tokens, Op<Val>]>(spaced.opSplitOnce(_ => isKeyword(Keywords.Colon, _)),
 				({before, after}) => [before, parseExpr(after)],
 				() => [spaced, null])
@@ -184,7 +190,6 @@ function parseAssign(localsTokens: Tokens, value: Val, loc: Loc): Assign {
 
 function parseAssert(negate: boolean, tokens: Tokens): Assert {
 	checkNonEmpty(tokens, _ => _.expectedAfterAssert)
-	// todo: https://github.com/Microsoft/TypeScript/issues/6310
 	const [condTokens, opThrown] =
 		caseOp<{before: Tokens, after: Tokens}, [Tokens, Op<Val>]>(tokens.opSplitOnce(_ => isKeyword(Keywords.Throw, _)),
 			({before, after}) => [before, parseExpr(after)],

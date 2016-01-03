@@ -1,5 +1,5 @@
 import {Suite} from 'benchmark'
-import Node from 'esast/lib/ast'
+import Node from 'esast/lib/Node'
 import {readFileSync} from 'fs'
 import {argv} from 'process'
 import {install} from 'source-map-support'
@@ -8,7 +8,7 @@ import Compiler from '../dist/Compiler'
 import CompileOptions from '../dist/private/CompileOptions'
 import {withContext} from '../dist/private/context'
 import lex from '../dist/private/lex/lex'
-import MsAst from '../dist/private/MsAst'
+import MsAst from '../dist/private/ast/MsAst'
 import parse from '../dist/private/parse/parse'
 import render from '../dist/private/render'
 import transpile from '../dist/private/transpile/transpile'
@@ -52,7 +52,7 @@ function doTest(isPerfTest: boolean): void {
 				lex() {
 					withContext(compileOptions, filename, () => lex(source))
 				},
-				parse() {
+				/*parse() {
 					withContext(compileOptions, filename, () => parse(rootToken))
 				},
 				verify() {
@@ -66,7 +66,7 @@ function doTest(isPerfTest: boolean): void {
 				},
 				all() {
 					compiler.compile(source, filename)
-				}
+				}*/
 			})
 		} else {
 			const logSize = false
@@ -97,7 +97,6 @@ function benchmark(tests: {[key: string]: () => void}): void {
 	suite.run()
 }
 
-//todo: type better
 function treeSize<A>(tree: A, treeType: any): {size: number, nLeaves: number} {
 	const visited = new Set()
 	let nLeaves = 0

@@ -1,5 +1,9 @@
 import Op from 'op/Op';
-import { Constructor, Funs, LocalDeclare, Loop, MethodImplLike } from '../MsAst';
+import { Constructor } from '../ast/Class';
+import { MethodImplLike } from '../ast/classTraitCommon';
+import { Funs } from '../ast/Fun';
+import { LocalDeclare } from '../ast/locals';
+import Loop from '../ast/Loop';
 import VerifyResults from '../VerifyResults';
 import SK from './SK';
 export declare let locals: Map<string, LocalDeclare>;

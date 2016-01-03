@@ -1,5 +1,7 @@
-import {BagSimple, Block, Call, Member, MsRegExp, New, ObjPair, ObjSimple, QuotePlain, QuoteSimple,
-	QuoteTaggedTemplate, SpecialVal, SpecialVals, Spread, With} from '../../dist/private/MsAst'
+import Block from '../../dist/private/ast/Block'
+import Call, {New, Spread} from '../../dist/private/ast/Call'
+import {BagSimple, Member, MsRegExp, ObjPair, ObjSimple, QuotePlain, QuoteSimple, QuoteTaggedTemplate, SpecialVal, SpecialVals} from '../../dist/private/ast/Val'
+import With from '../../dist/private/ast/With'
 import {aDeclare, blockPass, focusAccess, focusDeclare, loc, objectAccess, one, zero
 	} from './util/ast-util'
 import {test} from './util/test-asts'

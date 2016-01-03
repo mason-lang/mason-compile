@@ -1,6 +1,8 @@
 import Loc from 'esast/lib/Loc'
-import Op, {opIf} from 'op/Op'
-import Token, {Group, GroupLine, Keyword, Keywords, QuoteTokenPart} from '../Token'
+import Op, {opIf, orThrow} from 'op/Op'
+import Group, {GroupLine, QuoteTokenPart} from '../token/Group'
+import Keyword, {Keywords} from '../token/Keyword'
+import Token from '../token/Token'
 import {head, isEmpty, tail} from '../util'
 
 /**
@@ -202,8 +204,9 @@ export class Tokens extends Slice<Token> {
 		Returned length is keywords.length + 1.
 		It's recommended to destructure on this value.
 	*/
+	//...keywords
 	getKeywordSections(keywords: Array<Keywords>): [this, Array<Op<this>>] {
-		const out = new Array(keywords.length + 1).fill(null)
+		const out = new Array<Op<this>>(keywords.length + 1).fill(null)
 
 		let iNextKeyword = 0
 		let iTokenPrev = this.start
@@ -218,13 +221,38 @@ export class Tokens extends Slice<Token> {
 						// so this is the index for that keyword.
 						out[iNextKeyword] = this.chop(iTokenPrev, iToken)
 						iNextKeyword = iKeyword + 1
+						//todo: if taken last keyword, break out of both loops
 						iTokenPrev = iToken + 1
 					}
 			}
 		}
 
 		out[iNextKeyword] = this.chopStart(iTokenPrev)
-		return [head(out), tail(out)]
+		return [orThrow(head(out)), tail(out)]
+	}
+
+	//doc
+	takeKeywords(...keywords: Array<Keywords>): [Array<boolean>, this] {
+		const out = new Array<boolean>(keywords.length).fill(false)
+
+		let iNextKeyword = 0
+		let iTokenPrev = this.start
+
+		for (let iToken = this.start; iToken < this.end; iToken = iToken + 1) {
+			const token = this.tokens[iToken]
+			if (token instanceof Keyword) {
+				const kind = token.kind
+				for (let iKeyword = iNextKeyword; iKeyword < keywords.length; iKeyword = iKeyword + 1)
+					if (kind === keywords[iKeyword]) {
+						out[iNextKeyword] = true
+						iNextKeyword = iNextKeyword + 1
+						//todo: if taken last keyword, break out of both loops
+						iTokenPrev = iToken + 1
+					}
+			}
+		}
+
+		return [out, this.chopStart(iTokenPrev)]
 	}
 }
 

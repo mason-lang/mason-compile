@@ -11,7 +11,7 @@
     var verifyDo_1 = require('./verifyDo');
     var verifyVal_1 = require('./verifyVal');
     function verifySK(_, sk) {
-        if (sk === 1) verifyVal_1.verifyValP(_);else verifyDo_1.verifyDoP(_);
+        (sk === 1 ? verifyVal_1.ensureValAndVerify : verifyDo_1.ensureDoAndVerify)(_);
     }
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = verifySK;

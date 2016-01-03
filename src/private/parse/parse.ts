@@ -1,5 +1,5 @@
-import {Module} from '../MsAst'
-import {GroupBlock} from '../Token'
+import Module from '../ast/Module'
+import {GroupBlock} from '../token/Group'
 import parseModule from './parseModule'
 import Slice, {Lines} from './Slice'
 

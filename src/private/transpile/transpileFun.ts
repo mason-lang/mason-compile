@@ -1,53 +1,73 @@
-import {ArrayExpression, ArrowFunctionExpression, BlockStatement, CallExpression,
-	FunctionExpression, Identifier, LiteralNumber, ReturnStatement, Statement} from 'esast/lib/ast'
+import {ArrayExpression, CallExpression, LiteralNumber} from 'esast/lib/Expression'
+import {ArrowFunctionExpression, FunctionExpression} from 'esast/lib/Function'
+import Identifier from 'esast/lib/Identifier'
+import Statement, {BlockStatement, ReturnStatement} from 'esast/lib/Statement'
 import {identifier, member} from 'esast-create-util/lib/util'
 import Op, {flatMapOps, opIf, opMap} from 'op/Op'
 import {options} from '../context'
-import {Funs} from '../MsAst'
+import Fun, {Funs} from '../ast/Fun'
 import {cat} from '../util'
-import {DeclareLexicalThis} from './ast-constants'
 import {verifyResults, withFunKind} from './context'
-import {makeDeclare, msCall, opTypeCheckForLocalDeclare, t0, t2} from './util'
+import {DeclareLexicalThis} from './esast-constants'
+import transpileBlock from './transpileBlock'
+import {transpileLocalDeclare} from './transpileMisc'
+import {loc, makeDeclare, msCall, opTypeCheckForLocalDeclare} from './util'
 
+//who uses parameters?
+export default function transpileFun(
+		_: Fun,
+		leadStatements: Op<Array<Statement>> = null,
+		dontDeclareThis: boolean = false)
+		: ArrowFunctionExpression | FunctionExpression {
+	return loc(_, transpileFunNoLoc(_, leadStatements, dontDeclareThis))
+}
+
+//who uses parameters?
 /*
 leadStatements comes from constructor members
 dontDeclareThis: applies if this is the fun for a Constructor,
 which may declare `this` at a `super` call.
 */
-export default function(leadStatements: Op<Array<Statement>> = null, dontDeclareThis: boolean = false) {
-	return withFunKind(this.kind, () => {
+export function transpileFunNoLoc(
+		_: Fun,
+		leadStatements: Op<Array<Statement>> = null,
+		dontDeclareThis: boolean = false)
+		: ArrowFunctionExpression | FunctionExpression {
+	const {args, opRestArg, block, kind, opDeclareThis, isDo, opReturnType} = _
+
+	return withFunKind(kind, () => {
 		// TODO:ES6 use `...`f
-		const nArgs = new LiteralNumber(this.args.length)
-		const opDeclareRest = opMap(this.opRestArg, rest =>
+		const nArgs = new LiteralNumber(args.length)
+		const opDeclareRest = opMap(opRestArg, rest =>
 			makeDeclare(rest, new CallExpression(ArraySliceCall, [IdArguments, nArgs])))
 		const argChecks = opIf(options.checks, () =>
-			flatMapOps(this.args, opTypeCheckForLocalDeclare))
+			flatMapOps(args, opTypeCheckForLocalDeclare))
 
-		const opDeclareThis = opIf(this.opDeclareThis !== null && !dontDeclareThis, () =>
+		const opDeclareThisAst = opIf(opDeclareThis !== null && !dontDeclareThis, () =>
 			DeclareLexicalThis)
 
-		const lead = cat(opDeclareRest, opDeclareThis, argChecks, leadStatements)
+		const lead = cat(opDeclareRest, opDeclareThisAst, argChecks, leadStatements)
 
-		const body = () => t2(this.block, lead, this.opReturnType)
-		const args = this.args.map(t0)
-		const id = opMap(verifyResults.opName(this), identifier)
+		const body = () => transpileBlock(block, lead, opReturnType)
+		const argAsts = args.map(transpileLocalDeclare)
+		const id = opMap(verifyResults.opName(_), identifier)
 
-		switch (this.kind) {
+		switch (kind) {
 			case Funs.Plain:
 				// TODO:ES6 Should be able to use rest args in arrow function
-				return id === null && this.opDeclareThis === null && opDeclareRest === null ?
-					new ArrowFunctionExpression(args, body()) :
-					new FunctionExpression(id, args, body())
+				return id === null && opDeclareThis === null && opDeclareRest === null ?
+					new ArrowFunctionExpression(argAsts, body()) :
+					new FunctionExpression(id, argAsts, body())
 			case Funs.Async: {
-				const plainBody = t2(this.block, null, this.opReturnType)
+				const plainBody = transpileBlock(block, null, opReturnType)
 				const genFunc = new FunctionExpression(null, [], plainBody, {generator: true})
 				const ret = new ReturnStatement(msCall('async', genFunc))
-				return new FunctionExpression(id, args, new BlockStatement(cat(lead, ret)))
+				return new FunctionExpression(id, argAsts, new BlockStatement(cat(lead, ret)))
 			}
 			case Funs.Generator:
-				return new FunctionExpression(id, args, body(), {generator: true})
+				return new FunctionExpression(id, argAsts, body(), {generator: true})
 			default:
-				throw new Error(this.kind)
+				throw new Error(String(kind))
 		}
 	})
 }

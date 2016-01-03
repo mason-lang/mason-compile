@@ -1,6 +1,7 @@
 import {opEach, orThrow} from 'op/Op'
 import {check} from '../context'
-import {Class, Constructor, Field, MethodImplLike, MethodImpl, MethodGetter, MethodSetter} from '../MsAst'
+import Class, {Constructor, Field} from '../ast/Class'
+import {MethodImplLike, MethodImpl, MethodGetter, MethodSetter} from '../ast/classTraitCommon'
 import {results, withIife, withMethod, withMethods} from './context'
 import {setDeclareAccessed} from './locals'
 import {makeUseOptional} from './util'

@@ -4,15 +4,17 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../context', '../MsAst', '../Token', './checks', './parseBlock', './parseLine', './parseLocalDeclares', './parseName', './Slice', './tryTakeComment'], factory);
+        define(["require", "exports", 'op/Op', '../ast/locals', '../ast/Module', '../context', '../token/Group', '../token/Keyword', './checks', './parseBlock', './parseLine', './parseLocalDeclares', './parseName', './Slice', './tryTakeComment'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Op_1 = require('op/Op');
+    var locals_1 = require('../ast/locals');
+    var Module_1 = require('../ast/Module');
     var context_1 = require('../context');
-    var MsAst_1 = require('../MsAst');
-    var Token_1 = require('../Token');
+    var Group_1 = require('../token/Group');
+    var Keyword_1 = require('../token/Keyword');
     var checks_1 = require('./checks');
     var parseBlock_1 = require('./parseBlock');
     var parseLine_1 = require('./parseLine');
@@ -35,14 +37,14 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const doImports = _takeImportDos2[0];
         const rest1 = _takeImportDos2[1];
 
-        var _takeImports = takeImports(80, rest1);
+        var _takeImports = takeImports(122, rest1);
 
         var _takeImports2 = _slicedToArray(_takeImports, 2);
 
         const plainImports = _takeImports2[0];
         const rest2 = _takeImports2[1];
 
-        var _takeImports3 = takeImports(82, rest2);
+        var _takeImports3 = takeImports(124, rest2);
 
         var _takeImports4 = _slicedToArray(_takeImports3, 2);
 
@@ -51,14 +53,14 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
 
         const moduleLines = parseLine_1.parseLines(rest3);
         const imports = plainImports.concat(lazyImports);
-        return new MsAst_1.Module(lines.loc, context_1.pathOptions.moduleName, opComment, doImports, imports, moduleLines);
+        return new Module_1.default(lines.loc, context_1.pathOptions.moduleName, opComment, doImports, imports, moduleLines);
     }
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = parseModule;
     function takeImports(importKeywordKind, lines) {
         if (!lines.isEmpty()) {
             const line = lines.headSlice();
-            if (Token_1.isKeyword(importKeywordKind, line.head())) return [parseImports(importKeywordKind, line.tail()), lines.tail()];
+            if (Keyword_1.isKeyword(importKeywordKind, line.head())) return [parseImports(importKeywordKind, line.tail()), lines.tail()];
         }
         return [[], lines];
     }
@@ -72,23 +74,23 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
 
             const rest = line.tail();
 
-            var _parseThingsImported = parseThingsImported(rest, name, importKeywordKind === 82);
+            var _parseThingsImported = parseThingsImported(rest, name, importKeywordKind === 124);
 
             const imported = _parseThingsImported.imported;
             const opImportDefault = _parseThingsImported.opImportDefault;
 
-            return new MsAst_1.Import(line.loc, path, imported, opImportDefault);
+            return new Module_1.Import(line.loc, path, imported, opImportDefault);
         });
     }
     function takeImportDos(lines) {
         if (!lines.isEmpty()) {
             const line = lines.headSlice();
-            if (Token_1.isKeyword(81, line.head())) return [parseImportDos(line.tail()), lines.tail()];
+            if (Keyword_1.isKeyword(123, line.head())) return [parseImportDos(line.tail()), lines.tail()];
         }
         return [[], lines];
     }
     function parseImportDos(tokens) {
-        const lines = parseBlock_1.justBlock(81, tokens);
+        const lines = parseBlock_1.justBlock(123, tokens);
         return lines.mapSlices(line => {
             var _takeRequire = takeRequire(line);
 
@@ -100,13 +102,13 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
             const rest = _takeRequire2[1];
 
             checks_1.checkEmpty(rest, _ => _.unexpectedAfterImportDo);
-            return new MsAst_1.ImportDo(line.loc, path);
+            return new Module_1.ImportDo(line.loc, path);
         });
     }
     function parseThingsImported(tokens, name, isLazy) {
-        const importDefault = () => MsAst_1.LocalDeclare.untyped(tokens.loc, name, isLazy ? 1 : 0);
+        const importDefault = () => locals_1.LocalDeclare.untyped(tokens.loc, name, isLazy ? 1 : 0);
         if (tokens.isEmpty()) return { imported: [], opImportDefault: importDefault() };else {
-            var _ref = Token_1.isKeyword(60, tokens.head()) ? [importDefault(), tokens.tail()] : [null, tokens];
+            var _ref = Keyword_1.isKeyword(102, tokens.head()) ? [importDefault(), tokens.tail()] : [null, tokens];
 
             var _ref2 = _slicedToArray(_ref, 2);
 
@@ -126,7 +128,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     }
     function parseRequire(token) {
         return Op_1.caseOp(parseName_1.tryParseName(token), name => ({ path: name, name: name }), () => {
-            if (token instanceof Token_1.GroupSpace) {
+            if (token instanceof Group_1.GroupSpace) {
                 const tokens = Slice_1.Tokens.of(token);
                 let rest = tokens;
                 const parts = [];
@@ -148,7 +150,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
                     parts.push(parseName_1.default(rest.head()));
                     rest = rest.tail();
                     if (rest.isEmpty()) break;
-                    checks_1.checkKeyword(52, rest.head());
+                    checks_1.checkKeyword(94, rest.head());
                     rest = rest.tail();
                 }
                 return { path: parts.join('/'), name: parts[parts.length - 1] };
@@ -156,12 +158,12 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         });
     }
     function tryTakeNDots(token) {
-        if (token instanceof Token_1.Keyword) switch (token.kind) {
-            case 52:
+        if (token instanceof Keyword_1.default) switch (token.kind) {
+            case 94:
                 return 1;
-            case 53:
+            case 95:
                 return 2;
-            case 54:
+            case 96:
                 return 3;
             default:
                 return null;

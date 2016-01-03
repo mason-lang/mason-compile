@@ -1,4 +1,4 @@
-import {Module} from '../MsAst'
+import Module from '../ast/Module'
 import VerifyResults from '../VerifyResults'
 import {results, setup, tearDown} from './context'
 import {warnUnusedLocals} from './locals'

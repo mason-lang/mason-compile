@@ -2,16 +2,26 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../context', '../MsAst', './context', './locals', './util', './verifyBlock', './verifyClass', './verifyFor', './verifyFunLike', './verifyFunLike', './verifyTrait', './verifyValOrDo'], factory);
+        define(["require", "exports", 'op/Op', '../context', '../ast/Block', '../ast/booleans', '../ast/Call', '../ast/Class', '../ast/Fun', '../ast/LineContent', '../ast/locals', '../ast/Loop', '../ast/Method', '../ast/Trait', '../ast/Val', './context', './locals', './util', './verifyBlock', './verifyClass', './verifyFor', './verifyFunLike', './verifyFunLike', './verifyTrait', './verifyValOrDo'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Op_1 = require('op/Op');
     var context_1 = require('../context');
-    var MsAst_1 = require('../MsAst');
+    var Block_1 = require('../ast/Block');
+    var booleans_1 = require('../ast/booleans');
+    var Call_1 = require('../ast/Call');
+    var Class_1 = require('../ast/Class');
+    var Fun_1 = require('../ast/Fun');
+    var LineContent_1 = require('../ast/LineContent');
+    var locals_1 = require('../ast/locals');
+    var Loop_1 = require('../ast/Loop');
+    var Method_1 = require('../ast/Method');
+    var Trait_1 = require('../ast/Trait');
+    var Val_1 = require('../ast/Val');
     var context_2 = require('./context');
-    var locals_1 = require('./locals');
+    var locals_2 = require('./locals');
     var util_1 = require('./util');
     var verifyBlock_1 = require('./verifyBlock');
     var verifyClass_1 = require('./verifyClass');
@@ -21,70 +31,70 @@
     var verifyTrait_1 = require('./verifyTrait');
     var verifyValOrDo_1 = require('./verifyValOrDo');
     function verifyVal(_) {
-        if (_ instanceof MsAst_1.BagSimple) util_1.verifyEachValOrSpread(_.parts);else if (_ instanceof MsAst_1.BlockWrap) context_2.withIife(() => verifyBlock_1.verifyBlockVal(_.block));else if (_ instanceof MsAst_1.Class) verifyClass_1.default(_);else if (_ instanceof MsAst_1.ForBag) locals_1.verifyAndPlusLocal(_.built, () => verifyFor_1.default(_));else if (_ instanceof MsAst_1.Fun) verifyFunLike_2.verifyFun(_);else if (_ instanceof MsAst_1.GetterFun) util_1.verifyName(_.name);else if (_ instanceof MsAst_1.InstanceOf) {
+        if (_ instanceof Val_1.BagSimple) util_1.verifyEachValOrSpread(_.parts);else if (_ instanceof Block_1.BlockWrap) context_2.withIife(() => verifyBlock_1.verifyBlockVal(_.block));else if (_ instanceof Class_1.default) verifyClass_1.default(_);else if (_ instanceof Loop_1.ForBag) locals_2.verifyAndPlusLocal(_.built, () => verifyFor_1.default(_));else if (_ instanceof Fun_1.default) verifyFunLike_2.verifyFun(_);else if (_ instanceof Fun_1.GetterFun) util_1.verifyMemberName(_.name);else if (_ instanceof Val_1.InstanceOf) {
             const instance = _.instance;
             const type = _.type;
 
             verifyVal(instance);
             verifyVal(type);
-        } else if (_ instanceof MsAst_1.Lazy) locals_1.withBlockLocals(() => verifyVal(_.value));else if (_ instanceof MsAst_1.LocalAccess) {
+        } else if (_ instanceof Val_1.Lazy) locals_2.withBlockLocals(() => verifyVal(_.value));else if (_ instanceof locals_1.LocalAccess) {
             const loc = _.loc;
             const name = _.name;
 
             const declare = context_2.locals.get(name);
             if (declare === undefined) {
-                const builtinPath = Op_1.orThrow(context_1.options.opBuiltinPath(name), () => locals_1.missingLocalFail(loc, name));
+                const builtinPath = Op_1.orThrow(context_1.options.opBuiltinPath(name), () => locals_2.missingLocalFail(loc, name));
                 context_2.results.accessBuiltin(name, builtinPath);
             } else {
                 context_2.results.localAccessToDeclare.set(_, declare);
-                locals_1.setDeclareAccessed(declare, _);
+                locals_2.setDeclareAccessed(declare, _);
             }
-        } else if (_ instanceof MsAst_1.Logic) {
+        } else if (_ instanceof booleans_1.Logic) {
             const loc = _.loc;
             const args = _.args;
 
             context_1.check(args.length > 1, loc, _ => _.argsLogic);
             verifyEachVal(args);
-        } else if (_ instanceof MsAst_1.Member) {
+        } else if (_ instanceof Val_1.Member) {
             const object = _.object;
             const name = _.name;
 
             verifyVal(object);
-            util_1.verifyName(name);
-        } else if (_ instanceof MsAst_1.MemberFun) {
+            util_1.verifyMemberName(name);
+        } else if (_ instanceof Fun_1.MemberFun) {
             const opObject = _.opObject;
             const name = _.name;
 
             verifyOpVal(opObject);
-            util_1.verifyName(name);
-        } else if (_ instanceof MsAst_1.Method) {
+            util_1.verifyMemberName(name);
+        } else if (_ instanceof Method_1.default) {
             const fun = _.fun;
 
-            if (fun instanceof MsAst_1.Fun) util_1.makeUseOptional(Op_1.orThrow(fun.opDeclareThis));
+            if (fun instanceof Fun_1.default) util_1.makeUseOptional(Op_1.orThrow(fun.opDeclareThis));
             fun.args.forEach(util_1.makeUseOptional);
             Op_1.opEach(fun.opRestArg, util_1.makeUseOptional);
             verifyFunLike_1.default(fun);
-        } else if (_ instanceof MsAst_1.Not) {
-            verifyVal(_.arg);
-        } else if (_ instanceof MsAst_1.NumberLiteral) {} else if (_ instanceof MsAst_1.MsRegExp) {
+        } else if (_ instanceof Val_1.MsRegExp) {
             const loc = _.loc;
             const parts = _.parts;
 
-            parts.forEach(util_1.verifyName);
-            const firstPart = parts[0];
-            if (parts.length === 1 && typeof firstPart === 'string') try {
-                new RegExp(firstPart);
+            parts.forEach(util_1.verifyMemberName);
+            const onlyPart = parts[0];
+            if (parts.length === 1 && typeof onlyPart === 'string') try {
+                new RegExp(onlyPart);
             } catch (err) {
                 if (!(err instanceof SyntaxError)) throw err;
-                throw context_1.fail(loc, _ => _.badRegExp(firstPart));
+                throw context_1.fail(loc, _ => _.badRegExp(onlyPart));
             }
-        } else if (_ instanceof MsAst_1.New) {
+        } else if (_ instanceof Call_1.New) {
             const type = _.type;
             const args = _.args;
 
             verifyVal(type);
             util_1.verifyEachValOrSpread(args);
-        } else if (_ instanceof MsAst_1.ObjSimple) {
+        } else if (_ instanceof booleans_1.Not) {
+            verifyVal(_.arg);
+        } else if (_ instanceof Val_1.NumberLiteral) {} else if (_ instanceof Val_1.ObjSimple) {
             const keys = new Set();
             for (const _ref of _.pairs) {
                 const key = _ref.key;
@@ -95,62 +105,60 @@
                 keys.add(key);
                 verifyVal(value);
             }
-        } else if (_ instanceof MsAst_1.Pipe) {
+        } else if (_ instanceof Val_1.Pipe) {
             const loc = _.loc;
             const startValue = _.startValue;
             const pipes = _.pipes;
 
             verifyVal(startValue);
-            for (const pipe of pipes) locals_1.registerAndPlusLocal(MsAst_1.LocalDeclare.focus(loc), () => {
+            for (const pipe of pipes) locals_2.registerAndPlusLocal(locals_1.LocalDeclare.focus(loc), () => {
                 verifyVal(pipe);
             });
-        } else if (_ instanceof MsAst_1.QuotePlain) {
-            _.parts.forEach(util_1.verifyName);
-        } else if (_ instanceof MsAst_1.QuoteSimple) {} else if (_ instanceof MsAst_1.QuoteTaggedTemplate) {
+        } else if (_ instanceof Val_1.QuotePlain) {
+            _.parts.forEach(util_1.verifyMemberName);
+        } else if (_ instanceof Val_1.QuoteSimple) {} else if (_ instanceof Val_1.QuoteTaggedTemplate) {
             const tag = _.tag;
             const quote = _.quote;
 
             verifyVal(tag);
             verifyVal(quote);
-        } else if (_ instanceof MsAst_1.Range) {
+        } else if (_ instanceof Val_1.Range) {
             const start = _.start;
-            const end = _.end;
+            const opEnd = _.opEnd;
 
             verifyVal(start);
-            verifyOpVal(end);
-        } else if (_ instanceof MsAst_1.SimpleFun) {
+            verifyOpVal(opEnd);
+        } else if (_ instanceof Fun_1.SimpleFun) {
             const loc = _.loc;
             const value = _.value;
 
             context_2.withFun(0, () => {
-                locals_1.registerAndPlusLocal(MsAst_1.LocalDeclare.focus(loc), () => {
+                locals_2.registerAndPlusLocal(locals_1.LocalDeclare.focus(loc), () => {
                     verifyVal(value);
                 });
             });
-        } else if (_ instanceof MsAst_1.SpecialVal) {
+        } else if (_ instanceof Val_1.SpecialVal) {
             util_1.setName(_);
-        } else if (_ instanceof MsAst_1.Sub) {
+        } else if (_ instanceof Val_1.Sub) {
             const subbed = _.subbed;
             const args = _.args;
 
             verifyVal(subbed);
             verifyEachVal(args);
-        } else if (_ instanceof MsAst_1.SuperMember) {
+        } else if (_ instanceof Class_1.SuperMember) {
             const loc = _.loc;
             const name = _.name;
 
             context_1.check(context_2.method !== null, loc, _ => _.superNeedsMethod);
-            util_1.verifyName(name);
-        } else if (_ instanceof MsAst_1.Trait) verifyTrait_1.default(_);else {
-            verifyValOrDo_1.default(_, 1);
-        }
+            util_1.verifyMemberName(name);
+        } else if (_ instanceof Trait_1.default) verifyTrait_1.default(_);else verifyValOrDo_1.default(_, 1);
     }
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = verifyVal;
-    function verifyValP(_) {
-        if (MsAst_1.isVal(_)) verifyVal(_);else throw context_1.fail(_.loc, _ => _.statementAsValue);
+    function ensureValAndVerify(_) {
+        if (LineContent_1.isVal(_)) verifyVal(_);else throw context_1.fail(_.loc, _ => _.statementAsValue);
     }
-    exports.verifyValP = verifyValP;
+    exports.ensureValAndVerify = ensureValAndVerify;
     function verifyOpVal(_) {
         if (Op_1.nonNull(_)) verifyVal(_);
     }

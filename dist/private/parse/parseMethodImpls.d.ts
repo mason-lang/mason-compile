@@ -1,5 +1,5 @@
 import Op from 'op/Op';
-import { ClassTraitDo, MethodImplLike } from '../MsAst';
+import { ClassTraitDo, MethodImplLike } from '../ast/classTraitCommon';
 import { Lines } from './Slice';
 export default function parseMethodImpls(lines: Lines): Array<MethodImplLike>;
 export declare function takeStatics(lines: Lines): [Array<MethodImplLike>, Lines];

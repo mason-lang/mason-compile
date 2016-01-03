@@ -2,14 +2,15 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'esast/lib/Loc', '../context', '../Token', '../util', './chars', './groupContext', './lexName', './lexPlain', './sourceContext'], factory);
+        define(["require", "exports", 'esast/lib/Loc', '../context', '../token/Group', '../token/Token', '../util', './chars', './groupContext', './lexName', './lexPlain', './sourceContext'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Loc_1 = require('esast/lib/Loc');
     var context_1 = require('../context');
-    var Token_1 = require('../Token');
+    var Group_1 = require('../token/Group');
+    var Token_1 = require('../token/Token');
     var util_1 = require('../util');
     var chars_1 = require('./chars');
     var groupContext_1 = require('./groupContext');
@@ -20,7 +21,7 @@
         const quoteIndent = indent + 1;
         const isIndented = sourceContext_1.tryEatNewline();
         if (isIndented) {
-            const actualIndent = sourceContext_1.skipWhileEquals(chars_1.Char.Tab);
+            const actualIndent = sourceContext_1.skipWhileEquals(9);
             context_1.check(actualIndent === quoteIndent, sourceContext_1.pos, _ => _.tooMuchIndentQuote);
         }
         let read = '';
@@ -39,20 +40,20 @@
         function locSingle() {
             return Loc_1.default.singleChar(sourceContext_1.pos());
         }
-        const groupType = isRegExp ? Token_1.GroupRegExp : Token_1.GroupQuote;
+        const groupType = isRegExp ? Group_1.GroupRegExp : Group_1.GroupQuote;
         groupContext_1.openGroup(locSingle().start, groupType);
         eatChars: for (;;) {
             const char = sourceContext_1.eat();
             switch (char) {
-                case chars_1.Char.Backslash:
+                case 92:
                     {
                         const next = sourceContext_1.eat();
-                        if (next === chars_1.Char.Hash || next === (isRegExp ? chars_1.Char.Backtick : chars_1.Char.Quote)) addChar(next);else add(`\\${ String.fromCharCode(next) }`);
+                        if (next === 35 || next === (isRegExp ? 96 : 34)) addChar(next);else add(`\\${ String.fromCharCode(next) }`);
                         break;
                     }
-                case chars_1.Char.Hash:
+                case 35:
                     maybeOutputRead();
-                    if (sourceContext_1.tryEat(chars_1.Char.OpenParenthesis)) {
+                    if (sourceContext_1.tryEat(40)) {
                         const l = locSingle();
                         groupContext_1.openInterpolation(l);
                         lexPlain_1.default(true);
@@ -63,26 +64,26 @@
                         lexName_1.default(startPos, true);
                     }
                     break;
-                case chars_1.Char.Newline:
+                case 10:
                     {
                         const originalPos = sourceContext_1.pos();
                         originalPos.column = originalPos.column - 1;
                         context_1.check(isIndented, sourceContext_1.pos, _ => _.unclosedQuote);
                         const numNewlines = sourceContext_1.skipNewlines();
-                        const newIndent = sourceContext_1.skipWhileEquals(chars_1.Char.Tab);
+                        const newIndent = sourceContext_1.skipWhileEquals(9);
                         if (newIndent < quoteIndent) {
                             sourceContext_1.stepBackMany(originalPos, numNewlines + newIndent);
-                            util_1.assert(sourceContext_1.peek() === chars_1.Char.Newline);
+                            util_1.assert(sourceContext_1.peek() === 10);
                             break eatChars;
                         } else add('\n'.repeat(numNewlines) + '\t'.repeat(newIndent - quoteIndent));
                         break;
                     }
-                case chars_1.Char.Backtick:
+                case 96:
                     if (isRegExp) {
                         if (isIndented) addChar(char);else break eatChars;
                     } else add('\\\`');
                     break;
-                case chars_1.Char.Quote:
+                case 34:
                     if (!isRegExp && !isIndented) break eatChars;else addChar(char);
                     break;
                 default:
@@ -104,13 +105,13 @@
     }
     function isName(str) {
         const cc0 = str.charCodeAt(0);
-        if (chars_1.isDigit(cc0) || cc0 === chars_1.Char.Tilde) return false;
+        if (chars_1.isDigit(cc0) || cc0 === 126) return false;
         for (let i = 0; i < str.length; i = i + 1) if (!chars_1.isNameCharacter(str.charCodeAt(i))) return false;
         return true;
     }
     function lexRegExpFlags() {
         let flags = '';
-        for (const ch of [chars_1.Char.G, chars_1.Char.I, chars_1.Char.M, chars_1.Char.Y]) if (sourceContext_1.tryEat(ch)) flags = flags + String.fromCharCode(ch);
+        for (const ch of [71, 73, 77, 89]) if (sourceContext_1.tryEat(ch)) flags = flags + String.fromCharCode(ch);
         return flags;
     }
 });

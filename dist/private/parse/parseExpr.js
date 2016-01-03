@@ -4,16 +4,25 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', 'esast/lib/Loc', '../context', '../MsAst', '../Token', '../util', './checks', './parseBlock', './parseClass', './parseCase', './parseDel', './parseExcept', './parseFor', './parseFun', './parseMethod', './parseSingle', './parseSwitch', './parseTrait', './parseLocalDeclares', './Slice'], factory);
+        define(["require", "exports", 'op/Op', 'esast/lib/Loc', '../ast/Await', '../ast/booleans', '../ast/Call', '../ast/Class', '../ast/locals', '../ast/Val', '../ast/With', '../ast/Yield', '../context', '../token/Group', '../token/Keyword', '../token/Token', '../util', './checks', './parseBlock', './parseClass', './parseCase', './parseDel', './parseExcept', './parseFor', './parseFun', './parseMethod', './parseSingle', './parseSwitch', './parseTrait', './parseLocalDeclares', './Slice'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Op_1 = require('op/Op');
     var Loc_1 = require('esast/lib/Loc');
+    var Await_1 = require('../ast/Await');
+    var booleans_1 = require('../ast/booleans');
+    var Call_1 = require('../ast/Call');
+    var Class_1 = require('../ast/Class');
+    var locals_1 = require('../ast/locals');
+    var Val_1 = require('../ast/Val');
+    var With_1 = require('../ast/With');
+    var Yield_1 = require('../ast/Yield');
     var context_1 = require('../context');
-    var MsAst_1 = require('../MsAst');
-    var Token_1 = require('../Token');
+    var Group_1 = require('../token/Group');
+    var Keyword_1 = require('../token/Keyword');
+    var Token_1 = require('../token/Token');
     var util_1 = require('../util');
     var checks_1 = require('./checks');
     var parseBlock_1 = require('./parseBlock');
@@ -30,7 +39,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     var parseLocalDeclares_1 = require('./parseLocalDeclares');
     var Slice_1 = require('./Slice');
     function parseExpr(tokens) {
-        return Op_1.caseOp(tokens.opSplitMany(_ => Token_1.isKeyword(92, _)), _ => parseObjSimple(tokens.loc, _), () => parseExprPlain(tokens));
+        return Op_1.caseOp(tokens.opSplitMany(_ => Keyword_1.isKeyword(134, _)), _ => parseObjSimple(tokens.loc, _), () => parseExprPlain(tokens));
     }
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = parseExpr;
@@ -46,7 +55,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
             return util_1.cat(before.map(parseSingle_1.default), keywordExpr(at, after));
         }, () => {
             const last = tokens.last();
-            if (last instanceof Token_1.GroupParenthesis) {
+            if (last instanceof Group_1.GroupParenthesis) {
                 const h = Slice_1.Tokens.of(last).head();
                 if (isSplitKeyword(h)) context_1.warn(h.loc, _ => _.extraParens);
             }
@@ -71,97 +80,97 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
             const tokensValue = i === splits.length - 2 ? splits[i + 1].before : splits[i + 1].before.rtail();
             const value = parseExprPlain(tokensValue);
             const loc = new Loc_1.default(nameToken.loc.start, tokensValue.loc.end);
-            pairs.push(new MsAst_1.ObjPair(loc, name, value));
+            pairs.push(new Val_1.ObjPair(loc, name, value));
         }
-        const val = new MsAst_1.ObjSimple(loc, pairs);
+        const val = new Val_1.ObjSimple(loc, pairs);
         if (tokensCaller.isEmpty()) return val;else {
             const parts = parseExprParts(tokensCaller);
-            return new MsAst_1.Call(loc, util_1.head(parts), util_1.cat(util_1.tail(parts), val));
+            return new Call_1.default(loc, util_1.head(parts), util_1.cat(util_1.tail(parts), val));
         }
     }
     function parseName(token) {
-        if (token instanceof Token_1.Name) return token.name;else throw context_1.fail(token.loc, _ => _.expectedName(token));
+        if (token instanceof Token_1.NameToken) return token.name;else throw context_1.fail(token.loc, _ => _.expectedName(token));
     }
     function keywordExpr(at, after) {
         switch (at.kind) {
-            case 36:
-            case 94:
-                {
-                    const kind = at.kind === 36 ? 0 : 1;
-                    return new MsAst_1.Logic(at.loc, kind, parseExprParts(after));
-                }
-            case 40:
-                return new MsAst_1.Await(at.loc, parseExprPlain(after));
-            case 43:
-                return parseCase_1.default(false, after);
-            case 46:
-                return parseClass_1.default(after);
-            case 45:
-                return parseCond(after);
-            case 50:
-                return parseDel_1.default(after);
-            case 56:
-                return parseExcept_1.default(after);
-            case 61:
-                return parseFor_1.parseFor(after);
-            case 62:
-                return parseFor_1.parseForAsync(after);
-            case 63:
-                return parseFor_1.parseForBag(after);
-            case 65:
-            case 66:
-            case 67:
-            case 68:
-            case 69:
-            case 70:
-            case 71:
-            case 72:
-            case 73:
-            case 74:
-            case 75:
-            case 76:
-                return parseFun_1.default(at.kind, after);
             case 78:
-            case 110:
-                return parseConditional(at.kind, after);
+            case 137:
+                {
+                    const kind = at.kind === 78 ? 0 : 1;
+                    return new booleans_1.Logic(at.loc, kind, parseExprParts(after));
+                }
+            case 82:
+                return new Await_1.default(at.loc, parseExprPlain(after));
+            case 85:
+                return parseCase_1.default(false, after);
+            case 88:
+                return parseClass_1.default(after);
+            case 87:
+                return parseCond(after);
+            case 92:
+                return parseDel_1.default(after);
+            case 98:
+                return parseExcept_1.default(after);
+            case 103:
+                return parseFor_1.parseFor(after);
+            case 104:
+                return parseFor_1.parseForAsync(after);
             case 105:
+                return parseFor_1.parseForBag(after);
+            case 107:
+            case 108:
+            case 109:
+            case 110:
+            case 111:
+            case 112:
+            case 113:
+            case 114:
+            case 115:
+            case 116:
+            case 117:
+            case 118:
+                return parseFun_1.default(at.kind, after);
+            case 120:
+            case 153:
+                return parseConditional(at.kind, after);
+            case 148:
                 return parseTrait_1.default(after);
-            case 86:
+            case 128:
                 return parseMethod_1.default(after);
-            case 89:
+            case 131:
                 {
                     const parts = parseExprParts(after);
-                    return new MsAst_1.New(at.loc, util_1.head(parts), util_1.tail(parts));
+                    return new Call_1.New(at.loc, util_1.head(parts), util_1.tail(parts));
                 }
-            case 90:
-                return new MsAst_1.Not(at.loc, parseExprPlain(after));
-            case 96:
+            case 132:
+                return new booleans_1.Not(at.loc, parseExprPlain(after));
+            case 139:
                 return parsePipe(after);
-            case 99:
-                return new MsAst_1.SuperCall(at.loc, parseExprParts(after));
-            case 101:
+            case 142:
+                return new Class_1.SuperCall(at.loc, parseExprParts(after));
+            case 144:
                 return parseSwitch_1.default(false, after);
-            case 111:
+            case 155:
                 return parseWith(after);
-            case 112:
-                return new MsAst_1.Yield(at.loc, Op_1.opIf(!after.isEmpty(), () => parseExprPlain(after)));
-            case 113:
-                return new MsAst_1.YieldTo(at.loc, parseExprPlain(after));
+            case 156:
+                return new Yield_1.Yield(at.loc, Op_1.opIf(!after.isEmpty(), () => parseExprPlain(after)));
+            case 157:
+                return new Yield_1.YieldTo(at.loc, parseExprPlain(after));
             default:
                 throw new Error(String(at.kind));
         }
     }
-    const exprSplitKeywords = new Set([36, 40, 43, 46, 45, 50, 56, 61, 62, 63, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 78, 86, 89, 90, 94, 96, 99, 101, 105, 110, 111, 112, 113]);
+    const exprSplitKeywords = new Set([78, 82, 85, 88, 87, 92, 98, 103, 104, 105, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 120, 128, 131, 132, 137, 139, 142, 144, 148, 153, 155, 156, 157]);
     function isSplitKeyword(_) {
-        return Token_1.isAnyKeyword(exprSplitKeywords, _);
+        return Keyword_1.isAnyKeyword(exprSplitKeywords, _);
     }
     function parseExprPlain(tokens) {
         checks_1.checkNonEmpty(tokens, _ => _.expectedExpression);
         const parts = parseExprParts(tokens);
         if (parts.length === 1) {
-            if (tokens.head() instanceof Token_1.GroupParenthesis && !(util_1.head(parts) instanceof MsAst_1.ObjSimple)) context_1.warn(tokens.loc, _ => _.extraParens);
+            if (tokens.head() instanceof Group_1.GroupParenthesis && !(util_1.head(parts) instanceof Val_1.ObjSimple)) context_1.warn(tokens.loc, _ => _.extraParens);
             return util_1.head(parts);
-        } else return new MsAst_1.Call(tokens.loc, util_1.head(parts), util_1.tail(parts));
+        } else return new Call_1.default(tokens.loc, util_1.head(parts), util_1.tail(parts));
     }
     function parseCond(tokens) {
         var _parseNExprParts = parseNExprParts(tokens, 3, _ => _.argsCond);
@@ -172,7 +181,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const then = _parseNExprParts2[1];
         const _else = _parseNExprParts2[2];
 
-        return new MsAst_1.Cond(tokens.loc, cond, then, _else);
+        return new booleans_1.Cond(tokens.loc, cond, then, _else);
     }
     function parseConditional(kind, tokens) {
         var _parseBlock_1$beforeA = parseBlock_1.beforeAndOpBlock(tokens);
@@ -189,7 +198,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const condition = _Op_1$caseOp2[0];
         const result = _Op_1$caseOp2[1];
 
-        return new MsAst_1.Conditional(tokens.loc, condition, result, kind === 110);
+        return new booleans_1.Conditional(tokens.loc, condition, result, kind === 153);
     }
     function parsePipe(tokens) {
         var _parseBlock_1$beforeA3 = parseBlock_1.beforeAndBlock(tokens);
@@ -199,7 +208,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const before = _parseBlock_1$beforeA4[0];
         const block = _parseBlock_1$beforeA4[1];
 
-        return new MsAst_1.Pipe(tokens.loc, parseExpr(before), block.mapSlices(parseExpr));
+        return new Val_1.Pipe(tokens.loc, parseExpr(before), block.mapSlices(parseExpr));
     }
     function parseWith(tokens) {
         var _parseBlock_1$beforeA5 = parseBlock_1.beforeAndBlock(tokens);
@@ -209,20 +218,20 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const before = _parseBlock_1$beforeA6[0];
         const block = _parseBlock_1$beforeA6[1];
 
-        var _Op_1$caseOp3 = Op_1.caseOp(before.opSplitOnce(_ => Token_1.isKeyword(37, _)), _ref2 => {
+        var _Op_1$caseOp3 = Op_1.caseOp(before.opSplitOnce(_ => Keyword_1.isKeyword(79, _)), _ref2 => {
             let before = _ref2.before;
             let after = _ref2.after;
 
             context_1.check(after.size() === 1, after.loc, _ => _.asToken);
             return [parseExprPlain(before), parseLocalDeclares_1.parseLocalDeclare(after.head())];
-        }, () => [parseExprPlain(before), MsAst_1.LocalDeclare.focus(tokens.loc)]);
+        }, () => [parseExprPlain(before), locals_1.LocalDeclare.focus(tokens.loc)]);
 
         var _Op_1$caseOp4 = _slicedToArray(_Op_1$caseOp3, 2);
 
         const val = _Op_1$caseOp4[0];
         const declare = _Op_1$caseOp4[1];
 
-        return new MsAst_1.With(tokens.loc, declare, val, parseBlock_1.default(block));
+        return new With_1.default(tokens.loc, declare, val, parseBlock_1.default(block));
     }
 });
 //# sourceMappingURL=parseExpr.js.map

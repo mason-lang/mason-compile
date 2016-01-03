@@ -1,4 +1,4 @@
-import {MemberSet, Pass, Setters, SpecialDo, SpecialDos} from '../../dist/private/MsAst'
+import {MemberSet, Pass, Setters, SpecialDo, SpecialDos} from '../../dist/private/ast/Do'
 import {loc, one, zero} from './util/ast-util'
 import {test} from './util/test-asts'
 

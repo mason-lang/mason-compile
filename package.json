@@ -21,11 +21,12 @@
 		"esast": "esast/esast",
 		"esast-create-util": "esast/esast-create-util",
 		"esast-render-fast": "esast/esast-render-fast",
-		"op": "esast/op"
+		"op": "esast/op",
+		"typescript-char": "mason-lang/typescript-char"
 	},
 	"devDependencies": {
-		"babel-plugin-transform-es2015-destructuring": "6.3.15",
-		"babel-plugin-transform-es2015-parameters": "6.3.26",
+		"babel-plugin-transform-es2015-destructuring": "6.4.0",
+		"babel-plugin-transform-es2015-parameters": "6.4.2",
 		"gulp": "3.9.0",
 		"gulp-babel": "6.1.1",
 		"gulp-sourcemaps": "1.6.0",
@@ -34,9 +35,9 @@
 		"mocha": "2.3.4",
 		"tslint": "3.2.1",
 		"typedoc": "0.3.12",
-		"typescript": "1.8.0-dev.20151231",
+		"typescript": "1.8.0-dev.20160110",
 
-		"benchmark": "1.0.0",
+		"benchmark": "2.0.0",
 		"microtime": "2.0.0",
 		"source-map-support": "0.4.0"
 	}

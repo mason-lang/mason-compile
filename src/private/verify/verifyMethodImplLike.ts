@@ -1,26 +1,28 @@
 import {orThrow} from 'op/Op'
-import {ClassTraitDo, MethodGetter, MethodImpl, MethodImplLike, MethodSetter} from '../MsAst'
+//rename this file to verifyClassTraitCommon
+import {ClassTraitDo, MethodGetter, MethodImpl, MethodImplLike, MethodSetter} from '../ast/classTraitCommon'
 import {assert} from '../util'
 import {withMethod} from './context'
 import {verifyAndPlusLocal, verifyAndPlusLocals} from './locals'
-import {makeUseOptional, verifyName} from './util'
+import {makeUseOptional, verifyMemberName} from './util'
 import {verifyBlockDo, verifyBlockVal} from './verifyBlock'
+import {verifyFun} from './verifyFunLike'
 import verifyVal from './verifyVal'
 
 export default function verifyMethodImplLike(_: MethodImplLike): void {
 	function doit(doVerify: () => void): void {
-		verifyName(_.symbol)
+		verifyMemberName(_.symbol)
 		withMethod(_, doVerify)
 	}
 
 	if (_ instanceof MethodImpl) {
 		const {fun} = _
 		doit(() => {
-			//opDeclareThis always exists, let type system know this
+			// fun always has opDeclareThis
 			makeUseOptional(orThrow(fun.opDeclareThis))
-			//verifyFun
-			verifyVal(fun)
+			verifyFun(fun)
 		})
+
 	} else if (_ instanceof MethodGetter) {
 		const {declareThis, block} = _
 		doit(() => {
@@ -29,6 +31,7 @@ export default function verifyMethodImplLike(_: MethodImplLike): void {
 				verifyBlockVal(block)
 			})
 		})
+
 	} else if (_ instanceof MethodSetter) {
 		const {declareThis, declareFocus, block} = _
 		doit(() => {
@@ -36,8 +39,9 @@ export default function verifyMethodImplLike(_: MethodImplLike): void {
 				verifyBlockDo(block)
 			})
 		})
+
 	} else
-		throw new Error()
+		throw new Error(_.constructor.name)
 }
 
 export function verifyClassTraitDo({declareFocus, block}: ClassTraitDo): void {

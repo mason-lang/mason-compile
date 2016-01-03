@@ -1,7 +1,10 @@
 import Loc from 'esast/lib/Loc'
+import Char from 'typescript-char/Char'
 import {code} from '../../CompileError'
-import {Char, showChar} from '../lex/chars'
-import Token, {Group, GroupType, Keywords} from '../Token'
+import {showChar} from '../lex/chars'
+import Token from '../token/Token'
+import Group, {GroupType} from '../token/Group'
+import {Keywords} from '../token/Keyword'
 import {assert} from '../util'
 
 interface Language {
@@ -50,6 +53,7 @@ interface Language {
 	infiniteRange: string
 	invalidImportModule: string
 	noImportFocus: string
+	noMyOverride: string
 	noSpecialKeyword(kind: Keywords): string
 	nothingAfterFinally: string
 	parensOutsideCall: string

@@ -1,6 +1,6 @@
 import {opEach} from 'op/Op'
 import {check} from '../context'
-import {Fun, FunAbstract, FunLike} from '../MsAst'
+import Fun, {FunAbstract, FunLike} from '../ast/Fun'
 import {assert, cat} from '../util'
 import {withFun} from './context'
 import {verifyAndPlusLocals} from './locals'
@@ -9,7 +9,7 @@ import {verifyBlockSK} from './verifyBlock'
 import {justVerifyLocalDeclare} from './verifyLocalDeclare'
 import {verifyOpVal} from './verifyVal'
 
-export default function verifyFunLike(_: FunLike) {
+export default function verifyFunLike(_: FunLike): void {
 	const {args, opRestArg, opReturnType} = _
 	if (_ instanceof FunAbstract) {
 		for (const _ of args)
@@ -22,7 +22,7 @@ export default function verifyFunLike(_: FunLike) {
 		throw new Error()
 }
 
-export function verifyFun({loc, opReturnType, isDo, opDeclareThis, args, opRestArg, kind, block}: Fun) {
+export function verifyFun({loc, opReturnType, isDo, opDeclareThis, args, opRestArg, kind, block}: Fun): void {
 	check(opReturnType === null || !isDo, loc, _ => _.doFuncCantHaveType)
 	verifyOpVal(opReturnType)
 	const allArgs = cat(opDeclareThis, args, opRestArg)

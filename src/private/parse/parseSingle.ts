@@ -1,7 +1,11 @@
 import {caseOp, opMap, orThrow} from 'op/Op'
+import {Val} from '../ast/LineContent'
+import {LocalAccess} from '../ast/locals'
+import {BagSimple, NumberLiteral, SpecialVal} from '../ast/Val'
 import {warn} from '../context'
-import {BagSimple, Val, LocalAccess, NumberLiteral, SpecialVal} from '../MsAst'
-import Token, {Group, GroupBlock, GroupBracket, GroupParenthesis, GroupQuote, GroupRegExp, GroupSpace, Keyword, Keywords, Name, NumberToken, opKeywordKindToSpecialValueKind} from '../Token'
+import Group, {GroupBlock, GroupBracket, GroupParenthesis, GroupQuote, GroupRegExp, GroupSpace} from '../token/Group'
+import Keyword, {Keywords, opKeywordKindToSpecialValueKind} from '../token/Keyword'
+import Token, {NameToken, NumberToken} from '../token/Token'
 import {unexpected} from './checks'
 import {parseBlockWrap} from './parseBlock'
 import parseExpr, {parseExprParts} from './parseExpr'
@@ -12,7 +16,7 @@ import Slice, {Lines, Tokens} from './Slice'
 /** Parse a single token. */
 export default function parseSingle(token: Token, isInSpaced: boolean = false): Val {
 	const {loc} = token
-	if (token instanceof Name)
+	if (token instanceof NameToken)
 		return new LocalAccess(loc, token.name)
 	else if (token instanceof Group) {
 		if (token instanceof GroupSpace)

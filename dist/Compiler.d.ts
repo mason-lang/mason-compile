@@ -1,6 +1,6 @@
 import CompileError, { ErrorMessage } from './CompileError';
 import { OptionsObject } from './private/CompileOptions';
-import { Module } from './private/MsAst';
+import Module from './private/ast/Module';
 export default class Compiler {
     private options;
     constructor(options?: OptionsObject);

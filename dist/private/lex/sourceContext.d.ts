@@ -1,5 +1,5 @@
 import { Pos } from 'esast/lib/Loc';
-import { Char } from './chars';
+import Char from 'typescript-char/Char';
 export declare let index: number;
 export declare let line: number;
 export declare let column: number;

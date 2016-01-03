@@ -1,4 +1,4 @@
-import {Method} from '../MsAst'
+import Method from '../ast/Method'
 import {checkEmpty} from './checks'
 import {parseFunLike} from './parseFun'
 import parseMethodSplit from './parseMethodSplit'

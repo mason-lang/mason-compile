@@ -4,19 +4,19 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", '../context', '../MsAst', '../Token', './checks', './parseBlock', './parseLocalDeclares'], factory);
+        define(["require", "exports", '../ast/errors', '../context', '../token/Keyword', './checks', './parseBlock', './parseLocalDeclares'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
+    var errors_1 = require('../ast/errors');
     var context_1 = require('../context');
-    var MsAst_1 = require('../MsAst');
-    var Token_1 = require('../Token');
+    var Keyword_1 = require('../token/Keyword');
     var checks_1 = require('./checks');
     var parseBlock_1 = require('./parseBlock');
     var parseLocalDeclares_1 = require('./parseLocalDeclares');
     function parseExcept(tokens) {
-        const lines = parseBlock_1.justBlock(56, tokens);
+        const lines = parseBlock_1.justBlock(98, tokens);
 
         var _takeTry = takeTry(lines);
 
@@ -41,21 +41,21 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const rest3 = _opTakeElse2[1];
 
         const opFinally = parseOpFinally(rest3);
-        return new MsAst_1.Except(tokens.loc, _try, typedCatches, opCatchAll, opElse, opFinally);
+        return new errors_1.Except(tokens.loc, _try, typedCatches, opCatchAll, opElse, opFinally);
     }
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = parseExcept;
     function takeTry(lines) {
         const line = lines.headSlice();
-        checks_1.checkKeyword(108, line.head());
-        return [parseBlock_1.parseJustBlock(108, line.tail()), lines.tail()];
+        checks_1.checkKeyword(151, line.head());
+        return [parseBlock_1.parseJustBlock(151, line.tail()), lines.tail()];
     }
     function takeTypedCatches(lines) {
         const typedCatches = [];
         let opCatchAll = null;
         while (!lines.isEmpty()) {
             const line = lines.headSlice();
-            if (!Token_1.isKeyword(44, line.head())) break;
+            if (!Keyword_1.isKeyword(86, line.head())) break;
 
             var _parseBlock_1$beforeA = parseBlock_1.beforeAndBlock(line.tail());
 
@@ -65,7 +65,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
             const block = _parseBlock_1$beforeA2[1];
 
             const caught = parseLocalDeclares_1.parseLocalDeclareOrFocus(before);
-            const _catch = new MsAst_1.Catch(line.loc, caught, parseBlock_1.default(block));
+            const _catch = new errors_1.Catch(line.loc, caught, parseBlock_1.default(block));
             lines = lines.tail();
             if (caught.opType === null) {
                 opCatchAll = _catch;
@@ -78,14 +78,14 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         if (lines.isEmpty()) return [null, lines];
         const line = lines.headSlice();
         const tokenElse = line.head();
-        return Token_1.isKeyword(55, tokenElse) ? [parseBlock_1.parseJustBlock(55, line.tail()), lines.tail()] : [null, lines];
+        return Keyword_1.isKeyword(97, tokenElse) ? [parseBlock_1.parseJustBlock(97, line.tail()), lines.tail()] : [null, lines];
     }
     function parseOpFinally(lines) {
         if (lines.isEmpty()) return null;
         const line = lines.headSlice();
-        checks_1.checkKeyword(59, line.head());
+        checks_1.checkKeyword(101, line.head());
         context_1.check(lines.size() === 1, lines.loc, _ => _.nothingAfterFinally);
-        return parseBlock_1.parseJustBlock(59, line.tail());
+        return parseBlock_1.parseJustBlock(101, line.tail());
     }
 });
 //# sourceMappingURL=parseExcept.js.map

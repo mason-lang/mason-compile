@@ -1,7 +1,12 @@
 import Op, {nonNull} from 'op/Op'
-import Language from '../languages/Language'
+import {Spread} from '../ast/Call'
+import {Val} from '../ast/LineContent'
+import {LocalDeclare} from '../ast/locals'
+import MemberName from '../ast/MemberName'
+import MsAst from '../ast/MsAst'
+import Named from '../ast/Named'
 import {check} from '../context'
-import MsAst, {Val, LocalDeclare, Name, Named, Spread} from '../MsAst'
+import Language from '../languages/Language'
 import {name, okToNotUse, results} from './context'
 import SK from './SK'
 import verifyVal from './verifyVal'
@@ -21,7 +26,7 @@ export function makeUseOptionalIfFocus(localDeclare: LocalDeclare): void {
 }
 
 /** Verify values, accepting Spreads. */
-export function verifyEachValOrSpread(asts: Array<Val | Spread>) {
+export function verifyEachValOrSpread(asts: Array<Val | Spread>): void {
 	for (const _ of asts)
 		// `null` signifies to Spread that we recognize it
 		// todo: just have special function for verify spread
@@ -31,14 +36,14 @@ export function verifyEachValOrSpread(asts: Array<Val | Spread>) {
 			verifyVal(_)
 }
 //move?
-function verifySpread({spreaded}: Spread) {
+function verifySpread({spreaded}: Spread): void {
 	//check(sk === null, this.loc, _ => sk === SK.Val ? _.misplacedSpreadVal : _.misplacedSpreadDo)
 	verifyVal(spreaded)
 }
 
 /** Verify if it's not a string. */
 //move
-export function verifyName(_: Name): void {
+export function verifyMemberName(_: MemberName): void {
 	if (typeof _ !== 'string')
 		verifyVal(_)
 }

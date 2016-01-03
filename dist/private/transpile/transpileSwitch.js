@@ -2,32 +2,44 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', 'esast/lib/ast', '../util', './context', './util'], factory);
+        define(["require", "exports", 'esast/lib/Statement', 'op/Op', '../util', './context', './transpileBlock', './transpileVal', './util', './util2'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
+    var Statement_1 = require('esast/lib/Statement');
     var Op_1 = require('op/Op');
-    var ast_1 = require('esast/lib/ast');
     var util_1 = require('../util');
     var context_1 = require('./context');
+    var transpileBlock_1 = require('./transpileBlock');
+    var transpileVal_1 = require('./transpileVal');
     var util_2 = require('./util');
-    function default_1() {
-        const parts = util_1.flatMap(this.parts, util_2.t0);
-        parts.push(Op_1.caseOp(this.opElse, _ => new ast_1.SwitchCase(null, util_2.t0(_).body), () => SwitchCaseNoMatch));
-        return util_2.blockWrapIfVal(this, new ast_1.SwitchStatement(util_2.t0(this.switched), parts));
+    var util2_1 = require('./util2');
+    function transpileSwitchValNoLoc(_) {
+        return util_2.blockWrapStatement(transpileSwitchDoNoLoc(_));
     }
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.default = default_1;
-    function transpileSwitchPart() {
-        const follow = Op_1.opIf(context_1.verifyResults.isStatement(this), () => new ast_1.BreakStatement());
-        const block = util_2.t3(this.result, null, null, follow);
+    exports.transpileSwitchValNoLoc = transpileSwitchValNoLoc;
+    function transpileSwitchDoNoLoc(_ref) {
+        let switched = _ref.switched;
+        let parts = _ref.parts;
+        let opElse = _ref.opElse;
+
+        const partAsts = util_1.flatMap(parts, transpileSwitchPart);
+        partAsts.push(Op_1.caseOp(opElse, _ => new Statement_1.SwitchCase(null, transpileBlock_1.default(_).body), () => SwitchCaseNoMatch));
+        return new Statement_1.SwitchStatement(transpileVal_1.default(switched), partAsts);
+    }
+    exports.transpileSwitchDoNoLoc = transpileSwitchDoNoLoc;
+    function transpileSwitchPart(_) {
+        const values = _.values;
+        const result = _.result;
+
+        const follow = Op_1.opIf(context_1.verifyResults.isStatement(_), () => new Statement_1.BreakStatement());
+        const block = transpileBlock_1.default(result, null, null, follow);
         const cases = [];
-        for (let i = 0; i < this.values.length - 1; i = i + 1) cases.push(new ast_1.SwitchCase(util_2.t0(this.values[i]), []));
-        cases.push(new ast_1.SwitchCase(util_2.t0(this.values[this.values.length - 1]), [block]));
+        for (let i = 0; i < values.length - 1; i = i + 1) cases.push(util_2.loc(_, new Statement_1.SwitchCase(transpileVal_1.default(values[i]), [])));
+        cases.push(util_2.loc(_, new Statement_1.SwitchCase(transpileVal_1.default(values[values.length - 1]), [block])));
         return cases;
     }
-    exports.transpileSwitchPart = transpileSwitchPart;
-    const SwitchCaseNoMatch = new ast_1.SwitchCase(null, [util_2.throwErrorFromString('No branch of `switch` matches.')]);
+    const SwitchCaseNoMatch = new Statement_1.SwitchCase(null, [util2_1.throwErrorFromString('No branch of `switch` matches.')]);
 });
 //# sourceMappingURL=transpileSwitch.js.map

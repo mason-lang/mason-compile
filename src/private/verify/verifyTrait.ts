@@ -1,10 +1,10 @@
 import {opEach} from 'op/Op'
-import {Trait} from '../MsAst'
+import Trait from '../ast/Trait'
 import {withMethods} from './context'
 import verifyMethodImplLike, {verifyClassTraitDo} from './verifyMethodImplLike'
 import verifyVal, {verifyEachVal} from './verifyVal'
 
-export default function verifyTrait({superTraits, opDo, statics, methods}: Trait) {
+export default function verifyTrait({superTraits, opDo, statics, methods}: Trait): void {
 	verifyEachVal(superTraits)
 	//withIife, like for class?
 	opEach(opDo, verifyClassTraitDo)

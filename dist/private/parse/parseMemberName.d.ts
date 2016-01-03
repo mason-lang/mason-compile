@@ -1,3 +1,3 @@
-import { QuotePlain } from '../MsAst';
-import Token from '../Token';
-export default function parseMemberName(token: Token): string | QuotePlain;
+import MemberName from '../ast/MemberName';
+import Token from '../token/Token';
+export default function parseMemberName(token: Token): MemberName;

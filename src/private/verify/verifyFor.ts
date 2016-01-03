@@ -1,5 +1,5 @@
 import {caseOp} from 'op/Op'
-import {For, ForBag, Iteratee} from '../MsAst'
+import {For, ForBag, Iteratee} from '../ast/Loop'
 import {withLoop} from './context'
 import {verifyAndPlusLocal} from './locals'
 import {verifyNotLazy} from './util'

@@ -1,60 +1,74 @@
-import {ArrayExpression, AssignmentExpression, BlockStatement, CallExpression, ClassBody,
-	ClassExpression, Expression, ExpressionStatement, FunctionExpression, Identifier, LiteralString, MemberExpressionPlain,
-	MethodDefinitionConstructor, Statement} from 'esast/lib/ast'
+import {ClassBody, ClassExpression, MethodDefinition, MethodDefinitionConstructor} from 'esast/lib/Class'
+import Expression, {ArrayExpression, AssignmentExpression, CallExpression, LiteralString,
+	MemberExpressionPlain} from 'esast/lib/Expression'
+import {FunctionExpression} from 'esast/lib/Function'
+import Identifier from 'esast/lib/Identifier'
+import Statement, {BlockStatement, ExpressionStatement} from 'esast/lib/Statement'
 import {identifier, member} from 'esast-create-util/lib/util'
-import {caseOp, opIf, opMap} from 'op/Op'
-import {Constructor, Val, Field, MethodImplLike} from '../MsAst'
-import {cat, isEmpty} from '../util'
-import {IdFocus, IdSuper, LetLexicalThis, ReturnFocus, This} from './ast-constants'
+import Op, {caseOp, opIf, opMap} from 'op/Op'
+import Class, {Constructor, Field} from '../ast/Class'
+import {MethodImplLike} from '../ast/classTraitCommon'
+import {Val} from '../ast/LineContent'
+import {assert, cat, isEmpty} from '../util'
 import {verifyResults} from './context'
+import {IdFocus, IdSuper, LetLexicalThis, ReturnFocus, This} from './esast-constants'
+import {transpileBlockDoWithLeadAndFollow} from './transpileBlock'
+import transpileFun from './transpileFun'
 import {transpileMethodToDefinition} from './transpileMethod'
-import {blockWrap, idForDeclareCached, maybeWrapInCheckInstance, msCall, plainLet, t0, t1, t2, t3
-	} from './util'
+import transpileVal from './transpileVal'
+import {blockWrap, idForDeclareCached, loc, maybeWrapInCheckInstance, msCall, plainLet} from './util'
 
-export default function transpileClass(): Expression {
-	const opName = opMap(verifyResults.opName(this), identifier)
+export function transpileClassNoLoc(_: Class): Expression {
+	const {opFields, opSuperClass, traits, opComment, opDo, statics, opConstructor, methods, isRecord} = _
 
-	const methods = cat(
-		this.statics.map((_: MethodImplLike) => transpileMethodToDefinition(_, true)),
-		caseOp(this.opConstructor, t0,
-			() => opMap(this.opFields, (_: Array<Field>) =>
-				defaultConstructor(_, this.opSuperClass !== null))),
-		this.methods.map((_: MethodImplLike) => transpileMethodToDefinition(_, false)))
+	const opName = opMap(verifyResults.opName(_), identifier)
+
+	const methodAsts = cat<MethodDefinition>(
+		statics.map(_ => transpileMethodToDefinition(_, true)),
+		caseOp<Constructor, Op<MethodDefinitionConstructor>>(opConstructor,
+			transpileConstructor,
+			() => opMap(opFields, _ => defaultConstructor(_, opSuperClass !== null))),
+		methods.map(_ => transpileMethodToDefinition(_, false)))
 
 	const classExpr = new ClassExpression(opName,
-		opMap(this.opSuperClass, t0), new ClassBody(methods))
+		opMap(opSuperClass, transpileVal), new ClassBody(methodAsts))
 
-	if (this.opDo === null && !this.isRecord && isEmpty(this.traits))
+	if (opDo === null && !isRecord && isEmpty(traits))
 		return classExpr
 	else {
-		const lead = cat(
+		const lead = cat<Statement>(
 			plainLet(IdFocus, classExpr),
-			opMap(this.opFields, beRecord),
-			this.traits.map((_: Val) => msCall('traitDo', IdFocus, t0(_))))
-		const block = caseOp(this.opDo,
-			_ => t3(_.block, lead, null, ReturnFocus),
+			opMap(opFields, beRecord),
+			traits.map(_ => new ExpressionStatement(msCall('traitDo', IdFocus, transpileVal(_)))))
+		const block = caseOp(opDo,
+			_ => transpileBlockDoWithLeadAndFollow(_.block, lead, ReturnFocus),
 			() => new BlockStatement(cat(lead, ReturnFocus)))
 		return blockWrap(block)
 	}
 }
 
-export function transpileConstructor(): MethodDefinitionConstructor {
+function transpileConstructor(_: Constructor): MethodDefinitionConstructor {
+	const {fun} = _
 	// If there is a `super`, `this` will not be defined until then,
 	// so must wait until then.
 	// Otherwise, do it at the beginning.
-	return new MethodDefinitionConstructor(verifyResults.constructorHasSuper(this) ?
-		t2(this.fun, LetLexicalThis, true) :
-		t1(this.fun, constructorSetMembers(this)))
+
+	// This is never an arrow function because the function uses `this`.
+	const funAst = <FunctionExpression> (verifyResults.constructorHasSuper(_) ?
+		transpileFun(fun, [LetLexicalThis], true) :
+		transpileFun(fun, constructorSetMembers(_)))
+	return loc(_, new MethodDefinitionConstructor(funAst))
 }
 
 export function constructorSetMembers(constructor: Constructor): Array<Statement> {
 	return constructor.memberArgs.map(_ =>
-		msCall('newProperty', This, new LiteralString(_.name), idForDeclareCached(_)))
+		loc(_, new ExpressionStatement(
+			msCall('newProperty', This, new LiteralString(_.name), idForDeclareCached(_)))))
 }
 
-function beRecord(fields: Array<Field>): Expression {
+function beRecord(fields: Array<Field>): Statement {
 	const fieldNames = new ArrayExpression(fields.map(_ => new LiteralString(_.name)))
-	return msCall('beRecord', IdFocus, fieldNames)
+	return new ExpressionStatement(msCall('beRecord', IdFocus, fieldNames))
 }
 
 /*

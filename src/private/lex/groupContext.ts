@@ -1,6 +1,7 @@
 import Loc, {Pos} from 'esast/lib/Loc'
 import {check, warn} from '../context'
-import Token, {Group, GroupBlock, GroupInterpolation, GroupLine, GroupParenthesis, GroupSpace, GroupType} from '../Token'
+import Group, {GroupBlock, GroupInterpolation, GroupLine, GroupParenthesis, GroupSpace, GroupType} from '../token/Group'
+import Token from '../token/Token'
 import {assert, isEmpty} from '../util'
 
 let groupStack: Array<Group<Token>>

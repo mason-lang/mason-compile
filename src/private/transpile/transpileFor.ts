@@ -1,46 +1,67 @@
-import Node, {BlockStatement, BreakStatement, Expression, ForStatement, ForOfStatement, FunctionExpression,
-	Identifier, LabeledStatement, Loop as EsLoop, ReturnStatement, Statement, VariableDeclaration, VariableDeclarator, YieldExpression} from 'esast/lib/ast'
+import {VariableDeclarationLet, VariableDeclarator} from 'esast/lib/Declaration'
+import Expression, {YieldExpression} from 'esast/lib/Expression'
+import {FunctionExpression} from 'esast/lib/Function'
+import Identifier from 'esast/lib/Identifier'
+import Node from 'esast/lib/Node'
+import Statement, {BlockStatement, BreakStatement, ExpressionStatement, ForStatement,
+	ForOfStatement, LabeledStatement, Loop as EsLoop, ReturnStatement} from 'esast/lib/Statement'
 import Op, {caseOp} from 'op/Op'
-import {Block, Val, Iteratee, LocalDeclare, Loop} from '../MsAst'
-import {DeclareBuiltBag, IdBuilt} from './ast-constants'
+import Block from '../ast/Block'
+import {Val} from '../ast/LineContent'
+import {LocalDeclare} from '../ast/locals'
+import Loop, {Break, For, ForAsync, ForBag, Iteratee} from '../ast/Loop'
 import {verifyResults} from './context'
-import {blockWrap, msCall, t0} from './util'
+import {DeclareBuiltBag, IdBuilt} from './esast-constants'
+import transpileBlock from './transpileBlock'
+import {transpileLocalDeclare} from './transpileMisc'
+import transpileVal from './transpileVal'
+import {blockWrap, blockWrapStatement, msCall} from './util'
 
-export function transpileBreak(): Statement {
-	return caseOp<Val, Statement>(this.opValue,
-		_ => new ReturnStatement(t0(_)),
-		() => new BreakStatement(verifyResults.isBreakInSwitch(this) ? IdLoop : null))
+export function transpileForValNoLoc({opIteratee, block}: For): Expression {
+	// use `return` instead of `break`, so no label needed
+	return blockWrapStatement(forLoop(opIteratee, block))
 }
 
-export function transpileFor(): Expression | Statement {
-	const loop = forLoop(this.opIteratee, this.block)
-	return verifyResults.isStatement(this) ?
-		maybeLabelLoop(this, loop) :
-		// use `return` instead of `break`, so no label needed
-		blockWrap(new BlockStatement([loop]))
+export function transpileForDoNoLoc(_: For): Statement {
+	const {opIteratee, block} = _
+	return maybeLabelLoop(_, forLoop(opIteratee, block))
 }
 
-export function transpileForAsync(): Expression {
-	const {element, bag} = this.iteratee
-	const func = new FunctionExpression(null, [t0(element)], t0(this.block), {generator: true})
-	const call = msCall('$for', t0(bag), func)
-	return verifyResults.isStatement(this) ? new YieldExpression(call) : call
+export function transpileForAsyncValNoLoc({iteratee: {element, bag}, block}: ForAsync): Expression {
+	const func = new FunctionExpression(
+		null,
+		[transpileLocalDeclare(element)],
+		transpileBlock(block),
+		{generator: true})
+	return msCall('$for', transpileVal(bag), func)
 }
 
-export function transpileForBag(): Expression {
-	const loop = maybeLabelLoop(this, forLoop(this.opIteratee, this.block))
+export function transpileForAsyncDoNoLoc(_: ForAsync): Statement {
+	return new ExpressionStatement(new YieldExpression(transpileForAsyncValNoLoc(_)))
+}
+
+export function transpileForBagNoLoc(_: ForBag): Expression {
+	const {opIteratee, block} = _
+	const loop = maybeLabelLoop(_, forLoop(opIteratee, block))
 	return blockWrap(new BlockStatement([DeclareBuiltBag, loop, ReturnBuilt]))
 }
 
+export function transpileBreakNoLoc(_: Break): Statement {
+	return caseOp<Val, Statement>(_.opValue,
+		_ => new ReturnStatement(transpileVal(_)),
+		() => new BreakStatement(verifyResults.isBreakInSwitch(_) ? IdLoop : null))
+}
+
 function forLoop(opIteratee: Op<Iteratee>, block: Block): EsLoop {
-	const jsBlock = t0(block)
-	return caseOp<{element: LocalDeclare, bag: Val}, Statement>(opIteratee,
+	const blockAst = transpileBlock(block)
+	return caseOp<{element: LocalDeclare, bag: Val}, EsLoop>(opIteratee,
 		({element, bag}) =>
 			new ForOfStatement(
-				new VariableDeclaration('let', [new VariableDeclarator(t0(element))]),
-				t0(bag),
-				jsBlock),
-		() => new ForStatement(null, null, null, jsBlock))
+				new VariableDeclarationLet(
+					[new VariableDeclarator(transpileLocalDeclare(element))]),
+				transpileVal(bag),
+				blockAst),
+		() => new ForStatement(null, null, null, blockAst))
 }
 
 function maybeLabelLoop(ast: Loop, loop: EsLoop): Statement {

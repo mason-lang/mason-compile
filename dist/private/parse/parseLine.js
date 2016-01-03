@@ -4,15 +4,22 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../context', '../MsAst', '../Token', '../util', './checks', './parseBlock', './parseExpr', './parseLocalDeclares', './parseMemberName', './parseName', './parseQuote', './parseSpaced', './parseTraitDo', './Slice'], factory);
+        define(["require", "exports", 'op/Op', '../ast/Block', '../ast/Call', '../ast/Do', '../ast/errors', '../ast/locals', '../ast/Loop', '../ast/Val', '../context', '../token/Group', '../token/Keyword', '../util', './checks', './parseBlock', './parseExpr', './parseLocalDeclares', './parseMemberName', './parseName', './parseQuote', './parseSpaced', './parseTraitDo', './Slice'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Op_1 = require('op/Op');
+    var Block_1 = require('../ast/Block');
+    var Call_1 = require('../ast/Call');
+    var Do_1 = require('../ast/Do');
+    var errors_1 = require('../ast/errors');
+    var locals_1 = require('../ast/locals');
+    var Loop_1 = require('../ast/Loop');
+    var Val_1 = require('../ast/Val');
     var context_1 = require('../context');
-    var MsAst_1 = require('../MsAst');
-    var Token_1 = require('../Token');
+    var Group_1 = require('../token/Group');
+    var Keyword_1 = require('../token/Keyword');
     var util_1 = require('../util');
     var checks_1 = require('./checks');
     var parseBlock_1 = require('./parseBlock');
@@ -31,41 +38,41 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const noRest = () => {
             checks_1.checkEmpty(rest(), _ => _.unexpectedAfter(head));
         };
-        if (head instanceof Token_1.Keyword) switch (head.kind) {
-            case 38:
-            case 64:
-                return parseAssert(head.kind === 64, rest());
-            case 41:
-                return new MsAst_1.Break(loc, parseExpr_1.opParseExpr(rest()));
-            case 49:
-                noRest();
-                return new MsAst_1.SpecialDo(loc, 0);
-            case 54:
-                return new MsAst_1.BagEntry(loc, parseExpr_1.default(rest()), true);
-            case 79:
-                return new MsAst_1.Ignore(loc, rest().map(parseLocalDeclares_1.parseLocalName));
-            case 92:
-                return new MsAst_1.BagEntry(loc, parseExpr_1.default(rest()));
-            case 95:
-                return Op_1.caseOp(parseExpr_1.opParseExpr(rest()), _ => new MsAst_1.Pass(tokens.loc, _), () => []);
-            case 97:
-                return parseLines(parseBlock_1.justBlock(97, rest()));
-            case 103:
-                return new MsAst_1.Throw(loc, parseExpr_1.opParseExpr(rest()));
+        if (head instanceof Keyword_1.default) switch (head.kind) {
+            case 80:
             case 106:
+                return parseAssert(head.kind === 106, rest());
+            case 83:
+                return new Loop_1.Break(loc, parseExpr_1.opParseExpr(rest()));
+            case 91:
+                noRest();
+                return new Do_1.SpecialDo(loc, 0);
+            case 96:
+                return new Block_1.BagEntry(loc, parseExpr_1.default(rest()), true);
+            case 121:
+                return new Do_1.Ignore(loc, rest().map(parseLocalDeclares_1.parseLocalName));
+            case 134:
+                return new Block_1.BagEntry(loc, parseExpr_1.default(rest()));
+            case 138:
+                return Op_1.caseOp(parseExpr_1.opParseExpr(rest()), _ => new Do_1.Pass(tokens.loc, _), () => []);
+            case 140:
+                return parseLines(parseBlock_1.justBlock(140, rest()));
+            case 146:
+                return new errors_1.Throw(loc, parseExpr_1.opParseExpr(rest()));
+            case 149:
                 return parseTraitDo_1.default(rest());
             default:
         }
-        return Op_1.caseOp(tokens.opSplitOnce(_ => Token_1.isAnyKeyword(lineSplitKeywords, _)), _ref => {
+        return Op_1.caseOp(tokens.opSplitOnce(_ => Keyword_1.isAnyKeyword(lineSplitKeywords, _)), _ref => {
             let before = _ref.before;
             let atToken = _ref.at;
             let after = _ref.after;
 
             const at = atToken;
             switch (at.kind) {
-                case 85:
-                    return new MsAst_1.MapEntry(loc, parseExpr_1.default(before), parseExpr_1.default(after));
-                case 92:
+                case 127:
+                    return new Block_1.MapEntry(loc, parseExpr_1.default(before), parseExpr_1.default(after));
+                case 134:
                     return parseObjEntry(before, after, loc);
                 default:
                     return parseAssignLike(before, at, parseExpr_1.default(after), loc);
@@ -74,7 +81,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     }
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = parseLine;
-    const lineSplitKeywords = new Set([39, 84, 85, 92]);
+    const lineSplitKeywords = new Set([81, 126, 127, 134]);
     function parseLines(lines) {
         const lineContents = [];
         for (const line of lines.slices()) {
@@ -88,10 +95,10 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const kind = at.kind;
         if (before.size() === 1) {
             const token = before.head();
-            if (token instanceof Token_1.GroupSpace) {
+            if (token instanceof Group_1.GroupSpace) {
                 const spaced = Slice_1.Tokens.of(token);
 
-                var _Op_1$caseOp = Op_1.caseOp(spaced.opSplitOnce(_ => Token_1.isKeyword(47, _)), _ref2 => {
+                var _Op_1$caseOp = Op_1.caseOp(spaced.opSplitOnce(_ => Keyword_1.isKeyword(89, _)), _ref2 => {
                     let before = _ref2.before;
                     let after = _ref2.after;
                     return [before, parseExpr_1.default(after)];
@@ -103,44 +110,44 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
                 const opType = _Op_1$caseOp2[1];
 
                 const last = assignee.last();
-                const object = obj => obj.isEmpty() ? MsAst_1.LocalAccess.this(obj.loc) : parseSpaced_1.default(obj);
-                if (Token_1.isKeyword(52, assignee.nextToLast())) {
+                const object = obj => obj.isEmpty() ? locals_1.LocalAccess.this(obj.loc) : parseSpaced_1.default(obj);
+                if (Keyword_1.isKeyword(94, assignee.nextToLast())) {
                     const name = parseMemberName_1.default(last);
                     const set = object(assignee.rtail().rtail());
-                    return new MsAst_1.MemberSet(loc, set, name, opType, setKind(at), value);
-                } else if (last instanceof Token_1.GroupBracket) {
+                    return new Do_1.MemberSet(loc, set, name, opType, setKind(at), value);
+                } else if (last instanceof Group_1.GroupBracket) {
                     const set = object(assignee.rtail());
                     const subbeds = parseExpr_1.parseExprParts(Slice_1.Tokens.of(last));
-                    return new MsAst_1.SetSub(loc, set, subbeds, opType, setKind(at), value);
+                    return new Do_1.SetSub(loc, set, subbeds, opType, setKind(at), value);
                 }
             }
         }
-        if (kind === 84) return parseLocalMutate(before, value, loc);else {
-            util_1.assert(kind === 39);
+        if (kind === 126) return parseLocalMutate(before, value, loc);else {
+            util_1.assert(kind === 81);
             return parseAssign(before, value, loc);
         }
     }
     function parseObjEntry(before, after, loc) {
         if (before.size() === 1) {
             const token = before.head();
-            const isName = Token_1.isKeyword(88, token);
+            const isName = Keyword_1.isKeyword(130, token);
             const value = () => parseExpr_1.default(after);
-            if (after.isEmpty()) return isName ? MsAst_1.ObjEntryPlain.nameEntry(loc, new MsAst_1.SpecialVal(loc, 1)) : MsAst_1.ObjEntryPlain.access(loc, parseLocalDeclares_1.parseLocalName(token));else if (token instanceof Token_1.Keyword) return new MsAst_1.ObjEntryPlain(loc, Token_1.keywordName(token.kind), value());else if (token instanceof Token_1.GroupQuote) return new MsAst_1.ObjEntryPlain(loc, parseQuote_1.default(Slice_1.default.of(token)), value());else if (token instanceof Token_1.GroupSpace) {
+            if (after.isEmpty()) return isName ? Block_1.ObjEntryPlain.nameEntry(loc, new Val_1.SpecialVal(loc, 1)) : Block_1.ObjEntryPlain.access(loc, parseLocalDeclares_1.parseLocalName(token));else if (token instanceof Keyword_1.default) return new Block_1.ObjEntryPlain(loc, Keyword_1.keywordName(token.kind), value());else if (token instanceof Group_1.GroupQuote) return new Block_1.ObjEntryPlain(loc, parseQuote_1.default(Slice_1.default.of(token)), value());else if (token instanceof Group_1.GroupSpace) {
                 const slice = Slice_1.Tokens.of(token);
-                if (slice.size() === 2 && Token_1.isKeyword(102, slice.head())) {
-                    const name = new MsAst_1.QuoteSimple(loc, parseName_1.default(slice.second()));
-                    return new MsAst_1.ObjEntryPlain(loc, name, value());
+                if (slice.size() === 2 && Keyword_1.isKeyword(145, slice.head())) {
+                    const name = new Val_1.QuoteSimple(loc, parseName_1.default(slice.second()));
+                    return new Block_1.ObjEntryPlain(loc, name, value());
                 }
             }
         }
         const assign = parseAssign(before, parseExpr_1.default(after), loc);
-        return new MsAst_1.ObjEntryAssign(loc, assign);
+        return new Block_1.ObjEntryAssign(loc, assign);
     }
     function setKind(keyword) {
         switch (keyword.kind) {
-            case 39:
+            case 81:
                 return 0;
-            case 84:
+            case 126:
                 return 1;
             default:
                 throw checks_1.unexpected(keyword);
@@ -149,21 +156,21 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     function parseLocalMutate(localsTokens, value, loc) {
         const locals = parseLocalDeclares_1.parseLocalDeclaresJustNames(localsTokens);
         context_1.check(locals.length === 1, loc, _ => _.todoMutateDestructure);
-        return new MsAst_1.LocalMutate(loc, locals[0].name, value);
+        return new locals_1.LocalMutate(loc, locals[0].name, value);
     }
     function parseAssign(localsTokens, value, loc) {
         const locals = parseLocalDeclares_1.default(localsTokens);
-        if (locals.length === 1) return new MsAst_1.AssignSingle(loc, locals[0], value);else {
+        if (locals.length === 1) return new locals_1.AssignSingle(loc, locals[0], value);else {
             context_1.check(locals.length > 1, localsTokens.loc, _ => _.assignNothing);
             const kind = locals[0].kind;
             for (const _ of locals) context_1.check(_.kind === kind, _.loc, _ => _.destructureAllLazy);
-            return new MsAst_1.AssignDestructure(loc, locals, value);
+            return new locals_1.AssignDestructure(loc, locals, value);
         }
     }
     function parseAssert(negate, tokens) {
         checks_1.checkNonEmpty(tokens, _ => _.expectedAfterAssert);
 
-        var _Op_1$caseOp3 = Op_1.caseOp(tokens.opSplitOnce(_ => Token_1.isKeyword(103, _)), _ref3 => {
+        var _Op_1$caseOp3 = Op_1.caseOp(tokens.opSplitOnce(_ => Keyword_1.isKeyword(146, _)), _ref3 => {
             let before = _ref3.before;
             let after = _ref3.after;
             return [before, parseExpr_1.default(after)];
@@ -175,8 +182,8 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const opThrown = _Op_1$caseOp4[1];
 
         const parts = parseExpr_1.parseExprParts(condTokens);
-        const cond = parts.length === 1 ? parts[0] : new MsAst_1.Call(condTokens.loc, parts[0], util_1.tail(parts));
-        return new MsAst_1.Assert(tokens.loc, negate, cond, opThrown);
+        const cond = parts.length === 1 ? parts[0] : new Call_1.default(condTokens.loc, parts[0], util_1.tail(parts));
+        return new errors_1.Assert(tokens.loc, negate, cond, opThrown);
     }
 });
 //# sourceMappingURL=parseLine.js.map

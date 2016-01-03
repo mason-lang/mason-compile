@@ -1,11 +1,14 @@
+import Loc from 'esast/lib/Loc'
 import Op from 'op/Op'
+import {ObjEntryAssign} from '../ast/Block'
+import LineContent from '../ast/LineContent'
+import {AssignDestructure, AssignSingle, LocalDeclare} from '../ast/locals'
 import {check} from '../context'
-import {AssignDestructure, AssignSingle, LineContent, LocalDeclare, ObjEntryAssign} from '../MsAst'
 import {assert, reverseIter} from '../util'
 import {locals, pendingBlockLocals} from './context'
-import {deleteLocal, registerLocal, setLocal} from './locals'
+import {deleteLocal, registerLocal, setLocal, verifyAndPlusLocal} from './locals'
 import SK from './SK'
-import verifyDo, {verifyDoP} from './verifyDo'
+import verifyDo, {ensureDoAndVerify} from './verifyDo'
 
 /**
 Verifies each line, accumulating locals.
@@ -50,7 +53,7 @@ export default function verifyLines(lines: Array<LineContent>): Array<LocalDecla
 	const shadowed: Array<LocalDeclare> = []
 
 	for (const line of lines) {
-		verifyDoP(line)
+		ensureDoAndVerify(line)
 		for (const newLocal of lineNewLocals(line)) {
 			const {name, loc} = newLocal
 			const oldLocal = locals.get(name)
@@ -71,6 +74,12 @@ export default function verifyLines(lines: Array<LineContent>): Array<LocalDecla
 	newLocals.forEach(deleteLocal)
 	shadowed.forEach(setLocal)
 	return newLocals
+}
+
+export function verifyBuiltLines(lines: Array<LineContent>, loc: Loc): void {
+	verifyAndPlusLocal(LocalDeclare.built(loc), () => {
+		verifyLines(lines)
+	})
 }
 
 function lineNewLocals(line: LineContent): Array<LocalDeclare> {

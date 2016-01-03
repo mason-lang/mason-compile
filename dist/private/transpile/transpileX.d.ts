@@ -1,0 +1,27 @@
+import { VariableDeclarationLet } from 'esast/lib/Declaration';
+import Expression, { ConditionalExpression, YieldDelegateExpression, YieldExpression } from 'esast/lib/Expression';
+import Identifier from 'esast/lib/Identifier';
+import Statement from 'esast/lib/Statement';
+import Await from '../ast/Await';
+import { Cond } from '../ast/booleans';
+import Call from '../ast/Call';
+import { SuperCall } from '../ast/Class';
+import { MethodImplLike } from '../ast/classTraitCommon';
+import Del from '../ast/Del';
+import { AssignSingle } from '../ast/locals';
+import With from '../ast/With';
+import { Yield, YieldTo } from '../ast/Yield';
+export declare function withParts({declare, value}: With): {
+    idDeclare: Identifier;
+    val: Expression;
+    lead: Statement;
+};
+export declare function transpileAssignSingle(_: AssignSingle): VariableDeclarationLet;
+export declare function transpileAssignSingleNoLoc({assignee, value}: AssignSingle, valWrap?: (_: Expression) => Expression): VariableDeclarationLet;
+export declare function transpileAwaitNoLoc({value}: Await): Expression;
+export declare function transpileCallNoLoc({called, args}: Call): Expression;
+export declare function transpileCondNoLoc({test, ifTrue, ifFalse}: Cond): ConditionalExpression;
+export declare function transpileDelNoLoc({subbed, args}: Del): Expression;
+export declare function superCallCall({args}: SuperCall, method: MethodImplLike): Expression;
+export declare function transpileYieldNoLoc({opValue}: Yield): YieldExpression;
+export declare function transpileYieldToNoLoc({value}: YieldTo): YieldDelegateExpression;

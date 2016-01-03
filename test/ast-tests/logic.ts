@@ -1,4 +1,4 @@
-import {Logic, Logics} from '../../dist/private/MsAst'
+import {Logic, Logics} from '../../dist/private/ast/booleans'
 import {loc, one, two, zero} from './util/ast-util'
 import {test} from './util/test-asts'
 

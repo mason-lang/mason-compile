@@ -17,6 +17,8 @@ export default class CompileOptions {
 	importBoot: boolean
 	indent: '\t' | number
 	language: Language
+	// TODO:ES6 Won't need this option
+	noModuleBoilerplate: boolean
 
 	private mslPath: string
 
@@ -33,7 +35,8 @@ export default class CompileOptions {
 			mslPath: 'msl',
 			indent: '\t',
 			language: 'english',
-			builtins: null
+			builtins: null,
+			noModuleBoilerplate: false
 		})
 
 		this.includeAmdefine = o.includeAmdefine
@@ -44,6 +47,7 @@ export default class CompileOptions {
 		this.importBoot = o.importBoot
 		this.mslPath = o.mslPath
 		this.indent = o.indent
+		this.noModuleBoilerplate = o.noModuleBoilerplate
 
 		const builtins = o.builtins === null ? getDefaultBuiltins(this.mslPath) : o.builtins
 		this.builtinNameToPath = generateBuiltinNameToPath(builtins)
@@ -60,7 +64,7 @@ export default class CompileOptions {
 		return `${this.mslPath}/private/boot`
 	}
 
-	opBuiltinPath(name: string) {
+	opBuiltinPath(name: string): string {
 		return this.builtinNameToPath.get(name)
 	}
 }
@@ -101,7 +105,10 @@ export interface OptionsObject {
 	Currently only intended for use by `msl`.
 	Represents a custom set of builtins.
 	*/
-	builtins?: Builtins
+	builtins?: Builtins,
+	// Just for tests.
+	// TODO:ES6 Won't be necessary
+	noModuleBoilerplate?: boolean
 }
 
 export interface Builtins {
@@ -121,9 +128,7 @@ function getDefaultBuiltins(mslPath: string): Builtins {
 
 function generateBuiltinNameToPath(builtins: Builtins): Map<string, string> {
 	const m = new Map()
-	for (const _path in builtins) {
-		//TODO: https://github.com/Microsoft/TypeScript/pull/6302 (should be fixed soon)
-		const path: string = _path
+	for (const path in builtins) {
 		const realPath = path.replace(/\./g, '/')
 		for (let imported of builtins[path]) {
 			if (imported === '_')

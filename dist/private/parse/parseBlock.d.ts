@@ -1,6 +1,6 @@
 import Op from 'op/Op';
-import { Block, BlockWrap } from '../MsAst';
-import { Keywords } from '../Token';
+import Block, { BlockWrap } from '../ast/Block';
+import { Keywords } from '../token/Keyword';
 import { Lines, Tokens } from './Slice';
 export default function parseBlock(lineTokens: Lines): Block;
 export declare function beforeAndBlock(tokens: Tokens): [Tokens, Lines];

@@ -1,43 +1,56 @@
-import Node, {BinaryExpression, BlockStatement, Expression, Identifier, IfStatement, LiteralNumber, MemberExpressionComputed, Statement,
-	VariableDeclaration, VariableDeclarator} from 'esast/lib/ast'
+import {VariableDeclarationLet, VariableDeclarator} from 'esast/lib/Declaration'
+import Expression, {BinaryExpression, LiteralNumber, MemberExpressionComputed} from 'esast/lib/Expression'
+import Identifier from 'esast/lib/Identifier'
+import Node from 'esast/lib/Node'
+import Statement, {BlockStatement, IfStatement} from 'esast/lib/Statement'
 import Op, {caseOp} from 'op/Op'
-import {Block, CasePart, LocalDeclare, Pattern} from '../MsAst'
-import {LitNull} from './ast-constants'
+import Block from '../ast/Block'
+import Case, {CasePart, Pattern} from '../ast/Case'
+import {LocalDeclare} from '../ast/locals'
 import {verifyResults} from './context'
-import {blockWrap, idForDeclareCached, msCall, plainLet, t0, t1, throwErrorFromString} from './util'
+import {IdFocus, LitNull} from './esast-constants'
+import transpileBlock from './transpileBlock'
+import transpileVal from './transpileVal'
+import {transpileAssignSingle} from './transpileX'
+import {blockWrap, idForDeclareCached, loc, msCall, plainLet} from './util'
+import {throwErrorFromString} from './util2'
 
-export default function(): Expression | Statement {
-	const body = caseBody(this.parts, this.opElse)
-	if (verifyResults.isStatement(this))
-		return caseOp(this.opCased, _ => new BlockStatement([t0(_), body]), () => body)
-	else {
-		const block = caseOp(this.opCased, _ => [t0(_), body], () => [body])
-		return blockWrap(new BlockStatement(block))
-	}
+export function transpileCaseValNoLoc({opCased, parts, opElse}: Case): Expression {
+	const body = caseBody(parts, opElse)
+	const block = caseOp(opCased, _ => [transpileAssignSingle(_), body], () => [body])
+	return blockWrap(new BlockStatement(block))
 }
 
-export function transpileCasePart(alternate: Statement): Statement {
-	if (this.test instanceof Pattern) {
-		const {type, patterned, locals} = this.test
-		const decl = plainLet(IdExtract,
-			msCall('extract', t0(type), t0(patterned), new LiteralNumber(locals.length)))
-		const test = new BinaryExpression('!==', IdExtract, LitNull)
-		const extract = new VariableDeclaration('let', locals.map((_: LocalDeclare, index: number) =>
-			new VariableDeclarator(
-				idForDeclareCached(_),
-				new MemberExpressionComputed(IdExtract, new LiteralNumber(index)))))
-		const res = t1(this.result, extract)
-		return new BlockStatement([decl, new IfStatement(test, res, alternate)])
-	} else
-		// alternate written to by `caseBody`.
-		return new IfStatement(t0(this.test), t0(this.result), alternate)
+export function transpileCaseDoNoLoc({opCased, parts, opElse}: Case): Statement | Array<Statement> {
+	const body = caseBody(parts, opElse)
+	return caseOp(opCased, _ => new BlockStatement([transpileAssignSingle(_), body]), () => body)
 }
 
-function caseBody(parts: Array<CasePart>, opElse: Op<Block>) {
-	let acc = caseOp(opElse, t0, () => ThrowNoCaseMatch)
+function caseBody(parts: Array<CasePart>, opElse: Op<Block>): Statement {
+	let acc = caseOp<Block, Statement>(opElse, transpileBlock, () => ThrowNoCaseMatch)
 	for (let i = parts.length - 1; i >= 0; i = i - 1)
-		acc = t1(parts[i], acc)
+		acc = transpileCasePart(parts[i], acc)
 	return acc
+}
+
+function transpileCasePart(_: CasePart, alternate: Statement): Statement {
+	const {test, result} = _
+	return loc(_, ((): Statement => {
+		if (test instanceof Pattern) {
+			const {type, patterned, locals} = test
+			const decl = plainLet(IdExtract,
+				msCall('extract', transpileVal(type), IdFocus, new LiteralNumber(locals.length)))
+			const testExtract = new BinaryExpression('!==', IdExtract, LitNull)
+			const extract = new VariableDeclarationLet(locals.map((_: LocalDeclare, index: number) =>
+				new VariableDeclarator(
+					idForDeclareCached(_),
+					new MemberExpressionComputed(IdExtract, new LiteralNumber(index)))))
+			const res = transpileBlock(result, extract)
+			return new BlockStatement([decl, new IfStatement(testExtract, res, alternate)])
+		} else
+			// alternate written to by `caseBody`.
+			return new IfStatement(transpileVal(test), transpileBlock(result), alternate)
+	})())
 }
 
 const IdExtract = new Identifier('_$')

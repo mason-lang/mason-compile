@@ -4,13 +4,15 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", '../MsAst', '../Token', './parseBlock', './parseExpr', './parseFun', './parseMethodSplit'], factory);
+        define(["require", "exports", '../ast/classTraitCommon', '../ast/Val', '../context', '../token/Keyword', './parseBlock', './parseExpr', './parseFun', './parseMethodSplit'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
-    var MsAst_1 = require('../MsAst');
-    var Token_1 = require('../Token');
+    var classTraitCommon_1 = require('../ast/classTraitCommon');
+    var Val_1 = require('../ast/Val');
+    var context_1 = require('../context');
+    var Keyword_1 = require('../token/Keyword');
     var parseBlock_1 = require('./parseBlock');
     var parseExpr_1 = require('./parseExpr');
     var parseFun_1 = require('./parseFun');
@@ -21,8 +23,10 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = parseMethodImpls;
     function takeStatics(lines) {
-        const line = lines.headSlice();
-        return Token_1.isKeyword(100, line.head()) ? [parseMethodImpls(parseBlock_1.justBlock(100, line.tail())), lines.tail()] : [[], lines];
+        if (lines.isEmpty()) return [[], lines];else {
+            const line = lines.headSlice();
+            return Keyword_1.isKeyword(143, line.head()) ? [parseMethodImpls(parseBlock_1.justBlock(143, line.tail())), lines.tail()] : [[], lines];
+        }
     }
     exports.takeStatics = takeStatics;
     function parseStaticsAndMethods(lines) {
@@ -38,48 +42,57 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     exports.parseStaticsAndMethods = parseStaticsAndMethods;
     function opTakeDo(lines) {
         const line = lines.headSlice();
-        return Token_1.isKeyword(51, line.head()) ? [new MsAst_1.ClassTraitDo(line.loc, parseBlock_1.parseJustBlock(51, line.tail())), lines.tail()] : [null, lines];
+        return Keyword_1.isKeyword(93, line.head()) ? [new classTraitCommon_1.ClassTraitDo(line.loc, parseBlock_1.parseJustBlock(93, line.tail())), lines.tail()] : [null, lines];
     }
     exports.opTakeDo = opTakeDo;
     function parseMethodImpl(tokens) {
-        let head = tokens.head();
-        const isMy = Token_1.isKeyword(87, head);
-        if (isMy) {
-            tokens = tokens.tail();
-            head = tokens.head();
-        }
-        if (Token_1.isKeyword(77, head)) {
-            var _parseBlock_1$beforeA = parseBlock_1.beforeAndBlock(tokens.tail());
+        var _tokens$takeKeywords = tokens.takeKeywords(129, 154, 136);
+
+        var _tokens$takeKeywords2 = _slicedToArray(_tokens$takeKeywords, 2);
+
+        var _tokens$takeKeywords3 = _slicedToArray(_tokens$takeKeywords2[0], 3);
+
+        const isMy = _tokens$takeKeywords3[0];
+        const isVirtual = _tokens$takeKeywords3[1];
+        const isOverride = _tokens$takeKeywords3[2];
+        const rest = _tokens$takeKeywords2[1];
+
+        const kind = methodKind(tokens.loc, isMy, isVirtual, isOverride);
+        const head = rest.head();
+        if (isGetSet(head)) {
+            var _parseBlock_1$beforeA = parseBlock_1.beforeAndBlock(rest.tail());
 
             var _parseBlock_1$beforeA2 = _slicedToArray(_parseBlock_1$beforeA, 2);
 
             const before = _parseBlock_1$beforeA2[0];
             const block = _parseBlock_1$beforeA2[1];
 
-            return new MsAst_1.MethodGetter(tokens.loc, isMy, parseExprOrQuoteSimple(before), parseBlock_1.default(block));
-        } else if (Token_1.isKeyword(98, head)) {
-            var _parseBlock_1$beforeA3 = parseBlock_1.beforeAndBlock(tokens.tail());
-
-            var _parseBlock_1$beforeA4 = _slicedToArray(_parseBlock_1$beforeA3, 2);
-
-            const before = _parseBlock_1$beforeA4[0];
-            const block = _parseBlock_1$beforeA4[1];
-
-            return new MsAst_1.MethodSetter(tokens.loc, isMy, parseExprOrQuoteSimple(before), parseBlock_1.default(block));
+            const ctr = head.kind === 119 ? classTraitCommon_1.MethodGetter : classTraitCommon_1.MethodSetter;
+            return new ctr(rest.loc, parseExprOrQuoteSimple(before), parseBlock_1.default(block), kind);
         } else {
-            var _parseMethodSplit_1$d = parseMethodSplit_1.default(tokens);
+            var _parseMethodSplit_1$d = parseMethodSplit_1.default(rest);
 
             const before = _parseMethodSplit_1$d.before;
-            const kind = _parseMethodSplit_1$d.kind;
+            const funKind = _parseMethodSplit_1$d.kind;
             const after = _parseMethodSplit_1$d.after;
 
-            const fun = parseFun_1.default(kind, after);
-            return new MsAst_1.MethodImpl(tokens.loc, isMy, parseExprOrQuoteSimple(before), fun);
+            const fun = parseFun_1.default(funKind, after);
+            return new classTraitCommon_1.MethodImpl(rest.loc, parseExprOrQuoteSimple(before), fun, kind);
         }
+    }
+    function methodKind(loc, isMy, isVirtual, isOverride) {
+        context_1.check(!(isMy && isOverride), loc, _ => _.noMyOverride);
+        const m = isMy ? 0b100 : 0;
+        const v = isVirtual ? 0b010 : 0;
+        const o = isOverride ? 0b001 : 0;
+        return m | v | o;
+    }
+    function isGetSet(token) {
+        if (token instanceof Keyword_1.default) return token.kind === 119 || token.kind === 141;else return null;
     }
     function parseExprOrQuoteSimple(tokens) {
         const expr = parseExpr_1.default(tokens);
-        return expr instanceof MsAst_1.QuoteSimple ? expr.value : expr;
+        return expr instanceof Val_1.QuoteSimple ? expr.value : expr;
     }
 });
 //# sourceMappingURL=parseMethodImpls.js.map

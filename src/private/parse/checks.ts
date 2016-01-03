@@ -2,7 +2,8 @@ import Op from 'op/Op'
 import CompileError from '../../CompileError'
 import {check, fail} from '../context'
 import Language from '../languages/Language'
-import Token, {isKeyword, isReservedKeyword, Keywords} from '../Token'
+import {isKeyword, isReservedKeyword, Keywords} from '../token/Keyword'
+import Token from '../token/Token'
 import Slice from './Slice'
 
 /** Throw if `tokens` has content. */

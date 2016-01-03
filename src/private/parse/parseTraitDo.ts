@@ -1,5 +1,5 @@
 import {caseOp} from 'op/Op'
-import {TraitDo} from '../MsAst'
+import {TraitDo} from '../ast/Trait'
 import {beforeAndOpBlock} from './parseBlock'
 import {parseNExprParts} from './parseExpr'
 import {parseStaticsAndMethods} from './parseMethodImpls'

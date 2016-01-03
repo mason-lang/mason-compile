@@ -4,15 +4,16 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../context', '../MsAst', '../Token', './parseBlock', './parseExpr', './parseLocalDeclares'], factory);
+        define(["require", "exports", 'op/Op', '../ast/locals', '../ast/Loop', '../context', '../token/Keyword', './parseBlock', './parseExpr', './parseLocalDeclares'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Op_1 = require('op/Op');
+    var locals_1 = require('../ast/locals');
+    var Loop_1 = require('../ast/Loop');
     var context_1 = require('../context');
-    var MsAst_1 = require('../MsAst');
-    var Token_1 = require('../Token');
+    var Keyword_1 = require('../token/Keyword');
     var parseBlock_1 = require('./parseBlock');
     var parseExpr_1 = require('./parseExpr');
     var parseLocalDeclares_1 = require('./parseLocalDeclares');
@@ -24,7 +25,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const before = _parseBlock_1$beforeA2[0];
         const block = _parseBlock_1$beforeA2[1];
 
-        return new MsAst_1.For(tokens.loc, opParseIteratee(before), parseBlock_1.default(block));
+        return new Loop_1.For(tokens.loc, opParseIteratee(before), parseBlock_1.default(block));
     }
     exports.parseFor = parseFor;
     function parseForAsync(tokens) {
@@ -35,7 +36,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const before = _parseBlock_1$beforeA4[0];
         const block = _parseBlock_1$beforeA4[1];
 
-        return new MsAst_1.ForAsync(tokens.loc, parseIteratee(before), parseBlock_1.default(block));
+        return new Loop_1.ForAsync(tokens.loc, parseIteratee(before), parseBlock_1.default(block));
     }
     exports.parseForAsync = parseForAsync;
     function parseForBag(tokens) {
@@ -46,27 +47,27 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const before = _parseBlock_1$beforeA6[0];
         const block = _parseBlock_1$beforeA6[1];
 
-        return new MsAst_1.ForBag(tokens.loc, opParseIteratee(before), parseBlock_1.default(block));
+        return new Loop_1.ForBag(tokens.loc, opParseIteratee(before), parseBlock_1.default(block));
     }
     exports.parseForBag = parseForBag;
     function opParseIteratee(tokens) {
         return Op_1.opIf(!tokens.isEmpty(), () => parseIteratee(tokens));
     }
     function parseIteratee(tokens) {
-        var _Op_1$caseOp = Op_1.caseOp(tokens.opSplitOnce(_ => Token_1.isKeyword(93, _)), _ref => {
+        var _Op_1$caseOp = Op_1.caseOp(tokens.opSplitOnce(_ => Keyword_1.isKeyword(135, _)), _ref => {
             let before = _ref.before;
             let after = _ref.after;
 
             context_1.check(before.size() === 1, before.loc, _ => _.todoForPattern);
             return [parseLocalDeclares_1.parseLocalDeclaresJustNames(before)[0], parseExpr_1.default(after)];
-        }, () => [MsAst_1.LocalDeclare.focus(tokens.loc), parseExpr_1.default(tokens)]);
+        }, () => [locals_1.LocalDeclare.focus(tokens.loc), parseExpr_1.default(tokens)]);
 
         var _Op_1$caseOp2 = _slicedToArray(_Op_1$caseOp, 2);
 
         const element = _Op_1$caseOp2[0];
         const bag = _Op_1$caseOp2[1];
 
-        return new MsAst_1.Iteratee(tokens.loc, element, bag);
+        return new Loop_1.Iteratee(tokens.loc, element, bag);
     }
 });
 //# sourceMappingURL=parseFor.js.map

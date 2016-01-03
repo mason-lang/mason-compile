@@ -1,3 +1,3 @@
-import { Expression, Statement } from 'esast/lib/ast';
-export declare function transpileSpecialDo(): Statement;
-export declare function transpileSpecialVal(): Expression;
+import Expression from 'esast/lib/Expression';
+import { SpecialVal } from '../ast/Val';
+export declare function transpileSpecialValNoLoc(_: SpecialVal): Expression;

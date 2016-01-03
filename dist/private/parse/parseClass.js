@@ -4,15 +4,16 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../MsAst', '../context', '../Token', './parseBlock', './parseExpr', './parseFun', './parseMethodImpls', './parseLocalDeclares', './tryTakeComment'], factory);
+        define(["require", "exports", 'op/Op', '../ast/Class', '../ast/Fun', '../context', '../token/Keyword', './parseBlock', './parseExpr', './parseFun', './parseMethodImpls', './parseLocalDeclares', './tryTakeComment'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Op_1 = require('op/Op');
-    var MsAst_1 = require('../MsAst');
+    var Class_1 = require('../ast/Class');
+    var Fun_1 = require('../ast/Fun');
     var context_1 = require('../context');
-    var Token_1 = require('../Token');
+    var Keyword_1 = require('../token/Keyword');
     var parseBlock_1 = require('./parseBlock');
     var parseExpr_1 = require('./parseExpr');
     var parseFun_1 = require('./parseFun');
@@ -79,12 +80,12 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const opConstructor = _Op_1$caseOp2[3];
         const methods = _Op_1$caseOp2[4];
 
-        return new MsAst_1.Class(tokens.loc, opFields, opSuperClass, traits, opComment, opDo, statics, opConstructor, methods);
+        return new Class_1.default(tokens.loc, opFields, opSuperClass, traits, opComment, opDo, statics, opConstructor, methods);
     }
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = parseClass;
     function parseClassHeader(tokens) {
-        var _tokens$getKeywordSec = tokens.getKeywordSections([57, 105]);
+        var _tokens$getKeywordSec = tokens.getKeywordSections([99, 148]);
 
         var _tokens$getKeywordSec2 = _slicedToArray(_tokens$getKeywordSec, 2);
 
@@ -104,7 +105,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
                 const kind = _parseLocalDeclares_.kind;
 
                 context_1.check(kind === 0, _.loc, _ => _.todoLazyField);
-                return new MsAst_1.Field(_.loc, name, opType);
+                return new Class_1.Field(_.loc, name, opType);
             })),
             opSuperClass: Op_1.opMap(extendsTokens, parseExpr_1.default),
             traits: Op_1.caseOp(traitTokens, parseExpr_1.parseExprParts, () => [])
@@ -112,7 +113,7 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     }
     function opTakeConstructor(tokens) {
         const line = tokens.headSlice();
-        return Token_1.isKeyword(48, line.head()) ? [parseConstructor(line.tail()), tokens.tail()] : [null, tokens];
+        return Keyword_1.isKeyword(90, line.head()) ? [parseConstructor(line.tail()), tokens.tail()] : [null, tokens];
     }
     function parseConstructor(tokens) {
         var _parseFun_1$funArgsAn = parseFun_1.funArgsAndBlock(tokens, false, true);
@@ -122,8 +123,8 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const opRestArg = _parseFun_1$funArgsAn.opRestArg;
         const block = _parseFun_1$funArgsAn.block;
 
-        const fun = new MsAst_1.Fun(tokens.loc, args, opRestArg, block, { isThisFun: true, isDo: true });
-        return new MsAst_1.Constructor(tokens.loc, fun, memberArgs);
+        const fun = new Fun_1.default(tokens.loc, args, opRestArg, block, { isThisFun: true, isDo: true });
+        return new Class_1.Constructor(tokens.loc, fun, memberArgs);
     }
 });
 //# sourceMappingURL=parseClass.js.map

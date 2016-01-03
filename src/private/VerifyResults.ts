@@ -1,7 +1,17 @@
 import Op, {caseOp} from 'op/Op'
 import {check, fail} from './context'
-import MsAst, {Block, Break, Do, CasePart, Class, Constructor, ForAsync, Fun, LocalAccess, LocalDeclare,
-	Loop, MethodImpl, MethodImplLike, Named, ObjEntry, SpecialVal, SuperCall, SwitchPart} from './MsAst'
+import Block, {ObjEntry} from './ast/Block'
+import {CasePart} from './ast/Case'
+import Class, {Constructor, SuperCall} from './ast/Class'
+import {MethodImpl, MethodImplLike} from './ast/classTraitCommon'
+import Fun from './ast/Fun'
+import {Do} from './ast/LineContent'
+import {LocalAccess, LocalDeclare} from './ast/locals'
+import Loop, {Break, ForAsync} from './ast/Loop'
+import Named from './ast/Named'
+import MsAst from './ast/MsAst'
+import {SwitchPart} from './ast/Switch'
+import {SpecialVal} from './ast/Val'
 
 /**
 Results of [[verify]].
@@ -70,7 +80,7 @@ export default class VerifyResults {
 	}
 
 	/** Get closest assignment name to an expression. */
-	name(expr: SpecialVal): string {
+	name(expr: Named): string {
 		const name = this.names.get(expr)
 		if (name === undefined)
 			throw fail(expr.loc, _ => _.cantDetermineName)
@@ -115,7 +125,7 @@ export default class VerifyResults {
 		return this.breaksInSwitch.has(breakAst)
 	}
 
-	accessBuiltin(name: string, path: string) {
+	accessBuiltin(name: string, path: string): void {
 		caseOp(this.builtinPathToNames.get(path),
 			_ => {
 				_.add(name)

@@ -2,13 +2,13 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", '../context', '../MsAst', './context', './verifyVal'], factory);
+        define(["require", "exports", '../ast/Call', '../context', './context', './verifyVal'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
+    var Call_1 = require('../ast/Call');
     var context_1 = require('../context');
-    var MsAst_1 = require('../MsAst');
     var context_2 = require('./context');
     var verifyVal_1 = require('./verifyVal');
     function makeUseOptional(localDeclare) {
@@ -20,7 +20,7 @@
     }
     exports.makeUseOptionalIfFocus = makeUseOptionalIfFocus;
     function verifyEachValOrSpread(asts) {
-        for (const _ of asts) if (_ instanceof MsAst_1.Spread) verifySpread(_);else verifyVal_1.default(_);
+        for (const _ of asts) if (_ instanceof Call_1.Spread) verifySpread(_);else verifyVal_1.default(_);
     }
     exports.verifyEachValOrSpread = verifyEachValOrSpread;
     function verifySpread(_ref) {
@@ -28,10 +28,10 @@
 
         verifyVal_1.default(spreaded);
     }
-    function verifyName(_) {
+    function verifyMemberName(_) {
         if (typeof _ !== 'string') verifyVal_1.default(_);
     }
-    exports.verifyName = verifyName;
+    exports.verifyMemberName = verifyMemberName;
     function setName(expr) {
         context_2.results.names.set(expr, context_2.name);
     }

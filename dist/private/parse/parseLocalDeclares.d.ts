@@ -1,6 +1,7 @@
 import Op from 'op/Op';
-import { Val, LocalDeclare, LocalDeclares } from '../MsAst';
-import Token from '../Token';
+import { Val } from '../ast/LineContent';
+import { LocalDeclare, LocalDeclares } from '../ast/locals';
+import Token from '../token/Token';
 import { Tokens } from './Slice';
 export default function parseLocalDeclares(tokens: Tokens): Array<LocalDeclare>;
 export declare function parseLocalDeclaresJustNames(tokens: Tokens): Array<LocalDeclare>;

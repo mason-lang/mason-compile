@@ -1,5 +1,14 @@
 import Op from 'op/Op';
-import MsAst, { Block, Break, Do, CasePart, Constructor, ForAsync, LocalAccess, LocalDeclare, Loop, MethodImplLike, Named, ObjEntry, SpecialVal, SuperCall, SwitchPart } from './MsAst';
+import Block, { ObjEntry } from './ast/Block';
+import { CasePart } from './ast/Case';
+import { Constructor, SuperCall } from './ast/Class';
+import { MethodImplLike } from './ast/classTraitCommon';
+import { Do } from './ast/LineContent';
+import { LocalAccess, LocalDeclare } from './ast/locals';
+import Loop, { Break, ForAsync } from './ast/Loop';
+import Named from './ast/Named';
+import MsAst from './ast/MsAst';
+import { SwitchPart } from './ast/Switch';
 export default class VerifyResults {
     localAccessToDeclare: Map<LocalAccess, LocalDeclare>;
     localDeclareToAccesses: Map<LocalDeclare, Array<MsAst>>;
@@ -15,7 +24,7 @@ export default class VerifyResults {
     breaksInSwitch: Set<Break>;
     constructor();
     localDeclareForAccess(localAccess: LocalAccess): LocalDeclare;
-    name(expr: SpecialVal): string;
+    name(expr: Named): string;
     opName(expr: Named): Op<string>;
     isStatement(expr: Do | CasePart | SwitchPart): boolean;
     blockKind(block: Block): Blocks;

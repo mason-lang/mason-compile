@@ -1,4 +1,4 @@
-import { Program } from 'esast/lib/ast';
-import { Module } from '../MsAst';
+import { Module as EsModule } from 'esast/lib/Program';
+import Module from '../ast/Module';
 import VerifyResults from '../VerifyResults';
-export default function transpile(moduleExpression: Module, verifyResults: VerifyResults): Program;
+export default function transpile(moduleExpression: Module, verifyResults: VerifyResults): EsModule;

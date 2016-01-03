@@ -1,6 +1,8 @@
 import Loc from 'esast/lib/Loc';
-import { Char } from '../lex/chars';
-import Token, { Group, GroupType, Keywords } from '../Token';
+import Char from 'typescript-char/Char';
+import Token from '../token/Token';
+import Group, { GroupType } from '../token/Group';
+import { Keywords } from '../token/Keyword';
 interface Language {
     badInterpolation: string;
     badSpacedIndent(indent: number): string;
@@ -42,6 +44,7 @@ interface Language {
     infiniteRange: string;
     invalidImportModule: string;
     noImportFocus: string;
+    noMyOverride: string;
     noSpecialKeyword(kind: Keywords): string;
     nothingAfterFinally: string;
     parensOutsideCall: string;

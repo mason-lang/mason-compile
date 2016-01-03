@@ -1,6 +1,8 @@
 import Loc from 'esast/lib/Loc';
 import Op from 'op/Op';
-import Token, { Group, GroupLine, Keywords, QuoteTokenPart } from '../Token';
+import Group, { GroupLine, QuoteTokenPart } from '../token/Group';
+import { Keywords } from '../token/Keyword';
+import Token from '../token/Token';
 export default class Slice<SubType extends Token> {
     static of<SubType extends Token>(group: Group<SubType>): Slice<SubType>;
     tokens: Array<SubType>;
@@ -35,6 +37,7 @@ export declare class Lines extends Slice<GroupLine> {
 export declare class Tokens extends Slice<Token> {
     static of(group: Group<Token>): Tokens;
     getKeywordSections(keywords: Array<Keywords>): [this, Array<Op<this>>];
+    takeKeywords(...keywords: Array<Keywords>): [Array<boolean>, this];
 }
 export declare type QuoteTokens = Slice<QuoteTokenPart>;
 export declare type SplitOnceResult<This, SubType> = {

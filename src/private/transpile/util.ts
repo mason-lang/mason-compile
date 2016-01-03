@@ -1,36 +1,43 @@
-import Node, {ArrowFunctionExpression, BlockStatement, CallExpression, Expression, ExpressionStatement,
-	FunctionExpression, Identifier, LiteralString, MemberExpression, MemberExpressionComputed, NewExpression, ReturnStatement, Statement,
-	ThrowStatement, VariableDeclarator, VariableDeclaration, YieldExpression} from 'esast/lib/ast'
-import {identifier, loc, member, toLineContent} from 'esast-create-util/lib/util'
+import {VariableDeclarator, VariableDeclarationLet} from 'esast/lib/Declaration'
+import Expression, {CallExpression, LiteralString, MemberExpression, MemberExpressionComputed, NewExpression, YieldDelegateExpression} from 'esast/lib/Expression'
+import {ArrowFunctionExpression, FunctionExpression} from 'esast/lib/Function'
+import Identifier from 'esast/lib/Identifier'
+import Node from 'esast/lib/Node'
+import Statement, {BlockStatement, ExpressionStatement, ReturnStatement, ThrowStatement} from 'esast/lib/Statement'
+import {identifier, loc, member} from 'esast-create-util/lib/util'
 import Op, {nonNull, opIf, opMap} from 'op/Op'
 import {options} from '../context'
-import MsAst, {Block, Val, Funs, LineContent, LocalDeclare, Name, QuoteAbstract, ValOrDo} from '../MsAst'
+import Block from '../ast/Block'
+import {Funs} from '../ast/Fun'
+import LineContent, {Do, Val} from '../ast/LineContent'
+import {LocalDeclare} from '../ast/locals'
+import MemberName from '../ast/MemberName'
+import MsAst from '../ast/MsAst'
+import {QuoteAbstract} from '../ast/Val'
 import {assert, cat, toArray} from '../util'
-import {IdFocus, GlobalError} from './ast-constants'
+import {IdFocus, GlobalError} from './esast-constants'
 import {funKind, getDestructuredId, verifyResults} from './context'
+import transpileBlock from './transpileBlock'
+import transpileDo from './transpileDo'
+import transpileVal from './transpileVal'
 
-export function t0(expr: MsAst): any {
-	return loc(expr.transpile(), expr.loc)
+//rename!
+export function loc<A extends Node>(expr: MsAst, node: A): A {
+	assert(node.loc === undefined)
+	node.loc = expr.loc
+	return node
 }
-export function t1(expr: MsAst, arg: any): any {
-	return loc(expr.transpile(arg), expr.loc)
-}
-export function t2(expr: MsAst, arg: any, arg2: any): any {
-	return loc(expr.transpile(arg, arg2), expr.loc)
-}
-export function t3(expr: MsAst, arg: any, arg2: any, arg3: any): any {
-	return loc(expr.transpile(arg, arg2, arg3), expr.loc)
-}
-export function tLines(exprs: Array<LineContent>): Array<Statement> {
+
+//rename
+export function tLines(exprs: Array<Do>): Array<Statement> {
 	const out: Array<Statement> = []
 	for (const expr of exprs) {
-		const ast = expr.transpile()
+		const ast = transpileDo(expr)
 		if (ast instanceof Array)
-			// Ignore produces 0 statements and Region produces many.
 			for (const _ of ast)
-				out.push(toLineContent(_))
+				out.push(_)
 		else
-			out.push(loc(toLineContent(ast), expr.loc))
+			out.push(ast) //was: loc(ast, expr.loc))
 	}
 	return out
 }
@@ -40,8 +47,8 @@ export function accessLocalDeclare(localDeclare: LocalDeclare): Expression {
 	return localDeclare.isLazy ? msCall('unlazy', id) : new Identifier(id.name)
 }
 
-export function makeDeclare(localDeclare: LocalDeclare, val: Node): VariableDeclaration {
-	return new VariableDeclaration('let',
+export function makeDeclare(localDeclare: LocalDeclare, val: Expression): VariableDeclarationLet {
+	return new VariableDeclarationLet(
 		[new VariableDeclarator(idForDeclareCached(localDeclare), val)])
 }
 
@@ -61,15 +68,9 @@ export function opTypeCheckForLocalDeclare(localDeclare: LocalDeclare): Op<State
 		opMap(localDeclare.opType, type =>
 			new ExpressionStatement(msCall(
 				'checkInstance',
-				t0(type),
+				transpileVal(type),
 				accessLocalDeclare(localDeclare),
 				new LiteralString(localDeclare.name)))))
-}
-
-export function throwErrorFromString(message: string): ThrowStatement {
-	// TODO:ES6 Should be able to use IdError in ast-constants without recursive module problems
-	return new ThrowStatement(
-		new NewExpression(new Identifier('Error'), [new LiteralString(message)]))
 }
 
 export function makeDeclarator(assignee: LocalDeclare, value: Expression, valueIsAlreadyLazy: boolean): VariableDeclarator {
@@ -85,24 +86,20 @@ export function makeDeclarator(assignee: LocalDeclare, value: Expression, valueI
 
 export function maybeWrapInCheckInstance(ast: Expression, opType: Op<Val>, name: string): Expression {
 	return options.checks && nonNull(opType) ?
-		msCall('checkInstance', t0(opType), ast, new LiteralString(name)) :
+		msCall('checkInstance', transpileVal(opType), ast, new LiteralString(name)) :
 		ast
 }
 
 export function doThrow(thrown: Val): ThrowStatement {
 	return new ThrowStatement(thrown instanceof QuoteAbstract ?
-		new NewExpression(GlobalError, [t0(thrown)]) :
-		t0(thrown))
+		new NewExpression(GlobalError, [transpileVal(thrown)]) :
+		transpileVal(thrown))
 }
 
-export function transpileName(name: Name): Expression {
-	return typeof name === 'string' ? new LiteralString(name) : t0(name)
-}
-
-export function memberStringOrVal(object: Expression, memberName: Name): MemberExpression {
+export function memberStringOrVal(object: Expression, memberName: MemberName): MemberExpression {
 	return typeof memberName === 'string' ?
 		member(object, memberName) :
-		new MemberExpressionComputed(object, t0(memberName))
+		new MemberExpressionComputed(object, transpileVal(memberName))
 }
 
 export function lazyWrap(value: Expression): Expression {
@@ -150,6 +147,11 @@ export function blockWrap(block: BlockStatement): Expression {
 	return callPreservingFunKind(new CallExpression(thunk, []))
 }
 
+/** Wrap a statement in an IIFE. */
+export function blockWrapStatement(statement: Statement): Expression {
+	return blockWrap(new BlockStatement([statement]))
+}
+
 /** Create a focus fun returning `value` and call it on `calledOn`, preserving generator/async. */
 export function callFocusFun(value: Expression, calledOn: Expression): Expression {
 	const fun = funKind === Funs.Plain ?
@@ -166,26 +168,18 @@ This looks like:
 	Funs.Generator, Funs.Async: `yield* function*(_) { return foo(_) }(1)`
 */
 function callPreservingFunKind(call: Expression): Expression {
-	return funKind === Funs.Plain ? call : new YieldExpression(call, true)
+	return funKind === Funs.Plain ? call : new YieldDelegateExpression(call)
 }
 
+//check uses (loc)
 export function blockWrapIfBlock(value: Block | Val): Expression {
-	// todo: in first case, block transpiles to BlockStatement
-	// in second case, transpiles to Expression
-	return value instanceof Block ? blockWrap(<any> t0(value)) : (<any> t0(value))
-}
-
-/** Wraps a statement in an IIFE if its MsAst is a value. */
-export function blockWrapIfVal(ast: ValOrDo, statement: Statement | Array<Statement>): Expression | Statement | Array<Statement> {
-	return verifyResults.isStatement(ast) ?
-		statement :
-		blockWrap(new BlockStatement(toArray(statement)))
+	return value instanceof Block ? blockWrap(transpileBlock(value)) : (transpileVal(value))
 }
 
 export function focusFun(value: Expression): ArrowFunctionExpression {
 	return new ArrowFunctionExpression([IdFocus], value)
 }
 
-export function plainLet(identifier: Identifier, value: Expression): VariableDeclaration {
-	return new VariableDeclaration('let', [new VariableDeclarator(identifier, value)])
+export function plainLet(identifier: Identifier, value: Expression): VariableDeclarationLet {
+	return new VariableDeclarationLet([new VariableDeclarator(identifier, value)])
 }

@@ -1,7 +1,10 @@
 import Loc from 'esast/lib/Loc'
+import Char from 'typescript-char/Char'
 import {code} from '../../CompileError'
-import {Char, showChar} from '../lex/chars'
-import Token, {Group, GroupType, Keywords, showKeyword as kw} from '../Token'
+import {showChar} from '../lex/chars'
+import Token from '../token/Token'
+import Group, {GroupType} from '../token/Group'
+import {Keywords, showKeyword as kw} from '../token/Keyword'
 import {assert} from '../util'
 import Language from './Language'
 
@@ -84,13 +87,15 @@ const english: Language = {
 	extraParens:
 		`Unnecessary ${code('()')}`,
 	implicitFunctionDot:
-		`Function ${showChar(Char.Dot)} is implicit for methods.`,
+		`Function ${showChar(Char.Period)} is implicit for methods.`,
 	infiniteRange:
 		`Use ${kw(Keywords.Dot3)} for infinite ranges.`,
 	invalidImportModule:
 		'Not a valid module name.',
 	noImportFocus:
 		`${kw(Keywords.Focus)} not allowed as import name.`,
+	noMyOverride:
+		`Method can't be both ${kw(Keywords.My)} and ${kw(Keywords.Override)}.`,
 	noSpecialKeyword: (kind: Keywords): string =>
 		`${kw(kind)} is not allowed here.`,
 	nothingAfterFinally:

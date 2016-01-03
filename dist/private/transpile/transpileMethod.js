@@ -2,60 +2,57 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'esast/lib/ast', 'esast-create-util/lib/util', '../MsAst', './ast-constants', './util'], factory);
+        define(["require", "exports", 'esast/lib/Class', 'esast/lib/Function', 'esast/lib/ObjectExpression', 'esast-create-util/lib/util', '../ast/classTraitCommon', '../ast/Val', './esast-constants', './transpileBlock', './transpileFun', './transpileVal', './util'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
-    var ast_1 = require('esast/lib/ast');
+    var Class_1 = require('esast/lib/Class');
+    var Function_1 = require('esast/lib/Function');
+    var ObjectExpression_1 = require('esast/lib/ObjectExpression');
     var util_1 = require('esast-create-util/lib/util');
-    var MsAst_1 = require('../MsAst');
-    var ast_constants_1 = require('./ast-constants');
+    var classTraitCommon_1 = require('../ast/classTraitCommon');
+    var Val_1 = require('../ast/Val');
+    var esast_constants_1 = require('./esast-constants');
+    var transpileBlock_1 = require('./transpileBlock');
+    var transpileFun_1 = require('./transpileFun');
+    var transpileVal_1 = require('./transpileVal');
     var util_2 = require('./util');
     function transpileMethodToDefinition(_, isStatic) {
-        var _methodParams = methodParams(_);
+        var _methodParams = methodParams(_, { method: Class_1.MethodDefinitionPlain, get: Class_1.MethodDefinitionGet, set: Class_1.MethodDefinitionSet });
 
-        const computed = _methodParams.computed;
-        const key = _methodParams.key;
-        const kind = _methodParams.kind;
+        const name = _methodParams.name;
+        const ctr = _methodParams.ctr;
         const value = _methodParams.value;
+        const params = value.params;
+        const body = value.body;
+        const generator = value.generator;
+        const async = value.async;
 
-        return new ast_1.MethodDefinitionPlain(key, value, kind, isStatic, computed);
+        return util_2.loc(_, new ctr(name, value, { static: isStatic }));
     }
     exports.transpileMethodToDefinition = transpileMethodToDefinition;
     function transpileMethodToProperty(_) {
-        var _methodParams2 = methodParams(_);
+        var _methodParams2 = methodParams(_, { method: ObjectExpression_1.PropertyMethod, get: ObjectExpression_1.PropertyGet, set: ObjectExpression_1.PropertySet });
 
-        const computed = _methodParams2.computed;
-        const key = _methodParams2.key;
-        const kind = _methodParams2.kind;
+        const name = _methodParams2.name;
+        const ctr = _methodParams2.ctr;
         const value = _methodParams2.value;
 
-        switch (kind) {
-            case 'method':
-                return new ast_1.PropertyMethod(key, value, computed);
-            case 'get':
-                return new ast_1.PropertyGet(key, value, computed);
-            case 'set':
-                return new ast_1.PropertySet(key, value, computed);
-            default:
-                throw new Error(String(kind));
-        }
+        return util_2.loc(_, new ctr(name, value));
     }
     exports.transpileMethodToProperty = transpileMethodToProperty;
-    function methodParams(_) {
+    function methodParams(_, ctrs) {
         const symbol = _.symbol;
         return {
-            computed: !(typeof _.symbol === 'string'),
-            isImpl: _ instanceof MsAst_1.MethodImpl,
-            key: typeof symbol === 'string' ? util_1.propertyIdOrLiteral(symbol) : symbol instanceof MsAst_1.QuoteAbstract ? util_2.t0(symbol) : util_2.msCall('symbol', util_2.t0(symbol)),
-            kind: _ instanceof MsAst_1.MethodImpl ? 'method' : _ instanceof MsAst_1.MethodGetter ? 'get' : 'set',
-            value: _ instanceof MsAst_1.MethodImpl ? util_2.t0(_.fun) : getSetFun(_)
+            name: typeof symbol === 'string' ? util_1.propertyIdOrLiteral(symbol) : new ObjectExpression_1.ComputedName(symbol instanceof Val_1.QuoteAbstract ? transpileVal_1.default(symbol) : util_2.msCall('symbol', transpileVal_1.default(symbol))),
+            ctr: _ instanceof classTraitCommon_1.MethodImpl ? ctrs.method : _ instanceof classTraitCommon_1.MethodGetter ? ctrs.get : ctrs.set,
+            value: _ instanceof classTraitCommon_1.MethodImpl ? transpileFun_1.default(_.fun) : getSetFun(_)
         };
     }
     function getSetFun(_) {
-        const args = _ instanceof MsAst_1.MethodGetter ? [] : [ast_constants_1.IdFocus];
-        return new ast_1.FunctionExpression(null, args, util_2.t1(_.block, ast_constants_1.DeclareLexicalThis));
+        const args = _ instanceof classTraitCommon_1.MethodGetter ? [] : [esast_constants_1.IdFocus];
+        return new Function_1.FunctionExpression(null, args, transpileBlock_1.default(_.block, esast_constants_1.DeclareLexicalThis));
     }
 });
 //# sourceMappingURL=transpileMethod.js.map

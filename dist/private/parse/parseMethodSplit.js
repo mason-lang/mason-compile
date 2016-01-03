@@ -2,16 +2,16 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'op/Op', '../context', '../Token'], factory);
+        define(["require", "exports", 'op/Op', '../context', '../token/Keyword'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Op_1 = require('op/Op');
     var context_1 = require('../context');
-    var Token_1 = require('../Token');
+    var Keyword_1 = require('../token/Keyword');
     function parseMethodSplit(tokens) {
-        return Op_1.caseOp(tokens.opSplitOnce(_ => Token_1.isAnyKeyword(funKeywords, _)), _ref => {
+        return Op_1.caseOp(tokens.opSplitOnce(_ => Keyword_1.isAnyKeyword(funKeywords, _)), _ref => {
             let before = _ref.before;
             let at = _ref.at;
             let after = _ref.after;
@@ -24,29 +24,29 @@
     exports.default = parseMethodSplit;
     function methodFunKind(funKindToken) {
         switch (funKindToken.kind) {
-            case 65:
-                return 67;
-            case 66:
-                return 68;
-            case 69:
-                return 71;
-            case 70:
-                return 72;
-            case 73:
-                return 75;
-            case 74:
-                return 76;
-            case 67:
-            case 68:
-            case 71:
-            case 72:
-            case 75:
-            case 76:
+            case 107:
+                return 109;
+            case 108:
+                return 110;
+            case 111:
+                return 113;
+            case 112:
+                return 114;
+            case 115:
+                return 117;
+            case 116:
+                return 118;
+            case 109:
+            case 110:
+            case 113:
+            case 114:
+            case 117:
+            case 118:
                 throw context_1.fail(funKindToken.loc, _ => _.implicitFunctionDot);
             default:
                 throw context_1.fail(funKindToken.loc, _ => _.expectedFuncKind(funKindToken));
         }
     }
-    const funKeywords = new Set([65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76]);
+    const funKeywords = new Set([107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118]);
 });
 //# sourceMappingURL=parseMethodSplit.js.map

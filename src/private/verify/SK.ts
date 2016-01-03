@@ -1,10 +1,16 @@
 import Loc from 'esast/lib/Loc'
 import Op, {caseOp, orDefault} from 'op/Op'
+import Block from '../ast/Block'
+import {Conditional} from '../ast/booleans'
+import Case, {CasePart} from '../ast/Case'
+import {Catch, Except} from '../ast/errors'
+import LineContent, {DoOnly, ValOnly, ValOrDo} from '../ast/LineContent'
+import {For, ForAsync, Break} from '../ast/Loop'
+import MsAst from '../ast/MsAst'
+import Switch, {SwitchPart} from '../ast/Switch'
+import With from '../ast/With'
 import {check, warn} from '../context'
 import Language from '../languages/Language'
-import MsAst, {Block, Break, Case, CasePart, Catch, Conditional, DoOnly, Except, For, ForAsync, LineContent,
-	Switch, SwitchPart, ValOnly, ValOrDo, With} from '../MsAst'
-import * as MsAstTypes from '../MsAst'
 import {cat, isEmpty, last} from '../util'
 import {Blocks} from '../VerifyResults'
 import autoBlockKind from './autoBlockKind'
@@ -40,7 +46,7 @@ export function getBlockSK(_: Block): SK {
 Infer whether the last line of a module is a statement or a value.
 Prefer to make it a value, such as in the case of a Call.
 */
-export function getLineSK(_: LineContent) {
+export function getLineSK(_: LineContent): SK {
 	return orDefault(opSK(_), () => SK.Val)
 }
 

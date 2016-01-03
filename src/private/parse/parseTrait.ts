@@ -1,5 +1,6 @@
 import Op, {caseOp} from 'op/Op'
-import {ClassTraitDo, MethodImplLike, Trait} from '../MsAst'
+import {ClassTraitDo, MethodImplLike} from '../ast/classTraitCommon'
+import Trait from '../ast/Trait'
 import {beforeAndOpBlock} from './parseBlock'
 import {parseExprParts} from './parseExpr'
 import {opTakeDo, parseStaticsAndMethods} from './parseMethodImpls'
@@ -10,7 +11,6 @@ import {Lines, Tokens} from './Slice'
 export default function parseTrait(tokens: Tokens): Trait {
 	const [before, opBlock] = beforeAndOpBlock(tokens)
 	const superTraits = parseExprParts(before)
-	// todo: https://github.com/Microsoft/TypeScript/issues/6310
 	type tuple = [Op<string>, Op<ClassTraitDo>, Array<MethodImplLike>, Array<MethodImplLike>]
 	const [opComment, opDo, statics, methods] = caseOp<Lines, tuple>(
 		opBlock,

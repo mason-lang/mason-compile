@@ -1,4 +1,4 @@
-import {Assert, Throw} from '../../dist/private/MsAst'
+import {Assert, Throw} from '../../dist/private/ast/errors'
 import {loc, one, strA, zero} from './util/ast-util'
 import {test} from './util/test-asts'
 

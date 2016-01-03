@@ -1,5 +1,5 @@
 import {Pos} from 'esast/lib/Loc'
-import {Char} from './chars'
+import Char from 'typescript-char/Char'
 
 /*
 These are kept up-to-date as we iterate through sourceString.
@@ -67,7 +67,7 @@ export function tryEat3(char1: Char, char2: Char, char3: Char): boolean {
 }
 
 export function tryEatNewline(): boolean {
-	const canEat = peek() === Char.Newline
+	const canEat = peek() === Char.LineFeed
 	if (canEat) {
 		index = index + 1
 		line = line + 1
@@ -102,11 +102,11 @@ export function skipWhileEquals(char: Char): number {
 }
 
 export function skipRestOfLine(): number {
-	return skipWhile(_ => _ !== Char.Newline)
+	return skipWhile(_ => _ !== Char.LineFeed)
 }
 
 export function eatRestOfLine(): string {
-	return takeWhile(_ => _ !== Char.Newline)
+	return takeWhile(_ => _ !== Char.LineFeed)
 }
 
 export function skipWhile(characterPredicate: (_: Char) => boolean): number {
@@ -123,7 +123,7 @@ export function skipWhile(characterPredicate: (_: Char) => boolean): number {
 export function skipNewlines(): number {
 	const startLine = line
 	line = line + 1
-	while (peek() === Char.Newline) {
+	while (peek() === Char.LineFeed) {
 		index = index + 1
 		line = line + 1
 	}
@@ -133,19 +133,19 @@ export function skipNewlines(): number {
 
 // Sprinkle checkPos() around to debug line and column tracking errors.
 /*
-function checkPos() {
+export function checkPos(): void {
 	const p = _getCorrectPos()
 	if (p.line !== line || p.column !== column)
 		throw new Error(`index: ${index}, wrong: ${Pos(line, column)}, right: ${p}`)
 }
-const _indexToPos = new Map()
-function _getCorrectPos() {
+const indexToPos = new Map()
+function getCorrectPos(): Pos {
 	if (index === 0)
 		return Pos.start
 
 	let oldPos, oldIndex
 	for (oldIndex = index - 1; ; oldIndex = oldIndex - 1) {
-		oldPos = _indexToPos.get(oldIndex)
+		oldPos = indexToPos.get(oldIndex)
 		if (oldPos !== undefined)
 			break
 		assert(oldIndex >= 0)
@@ -159,7 +159,7 @@ function _getCorrectPos() {
 			newColumn = newColumn + 1
 
 	const p = Pos(newLine, newColumn)
-	_indexToPos.set(index, p)
+	indexToPos.set(index, p)
 	return p
 }
 */

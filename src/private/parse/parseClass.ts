@@ -1,7 +1,11 @@
 import Op, {caseOp, opIf, opMap} from 'op/Op'
-import {Class, ClassTraitDo, Constructor, Val, Field, Fun, LocalDeclares, MethodImplLike} from '../MsAst'
+import Class, {Constructor, Field} from '../ast/Class'
+import {ClassTraitDo, MethodImplLike} from '../ast/classTraitCommon'
+import Fun from '../ast/Fun'
+import {Val} from '../ast/LineContent'
+import {LocalDeclares} from '../ast/locals'
 import {check} from '../context'
-import {isKeyword, Keywords} from '../Token'
+import {isKeyword, Keywords} from '../token/Keyword'
 import {beforeAndOpBlock} from './parseBlock'
 import parseExpr, {parseExprParts} from './parseExpr'
 import {funArgsAndBlock} from './parseFun'
@@ -14,7 +18,6 @@ import tryTakeComment from './tryTakeComment'
 export default function parseClass(tokens: Tokens): Class {
 	const [before, opBlock] = beforeAndOpBlock(tokens)
 	const {opFields, opSuperClass, traits} = parseClassHeader(before)
-	// todo: https://github.com/Microsoft/TypeScript/issues/6310
 	type tuple = [Op<string>, Op<ClassTraitDo>, Array<MethodImplLike>, Op<Constructor>, Array<MethodImplLike>]
 	const [opComment, opDo, statics, opConstructor, methods] = caseOp<Lines, tuple>(opBlock,
 		_ => {

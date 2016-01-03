@@ -4,14 +4,15 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", '../context', '../MsAst', '../Token', './checks', './parseBlock', './parseExpr'], factory);
+        define(["require", "exports", '../context', '../ast/locals', '../ast/Switch', '../token/Keyword', './checks', './parseBlock', './parseExpr'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var context_1 = require('../context');
-    var MsAst_1 = require('../MsAst');
-    var Token_1 = require('../Token');
+    var locals_1 = require('../ast/locals');
+    var Switch_1 = require('../ast/Switch');
+    var Keyword_1 = require('../token/Keyword');
     var checks_1 = require('./checks');
     var parseBlock_1 = require('./parseBlock');
     var parseExpr_1 = require('./parseExpr');
@@ -24,10 +25,10 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
         const block = _parseBlock_1$beforeA2[1];
 
         if (switchedFromFun) checks_1.checkEmpty(before, _ => _.switchArgIsImplicit);
-        const switched = switchedFromFun ? MsAst_1.LocalAccess.focus(tokens.loc) : parseExpr_1.default(before);
+        const switched = switchedFromFun ? locals_1.LocalAccess.focus(tokens.loc) : parseExpr_1.default(before);
         const lastLine = block.lastSlice();
 
-        var _ref = Token_1.isKeyword(55, lastLine.head()) ? [block.rtail(), parseBlock_1.parseJustBlock(55, lastLine.tail())] : [block, null];
+        var _ref = Keyword_1.isKeyword(97, lastLine.head()) ? [block.rtail(), parseBlock_1.parseJustBlock(97, lastLine.tail())] : [block, null];
 
         var _ref2 = _slicedToArray(_ref, 2);
 
@@ -42,10 +43,10 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
             const before = _parseBlock_1$beforeA4[0];
             const block = _parseBlock_1$beforeA4[1];
 
-            return new MsAst_1.SwitchPart(line.loc, parseExpr_1.parseExprParts(before), parseBlock_1.default(block));
+            return new Switch_1.SwitchPart(line.loc, parseExpr_1.parseExprParts(before), parseBlock_1.default(block));
         });
         context_1.check(parts.length > 0, tokens.loc, _ => _.caseSwitchNeedsParts);
-        return new MsAst_1.Switch(tokens.loc, switched, parts, opElse);
+        return new Switch_1.default(tokens.loc, switched, parts, opElse);
     }
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = parseSwitch;

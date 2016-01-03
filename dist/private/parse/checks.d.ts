@@ -1,6 +1,7 @@
 import CompileError from '../../CompileError';
 import Language from '../languages/Language';
-import Token, { Keywords } from '../Token';
+import { Keywords } from '../token/Keyword';
+import Token from '../token/Token';
 import Slice from './Slice';
 export declare function checkEmpty(tokens: Slice<Token>, message: (_: Language) => string): void;
 export declare function checkNonEmpty(tokens: Slice<Token>, message: (_: Language) => string): void;

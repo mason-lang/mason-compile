@@ -1,25 +1,27 @@
 import Loc from 'esast/lib/Loc'
 import Op, {caseOp} from 'op/Op'
+import Block, {ObjEntry} from '../ast/Block'
+import LineContent from '../ast/LineContent'
+import {LocalDeclare} from '../ast/locals'
 import {check} from '../context'
-import {Block, LineContent, LocalDeclare, ObjEntry} from '../MsAst'
 import {isEmpty, last, rtail} from '../util'
 import {Blocks, Modules} from '../VerifyResults'
-import autoBlockKind, {opBlockBuildKind} from './autoBlockKind'
+import autoBlockKind from './autoBlockKind'
 import {results} from './context'
 import {plusLocals, verifyAndPlusLocal} from './locals'
-import SK, {getLineSK} from './SK'
-import verifyLines from './verifyLines'
+import SK from './SK'
+import verifyLines, {verifyBuiltLines} from './verifyLines'
 import verifySK from './verifySK'
-import verifyVal, {verifyValP} from './verifyVal'
+import verifyVal, {ensureValAndVerify} from './verifyVal'
 
-export function verifyBlockSK(_: Block, sk: SK) {
+export function verifyBlockSK(_: Block, sk: SK): void {
 	if (sk === SK.Do)
 		verifyBlockDo(_)
 	else
 		verifyBlockVal(_)
 }
 
-export function verifyBlockVal(_: Block) {
+export function verifyBlockVal(_: Block): void {
 	const {lines, loc} = _
 	check(!isEmpty(lines), loc, _ => _.blockNeedsContent)
 	const kind = autoBlockKind(lines, loc)
@@ -31,7 +33,7 @@ export function verifyBlockVal(_: Block) {
 			verifyLines(lines)
 			break
 		case Blocks.Return:
-			plusLocals(verifyLines(rtail(lines)), () => verifyValP(last(lines)))
+			plusLocals(verifyLines(rtail(lines)), () => ensureValAndVerify(last(lines)))
 			break
 		default:
 			throw new Error(String(kind))
@@ -42,42 +44,4 @@ export function verifyBlockVal(_: Block) {
 export function verifyBlockDo(_: Block): Array<LocalDeclare> {
 	results.blockToKind.set(_, Blocks.Do)
 	return verifyLines(_.lines)
-}
-
-export function verifyModuleLines(lines: Array<LineContent>, loc: Loc): void {
-	results.moduleKind = caseOp(opBlockBuildKind(lines, loc),
-		buildKind => {
-			if (buildKind === Blocks.Obj) {
-				for (const line of lines)
-					if (line instanceof ObjEntry)
-						results.objEntryExports.add(line)
-				verifyLines(lines)
-				return Modules.Exports
-			} else {
-				verifyBuiltLines(lines, loc)
-				return buildKind === Blocks.Bag ? Modules.Bag : Modules.Map
-			}
-		},
-		() => {
-			if (isEmpty(lines))
-				return Modules.Do
-			else {
-				const l = last(lines)
-				const lastSK = getLineSK(l)
-				if (lastSK === SK.Do) {
-					verifyLines(lines)
-					return Modules.Do
-				} else {
-					const newLocals = verifyLines(rtail(lines))
-					plusLocals(newLocals, () => verifyValP(l))
-					return Modules.Val
-				}
-			}
-		})
-}
-
-function verifyBuiltLines(lines: Array<LineContent>, loc: Loc): void {
-	verifyAndPlusLocal(LocalDeclare.built(loc), () => {
-		verifyLines(lines)
-	})
 }

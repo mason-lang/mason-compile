@@ -1,32 +1,30 @@
+import {VariableDeclarationLet, VariableDeclarator} from 'esast/lib/Declaration'
+import Expression, {AssignmentExpression, LiteralBoolean} from 'esast/lib/Expression'
+import Identifier from 'esast/lib/Identifier'
+import Node from 'esast/lib/Node'
+import Statement, {BlockStatement, CatchClause, ExpressionStatement, IfStatement, ThrowStatement, TryStatement} from 'esast/lib/Statement'
 import Op, {caseOp, opMap} from 'op/Op'
-import Node, {AssignmentExpression, BlockStatement, CatchClause, Expression, Identifier, IfStatement, Literal, LiteralBoolean,
-	Statement, ThrowStatement, TryStatement, VariableDeclaration, VariableDeclarator} from 'esast/lib/ast'
-import {Block, Catch, Val, Except} from '../MsAst'
-import {allSame, cat, isEmpty, reverseIter} from '../util'
-import {blockWrapIfVal, idForDeclareCached, msCall, t0, t1, tLines} from './util'
+import Block from '../ast/Block'
+import {Catch, Except} from '../ast/errors'
+import {Do, Val} from '../ast/LineContent'
+import {allSame, cat, isEmpty, reverseIter, toArray} from '../util'
+import transpileBlock, {transpileBlockDo, transpileBlockNoLoc} from './transpileBlock'
+import {transpileLocalDeclare} from './transpileMisc'
+import transpileVal from './transpileVal'
+import {blockWrap, idForDeclareCached, loc, msCall, tLines} from './util'
 
-export default function(): Expression | Statement | Array<Statement> {
-	const block = this.opElse === null ?
-		new TryStatement(
-			t0(this.try),
-			transpileCatches(this.typedCatches, this.opCatchAll, false),
-			opMap(this.opFinally, t0)) :
-		transpileWithElse(this, this.opElse)
-	return blockWrapIfVal(this, block)
+export function transpileExceptValNoLoc(_: Except): Expression {
+	return blockWrap(new BlockStatement(toArray(transpileExceptDoNoLoc(_))))
 }
 
-/**
-@param needsErrorDeclare
-	If there are multiple catches with different error names, each one must declare its own.
-	The common error (used by the compiled `catch` block) is IdError.
-*/
-export function transpileCatch(needsErrorDeclare: boolean): BlockStatement {
-	if (needsErrorDeclare) {
-		const declareError = new VariableDeclaration('let', [
-			new VariableDeclarator(t0(this.caught), IdError)])
-		return t1(this.block, declareError)
-	} else
-		return t0(this.block)
+export function transpileExceptDoNoLoc(_: Except): Statement | Array<Statement> {
+	const {try: _try, typedCatches, opCatchAll, opElse, opFinally} = _
+	return caseOp<Block, Statement | Array<Statement>>(opElse,
+		_else => transpileWithElse(_, _else),
+		() => new TryStatement(
+			transpileBlock(_try),
+			transpileCatches(typedCatches, opCatchAll, false),
+			opMap(opFinally, transpileBlockDo)))
 }
 
 /**
@@ -42,9 +40,12 @@ try {
 }
 */
 function transpileWithElse(_: Except, _else: Block): Array<Statement> {
-	const _try = t1(_else, cat(tLines(_.try.lines), SetExceptElse))
-	const _catch = transpileCatches(_.typedCatches, _.opCatchAll, true)
-	return [LetExceptElse, new TryStatement(_try, _catch, opMap(_.opFinally, t0))]
+	const {try: _try, typedCatches, opCatchAll, opFinally} = _
+	//_try.lines must all be Do
+	//(maybe just have a BlockDo ast type for this?)
+	const tryAst = transpileBlock(_else, cat(tLines(<Array<Do>> _try.lines), SetExceptElse))
+	const catchAst = transpileCatches(typedCatches, opCatchAll, true)
+	return [LetExceptElse, new TryStatement(tryAst, catchAst, opMap(opFinally, transpileBlockDo))]
 }
 
 function transpileCatches(typedCatches: Array<Catch>, opCatchAll: Op<Catch>, hasElse: boolean): CatchClause {
@@ -56,29 +57,50 @@ function transpileCatches(typedCatches: Array<Catch>, opCatchAll: Op<Catch>, has
 		new IfStatement(IdExceptElse, new ThrowStatement(idError))
 
 	const catchAll = caseOp(opCatchAll,
-		_ => t1(_, needsErrorDeclare),
-		() => new ThrowStatement(idError))
+		_ => transpileCatch(_, needsErrorDeclare),
+		() => new BlockStatement([new ThrowStatement(idError)]))
 
-	if (isEmpty(typedCatches)) {
-		if (hasElse)
-			catchAll.body.unshift(throwIfOnElse())
-		return new CatchClause(idError, catchAll)
-	} else {
-		let catches = catchAll
-		for (const typedCatch of reverseIter(typedCatches)) {
-			const type = <Val> typedCatch.caught.opType
-			const cond = msCall('contains', t0(type), idError)
-			const then = t1(typedCatch, needsErrorDeclare)
-			catches = new IfStatement(cond, then, catches)
+	const catchBlock = (() => {
+		if (isEmpty(typedCatches)) {
+			if (hasElse)
+				catchAll.body.unshift(throwIfOnElse())
+			return catchAll
+		} else {
+			let catches: Statement = catchAll
+			for (const typedCatch of reverseIter(typedCatches)) {
+				//todo: all typed catches have <Val>, can we let type system know?
+				const type = <Val> typedCatch.caught.opType
+				const cond = msCall('contains', transpileVal(type), idError)
+				const then = transpileCatch(typedCatch, needsErrorDeclare)
+				catches = new IfStatement(cond, then, catches)
+			}
+			return new BlockStatement(hasElse ? [throwIfOnElse(), catches] : [catches])
 		}
-		return new CatchClause(idError,
-			new BlockStatement(hasElse ? [throwIfOnElse(), catches] : [catches]))
-	}
+	})()
+
+	return new CatchClause(idError, catchBlock)
+}
+
+/**
+@param needsErrorDeclare
+	If there are multiple catches with different error names, each one must declare its own.
+	The common error (used by the compiled `catch` block) is IdError.
+*/
+function transpileCatch(_: Catch, needsErrorDeclare: boolean): BlockStatement {
+	const {caught, block} = _
+	return loc(_, (() => {
+		if (needsErrorDeclare) {
+			const declareError = new VariableDeclarationLet(
+				[new VariableDeclarator(transpileLocalDeclare(caught), IdError)])
+			return transpileBlockNoLoc(block, declareError)
+		} else
+			return transpileBlockNoLoc(block)
+	})())
 }
 
 const
 	IdError = new Identifier('error_'),
 	IdExceptElse = new Identifier('exceptElse_'),
-	LetExceptElse = new VariableDeclaration('let', [
-		new VariableDeclarator(IdExceptElse, new LiteralBoolean(false))]),
-	SetExceptElse = new AssignmentExpression('=', IdExceptElse, new LiteralBoolean(true))
+	LetExceptElse = new VariableDeclarationLet(
+		[new VariableDeclarator(IdExceptElse, new LiteralBoolean(false))]),
+	SetExceptElse = new ExpressionStatement(new AssignmentExpression('=', IdExceptElse, new LiteralBoolean(true)))

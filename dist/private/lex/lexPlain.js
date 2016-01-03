@@ -2,14 +2,16 @@
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports);if (v !== undefined) module.exports = v;
     } else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports", 'esast/lib/Loc', '../context', '../Token', '../util', './chars', './groupContext', './lexName', './lexQuote', './sourceContext'], factory);
+        define(["require", "exports", 'esast/lib/Loc', '../context', '../token/Group', '../token/Keyword', '../token/Token', '../util', './chars', './groupContext', './lexName', './lexQuote', './sourceContext'], factory);
     }
 })(function (require, exports) {
     "use strict";
 
     var Loc_1 = require('esast/lib/Loc');
     var context_1 = require('../context');
-    var Token_1 = require('../Token');
+    var Group_1 = require('../token/Group');
+    var Keyword_1 = require('../token/Keyword');
+    var Token_1 = require('../token/Token');
     var util_1 = require('../util');
     var chars_1 = require('./chars');
     var groupContext_1 = require('./groupContext');
@@ -26,7 +28,7 @@
             return new Loc_1.default(startPos(), sourceContext_1.pos());
         }
         function keyword(kind) {
-            groupContext_1.addToCurrentGroup(new Token_1.Keyword(loc(), kind));
+            groupContext_1.addToCurrentGroup(new Keyword_1.default(loc(), kind));
         }
         function funKeyword(kind) {
             keyword(kind);
@@ -34,20 +36,20 @@
         }
         function eatAndAddNumber() {
             const startIndex = sourceContext_1.index - 1;
-            sourceContext_1.tryEat(chars_1.Char.Hyphen);
-            if (sourceContext_1.peek(-1) === chars_1.Char.N0) {
+            sourceContext_1.tryEat(45);
+            if (sourceContext_1.peek(-1) === 48) {
                 const p = sourceContext_1.peek();
                 switch (p) {
-                    case chars_1.Char.LetterB:
-                    case chars_1.Char.LetterO:
-                    case chars_1.Char.LetterX:
+                    case 66:
+                    case 79:
+                    case 88:
                         {
                             sourceContext_1.skip();
-                            const isDigitSpecial = p === chars_1.Char.LetterB ? chars_1.isDigitBinary : p === chars_1.Char.LetterO ? chars_1.isDigitOctal : chars_1.isDigitHex;
+                            const isDigitSpecial = p === 66 ? chars_1.isDigitBinary : p === 79 ? chars_1.isDigitOctal : chars_1.isDigitHex;
                             sourceContext_1.skipWhile(isDigitSpecial);
                             break;
                         }
-                    case chars_1.Char.Dot:
+                    case 46:
                         if (chars_1.isDigit(sourceContext_1.peek(1))) {
                             sourceContext_1.skip();
                             sourceContext_1.skipWhile(chars_1.isDigit);
@@ -57,7 +59,7 @@
                 }
             } else {
                 sourceContext_1.skipWhile(chars_1.isDigit);
-                if (sourceContext_1.peek() === chars_1.Char.Dot && chars_1.isDigit(sourceContext_1.peek(1))) {
+                if (sourceContext_1.peek() === 46 && chars_1.isDigit(sourceContext_1.peek(1))) {
                     sourceContext_1.skip();
                     sourceContext_1.skipWhile(chars_1.isDigit);
                 }
@@ -68,12 +70,12 @@
         function eatIndent() {
             const optIndent = context_1.options.indent;
             if (typeof optIndent === 'number') {
-                const spaces = sourceContext_1.skipWhileEquals(chars_1.Char.Space);
+                const spaces = sourceContext_1.skipWhileEquals(32);
                 context_1.check(spaces % optIndent === 0, sourceContext_1.pos, _ => _.badSpacedIndent(optIndent));
                 return spaces / optIndent;
             } else {
-                const indent = sourceContext_1.skipWhileEquals(chars_1.Char.Tab);
-                context_1.check(sourceContext_1.peek() !== chars_1.Char.Space, sourceContext_1.pos, _ => _.noLeadingSpace);
+                const indent = sourceContext_1.skipWhileEquals(9);
+                context_1.check(sourceContext_1.peek() !== 32, sourceContext_1.pos, _ => _.noLeadingSpace);
                 return indent;
             }
         }
@@ -84,49 +86,49 @@
             startColumn = sourceContext_1.column;
             const characterEaten = sourceContext_1.eat();
             switch (characterEaten) {
-                case chars_1.Char.Null:
+                case 0:
                     break loop;
-                case chars_1.Char.Backtick:
-                case chars_1.Char.Quote:
-                    lexQuote_1.default(indent, characterEaten === chars_1.Char.Backtick);
+                case 96:
+                case 34:
+                    lexQuote_1.default(indent, characterEaten === 96);
                     break;
-                case chars_1.Char.OpenParenthesis:
-                    if (sourceContext_1.tryEat(chars_1.Char.CloseParenthesis)) groupContext_1.addToCurrentGroup(new Token_1.GroupParenthesis(loc(), []));else groupContext_1.openParenthesis(loc());
+                case 40:
+                    if (sourceContext_1.tryEat(41)) groupContext_1.addToCurrentGroup(new Group_1.GroupParenthesis(loc(), []));else groupContext_1.openParenthesis(loc());
                     break;
-                case chars_1.Char.OpenBracket:
-                    if (sourceContext_1.tryEat(chars_1.Char.CloseBracket)) groupContext_1.addToCurrentGroup(new Token_1.GroupBracket(loc(), []));else {
-                        groupContext_1.openGroup(startPos(), Token_1.GroupBracket);
-                        groupContext_1.openGroup(sourceContext_1.pos(), Token_1.GroupSpace);
+                case 91:
+                    if (sourceContext_1.tryEat(93)) groupContext_1.addToCurrentGroup(new Group_1.GroupBracket(loc(), []));else {
+                        groupContext_1.openGroup(startPos(), Group_1.GroupBracket);
+                        groupContext_1.openGroup(sourceContext_1.pos(), Group_1.GroupSpace);
                     }
                     break;
-                case chars_1.Char.CloseParenthesis:
+                case 41:
                     if (groupContext_1.closeInterpolationOrParenthesis(loc())) {
                         util_1.assert(isInQuote);
                         break loop;
                     }
                     break;
-                case chars_1.Char.CloseBracket:
-                    groupContext_1.closeGroup(startPos(), Token_1.GroupSpace);
-                    groupContext_1.closeGroup(sourceContext_1.pos(), Token_1.GroupBracket);
+                case 93:
+                    groupContext_1.closeGroup(startPos(), Group_1.GroupSpace);
+                    groupContext_1.closeGroup(sourceContext_1.pos(), Group_1.GroupBracket);
                     break;
-                case chars_1.Char.Space:
+                case 32:
                     groupContext_1.space(loc());
                     break;
-                case chars_1.Char.Newline:
+                case 10:
                     {
                         context_1.check(!isInQuote, loc, _ => _.noNewlineInInterpolation);
-                        if (sourceContext_1.peek(-2) === chars_1.Char.Space) context_1.warn(sourceContext_1.pos(), _ => _.trailingSpace);
+                        if (sourceContext_1.peek(-2) === 32) context_1.warn(sourceContext_1.pos(), _ => _.trailingSpace);
                         sourceContext_1.skipNewlines();
                         const oldIndent = indent;
                         indent = eatIndent();
                         if (indent > oldIndent) {
                             context_1.check(indent === oldIndent + 1, loc, _ => _.tooMuchIndent);
                             const l = loc();
-                            if (util_1.isEmpty(groupContext_1.curGroup.subTokens) || !Token_1.isKeyword(83, util_1.last(groupContext_1.curGroup.subTokens))) {
-                                if (groupContext_1.curGroup instanceof Token_1.GroupSpace) groupContext_1.closeSpaceOKIfEmpty(l.start);
-                                groupContext_1.openGroup(l.end, Token_1.GroupSpace);
+                            if (util_1.isEmpty(groupContext_1.curGroup.subTokens) || !Keyword_1.isKeyword(125, util_1.last(groupContext_1.curGroup.subTokens))) {
+                                if (groupContext_1.curGroup instanceof Group_1.GroupSpace) groupContext_1.closeSpaceOKIfEmpty(l.start);
+                                groupContext_1.openGroup(l.end, Group_1.GroupSpace);
                             }
-                            groupContext_1.openGroup(l.start, Token_1.GroupBlock);
+                            groupContext_1.openGroup(l.start, Group_1.GroupBlock);
                             groupContext_1.openLine(l.end);
                         } else {
                             const l = loc();
@@ -136,70 +138,70 @@
                         }
                         break;
                     }
-                case chars_1.Char.Tab:
+                case 9:
                     throw context_1.fail(loc(), _ => _.nonLeadingTab);
-                case chars_1.Char.Bang:
-                    if (sourceContext_1.tryEat(chars_1.Char.Bar)) funKeyword(66);else handleName();
+                case 33:
+                    if (sourceContext_1.tryEat(124)) funKeyword(108);else handleName();
                     break;
-                case chars_1.Char.Cash:
-                    if (sourceContext_1.tryEat2(chars_1.Char.Bang, chars_1.Char.Bar)) funKeyword(70);else if (sourceContext_1.tryEat(chars_1.Char.Bar)) funKeyword(69);else handleName();
+                case 36:
+                    if (sourceContext_1.tryEat2(33, 124)) funKeyword(112);else if (sourceContext_1.tryEat(124)) funKeyword(111);else handleName();
                     break;
-                case chars_1.Char.Star:
-                    if (sourceContext_1.tryEat2(chars_1.Char.Bang, chars_1.Char.Bar)) funKeyword(74);else if (sourceContext_1.tryEat(chars_1.Char.Bar)) funKeyword(73);else handleName();
+                case 42:
+                    if (sourceContext_1.tryEat2(33, 124)) funKeyword(116);else if (sourceContext_1.tryEat(124)) funKeyword(115);else handleName();
                     break;
-                case chars_1.Char.Bar:
-                    if (sourceContext_1.tryEat(chars_1.Char.Space) || sourceContext_1.tryEat(chars_1.Char.Tab)) {
+                case 124:
+                    if (sourceContext_1.tryEat(32) || sourceContext_1.tryEat(9)) {
                         const text = sourceContext_1.eatRestOfLine();
                         groupContext_1.closeSpaceOKIfEmpty(startPos());
-                        context_1.check(groupContext_1.curGroup instanceof Token_1.GroupLine && groupContext_1.curGroup.subTokens.length === 0, loc, _ => _.trailingDocComment);
+                        context_1.check(groupContext_1.curGroup instanceof Group_1.GroupLine && groupContext_1.curGroup.subTokens.length === 0, loc, _ => _.trailingDocComment);
                         groupContext_1.addToCurrentGroup(new Token_1.DocComment(loc(), text));
-                    } else if (sourceContext_1.tryEat(chars_1.Char.Bar)) sourceContext_1.skipRestOfLine();else funKeyword(65);
+                    } else if (sourceContext_1.tryEat(124)) sourceContext_1.skipRestOfLine();else funKeyword(107);
                     break;
-                case chars_1.Char.Hyphen:
+                case 45:
                     if (chars_1.isDigit(sourceContext_1.peek())) eatAndAddNumber();else handleName();
                     break;
-                case chars_1.Char.N0:
-                case chars_1.Char.N1:
-                case chars_1.Char.N2:
-                case chars_1.Char.N3:
-                case chars_1.Char.N4:
-                case chars_1.Char.N5:
-                case chars_1.Char.N6:
-                case chars_1.Char.N7:
-                case chars_1.Char.N8:
-                case chars_1.Char.N9:
+                case 48:
+                case 49:
+                case 50:
+                case 51:
+                case 52:
+                case 53:
+                case 54:
+                case 55:
+                case 56:
+                case 57:
                     eatAndAddNumber();
                     break;
-                case chars_1.Char.Dot:
+                case 46:
                     {
-                        if (sourceContext_1.peek() === chars_1.Char.Space || sourceContext_1.peek() === chars_1.Char.Newline) {
+                        if (sourceContext_1.peek() === 32 || sourceContext_1.peek() === 10) {
                             groupContext_1.closeSpaceOKIfEmpty(startPos());
-                            keyword(92);
-                        } else if (sourceContext_1.tryEat(chars_1.Char.Bar)) funKeyword(67);else if (sourceContext_1.tryEat2(chars_1.Char.Bang, chars_1.Char.Bar)) funKeyword(68);else if (sourceContext_1.tryEat2(chars_1.Char.Star, chars_1.Char.Bar)) funKeyword(75);else if (sourceContext_1.tryEat3(chars_1.Char.Star, chars_1.Char.Bang, chars_1.Char.Bar)) funKeyword(76);else if (sourceContext_1.tryEat(chars_1.Char.Dot)) {
-                            if (sourceContext_1.tryEat(chars_1.Char.Dot)) keyword(54);else keyword(53);
-                        } else keyword(52);
+                            keyword(134);
+                        } else if (sourceContext_1.tryEat(124)) funKeyword(109);else if (sourceContext_1.tryEat2(33, 124)) funKeyword(110);else if (sourceContext_1.tryEat2(42, 124)) funKeyword(117);else if (sourceContext_1.tryEat3(42, 33, 124)) funKeyword(118);else if (sourceContext_1.tryEat(46)) {
+                            if (sourceContext_1.tryEat(46)) keyword(96);else keyword(95);
+                        } else keyword(94);
                         break;
                     }
-                case chars_1.Char.Colon:
-                    if (sourceContext_1.tryEat(chars_1.Char.Equal)) keyword(84);else keyword(47);
+                case 58:
+                    if (sourceContext_1.tryEat(61)) keyword(126);else keyword(89);
                     break;
-                case chars_1.Char.Tick:
-                    keyword(102);
+                case 39:
+                    keyword(145);
                     break;
-                case chars_1.Char.Tilde:
-                    keyword(83);
+                case 126:
+                    keyword(125);
                     break;
-                case chars_1.Char.Ampersand:
-                    keyword(35);
+                case 38:
+                    keyword(77);
                     break;
-                case chars_1.Char.Backslash:
-                case chars_1.Char.Caret:
-                case chars_1.Char.CloseBrace:
-                case chars_1.Char.Comma:
-                case chars_1.Char.Hash:
-                case chars_1.Char.OpenBrace:
-                case chars_1.Char.Percent:
-                case chars_1.Char.Semicolon:
+                case 92:
+                case 94:
+                case 125:
+                case 44:
+                case 35:
+                case 123:
+                case 37:
+                case 59:
                     throw context_1.fail(loc(), _ => _.reservedChar(characterEaten));
                 default:
                     handleName();

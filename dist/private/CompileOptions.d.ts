@@ -8,6 +8,7 @@ export default class CompileOptions {
     importBoot: boolean;
     indent: '\t' | number;
     language: Language;
+    noModuleBoilerplate: boolean;
     private mslPath;
     private builtinNameToPath;
     constructor(opts: OptionsObject);
@@ -25,6 +26,7 @@ export interface OptionsObject {
     indent?: '\t' | number;
     language?: 'english';
     builtins?: Builtins;
+    noModuleBoilerplate?: boolean;
 }
 export interface Builtins {
     [moduleName: string]: Array<string>;

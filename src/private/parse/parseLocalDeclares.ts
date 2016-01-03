@@ -1,7 +1,10 @@
 import Op, {opIf} from 'op/Op'
+import {Val} from '../ast/LineContent'
+import {LocalDeclare, LocalDeclares} from '../ast/locals'
 import {check, fail} from '../context'
-import {Val, LocalDeclare, LocalDeclares} from '../MsAst'
-import Token, {GroupSpace, isKeyword, Keywords, Name} from '../Token'
+import {GroupSpace} from '../token/Group'
+import {isKeyword, Keywords} from '../token/Keyword'
+import Token, {NameToken} from '../token/Token'
 import {checkNonEmpty, checkKeyword} from './checks'
 import parseSpaced from './parseSpaced'
 import {Tokens} from './Slice'
@@ -52,7 +55,7 @@ Unlike [[parseName]], `_` is the only allowed Keyword.
 export function parseLocalName(token: Token): string {
 	if (isKeyword(Keywords.Focus, token))
 		return '_'
-	else if (token instanceof Name)
+	else if (token instanceof NameToken)
 		return token.name
 	else
 		throw fail(token.loc, _ => _.expectedLocalName(token))
