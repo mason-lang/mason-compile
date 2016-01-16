@@ -1,31 +1,35 @@
 import Expression from 'esast/lib/Expression'
-import Statement, {BreakStatement, SwitchCase, SwitchStatement} from 'esast/lib/Statement'
+import {BreakStatement} from 'esast/lib/Loop'
+import Statement, {SwitchCase, SwitchStatement} from 'esast/lib/Statement'
 import {caseOp, opIf} from 'op/Op'
 import Switch, {SwitchPart} from '../ast/Switch'
 import {flatMap} from '../util'
-import {verifyResults} from './context'
-import transpileBlock from './transpileBlock'
+import throwErrorFromString from './throwErrorFromString'
+import transpileBlock, {blockWrapStatement} from './transpileBlock'
 import transpileVal from './transpileVal'
-import {blockWrapStatement, loc} from './util'
-import {throwErrorFromString} from './util2'
+import {loc} from './util'
 
 export function transpileSwitchValNoLoc(_: Switch): Expression {
-	return blockWrapStatement(transpileSwitchDoNoLoc(_))
+	return blockWrapStatement(transpileSwitchVDNoLoc(_, false))
 }
 
-export function transpileSwitchDoNoLoc({switched, parts, opElse}: Switch): Statement {
-	const partAsts = flatMap(parts, transpileSwitchPart)
-	partAsts.push(caseOp(opElse,
-		//could use a loc (this would be additional)
-		_ => new SwitchCase(null, transpileBlock(_).body),
-		() => SwitchCaseNoMatch))
+export function transpileSwitchDoNoLoc(_: Switch): Statement {
+	return transpileSwitchVDNoLoc(_, true)
+}
+
+function transpileSwitchVDNoLoc({switched, parts, opElse}: Switch, isDo: boolean): Statement {
+	const partAsts = flatMap(parts, _ => transpileSwitchPart(_, isDo))
+	partAsts.push(caseOp(
+		opElse,
+		_ => loc(_, new SwitchCase(null, transpileBlock(_).body)),
+		() => switchCaseNoMatch))
 	return new SwitchStatement(transpileVal(switched), partAsts)
 }
 
-function transpileSwitchPart(_: SwitchPart):  Array<SwitchCase> {
+function transpileSwitchPart(_: SwitchPart, isDo: boolean):  Array<SwitchCase> {
 	const {values, result} = _
 
-	const follow = opIf(verifyResults.isStatement(_), () => new BreakStatement)
+	const follow = opIf(isDo, () => new BreakStatement)
 	/*
 	We could just pass block.body for the switch lines, but instead
 	enclose the body of the switch case in curly braces to ensure a new scope.
@@ -42,7 +46,7 @@ function transpileSwitchPart(_: SwitchPart):  Array<SwitchCase> {
 			}
 		}
 	*/
-	const block = transpileBlock(result, null, null, follow)
+	const block = transpileBlock(result, {follow})
 	// If switch has multiple values, build up a statement like: `case 1: case 2: { doBlock() }`
 	const cases: Array<SwitchCase> = []
 	for (let i = 0; i < values.length - 1; i = i + 1)
@@ -52,5 +56,6 @@ function transpileSwitchPart(_: SwitchPart):  Array<SwitchCase> {
 	return cases
 }
 
-const SwitchCaseNoMatch = new SwitchCase(null, [
-	throwErrorFromString('No branch of `switch` matches.')])
+const switchCaseNoMatch = new SwitchCase(
+	null,
+	[throwErrorFromString('No branch of `switch` matches.')])

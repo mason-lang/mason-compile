@@ -1,13 +1,14 @@
 import Loc from 'esast/lib/Loc'
 import Op, {caseOp} from 'op/Op'
-import {BagEntry, MapEntry, ObjEntry, ObjEntryAssign, ObjEntryPlain} from '../ast/Block'
+import {BagEntry, MapEntry, ObjEntry, ObjEntryAssign, ObjEntryPlain} from '../ast/BuildEntry'
 import Call from '../ast/Call'
 import {Ignore, MemberSet, Pass, SetSub, Setters, SpecialDo, SpecialDos} from '../ast/Do'
 import {Assert, Throw} from '../ast/errors'
 import LineContent, {Do, Val} from '../ast/LineContent'
 import {Assign, AssignSingle, AssignDestructure, LocalAccess, LocalMutate} from '../ast/locals'
 import {Break} from '../ast/Loop'
-import {QuoteSimple, SpecialVal, SpecialVals} from '../ast/Val'
+import {QuoteSimple} from '../ast/Quote'
+import {SpecialVal, SpecialVals} from '../ast/Val'
 import {check} from '../context'
 import {GroupBracket, GroupQuote, GroupSpace} from '../token/Group'
 import Keyword, {isAnyKeyword, isKeyword, keywordName, Keywords} from '../token/Keyword'
@@ -51,7 +52,8 @@ export default function parseLine(tokens: Tokens): LineContent | Array<LineConte
 			case Keywords.ObjEntry:
 				return new BagEntry(loc, parseExpr(rest()))
 			case Keywords.Pass:
-				return caseOp<Val, LineContent | Array<LineContent>>(opParseExpr(rest()), _ => new Pass(tokens.loc, _), () => [])
+				return caseOp<Val, LineContent | Array<LineContent>>(
+					opParseExpr(rest()), _ => new Pass(tokens.loc, _), () => [])
 			case Keywords.Region:
 				return parseLines(justBlock(Keywords.Region, rest()))
 			case Keywords.Throw:
@@ -62,7 +64,8 @@ export default function parseLine(tokens: Tokens): LineContent | Array<LineConte
 				// fall through
 		}
 
-	return caseOp<{before: Tokens, at: Token, after: Tokens}, LineContent>(tokens.opSplitOnce(_ => isAnyKeyword(lineSplitKeywords, _)),
+	return caseOp<{before: Tokens, at: Token, after: Tokens}, LineContent>(
+		tokens.opSplitOnce(_ => isAnyKeyword(lineSplitKeywords, _)),
 		({before, at: atToken, after}) => {
 			const at = <Keyword> atToken
 			switch (at.kind) {
@@ -99,7 +102,8 @@ function parseAssignLike(before: Tokens, at: Keyword, value: Val, loc: Loc): Do 
 		// `a.b = c`, `.b = c`, `a."b" = c`, `."b" = c`, `a[b] = c`; and their `:=` variants.
 		if (token instanceof GroupSpace) {
 			const spaced = Tokens.of(token)
-			const [assignee, opType] = caseOp<{before: Tokens, after: Tokens}, [Tokens, Op<Val>]>(spaced.opSplitOnce(_ => isKeyword(Keywords.Colon, _)),
+			const [assignee, opType] = caseOp<{before: Tokens, after: Tokens}, [Tokens, Op<Val>]>(
+				spaced.opSplitOnce(_ => isKeyword(Keywords.Colon, _)),
 				({before, after}) => [before, parseExpr(after)],
 				() => [spaced, null])
 
@@ -190,10 +194,10 @@ function parseAssign(localsTokens: Tokens, value: Val, loc: Loc): Assign {
 
 function parseAssert(negate: boolean, tokens: Tokens): Assert {
 	checkNonEmpty(tokens, _ => _.expectedAfterAssert)
-	const [condTokens, opThrown] =
-		caseOp<{before: Tokens, after: Tokens}, [Tokens, Op<Val>]>(tokens.opSplitOnce(_ => isKeyword(Keywords.Throw, _)),
-			({before, after}) => [before, parseExpr(after)],
-			() => [tokens, null])
+	const [condTokens, opThrown] = caseOp<{before: Tokens, after: Tokens}, [Tokens, Op<Val>]>(
+		tokens.opSplitOnce(_ => isKeyword(Keywords.Throw, _)),
+		({before, after}) => [before, parseExpr(after)],
+		() => [tokens, null])
 	const parts = parseExprParts(condTokens)
 	const cond = parts.length === 1 ? parts[0] : new Call(condTokens.loc, parts[0], tail(parts))
 	return new Assert(tokens.loc, negate, cond, opThrown)

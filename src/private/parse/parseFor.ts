@@ -29,12 +29,12 @@ function opParseIteratee(tokens: Tokens): Op<Iteratee> {
 }
 
 function parseIteratee(tokens: Tokens): Iteratee {
-	const [element, bag] : any =
-		caseOp<{before: Tokens, after: Tokens}, [LocalDeclare, Val]>(tokens.opSplitOnce(_ => isKeyword(Keywords.Of, _)),
-			({before, after}) => {
-				check(before.size() === 1, before.loc, _ => _.todoForPattern)
-				return [parseLocalDeclaresJustNames(before)[0], parseExpr(after)]
-			},
-			() => [LocalDeclare.focus(tokens.loc), parseExpr(tokens)])
+	const [element, bag]: any = caseOp<{before: Tokens, after: Tokens}, [LocalDeclare, Val]>(
+		tokens.opSplitOnce(_ => isKeyword(Keywords.Of, _)),
+		({before, after}) => {
+			check(before.size() === 1, before.loc, _ => _.todoForPattern)
+			return [parseLocalDeclaresJustNames(before)[0], parseExpr(after)]
+		},
+		() => [LocalDeclare.focus(tokens.loc), parseExpr(tokens)])
 	return new Iteratee(tokens.loc, element, bag)
 }

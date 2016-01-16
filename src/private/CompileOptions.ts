@@ -1,6 +1,5 @@
-import Op from 'op/Op'
 import defaultBuiltins from './defaultBuiltins'
-import {applyDefaults, cat, last} from './util'
+import {applyDefaults, last} from './util'
 import allLanguages from './languages/allLanguages'
 import Language from './languages/Language'
 
@@ -90,7 +89,7 @@ export interface OptionsObject {
 	Settings this to `false` means that `msl/private/boot` won't be imported.
 	*/
 	importBoot?: boolean,
-	/** Path to `msl`. This may be `msl/dist`. */
+	/** Path to `msl`. This may be `msl/lib`. */
 	mslPath?: string,
 	/**
 	Mason does not allow mixed kinds of indentation,

@@ -58,7 +58,7 @@ function takeImportDos(lines: Lines): [Array<ImportDo>, Lines] {
 function parseImportDos(tokens: Tokens): Array<ImportDo> {
 	const lines = justBlock(Keywords.ImportDo, tokens)
 	return lines.mapSlices(line => {
-		const [{path, name}, rest] = takeRequire(line)
+		const [{path}, rest] = takeRequire(line)
 		checkEmpty(rest, _ => _.unexpectedAfterImportDo)
 		return new ImportDo(line.loc, path)
 	})
@@ -93,7 +93,8 @@ function takeRequire(tokens: Tokens): [{path: string, name: string}, Tokens] {
 }
 
 function parseRequire(token: Token): {path: string, name: string} {
-	return caseOp(tryParseName(token),
+	return caseOp(
+		tryParseName(token),
 		name => ({path: name, name}),
 		() => {
 			if (token instanceof GroupSpace) {
@@ -121,7 +122,7 @@ function parseRequire(token: Token): {path: string, name: string} {
 				})
 
 				// Take name, then any number of dot-then-name (`.x`)
-				for (;;) {
+				while (true) {
 					checkNonEmpty(rest, _ => _.expectedImportModuleName)
 					parts.push(parseName(rest.head()))
 					rest = rest.tail()

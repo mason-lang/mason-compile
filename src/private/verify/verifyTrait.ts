@@ -1,12 +1,11 @@
 import {opEach} from 'op/Op'
-import Trait from '../ast/Trait'
+import Trait, {TraitDo} from '../ast/Trait'
 import {withMethods} from './context'
-import verifyMethodImplLike, {verifyClassTraitDo} from './verifyMethodImplLike'
+import {verifyClassTraitDo, verifyMethodImplLike} from './verifyClassTraitCommon'
 import verifyVal, {verifyEachVal} from './verifyVal'
 
 export default function verifyTrait({superTraits, opDo, statics, methods}: Trait): void {
 	verifyEachVal(superTraits)
-	//withIife, like for class?
 	opEach(opDo, verifyClassTraitDo)
 	withMethods(() => {
 		for (const _ of statics)
@@ -15,4 +14,16 @@ export default function verifyTrait({superTraits, opDo, statics, methods}: Trait
 			verifyMethodImplLike(_)
 	})
 	// name set by AssignSingle
+}
+
+export function verifyTraitDo(_: TraitDo): void {
+	const {implementor, trait, statics, methods} = _
+	verifyVal(implementor)
+	verifyVal(trait)
+	withMethods(() => {
+		for (const _ of statics)
+			verifyMethodImplLike(_)
+		for (const _ of methods)
+			verifyMethodImplLike(_)
+	})
 }

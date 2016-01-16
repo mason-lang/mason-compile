@@ -5,8 +5,8 @@ export let verifyResults: VerifyResults
 export let funKind: Funs
 export let nextDestructuredId: number
 
-export function setup(_verifyResults: VerifyResults): void {
-	verifyResults = _verifyResults
+export function setup(vr: VerifyResults): void {
+	verifyResults = vr
 	funKind = Funs.Plain
 	nextDestructuredId = 0
 }

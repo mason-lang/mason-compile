@@ -3,16 +3,16 @@ import Node from 'esast/lib/Node'
 import {readFileSync} from 'fs'
 import {argv} from 'process'
 import {install} from 'source-map-support'
-import CompileError from '../dist/CompileError'
-import Compiler from '../dist/Compiler'
-import CompileOptions from '../dist/private/CompileOptions'
-import {withContext} from '../dist/private/context'
-import lex from '../dist/private/lex/lex'
-import MsAst from '../dist/private/ast/MsAst'
-import parse from '../dist/private/parse/parse'
-import render from '../dist/private/render'
-import transpile from '../dist/private/transpile/transpile'
-import verify from '../dist/private/verify/verify'
+import CompileError from '../lib/CompileError'
+import Compiler from '../lib/Compiler'
+import CompileOptions from '../lib/private/CompileOptions'
+import {withContext} from '../lib/private/context'
+import lex from '../lib/private/lex/lex'
+import MsAst from '../lib/private/ast/MsAst'
+import parse from '../lib/private/parse/parse'
+import render from '../lib/private/render'
+import transpile from '../lib/private/transpile/transpile'
+import verify from '../lib/private/verify/verify'
 install()
 
 function doTest(isPerfTest: boolean): void {
@@ -45,28 +45,27 @@ function doTest(isPerfTest: boolean): void {
 
 		if (isPerfTest) {
 			const compiler = new Compiler(opts)
-			/* eslint-disable no-undef */
 			Object.assign(global, {withContext, lex, parse, verify, transpile, render})
 
 			benchmark({
-				lex() {
+				lex(): void {
 					withContext(compileOptions, filename, () => lex(source))
 				},
-				/*parse() {
+				parse(): void {
 					withContext(compileOptions, filename, () => parse(rootToken))
 				},
-				verify() {
+				verify(): void {
 					withContext(compileOptions, filename, () => verify(msAst))
 				},
-				transpile() {
+				transpile(): void {
 					withContext(compileOptions, filename, () => transpile(msAst, verifyResults))
 				},
-				render() {
+				render(): void {
 					withContext(compileOptions, filename, () => render(esAst))
 				},
-				all() {
+				all(): void {
 					compiler.compile(source, filename)
-				}*/
+				}
 			})
 		} else {
 			const logSize = false
@@ -86,7 +85,7 @@ function benchmark(tests: {[key: string]: () => void}): void {
 	const suite = new Suite()
 	for (const name in tests)
 		suite.add(name, tests[name])
-	suite.on('complete', function() {
+	suite.on('complete', function(): void {
 		this.forEach((_: any) => {
 			console.log(`${_.name}: ${_.stats.mean * 1000}ms`)
 		})
@@ -100,7 +99,7 @@ function benchmark(tests: {[key: string]: () => void}): void {
 function treeSize<A>(tree: A, treeType: any): {size: number, nLeaves: number} {
 	const visited = new Set()
 	let nLeaves = 0
-	function visit(node: A) {
+	function visit(node: A): void {
 		if (node !== null && node !== undefined && !visited.has(node))
 			if (node instanceof treeType) {
 				visited.add(node)

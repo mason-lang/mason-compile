@@ -1,12 +1,16 @@
-import {VariableDeclarationLet, VariableDeclarationVar, VariableDeclarator} from 'esast/lib/Declaration'
-import Expression, {ArrayExpression, AssignmentExpression, BinaryExpression, CallExpression, LiteralString, UnaryExpression} from 'esast/lib/Expression'
+import {VariableDeclarationLet, VariableDeclarationVar, VariableDeclarator
+	} from 'esast/lib/Declaration'
+import Expression, {ArrayExpression, AssignmentExpression, BinaryExpression, CallExpression,
+	UnaryExpression} from 'esast/lib/Expression'
 import {ArrowFunctionExpression} from 'esast/lib/Function'
 import Identifier from 'esast/lib/Identifier'
+import {LiteralString} from 'esast/lib/Literal'
 import {Script} from 'esast/lib/Program'
-import Statement, {BlockStatement, ExpressionStatement, IfStatement, ReturnStatement} from 'esast/lib/Statement'
-import {identifier, member, toLineContent} from 'esast-create-util/lib/util'
+import Statement, {BlockStatement, ExpressionStatement, IfStatement, ReturnStatement
+	} from 'esast/lib/Statement'
+import {identifier, member} from 'esast-create-util/lib/util'
 import Op, {opIf, opMap} from 'op/Op'
-import {options, pathOptions} from '../context'
+import {compileOptions, pathOptions} from '../context'
 import manglePath from '../manglePath'
 import LineContent, {Do, Val} from '../ast/LineContent'
 import {LocalDeclare} from '../ast/locals'
@@ -14,26 +18,27 @@ import Module, {Import, ImportDo} from '../ast/Module'
 import {cat, flatMap, isEmpty, last, rtail} from '../util'
 import {Modules} from '../VerifyResults'
 import {verifyResults} from './context'
-import {DeclareBuiltBag, DeclareBuiltMap, IdBuilt, IdExports} from './esast-constants'
+import {declareBuiltBag, declareBuiltMap, idBuilt} from './esast-constants'
+import {msCall} from './ms'
+import {idForDeclareCached, makeDestructureDeclarators} from './transpileLocals'
 import transpileVal from './transpileVal'
-import {idForDeclareCached, lazyWrap, loc, makeDestructureDeclarators, msCall, tLines} from './util'
+import {lazyWrap, loc, transpileLines} from './util'
 
 // TODO:ES6 return esast.Module
-//remember to set loc
 export default function transpileModule(_: Module): Script {
-	const {doImports, imports, lines} = _
+	const {doImports, lines} = _
 
 	const body = moduleBody(verifyResults.moduleKind, lines)
 
-	if (options.noModuleBoilerplate)
+	if (compileOptions.noModuleBoilerplate)
 		return new Script(body)
 
 	const amd = amdWrapModule(doImports, transpiledImports(_), body)
 
 	return loc(_, new Script(cat(
-		opIf(options.useStrict, () => UseStrict),
-		opIf(options.includeAmdefine, () => AmdefineHeader),
-		toLineContent(amd))))
+		opIf(compileOptions.useStrict, () => useStrict),
+		opIf(compileOptions.includeAmdefine, () => amdefineHeader),
+		amd)))
 }
 
 function transpiledImports(_: Module): Array<Import> {
@@ -62,21 +67,21 @@ function transpiledImports(_: Module): Array<Import> {
 function moduleBody(kind: Modules, lines: Array<LineContent>): Array<Statement> {
 	switch (kind) {
 		case Modules.Do: case Modules.Exports:
-			return tLines(<Array<Do>> lines)
+			return transpileLines(<Array<Do>> lines)
 		case Modules.Val:
-			const dos = tLines(<Array<Do>> rtail(lines))
+			const dos = transpileLines(<Array<Do>> rtail(lines))
 			const val = transpileVal(<Val> last(lines))
-			if (options.noModuleBoilerplate)
+			if (compileOptions.noModuleBoilerplate)
 				return cat(dos, new ExpressionStatement(val))
 			else
 				return cat(dos, new ExpressionStatement(exportDefault(val)))
 		case Modules.Bag: case Modules.Map: {
-			const declare = kind === Modules.Bag ? DeclareBuiltBag : DeclareBuiltMap
-			const dos = tLines(<Array<Do>> lines)
-			if (options.noModuleBoilerplate)
+			const declare = kind === Modules.Bag ? declareBuiltBag : declareBuiltMap
+			const dos = transpileLines(<Array<Do>> lines)
+			if (compileOptions.noModuleBoilerplate)
 				return cat(declare, dos)
 			else
-				return cat(declare, dos, new ExpressionStatement(exportDefault(IdBuilt)))
+				return cat(declare, dos, new ExpressionStatement(exportDefault(idBuilt)))
 		}
 		default:
 			throw new Error(String(verifyResults.moduleKind))
@@ -90,22 +95,25 @@ export function exportNamedOrDefault(val: Expression, name: string): AssignmentE
 }
 
 function exportNamed(val: Expression, name: string): AssignmentExpression {
-	return new AssignmentExpression('=', member(IdExports, name), val)
+	return new AssignmentExpression('=', member(idExports, name), val)
 }
 function exportDefault(val: Expression): AssignmentExpression {
-	return new AssignmentExpression('=', ExportsDefault, val)
+	return new AssignmentExpression('=', exportsDefault, val)
 }
 
-
-function amdWrapModule(doImports: Array<ImportDo>, imports: Array<Import>, body: Array<Statement>) {
-	const shouldImportBoot = options.importBoot
+function amdWrapModule(
+	doImports: Array<ImportDo>,
+	imports: Array<Import>,
+	body: Array<Statement>)
+	: Statement {
+	const shouldImportBoot = compileOptions.importBoot
 
 	const allImports = doImports.concat(imports)
 	const allImportPaths = allImports.map(_ => manglePath(_.path))
 
 	const arrImportPaths = new ArrayExpression(cat(
-		LitStrExports,
-		opIf(shouldImportBoot, () => new LiteralString(options.bootPath)),
+		litStrExports,
+		opIf(shouldImportBoot, () => new LiteralString(compileOptions.bootPath)),
 		allImportPaths.map(_ => new LiteralString(_))))
 
 	const importToIdentifier = new Map()
@@ -121,38 +129,41 @@ function amdWrapModule(doImports: Array<ImportDo>, imports: Array<Import>, body:
 		return <Identifier> importToIdentifier.get(_)
 	}
 
-	const importArgs = cat(IdExports, opIf(shouldImportBoot, () => IdBoot), importIdentifiers)
+	const importArgs = cat(idExports, opIf(shouldImportBoot, () => idBoot), importIdentifiers)
 
 	const doBoot = opIf(shouldImportBoot, () =>
-		new ExpressionStatement(msCall('getModule', IdBoot)))
+		new ExpressionStatement(msCall('getModule', idBoot)))
 
 	const importDos = doImports.map(_ =>
 		loc(_, new ExpressionStatement(msCall('getModule', getIdentifier(_)))))
 
 	// Extracts imported values from the modules.
-	const opDeclareImportedLocals = opIf(!isEmpty(imports),
-		() => new VariableDeclarationLet(
+	const opDeclareImportedLocals = opIf(!isEmpty(imports), () =>
+		new VariableDeclarationLet(
 			flatMap(imports, _ => importDeclarators(_, getIdentifier(_)))))
 
 	const fullBody = new BlockStatement(cat(
-		doBoot, importDos, opDeclareImportedLocals, body, ReturnExports))
+		doBoot, importDos, opDeclareImportedLocals, body, returnExports))
 
-	const lazyBody =
-		options.lazyModules ?
-			new BlockStatement([new ExpressionStatement(
-				new AssignmentExpression('=', ExportsGet,
-					msCall('lazy', new ArrowFunctionExpression([], fullBody))))]) :
-			fullBody
+	const lazyBody = compileOptions.lazyModules ?
+		new BlockStatement([new ExpressionStatement(
+			new AssignmentExpression(
+				'=',
+				exportsGet,
+				msCall('lazy', new ArrowFunctionExpression([], fullBody))))]) :
+		fullBody
 
-	return new CallExpression(IdDefine,
-		[arrImportPaths, new ArrowFunctionExpression(importArgs, lazyBody)])
+	return new ExpressionStatement(new CallExpression(
+		idDefine,
+		[arrImportPaths, new ArrowFunctionExpression(importArgs, lazyBody)]))
 }
 
 function pathBaseName(path: string): string {
 	return path.substr(path.lastIndexOf('/') + 1)
 }
 
-function importDeclarators({imported, opImportDefault}: Import, moduleIdentifier: Identifier): Array<VariableDeclarator> {
+function importDeclarators({imported, opImportDefault}: Import, moduleIdentifier: Identifier)
+	: Array<VariableDeclarator> {
 	// TODO: Could be neater about this
 	const isLazy = (<LocalDeclare> (isEmpty(imported) ? opImportDefault : imported[0])).isLazy
 	const value = msCall(isLazy ? 'lazyGetModule' : 'getModule', moduleIdentifier)
@@ -169,21 +180,23 @@ function importDeclarators({imported, opImportDefault}: Import, moduleIdentifier
 	return cat(importedDefault, importedDestruct)
 }
 
-const IdBoot = new Identifier('_boot')
-const IdDefine = new Identifier('define')
-const ExportsGet = member(IdExports, '_get')
-const LitStrExports = new LiteralString('exports')
-const ReturnExports = new ReturnStatement(IdExports)
-const UseStrict = new ExpressionStatement(new LiteralString('use strict'))
+const idBoot = new Identifier('_boot')
+const idDefine = new Identifier('define')
+const idExports = new Identifier('exports')
+const exportsGet = member(idExports, '_get')
+const litStrExports = new LiteralString('exports')
+const returnExports = new ReturnStatement(idExports)
+const useStrict = new ExpressionStatement(new LiteralString('use strict'))
 
 // if (typeof define !== 'function') var define = require('amdefine')(module)
-const AmdefineHeader = new IfStatement(
-	new BinaryExpression('!==',
-		new UnaryExpression('typeof', IdDefine),
+const amdefineHeader = new IfStatement(
+	new BinaryExpression(
+		'!==',
+		new UnaryExpression('typeof', idDefine),
 		new LiteralString('function')),
 	new VariableDeclarationVar([
-		new VariableDeclarator(IdDefine, new CallExpression(
+		new VariableDeclarator(idDefine, new CallExpression(
 			new CallExpression(new Identifier('require'), [new LiteralString('amdefine')]),
 			[new Identifier('module')]))]))
 
-const ExportsDefault = member(IdExports, 'default')
+const exportsDefault = member(idExports, 'default')

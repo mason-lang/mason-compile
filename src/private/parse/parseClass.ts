@@ -1,14 +1,14 @@
 import Op, {caseOp, opIf, opMap} from 'op/Op'
 import Class, {Constructor, Field} from '../ast/Class'
 import {ClassTraitDo, MethodImplLike} from '../ast/classTraitCommon'
-import Fun from '../ast/Fun'
+import {FunBlock} from '../ast/Fun'
 import {Val} from '../ast/LineContent'
 import {LocalDeclares} from '../ast/locals'
 import {check} from '../context'
 import {isKeyword, Keywords} from '../token/Keyword'
 import {beforeAndOpBlock} from './parseBlock'
 import parseExpr, {parseExprParts} from './parseExpr'
-import {funArgsAndBlock} from './parseFun'
+import {funArgsAndBlock} from './parseFunBlock'
 import parseMethodImpls, {opTakeDo, takeStatics} from './parseMethodImpls'
 import {parseLocalParts} from './parseLocalDeclares'
 import {Lines, Tokens} from './Slice'
@@ -18,8 +18,10 @@ import tryTakeComment from './tryTakeComment'
 export default function parseClass(tokens: Tokens): Class {
 	const [before, opBlock] = beforeAndOpBlock(tokens)
 	const {opFields, opSuperClass, traits} = parseClassHeader(before)
-	type tuple = [Op<string>, Op<ClassTraitDo>, Array<MethodImplLike>, Op<Constructor>, Array<MethodImplLike>]
-	const [opComment, opDo, statics, opConstructor, methods] = caseOp<Lines, tuple>(opBlock,
+	type Tuple = [Op<string>, Op<ClassTraitDo>,
+		Array<MethodImplLike>, Op<Constructor>, Array<MethodImplLike>]
+	const [opComment, opDo, statics, opConstructor, methods] = caseOp<Lines, Tuple>(
+		opBlock,
 		_ => {
 			const [opComment, rest] = tryTakeComment(_)
 			if (rest.isEmpty())
@@ -34,14 +36,15 @@ export default function parseClass(tokens: Tokens): Class {
 			return [opComment, opDo, statics, opConstructor, parseMethodImpls(rest4)]
 		},
 		() => [null, null, [], null, []])
-	return new Class(tokens.loc,
+	return new Class(
+		tokens.loc,
 		opFields, opSuperClass, traits, opComment, opDo, statics, opConstructor, methods)
 }
 
 function parseClassHeader(tokens: Tokens)
 	: {opFields: Op<Array<Field>>, opSuperClass: Op<Val>, traits: Array<Val>} {
 	const [fieldsTokens, [extendsTokens, traitTokens]] =
-		tokens.getKeywordSections([Keywords.Extends, Keywords.Trait])
+		tokens.getKeywordSections(Keywords.Extends, Keywords.Trait)
 	return {
 		opFields: opIf(!fieldsTokens.isEmpty(), () => fieldsTokens.map(_ => {
 			const {name, opType, kind} = parseLocalParts(_)
@@ -62,6 +65,6 @@ function opTakeConstructor(tokens: Lines): [Op<Constructor>, Lines] {
 
 function parseConstructor(tokens: Tokens): Constructor {
 	const {args, memberArgs, opRestArg, block} = funArgsAndBlock(tokens, false, true)
-	const fun = new Fun(tokens.loc, args, opRestArg, block, {isThisFun: true, isDo: true})
+	const fun = new FunBlock(tokens.loc, args, opRestArg, block, {isThisFun: true, isDo: true})
 	return new Constructor(tokens.loc, fun, memberArgs)
 }

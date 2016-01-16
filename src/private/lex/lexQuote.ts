@@ -1,7 +1,7 @@
 import Loc from 'esast/lib/Loc'
 import Char from 'typescript-char/Char'
 import {check, warn} from '../context'
-import Group, {GroupQuote, GroupRegExp} from '../token/Group'
+import {GroupQuote, GroupRegExp} from '../token/Group'
 import {StringToken} from '../token/Token'
 import {assert} from '../util'
 import {isDigit, isNameCharacter} from './chars'
@@ -50,7 +50,7 @@ export default function lexQuote(indent: number, isRegExp: boolean): void {
 
 	openGroup(locSingle().start, groupType)
 
-	eatChars: for (;;) {
+	eatChars: while (true) {
 		const char = eat()
 
 		switch (char) {
@@ -150,7 +150,7 @@ function isName(str: string): boolean {
 
 function lexRegExpFlags(): string {
 	let flags = ''
-	for (const ch of [Char.G, Char.I, Char.M, Char.Y])
+	for (const ch of [Char.g, Char.i, Char.m, Char.y])
 		if (tryEat(ch))
 			flags = flags + String.fromCharCode(ch)
 	return flags

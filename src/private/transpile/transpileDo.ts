@@ -1,42 +1,40 @@
-import {VariableDeclarationLet} from 'esast/lib/Declaration'
-import Expression, {ArrayExpression, AssignmentExpression, CallExpression, LiteralString, UnaryExpression} from 'esast/lib/Expression'
-import Statement, {BreakStatement, DebuggerStatement, ExpressionStatement, IfStatement, ReturnStatement} from 'esast/lib/Statement'
-import {identifier, member} from 'esast-create-util/lib/util'
-import {caseOp} from 'op/Op'
+import {ArrayExpression, AssignmentExpression} from 'esast/lib/Expression'
+import {LiteralString} from 'esast/lib/Literal'
+import Statement, {DebuggerStatement, ExpressionStatement} from 'esast/lib/Statement'
 import Await from '../ast/Await'
-import Block, {BagEntry, MapEntry, ObjEntryAssign, ObjEntryPlain} from '../ast/Block'
 import {Cond, Conditional} from '../ast/booleans'
+import BuildEntry from '../ast/BuildEntry'
 import Call from '../ast/Call'
 import Case from '../ast/Case'
-import Class, {Constructor, SuperCall} from '../ast/Class'
+import {SuperCall} from '../ast/Class'
 import Del from '../ast/Del'
 import {Ignore, MemberSet, Pass, SetSub, Setters, SpecialDo, SpecialDos} from '../ast/Do'
 import {Assert, Except, Throw} from '../ast/errors'
-import Fun from '../ast/Fun'
-import LineContent, {Do, isDo, isVal} from '../ast/LineContent'
-import {AssignDestructure, AssignSingle, LocalDeclares, LocalMutate} from '../ast/locals'
-import {Break, For, ForAsync, ForBag} from '../ast/Loop'
-import Method from '../ast/Method'
+import {Do} from '../ast/LineContent'
+import {Assign, LocalMutate} from '../ast/locals'
+import {Break, For, ForAsync} from '../ast/Loop'
 import Switch from '../ast/Switch'
-import Trait, {TraitDo} from '../ast/Trait'
+import {TraitDo} from '../ast/Trait'
 import With from '../ast/With'
-import {Yield, YieldTo} from '../ast/Yield'
-import {cat} from '../util'
-import {verifyResults} from './context'
-import {IdBuilt, IdSuper, SetLexicalThis} from './esast-constants'
-import transpileAssertNoLoc from './transpileAssertNoLoc'
-import transpileBlock, {transpileBlockDo, transpileBlockNoLoc} from './transpileBlock'
+import YieldLike from '../ast/YieldLike'
+import {msCall} from './ms'
+import {transpileAwaitNoLoc} from './transpileAwait'
+import {transpileConditionalDoNoLoc, transpileCondNoLoc} from './transpileBooleans'
+import {transpileBuildEntryNoLoc} from './transpileBuildEntry'
+import {transpileCallNoLoc} from './transpileCall'
 import {transpileCaseDoNoLoc} from './transpileCase'
-import {constructorSetMembers} from './transpileClass'
-import {transpileExceptDoNoLoc} from './transpileExcept'
-import {transpileBreakNoLoc, transpileForDoNoLoc, transpileForAsyncDoNoLoc} from './transpileFor'
-import {transpileMemberName, transpileThrowNoLoc} from './transpileMisc'
-import {exportNamedOrDefault} from './transpileModule'
+import {transpileSuperCallDoNoLoc} from './transpileClass'
+import {transpileDelNoLoc} from './transpileDel'
+import {transpileAssertNoLoc, transpileExceptDoNoLoc, transpileThrowNoLoc} from './transpileErrors'
+import {transpileAssignNoLoc, transpileLocalMutateNoLoc} from './transpileLocals'
+import {transpileBreakNoLoc, transpileForDoNoLoc, transpileForAsyncDoNoLoc} from './transpileLoop'
+import transpileMemberName, {transpileMember} from './transpileMemberName'
 import {transpileSwitchDoNoLoc} from './transpileSwitch'
 import {transpileTraitDoNoLoc} from './transpileTrait'
 import transpileVal from './transpileVal'
-import {superCallCall, transpileAssignSingleNoLoc, transpileAwaitNoLoc, transpileCallNoLoc, transpileCondNoLoc, transpileDelNoLoc, transpileYieldNoLoc, transpileYieldToNoLoc, withParts} from './transpileX'
-import {doThrow, idForDeclareCached, makeDestructureDeclarators, maybeWrapInCheckInstance, memberStringOrVal, msCall} from './util'
+import {transpileWithDoNoLoc} from './transpileWith'
+import {transpileYieldLikeNoLoc} from './transpileYieldLike'
+import {maybeWrapInCheckInstance} from './util'
 
 export default function transpileDo(_: Do): Statement | Array<Statement> {
 	const ast: Statement | Array<Statement> = transpileDoNoLoc(_)
@@ -52,28 +50,16 @@ function transpileDoNoLoc(_: Do): Statement | Array<Statement> {
 	if (_ instanceof Assert)
 		return transpileAssertNoLoc(_)
 
-	else if (_ instanceof AssignSingle) {
-		return transpileAssignSingleNoLoc(_)
+	else if (_ instanceof Assign)
+		return transpileAssignNoLoc(_)
 
-	} else if (_ instanceof AssignDestructure) {
-		const {assignees, kind, value} = _
-		// TODO:ES6 Just use native destructuring assign
-		return new VariableDeclarationLet(
-			makeDestructureDeclarators(
-				assignees,
-				kind === LocalDeclares.Lazy,
-				transpileVal(value),
-				false))
-
-	} else if (_ instanceof Await)
+	else if (_ instanceof Await)
 		return  new ExpressionStatement(transpileAwaitNoLoc(_))
 
-	else if (_ instanceof BagEntry) {
-		const {isMany, value} = _
-		return new ExpressionStatement(
-			msCall(isMany ? 'addMany' : 'add', IdBuilt, transpileVal(value)))
+	else if (_ instanceof BuildEntry)
+		return transpileBuildEntryNoLoc(_)
 
-	} else if (_ instanceof Break)
+	else if (_ instanceof Break)
 		return transpileBreakNoLoc(_)
 
 	else if (_ instanceof Call)
@@ -85,14 +71,10 @@ function transpileDoNoLoc(_: Do): Statement | Array<Statement> {
 	else if (_ instanceof Cond)
 		return new ExpressionStatement(transpileCondNoLoc(_))
 
-	else if (_ instanceof Conditional) {
-		const {test, result, isUnless} = _
-		const testAst = transpileVal(test)
-		return new IfStatement(
-			isUnless ? new UnaryExpression('!', testAst) : testAst,
-			result instanceof Block ? transpileBlockDo(result) : new ExpressionStatement(transpileVal(result)))
+	else if (_ instanceof Conditional)
+		return transpileConditionalDoNoLoc(_)
 
-	} else if (_ instanceof Del)
+	else if (_ instanceof Del)
 		return new ExpressionStatement(transpileDelNoLoc(_))
 
 	else if (_ instanceof Except)
@@ -107,55 +89,24 @@ function transpileDoNoLoc(_: Do): Statement | Array<Statement> {
 	else if (_ instanceof Ignore)
 		return []
 
-	else if (_ instanceof LocalMutate) {
-		const {name, value} = _
-		return new ExpressionStatement(
-			new AssignmentExpression('=', identifier(name), transpileVal(value)))
+	else if (_ instanceof LocalMutate)
+		return transpileLocalMutateNoLoc(_)
 
-	} else if (_ instanceof MapEntry) {
-		const {key, val} = _
-		return new ExpressionStatement(
-			msCall('setSub', IdBuilt, transpileVal(key), transpileVal(val)))
-
-	} else if (_ instanceof MemberSet) {
+	else if (_ instanceof MemberSet) {
 		const {object, name, opType, kind, value} = _
 		const obj = transpileVal(object)
-		//todo
-		const strName = typeof name === 'string' ? name : 'computed member'
+		const strName = typeof name === 'string' ? name : '<computed member>'
 		const val = maybeWrapInCheckInstance(transpileVal(value), opType, strName)
 		return new ExpressionStatement((() => {
 			switch (kind) {
 				case Setters.Init:
 					return msCall('newProperty', obj, transpileMemberName(name), val)
 				case Setters.Mutate:
-					return new AssignmentExpression('=', memberStringOrVal(obj, name), val)
+					return new AssignmentExpression('=', transpileMember(obj, name), val)
 				default:
 					throw new Error()
 			}
 		})())
-
-	} else if (_ instanceof ObjEntryAssign) {
-		const {assign} = _
-		if (assign instanceof AssignSingle && !assign.assignee.isLazy) {
-			const name = assign.assignee.name
-			return transpileAssignSingleNoLoc(assign, val =>
-				verifyResults.isObjEntryExport(_) ?
-					exportNamedOrDefault(val, name) :
-					new AssignmentExpression('=', member(IdBuilt, name), val))
-		} else {
-			const assigns = assign.allAssignees().map(_ =>
-				new ExpressionStatement(msCall('setLazy', IdBuilt, new LiteralString(_.name), idForDeclareCached(_))))
-			return cat(transpileDo(assign), assigns)
-		}
-
-	} else if (_ instanceof ObjEntryPlain) {
-		const {name, value} = _
-		const val = transpileVal(value)
-		return new ExpressionStatement(
-			verifyResults.isObjEntryExport(_) ?
-				// We've verified that for module export, name must be a string.
-				exportNamedOrDefault(val, <string> name) :
-				new AssignmentExpression('=', memberStringOrVal(IdBuilt, name), val))
 
 	} else if (_ instanceof Pass) {
 		return new ExpressionStatement(transpileVal(_.ignored))
@@ -187,17 +138,8 @@ function transpileDoNoLoc(_: Do): Statement | Array<Statement> {
 				throw new Error(String(_.kind))
 		}
 
-	else if (_ instanceof SuperCall) {
-		const {args} = _
-		const method = verifyResults.superCallToMethod.get(_)
-		if (method instanceof Constructor) {
-			// super must appear as a statement, so OK to declare `this`
-			const call = new ExpressionStatement(new CallExpression(IdSuper, args.map(transpileVal)))
-			const memberSets = constructorSetMembers(method)
-			return cat(call, memberSets, SetLexicalThis)
-		} else
-			return new ExpressionStatement(superCallCall(_, method))
-	}
+	else if (_ instanceof SuperCall)
+		return transpileSuperCallDoNoLoc(_)
 
 	else if (_ instanceof Switch)
 		return transpileSwitchDoNoLoc(_)
@@ -208,17 +150,13 @@ function transpileDoNoLoc(_: Do): Statement | Array<Statement> {
 	} else if (_ instanceof TraitDo)
 		return transpileTraitDoNoLoc(_)
 
-	else if (_ instanceof With) {
-		const {idDeclare, val, lead} = withParts(_)
-		return transpileBlockNoLoc(_.block, lead)
+	else if (_ instanceof With)
+		return transpileWithDoNoLoc(_)
 
-	} else if (_ instanceof Yield)
-		return new ExpressionStatement(transpileYieldNoLoc(_))
-
-	else if (_ instanceof YieldTo)
-		return new ExpressionStatement(transpileYieldToNoLoc(_))
+	else if (_ instanceof YieldLike)
+		return new ExpressionStatement(transpileYieldLikeNoLoc(_))
 
 	else
-		// Should have handled every case.
+		// Should have handled every type.
 		throw new Error(_.constructor.name)
 }

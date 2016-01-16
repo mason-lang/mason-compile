@@ -1,6 +1,5 @@
 import {nonNull} from 'op/Op'
 import MemberName from '../ast/MemberName'
-import {QuotePlain} from '../ast/Val'
 import {GroupParenthesis, GroupQuote} from '../token/Group'
 import Token from '../token/Token'
 import {unexpected} from './checks'

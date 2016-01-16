@@ -1,4 +1,4 @@
-import {Assert, Throw} from '../../dist/private/ast/errors'
+import {Assert, Throw} from '../../lib/private/ast/errors'
 import {loc, one, strA, zero} from './util/ast-util'
 import {test} from './util/test-asts'
 
@@ -13,7 +13,8 @@ describe('assert', () => {
 		'assert 0',
 		new Assert(loc, false, zero, null),
 		'if(! 0)throw new (Error)("Assertion failed.")')
-	test('forbid 0',
+	test(
+		'forbid 0',
 		new Assert(loc, true, zero, null),
 		'if(0)throw new (Error)("Assertion failed.")')
 

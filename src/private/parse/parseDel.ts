@@ -6,7 +6,7 @@ import {parseExprParts} from './parseExpr'
 import parseSpaced from './parseSpaced'
 import {Tokens} from './Slice'
 
-export default function parseDel(tokens: Tokens) : Del{
+export default function parseDel(tokens: Tokens): Del{
 	check(tokens.size() === 1, tokens.loc, _ => _.argsDel)
 	const spaced = tokens.head()
 	if (spaced instanceof GroupSpace) {

@@ -1,7 +1,7 @@
 import Loc, {Pos} from 'esast/lib/Loc'
 import Char from 'typescript-char/Char'
-import {check, fail, options, warn} from '../context'
-import Group, {GroupBlock, GroupBracket, GroupLine, GroupParenthesis, GroupSpace} from '../token/Group'
+import {check, fail, compileOptions, warn} from '../context'
+import {GroupBlock, GroupBracket, GroupLine, GroupParenthesis, GroupSpace} from '../token/Group'
 import Keyword, {isKeyword, Keywords} from '../token/Keyword'
 import {DocComment, NumberToken} from '../token/Token'
 import {assert, isEmpty, last} from '../util'
@@ -78,7 +78,7 @@ export default function lexPlain(isInQuote: boolean): void {
 		addToCurrentGroup(new NumberToken(loc(), str))
 	}
 	function eatIndent(): number {
-		const optIndent = options.indent
+		const optIndent = compileOptions.indent
 		if (typeof optIndent === 'number') {
 			const spaces = skipWhileEquals(Char.Space)
 			check(spaces % optIndent === 0, pos, _ => _.badSpacedIndent(optIndent))
@@ -93,13 +93,13 @@ export default function lexPlain(isInQuote: boolean): void {
 		lexName(startPos(), false)
 	}
 
-	loop: for (;;) {
+	while (true) {
 		startColumn = column
 		const characterEaten = eat()
 		// Generally, the type of a token is determined by the first character.
 		switch (characterEaten) {
 			case Char.Null:
-				break loop
+				return
 			case Char.Backtick: case Char.DoubleQuote:
 				lexQuote(indent, characterEaten === Char.Backtick)
 				break
@@ -124,7 +124,7 @@ export default function lexPlain(isInQuote: boolean): void {
 			case Char.CloseParenthesis:
 				if (closeInterpolationOrParenthesis(loc())) {
 					assert(isInQuote)
-					break loop
+					return
 				}
 				break
 			case Char.CloseBracket:
@@ -198,7 +198,10 @@ export default function lexPlain(isInQuote: boolean): void {
 				if (tryEat(Char.Space) || tryEat(Char.Tab)) {
 					const text = eatRestOfLine()
 					closeSpaceOKIfEmpty(startPos())
-					check(curGroup instanceof GroupLine && curGroup.subTokens.length === 0, loc, _ => _.trailingDocComment)
+					check(
+						curGroup instanceof GroupLine && curGroup.subTokens.length === 0,
+						loc,
+						_ => _.trailingDocComment)
 					addToCurrentGroup(new DocComment(loc(), text))
 				} else if (tryEat(Char.Bar))
 					// non-doc comment
@@ -220,7 +223,6 @@ export default function lexPlain(isInQuote: boolean): void {
 			case Char._5: case Char._6: case Char._7: case Char._8: case Char._9:
 				eatAndAddNumber()
 				break
-
 
 			// OTHER
 

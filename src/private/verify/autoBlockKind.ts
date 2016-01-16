@@ -1,7 +1,7 @@
 import Loc from 'esast/lib/Loc'
 import Op, {orDefault} from 'op/Op'
 import {Throw} from '../ast/errors'
-import {BagEntry, MapEntry, ObjEntry} from '../ast/Block'
+import {BagEntry, MapEntry, ObjEntry} from '../ast/BuildEntry'
 import LineContent from '../ast/LineContent'
 import {check} from '../context'
 import {isEmpty, last} from '../util'

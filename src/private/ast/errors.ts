@@ -4,7 +4,7 @@ import {assert, cat} from '../util'
 import Block from './Block'
 import {DoOnly, Val, ValOrDo} from './LineContent'
 import {LocalDeclare} from './locals'
-import MsAst from '../MsAst'
+import MsAst from './MsAst'
 
 /** `throw! {opThrown}` */
 export class Throw extends DoOnly {
@@ -15,7 +15,8 @@ export class Throw extends DoOnly {
 
 /** `assert!/forbid! {condition} throw! {opThrown}` */
 export class Assert extends DoOnly {
-	constructor(loc: Loc,
+	constructor(
+		loc: Loc,
 		/** If true, this is a `forbid!`. */
 		public negate: boolean,
 		/** Compiled specially if a [[Call]]. */
@@ -37,11 +38,9 @@ export class Assert extends DoOnly {
 		{opFinally}```
 */
 export class Except extends ValOrDo {
-	try: Block
-
 	constructor(
 		loc: Loc,
-		_try: Block,
+		public tried: Block,
 		/** These all have types for their LocalDeclares. */
 		public typedCatches: Array<Catch>,
 		/** opCatchAll.caught should have no type. */
@@ -49,7 +48,6 @@ export class Except extends ValOrDo {
 		public opElse: Op<Block>,
 		public opFinally: Op<Block>) {
 		super(loc)
-		this.try = _try
 	}
 
 	get allCatches(): Array<Catch> {

@@ -1,7 +1,6 @@
 import Loc from 'esast/lib/Loc'
 import Op from 'op/Op'
 import {DoOnly, Val} from './LineContent'
-import {LocalDeclare, LocalDeclares} from './locals'
 import MemberName from './MemberName'
 
 /**
@@ -52,7 +51,8 @@ export const enum Setters {
 Also handles `{object}."{name}"`.
 */
 export class MemberSet extends DoOnly {
-	constructor(loc: Loc,
+	constructor(
+		loc: Loc,
 		public object: Val,
 		public name: MemberName,
 		public opType: Op<Val>,
@@ -64,7 +64,8 @@ export class MemberSet extends DoOnly {
 
 /** `{object}[{subbeds}]:{opType} =/:=/::= {value}` */
 export class SetSub extends DoOnly {
-	constructor(loc: Loc,
+	constructor(
+		loc: Loc,
 		public object: Val,
 		public subbeds: Array<Val>,
 		public opType: Op<Val>,

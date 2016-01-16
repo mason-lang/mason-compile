@@ -1,8 +1,8 @@
-import Block from '../../dist/private/ast/Block'
-import {Conditional} from '../../dist/private/ast/booleans'
-import Case, {CasePart, Pattern} from '../../dist/private/ast/Case'
-import Fun from '../../dist/private/ast/Fun'
-import Switch, {SwitchPart} from '../../dist/private/ast/Switch'
+import Block from '../../lib/private/ast/Block'
+import {Conditional} from '../../lib/private/ast/booleans'
+import Case, {CasePart, Pattern} from '../../lib/private/ast/Case'
+import {FunBlock} from '../../lib/private/ast/Fun'
+import Switch, {SwitchPart} from '../../lib/private/ast/Switch'
 import {aAccess, assignAZero, assignFocusZero, bDeclare, bAccess, blockDbg, blockOne, blockTwo,
 	blockPass, focusAccess, focusDeclare, loc, one, zero} from './util/ast-util'
 import {test} from './util/test-asts'
@@ -58,7 +58,8 @@ describe('case', () => {
 			case 0
 				_
 					pass`,
-		new Case(loc,
+		new Case(
+			loc,
 			assignFocusZero,
 			[new CasePart(loc, focusAccess, blockPass)],
 			null),
@@ -74,7 +75,9 @@ describe('case', () => {
 					debugger
 				else
 					pass`,
-		new Case(loc, null,
+		new Case(
+			loc,
+			null,
 			[new CasePart(loc, zero, blockDbg)],
 			blockPass),
 		`
@@ -89,7 +92,9 @@ describe('case', () => {
 					1
 				else
 					2`,
-		new Case(loc, null,
+		new Case(
+			loc,
+			null,
 			[new CasePart(loc, zero, blockOne)],
 			blockTwo),
 		`
@@ -107,12 +112,13 @@ describe('case', () => {
 					b
 				else
 					2`,
-		new Case(loc, assignFocusZero,
-			[
-				new CasePart(loc,
-					new Pattern(loc, one, [bDeclare]),
-					new Block(loc, null, [bAccess]))
-			],
+		new Case(
+			loc,
+			assignFocusZero,
+			[new CasePart(
+				loc,
+				new Pattern(loc, one, [bDeclare]),
+				new Block(loc, null, [bAccess]))],
 			blockTwo),
 		`
 			(()=>{
@@ -132,12 +138,16 @@ describe('case', () => {
 			|case
 				_
 					1`,
-		new Fun(
+		new FunBlock(
 			loc,
 			[focusDeclare],
 			null,
-			new Block(loc, null, [
-				new Case(loc, null,
+			new Block(
+				loc,
+				null,
+				[new Case(
+					loc,
+					null,
 					[new CasePart(loc, focusAccess, blockOne)],
 					null)])),
 		`
@@ -153,12 +163,16 @@ describe('case', () => {
 			!|case
 				_
 					pass`,
-		new Fun(
+		new FunBlock(
 			loc,
 			[focusDeclare],
 			null,
-			new Block(loc, null, [
-				new Case(loc, null,
+			new Block(
+				loc,
+				null,
+				[new Case(
+					loc,
+					null,
 					[new CasePart(loc, focusAccess, blockPass)],
 					null)]),
 			{isDo: true}),
@@ -174,7 +188,9 @@ describe('switch', () => {
 			switch 0
 				1
 					pass`,
-		new Switch(loc, zero,
+		new Switch(
+			loc,
+			zero,
 			[new SwitchPart(loc, [one], blockPass)],
 			null),
 		`
@@ -192,8 +208,11 @@ describe('switch', () => {
 					a
 				else
 					1`,
-		new Switch(loc, zero,
-			[new SwitchPart(loc,
+		new Switch(
+			loc,
+			zero,
+			[new SwitchPart(
+				loc,
 				[one],
 				new Block(loc, null, [assignAZero, aAccess]))],
 			blockOne),
@@ -212,7 +231,9 @@ describe('switch', () => {
 			switch 0
 				0 1
 					pass`,
-		new Switch(loc, zero,
+		new Switch(
+			loc,
+			zero,
 			[new SwitchPart(loc, [zero, one], blockPass)],
 			null),
 		`
@@ -228,12 +249,14 @@ describe('switch', () => {
 			|switch
 				0
 					1`,
-		new Fun(
+		new FunBlock(
 			loc,
 			[focusDeclare],
 			null,
 			new Block(loc, null, [
-				new Switch(loc, focusAccess,
+				new Switch(
+					loc,
+					focusAccess,
 					[new SwitchPart(loc, [zero], blockOne)],
 					null)])),
 		`
@@ -252,12 +275,14 @@ describe('switch', () => {
 			!|switch
 				0
 					pass`,
-		new Fun(
+		new FunBlock(
 			loc,
 			[focusDeclare],
 			null,
 			new Block(loc, null, [
-				new Switch(loc, focusAccess,
+				new Switch(
+					loc,
+					focusAccess,
 					[new SwitchPart(loc, [zero], blockPass)],
 					null)]),
 			{isDo: true}),

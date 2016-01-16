@@ -7,7 +7,8 @@ import {Val, ValOnly, ValOrDo} from './LineContent'
 	{result}```
 */
 export class Conditional extends ValOrDo {
-	constructor(loc: Loc,
+	constructor(
+		loc: Loc,
 		public test: Val,
 		public result: Block | Val,
 		public isUnless: boolean) {

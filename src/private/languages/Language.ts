@@ -1,11 +1,8 @@
 import Loc from 'esast/lib/Loc'
 import Char from 'typescript-char/Char'
-import {code} from '../../CompileError'
-import {showChar} from '../lex/chars'
 import Token from '../token/Token'
 import Group, {GroupType} from '../token/Group'
 import {Keywords} from '../token/Keyword'
-import {assert} from '../util'
 
 interface Language {
 	// Lex:

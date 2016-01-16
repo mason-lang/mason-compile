@@ -134,16 +134,22 @@ export default class Slice<SubType extends Token> {
 	}
 
 	protected chop(newStart: number, newEnd: number): this {
-		return this.slice(newStart, newEnd, new Loc(this.tokens[newStart].loc.start, this.tokens[newEnd - 1].loc.end))
+		return this.slice(
+			newStart, newEnd,
+			new Loc(this.tokens[newStart].loc.start, this.tokens[newEnd - 1].loc.end))
 	}
 
 	// todo: would like this to be private, but it's used by parseSpacedFold
 	chopStart(newStart: number): this {
-		return this.slice(newStart, this.end, newStart === this.end ? this.loc : new Loc(this.tokens[newStart].loc.start, this.loc.end))
+		return this.slice(
+			newStart, this.end,
+			newStart === this.end ? this.loc : new Loc(this.tokens[newStart].loc.start, this.loc.end))
 	}
 
 	private chopEnd(newEnd: number): this {
-		return this.slice(this.start, newEnd, newEnd === this.start ? this.loc : new Loc(this.loc.start, this.tokens[newEnd - 1].loc.end))
+		return this.slice(
+			this.start, newEnd,
+			newEnd === this.start ? this.loc : new Loc(this.loc.start, this.tokens[newEnd - 1].loc.end))
 	}
 }
 
@@ -204,8 +210,7 @@ export class Tokens extends Slice<Token> {
 		Returned length is keywords.length + 1.
 		It's recommended to destructure on this value.
 	*/
-	//...keywords
-	getKeywordSections(keywords: Array<Keywords>): [this, Array<Op<this>>] {
+	getKeywordSections(...keywords: Array<Keywords>): [this, Array<Op<this>>] {
 		const out = new Array<Op<this>>(keywords.length + 1).fill(null)
 
 		let iNextKeyword = 0
@@ -221,7 +226,6 @@ export class Tokens extends Slice<Token> {
 						// so this is the index for that keyword.
 						out[iNextKeyword] = this.chop(iTokenPrev, iToken)
 						iNextKeyword = iKeyword + 1
-						//todo: if taken last keyword, break out of both loops
 						iTokenPrev = iToken + 1
 					}
 			}
@@ -231,14 +235,23 @@ export class Tokens extends Slice<Token> {
 		return [orThrow(head(out)), tail(out)]
 	}
 
-	//doc
+	/**
+	Takes the given keywords, in order.
+	Every keyword is optional.
+	e.g.:
+		`Slice({{a c d e}}).takeKeywords(Keywords.A, Keywords.B, Keywords.C)` is:
+		`[[true, false, true], Slice({{d e}})]`.
+	@return
+		[0]: For each keyword, whether that keyword was found.
+		[1]: The remaining tokens after those keywords.
+	*/
 	takeKeywords(...keywords: Array<Keywords>): [Array<boolean>, this] {
 		const out = new Array<boolean>(keywords.length).fill(false)
 
 		let iNextKeyword = 0
 		let iTokenPrev = this.start
 
-		for (let iToken = this.start; iToken < this.end; iToken = iToken + 1) {
+		loop: for (let iToken = this.start; iToken < this.end; iToken = iToken + 1) {
 			const token = this.tokens[iToken]
 			if (token instanceof Keyword) {
 				const kind = token.kind
@@ -246,9 +259,11 @@ export class Tokens extends Slice<Token> {
 					if (kind === keywords[iKeyword]) {
 						out[iNextKeyword] = true
 						iNextKeyword = iNextKeyword + 1
-						//todo: if taken last keyword, break out of both loops
 						iTokenPrev = iToken + 1
+						continue loop
 					}
+				// Didn't find any of the keywords, so done.
+				break
 			}
 		}
 

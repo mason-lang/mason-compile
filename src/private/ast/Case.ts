@@ -9,7 +9,8 @@ import MsAst from './MsAst'
 export default class Case extends ValOrDo {
 	// todo: create declare in verify for opCased (use Val instead of AssignSingle)
 	// opCased: Assignee is always a LocalDeclareFocus.
-	constructor(loc: Loc,
+	constructor(
+		loc: Loc,
 		public opCased: Op<AssignSingle>,
 		public parts: Array<CasePart>,
 		public opElse: Op<Block>) {

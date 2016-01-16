@@ -38,7 +38,7 @@ export class ErrorMessage {
 		const message = this.message
 		const codeRegex = /{{(.*?)}}/g
 		let prevIdx = 0
-		for (;;) {
+		while (true) {
 			const match = codeRegex.exec(message)
 			if (match === null) {
 				yield message.slice(prevIdx, message.length)
@@ -50,9 +50,4 @@ export class ErrorMessage {
 			}
 		}
 	}
-}
-
-/** Used when generating messages to highlight a part of that message. */
-export function code(str: string): string {
-	return `{{${str}}}`
 }

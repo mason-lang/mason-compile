@@ -1,0 +1,18 @@
+import { Assign, LocalAccess, LocalDeclare, LocalMutate } from '../ast/locals';
+import MsAst from '../ast/MsAst';
+export declare function verifyLocalDeclare({loc, name, opType}: LocalDeclare): void;
+export declare function verifyLocalAccess(_: LocalAccess): void;
+export declare function verifyAssign(_: Assign): void;
+export declare function deleteLocal(localDeclare: LocalDeclare): void;
+export declare function setLocal(localDeclare: LocalDeclare): void;
+export declare function accessLocal(access: MsAst, name: string): void;
+export declare function setDeclareAccessed(declare: LocalDeclare, access: MsAst): void;
+export declare function registerLocal(localDeclare: LocalDeclare): void;
+export declare function registerAndPlusLocal(localDeclare: LocalDeclare, action: () => void): void;
+export declare function plusLocals(addedLocals: Array<LocalDeclare>, action: () => void): void;
+export declare function verifyAndPlusLocal(addedLocal: LocalDeclare, action: () => void): void;
+export declare function verifyAndPlusLocals(addedLocals: Array<LocalDeclare>, action: () => void): void;
+export declare function withBlockLocals(action: () => void): void;
+export declare function warnUnusedLocals(): void;
+export declare function addImportedLocal(ld: LocalDeclare): void;
+export declare function verifyLocalMutate({value}: LocalMutate): void;

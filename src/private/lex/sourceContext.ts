@@ -11,8 +11,8 @@ export let line: number
 export let column: number
 export let sourceString: string
 
-export function setupSourceContext(_sourceString: string): void {
-	sourceString = _sourceString
+export function setupSourceContext(source: string): void {
+	sourceString = source
 	index = 0
 	line = Pos.start.line
 	column = Pos.start.column

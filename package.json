@@ -1,7 +1,7 @@
 {
 	"name": "mason-compile",
 	"version": "0.0.0",
-	"files": ["dist", "src"],
+	"files": ["lib", "src"],
 	"license": "Unlicense",
 	"repository": "mason-lang/mason-compile",
 	"typings": "lib",
@@ -13,7 +13,7 @@
 		"test": "mocha compiled-test/*.js compiled-test/*/*.js",
 		"test-compile": "npm run build-test && node compiled-test/test-compile",
 		"perf-test-compile": "npm run build-test && node compiled-test/test-compile perf",
-		"TODO-lint": "tslint src/*.ts src/*/*.ts src/*/*/*.ts",
+		"lint": "tslint src/*.ts src/*/*.ts src/*/*/*.ts test/*.ts test/*/*.ts",
 		"TODO-doc": "typedoc src --out doc",
 		"TODO-all": "npm run build && npm run build-test && npm run test && npm run lint && npm run doc"
 	},
@@ -25,17 +25,12 @@
 		"typescript-char": "mason-lang/typescript-char"
 	},
 	"devDependencies": {
-		"babel-plugin-transform-es2015-destructuring": "6.4.0",
-		"babel-plugin-transform-es2015-parameters": "6.4.2",
 		"gulp": "3.9.0",
-		"gulp-babel": "6.1.1",
-		"gulp-sourcemaps": "1.6.0",
-		"gulp-typescript": "2.10.0",
-		"merge2": "0.3.6",
+		"gulp-typescript-esast": "esast/gulp-typescript-esast",
 		"mocha": "2.3.4",
-		"tslint": "3.2.1",
+		"tslint": "3.2.2-dev.1",
+		"tslint-config-esast": "esast/tslint-config-esast",
 		"typedoc": "0.3.12",
-		"typescript": "1.8.0-dev.20160110",
 
 		"benchmark": "2.0.0",
 		"microtime": "2.0.0",

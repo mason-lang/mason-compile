@@ -1,7 +1,9 @@
-import Block from '../../dist/private/ast/Block'
-import Call, {New, Spread} from '../../dist/private/ast/Call'
-import {BagSimple, Member, MsRegExp, ObjPair, ObjSimple, QuotePlain, QuoteSimple, QuoteTaggedTemplate, SpecialVal, SpecialVals} from '../../dist/private/ast/Val'
-import With from '../../dist/private/ast/With'
+import Block from '../../lib/private/ast/Block'
+import Call, {New, Spread} from '../../lib/private/ast/Call'
+import {MsRegExp, QuoteSimple, QuoteTagged, QuoteTemplate} from '../../lib/private/ast/Quote'
+import {BagSimple, Member, ObjPair, ObjSimple, SpecialVal, SpecialVals
+	} from '../../lib/private/ast/Val'
+import With from '../../lib/private/ast/With'
 import {aDeclare, blockPass, focusAccess, focusDeclare, loc, objectAccess, one, zero
 	} from './util/ast-util'
 import {test} from './util/test-asts'
@@ -72,13 +74,13 @@ describe('expressions', () => {
 
 		test(
 			'"a"',
-			new QuotePlain(loc, ['a']),
+			new QuoteTemplate(loc, ['a']),
 			'`a`',
 			{warnings: ['Quoted text could be a simple quote {{\'a}}.']})
 
 		test(
 			'"a b"',
-			new QuotePlain(loc, ['a b']),
+			new QuoteTemplate(loc, ['a b']),
 			'`a b`')
 
 		test(
@@ -87,27 +89,27 @@ describe('expressions', () => {
 					a
 						b
 					c`,
-			new QuotePlain(loc, ['a\n\tb\nc']),
+			new QuoteTemplate(loc, ['a\n\tb\nc']),
 			'`a\n\tb\nc`')
 
 		test(
 			'"a`\\"\\#\\n"',
-			new QuotePlain(loc, ['a\\`"#\\n']),
+			new QuoteTemplate(loc, ['a\\`"#\\n']),
 			'\`a\\`"#\\n\`')
 
 		test(
 			'"a#(0)b"',
-			new QuotePlain(loc, ['a', zero, 'b']),
+			new QuoteTemplate(loc, ['a', zero, 'b']),
 			'`a${0}b`')
 
 		test(
 			'"a#Object"',
-			new QuotePlain(loc, ['a', objectAccess]),
+			new QuoteTemplate(loc, ['a', objectAccess]),
 			'`a${Object}`')
 
 		test(
 			'0"a#(0)b"',
-			new QuoteTaggedTemplate(loc, zero, new QuotePlain(loc, ['a', zero, 'b'])),
+			new QuoteTagged(loc, zero, new QuoteTemplate(loc, ['a', zero, 'b'])),
 			'0`a${0}b`')
 
 		test(
@@ -161,7 +163,10 @@ describe('expressions', () => {
 			`
 				with 0
 					_ _`,
-			new With(loc, focusDeclare, zero,
+			new With(
+				loc,
+				focusDeclare,
+				zero,
 				new Block(loc, null, [new Call(loc, focusAccess, [focusAccess])])),
 			`
 				(()=>{
@@ -175,8 +180,7 @@ describe('expressions', () => {
 // TODO:
 // BlockWrap
 // Range (`a..b`, `a...b`, `a...`)
-// MemberFun
-// GetterFun
+// Fun
 // Method
 // Pipe
 // Literal (NumberLiteral, RegExpLiteral)

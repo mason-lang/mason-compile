@@ -7,7 +7,6 @@ import {LocalDeclare} from './locals'
 ```with {value} [as {declare}]
 	{block}```
 */
-//todo: not ValOnly, move!
 export default class With extends ValOrDo {
 	constructor(loc: Loc, public declare: LocalDeclare, public value: Val, public block: Block) {
 		super(loc)

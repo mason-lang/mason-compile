@@ -1,6 +1,6 @@
 import Loc from 'esast/lib/Loc'
 import Op from 'op/Op'
-import {Val, ValOnly, ValOrDo} from './LineContent'
+import {Val, ValOnly} from './LineContent'
 import MsAst from './MsAst'
 import MemberName from './MemberName'
 
@@ -20,7 +20,7 @@ export class ObjSimple extends ValOnly {
 }
 /** Part of an [[ObjSimple]]. */
 export class ObjPair extends MsAst {
-	constructor(loc: Loc, public key: string, public value: Val) {
+	constructor(loc: Loc, public key: MemberName, public value: Val) {
 		super(loc)
 	}
 }
@@ -48,53 +48,6 @@ export class Member extends ValOnly {
 	}
 }
 
-export type QuotePart = string | Val
-
-/**
-RegExp expression, like `\`foo\``..
-Like QuotePlain, may contain interpolation.
-*/
-export class MsRegExp extends ValOnly {
-	constructor(loc: Loc,
-		public parts: Array<QuotePart>,
-		/** Some selection of the letters in 'gimy' (in that order). */
-		public flags: string = '') {
-		super(loc)
-	}
-}
-
-/** [[Quote]] or [[QuoteSimple]]. */
-export class QuoteAbstract extends ValOnly {}
-
-/**
-Quoted text. Always compiles to a template string.
-For tagged templates, use [[QuoteTaggedTemplate]].
-*/
-export class QuotePlain extends QuoteAbstract {
-	// `parts` are Strings interleaved with Vals.
-	// part Strings are raw values, meaning "\n" is two characters.
-	constructor(loc: Loc, public parts: Array<QuotePart>) {
-		super(loc)
-	}
-}
-
-/** `{tag}"{quote}"` */
-export class QuoteTaggedTemplate extends ValOnly {
-	constructor(loc: Loc, public tag: Val, public quote: QuotePlain) {
-		super(loc)
-	}
-}
-
-/**
-`'{name}`.
-Quote consisting of a single name.
-*/
-export class QuoteSimple extends QuoteAbstract {
-	constructor(loc: Loc, public value: string) {
-		super(loc)
-	}
-}
-
 /**
 ```pipe {value}
 	{pipes}```
@@ -107,7 +60,8 @@ export class Pipe extends ValOnly {
 
 /** `{start}..{end}` or `{start}...{end}`. */
 export class Range extends ValOnly {
-	constructor(loc: Loc,
+	constructor(
+		loc: Loc,
 		public start: Val,
 		/** If null, this is an infinite Range. */
 		public opEnd: Op<Val>,

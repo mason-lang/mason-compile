@@ -1,7 +1,7 @@
 import Module from '../ast/Module'
 import {GroupBlock} from '../token/Group'
 import parseModule from './parseModule'
-import Slice, {Lines} from './Slice'
+import {Lines} from './Slice'
 
 /**
 This converts a Token tree to a MsAst.

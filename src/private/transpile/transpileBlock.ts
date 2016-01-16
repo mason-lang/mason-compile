@@ -1,35 +1,36 @@
-import Expression from 'esast/lib/Expression'
+import Expression, {CallExpression} from 'esast/lib/Expression'
+import {ArrowFunctionExpression, FunctionExpression} from 'esast/lib/Function'
 import Statement, {BlockStatement, ReturnStatement} from 'esast/lib/Statement'
 import Op from 'op/Op'
 import Block from '../ast/Block'
 import {Throw} from '../ast/errors'
+import {Funs} from '../ast/Fun'
 import {Do, Val} from '../ast/LineContent'
 import {assert, cat, last, rtail} from '../util'
 import {Blocks} from '../VerifyResults'
-import {verifyResults} from './context'
-import {DeclareBuiltBag, DeclareBuiltMap, DeclareBuiltObj, IdBuilt} from './esast-constants'
-import transpileDo from './transpileDo'
-import {transpileThrow} from './transpileMisc'
+import {funKind, verifyResults} from './context'
+import {declareBuiltBag, declareBuiltMap, declareBuiltObj, idBuilt} from './esast-constants'
+import {transpileThrow} from './transpileErrors'
 import transpileVal from './transpileVal'
-import {loc, maybeWrapInCheckInstance, tLines} from './util'
+import {callPreservingFunKind, loc, maybeWrapInCheckInstance, transpileLines} from './util'
 
-//todo: lead, follow could be cleaned up
-//todo: maybe some callers of this should be using transpileBlockVal or transpileBlockDo
-export default function transpileBlock(
-	_: Block,
-	lead: Op<Statement | Array<Statement>> = null,
-	opReturnType: Op<Val> = null,
-	follow: Op<Statement | Array<Statement>> = null): BlockStatement {
-	return loc(_, transpileBlockNoLoc(_, lead, opReturnType, follow))
+/** Transpiled block may have a return statement depending on the kind of block. */
+export default function transpileBlock(_: Block, options: TranspileBlockOptions = {})
+	: BlockStatement {
+	return loc(_, transpileBlockNoLoc(_, options))
 }
 
-//todo: cut back on params
-export function transpileBlockNoLoc(_: Block,
-	lead: Op<Statement | Array<Statement>> = null,
-	opReturnType: Op<Val> = null,
-	follow: Op<Statement | Array<Statement>> = null): BlockStatement {
+export type TranspileBlockOptions = {
+	lead?: Op<Statement | Array<Statement>>,
+	opReturnType?: Op<Val>,
+	follow?: Op<Statement | Array<Statement>>,
+}
+
+export function transpileBlockNoLoc(_: Block, options: TranspileBlockOptions = {}): BlockStatement {
 	const {lines} = _
 	const kind = verifyResults.blockKind(_)
+
+	const {lead = null, opReturnType: opReturnType = null, follow = null} = options
 
 	function blockWithReturn(returned: Expression, lines: Array<Statement>): BlockStatement {
 		const doReturn = new ReturnStatement(
@@ -43,46 +44,57 @@ export function transpileBlockNoLoc(_: Block,
 			return transpileBlockDoWithLeadAndFollowNoLoc(_, lead, follow)
 		case Blocks.Throw:
 			return new BlockStatement(
-				cat(lead, tLines(rtail(<Array<Do>> lines)), transpileThrow(<Throw> last(lines))))
+				cat(lead, transpileLines(rtail(<Array<Do>> lines)), transpileThrow(<Throw> last(lines))))
 		case Blocks.Return:
-			return blockWithReturn(transpileVal(<Val> last(lines)), tLines(<Array<Do>> rtail(lines)))
+			return blockWithReturn(transpileVal(<Val> last(lines)), transpileLines(<Array<Do>> rtail(lines)))
 		case Blocks.Bag: case Blocks.Map: case Blocks.Obj: {
 			const declare = kind === Blocks.Bag ?
-				DeclareBuiltBag :
-				kind === Blocks.Map ? DeclareBuiltMap : DeclareBuiltObj
-			return blockWithReturn(IdBuilt, cat(declare, tLines(<Array<Do>> lines)))
+				declareBuiltBag :
+				kind === Blocks.Map ? declareBuiltMap : declareBuiltObj
+			return blockWithReturn(idBuilt, cat(declare, transpileLines(<Array<Do>> lines)))
 		}
 		default:
 			throw new Error(String(kind))
 	}
 }
 
-//rename
-function transpileBlockReturnNoLoc(
-	returned: Expression,
-	lines: Array<Statement>,
-	lead: Op<Statement | Array<Statement>>,
-	opReturnType: Op<Val>): BlockStatement {
-	const ret = new ReturnStatement(
-		maybeWrapInCheckInstance(returned, opReturnType, 'returned value'))
-	return new BlockStatement(cat(lead, lines, ret))
+export function transpileBlockVal(_: Block, options: TranspileBlockOptions = {}): Expression {
+	return blockWrap(transpileBlock(_, options))
 }
 
 export function transpileBlockDo(_: Block): BlockStatement {
-	return loc(_, new BlockStatement(tLines(<Array<Do>> _.lines)))
+	return loc(_, new BlockStatement(transpileLines(<Array<Do>> _.lines)))
 }
 
 export function transpileBlockDoWithLeadAndFollow(
 	_: Block,
 	lead?: Op<Statement | Array<Statement>>,
-	follow?: Op<Statement | Array<Statement>>): BlockStatement {
+	follow?: Op<Statement | Array<Statement>>)
+	: BlockStatement {
 	return loc(_, transpileBlockDoWithLeadAndFollowNoLoc(_, lead, follow))
 }
 
-//rename?
-export function transpileBlockDoWithLeadAndFollowNoLoc(
+function transpileBlockDoWithLeadAndFollowNoLoc(
 	_: Block,
-	lead?: Op<Statement | Array<Statement>>,
-	follow?: Op<Statement | Array<Statement>>): BlockStatement {
-	return new BlockStatement(cat(lead, tLines(<Array<Do>> _.lines), follow))
+	lead: Op<Statement | Array<Statement>>,
+	follow: Op<Statement | Array<Statement>>)
+	: BlockStatement {
+	return new BlockStatement(cat(lead, transpileLines(<Array<Do>> _.lines), follow))
+}
+
+/** Wraps a block (with `return` statements in it) in an IIFE. */
+export function blockWrap(block: BlockStatement): Expression {
+	const thunk = funKind === Funs.Plain ?
+		new ArrowFunctionExpression([], block) :
+		new FunctionExpression(null, [], block, {generator: true})
+	return callPreservingFunKind(new CallExpression(thunk, []))
+}
+
+/** Wrap a statement in an IIFE. */
+export function blockWrapStatement(statement: Statement): Expression {
+	return blockWrap(new BlockStatement([statement]))
+}
+
+export function blockWrapIfBlock(_: Block | Val): Expression {
+	return _ instanceof Block ? transpileBlockVal(_) : transpileVal(_)
 }

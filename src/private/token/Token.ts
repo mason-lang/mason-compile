@@ -1,5 +1,5 @@
 import Loc from 'esast/lib/Loc'
-import {code} from '../../CompileError'
+import {code} from '../languages/util'
 
 /**
 Lexed element in a tree of Tokens.

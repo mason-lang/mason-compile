@@ -2,7 +2,7 @@ import Loc from 'esast/lib/Loc'
 import Op from 'op/Op'
 import {Arguments} from './Call'
 import {ClassTraitDo, MethodImplLike} from './classTraitCommon'
-import Fun from './Fun'
+import {FunBlock} from './Fun'
 import {Val, ValOnly, ValOrDo} from './LineContent'
 import {LocalDeclare} from './locals'
 import MemberName from './MemberName'
@@ -46,7 +46,7 @@ export class Field extends MsAst {
 
 /** `construct! {fun}` */
 export class Constructor extends MsAst {
-	constructor(loc: Loc, public fun: Fun, public memberArgs: Array<LocalDeclare>) {
+	constructor(loc: Loc, public fun: FunBlock, public memberArgs: Array<LocalDeclare>) {
 		super(loc)
 	}
 }

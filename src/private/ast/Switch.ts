@@ -6,7 +6,8 @@ import MsAst from './MsAst'
 
 /** `switch` */
 export default class Switch extends ValOrDo {
-	constructor(loc: Loc,
+	constructor(
+		loc: Loc,
 		public switched: Val,
 		public parts: Array<SwitchPart>,
 		public opElse: Op<Block>) {

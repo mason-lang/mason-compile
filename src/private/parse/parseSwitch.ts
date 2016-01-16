@@ -1,12 +1,11 @@
 import {check} from '../context'
 import {LocalAccess} from '../ast/locals'
 import Switch, {SwitchPart} from '../ast/Switch'
-import Group from '../token/Group'
 import {isKeyword, Keywords} from '../token/Keyword'
 import {checkEmpty} from './checks'
 import parseBlock, {beforeAndBlock, parseJustBlock} from './parseBlock'
 import parseExpr, {parseExprParts} from './parseExpr'
-import Slice, {Tokens} from './Slice'
+import {Tokens} from './Slice'
 
 /** Parse a [[Switch]]. */
 export default function parseSwitch(switchedFromFun: boolean, tokens: Tokens): Switch {

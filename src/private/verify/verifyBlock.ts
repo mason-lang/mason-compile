@@ -1,18 +1,14 @@
-import Loc from 'esast/lib/Loc'
-import Op, {caseOp} from 'op/Op'
-import Block, {ObjEntry} from '../ast/Block'
-import LineContent from '../ast/LineContent'
+import Block from '../ast/Block'
 import {LocalDeclare} from '../ast/locals'
 import {check} from '../context'
 import {isEmpty, last, rtail} from '../util'
-import {Blocks, Modules} from '../VerifyResults'
+import {Blocks} from '../VerifyResults'
 import autoBlockKind from './autoBlockKind'
 import {results} from './context'
-import {plusLocals, verifyAndPlusLocal} from './locals'
 import SK from './SK'
 import verifyLines, {verifyBuiltLines} from './verifyLines'
-import verifySK from './verifySK'
-import verifyVal, {ensureValAndVerify} from './verifyVal'
+import {plusLocals} from './verifyLocals'
+import {ensureValAndVerify} from './verifyVal'
 
 export function verifyBlockSK(_: Block, sk: SK): void {
 	if (sk === SK.Do)

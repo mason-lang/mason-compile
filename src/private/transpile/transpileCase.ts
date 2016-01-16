@@ -1,19 +1,19 @@
 import {VariableDeclarationLet, VariableDeclarator} from 'esast/lib/Declaration'
-import Expression, {BinaryExpression, LiteralNumber, MemberExpressionComputed} from 'esast/lib/Expression'
+import Expression, {BinaryExpression, MemberExpressionComputed} from 'esast/lib/Expression'
 import Identifier from 'esast/lib/Identifier'
-import Node from 'esast/lib/Node'
+import {LiteralNumber} from 'esast/lib/Literal'
 import Statement, {BlockStatement, IfStatement} from 'esast/lib/Statement'
 import Op, {caseOp} from 'op/Op'
 import Block from '../ast/Block'
 import Case, {CasePart, Pattern} from '../ast/Case'
 import {LocalDeclare} from '../ast/locals'
-import {verifyResults} from './context'
-import {IdFocus, LitNull} from './esast-constants'
-import transpileBlock from './transpileBlock'
+import {idFocus, litNull} from './esast-constants'
+import {msCall} from './ms'
+import throwErrorFromString from './throwErrorFromString'
+import transpileBlock, {blockWrap} from './transpileBlock'
+import {idForDeclareCached, plainLet, transpileAssignSingle} from './transpileLocals'
 import transpileVal from './transpileVal'
-import {transpileAssignSingle} from './transpileX'
-import {blockWrap, idForDeclareCached, loc, msCall, plainLet} from './util'
-import {throwErrorFromString} from './util2'
+import {loc} from './util'
 
 export function transpileCaseValNoLoc({opCased, parts, opElse}: Case): Expression {
 	const body = caseBody(parts, opElse)
@@ -27,7 +27,7 @@ export function transpileCaseDoNoLoc({opCased, parts, opElse}: Case): Statement 
 }
 
 function caseBody(parts: Array<CasePart>, opElse: Op<Block>): Statement {
-	let acc = caseOp<Block, Statement>(opElse, transpileBlock, () => ThrowNoCaseMatch)
+	let acc = caseOp<Block, Statement>(opElse, transpileBlock, () => throwNoCaseMatch)
 	for (let i = parts.length - 1; i >= 0; i = i - 1)
 		acc = transpileCasePart(parts[i], acc)
 	return acc
@@ -37,15 +37,16 @@ function transpileCasePart(_: CasePart, alternate: Statement): Statement {
 	const {test, result} = _
 	return loc(_, ((): Statement => {
 		if (test instanceof Pattern) {
-			const {type, patterned, locals} = test
-			const decl = plainLet(IdExtract,
-				msCall('extract', transpileVal(type), IdFocus, new LiteralNumber(locals.length)))
-			const testExtract = new BinaryExpression('!==', IdExtract, LitNull)
+			const {type, locals} = test
+			const decl = plainLet(
+				idExtract,
+				msCall('extract', transpileVal(type), idFocus, new LiteralNumber(locals.length)))
+			const testExtract = new BinaryExpression('!==', idExtract, litNull)
 			const extract = new VariableDeclarationLet(locals.map((_: LocalDeclare, index: number) =>
 				new VariableDeclarator(
 					idForDeclareCached(_),
-					new MemberExpressionComputed(IdExtract, new LiteralNumber(index)))))
-			const res = transpileBlock(result, extract)
+					new MemberExpressionComputed(idExtract, new LiteralNumber(index)))))
+			const res = transpileBlock(result, {lead: extract})
 			return new BlockStatement([decl, new IfStatement(testExtract, res, alternate)])
 		} else
 			// alternate written to by `caseBody`.
@@ -53,5 +54,5 @@ function transpileCasePart(_: CasePart, alternate: Statement): Statement {
 	})())
 }
 
-const IdExtract = new Identifier('_$')
-const ThrowNoCaseMatch = throwErrorFromString('No branch of `case` matches.')
+const idExtract = new Identifier('_$')
+const throwNoCaseMatch = throwErrorFromString('No branch of `case` matches.')

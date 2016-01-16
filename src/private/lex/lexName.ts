@@ -23,7 +23,8 @@ export default function lexName(startPos: Pos, isInterpolation: boolean): void {
 }
 
 function handleNameText(startPos: Pos, name: string, allowSpecialKeywords: boolean): void {
-	caseOp(opKeywordKindFromName(name),
+	caseOp(
+		opKeywordKindFromName(name),
 		kind => {
 			switch (kind) {
 				case Keywords.Region: case Keywords.Todo:

@@ -1,4 +1,4 @@
-import Op, {caseOp, opIf, orThrow} from 'op/Op'
+import Op, {caseOp, opIf} from 'op/Op'
 import Loc from 'esast/lib/Loc'
 import Await from '../ast/Await'
 import {Cond, Conditional, Logic, Logics, Not} from '../ast/booleans'
@@ -9,12 +9,12 @@ import {Val} from '../ast/LineContent'
 import {LocalDeclare} from '../ast/locals'
 import {ObjPair, ObjSimple, Pipe} from '../ast/Val'
 import With from '../ast/With'
-import {Yield, YieldTo} from '../ast/Yield'
-import {check, fail, warn} from '../context'
+import {Yield, YieldTo} from '../ast/YieldLike'
+import {check, warn} from '../context'
 import Language from '../languages/Language'
 import {GroupParenthesis} from '../token/Group'
 import Keyword, {isAnyKeyword, isKeyword, Keywords} from '../token/Keyword'
-import Token, {NameToken} from '../token/Token'
+import Token from '../token/Token'
 import {cat, head, tail} from '../util'
 import {checkNonEmpty} from './checks'
 import parseBlock, {beforeAndBlock, beforeAndOpBlock} from './parseBlock'
@@ -23,17 +23,19 @@ import parseCase from './parseCase'
 import parseDel from './parseDel'
 import parseExcept from './parseExcept'
 import {parseFor, parseForAsync, parseForBag} from './parseFor'
-import parseFun from './parseFun'
+import parseFun from './parseFunBlock'
+import parseMemberName from './parseMemberName'
 import parseMethod from './parseMethod'
 import parseSingle from './parseSingle'
 import parseSwitch from './parseSwitch'
 import parseTrait from './parseTrait'
 import {parseLocalDeclare} from './parseLocalDeclares'
-import Slice, {Lines, Tokens} from './Slice'
+import {Lines, Tokens} from './Slice'
 
 /** Parse a [[Val]]. */
 export default function parseExpr(tokens: Tokens): Val {
-	return caseOp(tokens.opSplitMany(_ => isKeyword(Keywords.ObjEntry, _)),
+	return caseOp(
+		tokens.opSplitMany(_ => isKeyword(Keywords.ObjEntry, _)),
 		_ => parseObjSimple(tokens.loc, _),
 		() => parseExprPlain(tokens))
 }
@@ -49,7 +51,8 @@ This is different from [[parseExpr]] because `a b` will parse as 2 different thi
 However, `cond a b c` will still parse as a single expression.
 */
 export function parseExprParts(tokens: Tokens): Array<Val> {
-	return caseOp(tokens.opSplitOnce(isSplitKeyword),
+	return caseOp(
+		tokens.opSplitOnce(isSplitKeyword),
 		({before, at, after}) =>
 			cat(before.map(parseSingle), keywordExpr(<Keyword> at, after)),
 		() => {
@@ -67,7 +70,8 @@ export function parseExprParts(tokens: Tokens): Array<Val> {
 }
 
 /** Parse exactly `n` Vals, or fail with `errorCode`. */
-export function parseNExprParts(tokens: Tokens, n: number, message: (_: Language) => string): Array<Val> {
+export function parseNExprParts(tokens: Tokens, n: number, message: (_: Language) => string)
+	: Array<Val> {
 	const parts = parseExprParts(tokens)
 	check(parts.length === n, tokens.loc, message)
 	return parts
@@ -82,7 +86,7 @@ function parseObjSimple(loc: Loc, splits: Array<{before: Tokens, at: Token}>): V
 	const pairs: Array<ObjPair> = []
 	for (let i = 0; i < splits.length - 1; i = i + 1) {
 		const nameToken = splits[i].before.last()
-		const name = parseName(nameToken)
+		const name = parseMemberName(nameToken)
 		const tokensValue = i === splits.length - 2 ?
 			splits[i + 1].before :
 			splits[i + 1].before.rtail()
@@ -97,14 +101,6 @@ function parseObjSimple(loc: Loc, splits: Array<{before: Tokens, at: Token}>): V
 		const parts = parseExprParts(tokensCaller)
 		return new Call(loc, head(parts), cat(tail(parts), val))
 	}
-}
-
-//todo: conflicts with parseName.ts
-function parseName(token: Token) {
-	if (token instanceof NameToken)
-		return token.name
-	else
-		throw fail(token.loc, _ => _.expectedName(token))
 }
 
 /** The keyword `at` groups with everything after it. */
@@ -201,13 +197,14 @@ function parseExprPlain(tokens: Tokens): Val {
 }
 
 function parseCond(tokens: Tokens): Val {
-	const [cond, then, _else] = parseNExprParts(tokens, 3, _ => _.argsCond)
-	return new Cond(tokens.loc, cond, then, _else)
+	const [cond, ifTrue, ifFalse] = parseNExprParts(tokens, 3, _ => _.argsCond)
+	return new Cond(tokens.loc, cond, ifTrue, ifFalse)
 }
 
 function parseConditional(kind: Keywords, tokens: Tokens): Conditional {
 	const [before, opBlock] = beforeAndOpBlock(tokens)
-	const [condition, result] = caseOp<Lines, [Val, Block | Val]>(opBlock,
+	const [condition, result] = caseOp<Lines, [Val, Block | Val]>(
+		opBlock,
 		_ => [parseExprPlain(before), parseBlock(_)],
 		() => <[Val, Block | Val]> (<any> parseNExprParts(before, 2, _ => _.argsConditional(kind))))
 	return new Conditional(tokens.loc, condition, result, kind === Keywords.Unless)
@@ -220,7 +217,8 @@ function parsePipe(tokens: Tokens): Pipe {
 
 function parseWith(tokens: Tokens): With {
 	const [before, block] = beforeAndBlock(tokens)
-	const [val, declare] = caseOp<{before: Tokens, after: Tokens}, [Val, LocalDeclare]>(before.opSplitOnce(_ => isKeyword(Keywords.As, _)),
+	const [val, declare] = caseOp<{before: Tokens, after: Tokens}, [Val, LocalDeclare]>(
+		before.opSplitOnce(_ => isKeyword(Keywords.As, _)),
 		({before, after}) => {
 			check(after.size() === 1, after.loc, _ => _.asToken)
 			return [parseExprPlain(before), parseLocalDeclare(after.head())]

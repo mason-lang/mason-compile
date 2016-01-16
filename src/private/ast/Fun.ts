@@ -4,20 +4,19 @@ import {applyDefaults} from '../util'
 import Block from './Block'
 import {Val, ValOnly} from './LineContent'
 import {LocalDeclare} from './locals'
-import MsAst from './MsAst'
 import MemberName from './MemberName'
 
-export interface FunLike extends MsAst {
-	args: Array<LocalDeclare>
-	opRestArg: Op<LocalDeclare>
-	opReturnType: Op<Val>
+abstract class Fun extends ValOnly {
+	// Make this a nominal type
+	isFun(): void {}
 }
+export default Fun
 
 /**
 ```|:{opDeclareRes} {args} ...{opRestArg}
 	{block}```
 */
-export default class Fun extends ValOnly implements FunLike {
+export class FunBlock extends Fun {
 	kind: Funs
 	opDeclareThis: Op<LocalDeclare>
 	isDo: boolean
@@ -28,7 +27,7 @@ export default class Fun extends ValOnly implements FunLike {
 		public args: Array<LocalDeclare>,
 		public opRestArg: Op<LocalDeclare>,
 		public block: Block,
-		opts: FunOptions = {}) {
+		opts: FunBlockOptions = {}) {
 		super(loc)
 		const {kind, isThisFun, isDo, opReturnType} = applyDefaults(opts, {
 			kind: Funs.Plain,
@@ -52,41 +51,29 @@ export const enum Funs {
 	Generator
 }
 
-export type FunOptions = {
+export type FunBlockOptions = {
 	kind?: Funs,
 	isThisFun?: boolean,
 	isDo?: boolean,
 	opReturnType?: Op<Val>
 }
 
-export class FunAbstract extends MsAst implements FunLike {
-	constructor(
-		loc: Loc,
-		public args: Array<LocalDeclare>,
-		public opRestArg: Op<LocalDeclare>,
-		public opReturnType: Op<Val>,
-		public opComment: Op<string>) {
-		super(loc)
-		this.opReturnType = opReturnType
-	}
-}
-
 /** `&{name}` or `.&{name}` or `{object}.&{name}` */
-export class MemberFun extends ValOnly {
+export class FunMember extends Fun {
 	constructor(loc: Loc, public opObject: Op<Val>, public name: MemberName) {
 		super(loc)
 	}
 }
 
 /** `&.{name}` */
-export class GetterFun extends ValOnly {
+export class FunGetter extends Fun {
 	constructor(loc: Loc, public name: MemberName) {
 		super(loc)
 	}
 }
 
 /** `&({value})` */
-export class SimpleFun extends ValOnly {
+export class FunSimple extends Fun {
 	constructor(loc: Loc, public value: Val) {
 		super(loc)
 	}

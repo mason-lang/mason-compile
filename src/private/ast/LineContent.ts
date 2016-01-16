@@ -7,7 +7,7 @@ Note that some [[Val]]s will still cause warnings if they appear as a line.
 */
 abstract class LineContent extends MsAst {
 	// Make this a nominal type
-	isLineContent() {}
+	isLineContent(): void {}
 }
 export default LineContent
 
@@ -29,20 +29,20 @@ export function isDo(_: LineContent): _ is Do {
 
 /** Could act as either a Val or Do. */
 export abstract class ValOrDo extends LineContent implements Val, Do {
-	isVal() {}
-	isDo() {}
+	isVal(): void {}
+	isDo(): void {}
 }
 
 /** Can only appear as a line of a Block. */
 export abstract class DoOnly extends LineContent implements Do {
-	isDo() {}
+	isDo(): void {}
 	// Make this a nominal type
-	private isDoOnly() {}
+	isDoOnly(): void {}
 }
 
 /** Can only appear as an expression. */
 export abstract class ValOnly extends LineContent implements Val {
-	isVal() {}
+	isVal(): void {}
 	// Make this a nominal type
-	private isValOnly() {}
+	isValOnly(): void {}
 }

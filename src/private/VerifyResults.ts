@@ -1,17 +1,13 @@
 import Op, {caseOp} from 'op/Op'
-import {check, fail} from './context'
-import Block, {ObjEntry} from './ast/Block'
-import {CasePart} from './ast/Case'
-import Class, {Constructor, SuperCall} from './ast/Class'
-import {MethodImpl, MethodImplLike} from './ast/classTraitCommon'
-import Fun from './ast/Fun'
-import {Do} from './ast/LineContent'
+import {fail} from './context'
+import Block from './ast/Block'
+import {ObjEntry} from './ast/BuildEntry'
+import {Constructor, SuperCall} from './ast/Class'
+import {MethodImplLike} from './ast/classTraitCommon'
 import {LocalAccess, LocalDeclare} from './ast/locals'
-import Loop, {Break, ForAsync} from './ast/Loop'
+import Loop, {Break} from './ast/Loop'
 import Named from './ast/Named'
 import MsAst from './ast/MsAst'
-import {SwitchPart} from './ast/Switch'
-import {SpecialVal} from './ast/Val'
 
 /**
 Results of [[verify]].
@@ -45,12 +41,6 @@ export default class VerifyResults {
 	constructorToSuper: Map<Constructor, SuperCall>
 	/** Stores verified block kind (see verifyBlock.js) */
 	blockToKind: Map<Block, Blocks>
-	/**
-	Set of MsAsts that have been marked as being statements.
-	Those which are always statements (like Throw) are not marked.
-	Use a set of statements because there are usually many more vals than statements.
-	*/
-	statements: Set<Do | CasePart | SwitchPart | ForAsync>
 	/** ObjEntry_s that are module exports */
 	objEntryExports: Set<ObjEntry>
 	moduleKind: Modules
@@ -67,7 +57,6 @@ export default class VerifyResults {
 		this.superCallToMethod = new Map()
 		this.constructorToSuper = new Map()
 		this.blockToKind = new Map()
-		this.statements = new Set()
 		this.objEntryExports = new Set()
 		this.moduleKind = null
 		this.loopsNeedingLabel = new Set()
@@ -96,11 +85,6 @@ export default class VerifyResults {
 		return x === undefined ? null : x
 	}
 
-	/** Certain expressions (such as `if`) are marked if they are statements. */
-	isStatement(expr: Do | CasePart | SwitchPart): boolean {
-		return this.statements.has(expr)
-	}
-
 	/** What kind of block the verifier determined this to be. */
 	blockKind(block: Block): Blocks {
 		return this.blockToKind.get(block)
@@ -126,7 +110,8 @@ export default class VerifyResults {
 	}
 
 	accessBuiltin(name: string, path: string): void {
-		caseOp(this.builtinPathToNames.get(path),
+		caseOp(
+			this.builtinPathToNames.get(path),
 			_ => {
 				_.add(name)
 			},

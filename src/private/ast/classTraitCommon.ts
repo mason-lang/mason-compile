@@ -1,6 +1,6 @@
 import Loc from 'esast/lib/Loc'
 import Block from './Block'
-import Fun from './Fun'
+import {FunBlock} from './Fun'
 import {LocalDeclare} from './locals'
 import MemberName from './MemberName'
 import MsAst from './MsAst'
@@ -32,7 +32,7 @@ export abstract class MethodImplLike extends MsAst {
 
 /** `{symbol} {fun}` */
 export class MethodImpl extends MethodImplLike {
-	constructor(loc: Loc, symbol: MemberName, public fun: Fun, kind: MethodImplKind) {
+	constructor(loc: Loc, symbol: MemberName, public fun: FunBlock, kind: MethodImplKind) {
 		super(loc, symbol, kind)
 	}
 }

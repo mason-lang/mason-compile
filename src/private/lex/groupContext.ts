@@ -1,6 +1,7 @@
 import Loc, {Pos} from 'esast/lib/Loc'
 import {check, warn} from '../context'
-import Group, {GroupBlock, GroupInterpolation, GroupLine, GroupParenthesis, GroupSpace, GroupType} from '../token/Group'
+import Group, {GroupBlock, GroupInterpolation, GroupLine, GroupParenthesis, GroupSpace, GroupType
+	} from '../token/Group'
 import Token from '../token/Token'
 import {assert, isEmpty} from '../util'
 
@@ -117,7 +118,7 @@ export function closeGroupsForDedent(pos: Pos): void {
 	closeGroup(pos, GroupBlock)
 	// It's OK to be missing a closing parenthesis if there's a block. E.g.:
 	// a (b
-	//	c | no closing paren here
+	// 	c | no closing paren here
 	while (curGroup instanceof GroupParenthesis || curGroup instanceof GroupSpace)
 		closeGroupNoCheck(pos, curGroup.type)
 }

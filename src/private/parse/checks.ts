@@ -1,4 +1,3 @@
-import Op from 'op/Op'
 import CompileError from '../../CompileError'
 import {check, fail} from '../context'
 import Language from '../languages/Language'

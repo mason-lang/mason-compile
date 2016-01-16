@@ -4,17 +4,15 @@ import Block from '../ast/Block'
 import {Conditional} from '../ast/booleans'
 import Case, {CasePart} from '../ast/Case'
 import {Catch, Except} from '../ast/errors'
-import LineContent, {DoOnly, ValOnly, ValOrDo} from '../ast/LineContent'
-import {For, ForAsync, Break} from '../ast/Loop'
-import MsAst from '../ast/MsAst'
+import LineContent, {DoOnly, ValOnly} from '../ast/LineContent'
+import {For, Break} from '../ast/Loop'
 import Switch, {SwitchPart} from '../ast/Switch'
 import With from '../ast/With'
-import {check, warn} from '../context'
+import {check} from '../context'
 import Language from '../languages/Language'
 import {cat, isEmpty, last} from '../util'
 import {Blocks} from '../VerifyResults'
 import autoBlockKind from './autoBlockKind'
-import {results} from './context'
 
 /** Statement Kind. */
 const enum SK {
@@ -24,15 +22,6 @@ const enum SK {
 	Val
 }
 export default SK
-
-/**
-This is an MsAst that is sometimes a statement, sometimes an expression.
-Mark it using `sk` so that it can transpile correctly.
-*/
-export function markStatement(_: ValOrDo | CasePart | SwitchPart | ForAsync, sk: SK): void {
-	if (sk === SK.Do)
-		results.statements.add(_)
-}
 
 /**
 Infer whether a block has a value.
@@ -66,10 +55,10 @@ function opSK(_: LineContent): Op<SK> {
 		const {result} = _
 		return result instanceof Block ? opBlockSK(result) : opSK(result)
 	} else if (_ instanceof Except) {
-		const {loc, try: _try, allCatches, opElse} = _
+		const {loc, tried, allCatches, opElse} = _
 		const catches = allCatches.map((_: Catch) => _.block)
 		// If there's opElse, `try` is always SK.Do and `else` may be SK.Val.
-		const parts = caseOp(opElse, _ => cat(_, catches), () => cat(_try, catches))
+		const parts = caseOp(opElse, _ => cat(_, catches), () => cat(tried, catches))
 		// opFinally is always SK.Do.
 		return compositeSK(loc, parts.map(opBlockSK))
 	} else if (_ instanceof For)
@@ -78,7 +67,6 @@ function opSK(_: LineContent): Op<SK> {
 	else if (_ instanceof Case || _ instanceof Switch)
 		return compositeSK(_.loc, caseSwitchParts(_).map(opBlockSK))
 	else
-		//_ instanceof Call || _ instanceof Del || _ instanceof With || _ instanceof Yield || _ instanceof YieldTo
 		return null
 }
 
@@ -93,10 +81,10 @@ function opForSK(_: LineContent): Op<SK> {
 		const {result} = _
 		return result instanceof Block ? opForSKBlock(result) : opForSK(result)
 	} else if (_ instanceof Except) {
-		const {loc, try: _try, allCatches, opElse, opFinally} = _
+		const {loc, tried, allCatches, opElse, opFinally} = _
 		const catches = allCatches.map(_ => _.block)
 		// Do look at opFinally for break statements.
-		return compositeForSK(loc, cat(_try, catches, opElse, opFinally).map(opForSKBlock))
+		return compositeForSK(loc, cat(tried, catches, opElse, opFinally).map(opForSKBlock))
 	} else if (_ instanceof With)
 		return opForSKBlock(_.block)
 	else if (_ instanceof Case || _ instanceof Switch)
@@ -106,9 +94,7 @@ function opForSK(_: LineContent): Op<SK> {
 }
 
 function caseSwitchParts({parts, opElse}: Case | Switch): Array<Block> {
-	//todo: should not be necessary
-	const prts: Array<CasePart | SwitchPart> = parts
-	return cat(prts.map(_ => _.result), opElse)
+	return cat((<Array<CasePart | SwitchPart>> parts).map(_ => _.result), opElse)
 }
 
 function compositeSK(loc: Loc, parts: Array<Op<SK>>): Op<SK> {

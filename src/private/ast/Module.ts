@@ -15,8 +15,6 @@ export default class Module extends MsAst {
 		public imports: Array<Import>,
 		public lines: Array<LineContent>) {
 		super(loc)
-		if (this.lines === undefined)
-			throw new Error("BAAAAH")
 		Object.freeze(this)
 	}
 }
@@ -33,7 +31,8 @@ Single import in an `import` block.
 If path is 'global', this is transpiled specially because there's no actual 'global' module.
 */
 export class Import extends MsAst {
-	constructor(loc: Loc,
+	constructor(
+		loc: Loc,
 		public path: string,
 		public imported: Array<LocalDeclare>,
 		public opImportDefault: Op<LocalDeclare>) {

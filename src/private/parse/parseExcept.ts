@@ -11,20 +11,20 @@ import {Lines, Tokens} from './Slice'
 /** Parse an [[Except]]. */
 export default function parseExcept(tokens: Tokens): Except {
 	const lines = justBlock(Keywords.Except, tokens)
-	const [_try, rest] = takeTry(lines)
-	const [typedCatches, opCatchAll, rest2] = takeTypedCatches(rest)
+	const [tried, rest] = takeTried(lines)
+	const [typedCatches, opCatchAll, rest2] = takeCatches(rest)
 	const [opElse, rest3] = opTakeElse(rest2)
 	const opFinally = parseOpFinally(rest3)
-	return new Except(tokens.loc, _try, typedCatches, opCatchAll, opElse, opFinally)
+	return new Except(tokens.loc, tried, typedCatches, opCatchAll, opElse, opFinally)
 }
 
-function takeTry(lines: Lines): [Block, Lines] {
+function takeTried(lines: Lines): [Block, Lines] {
 	const line = lines.headSlice()
 	checkKeyword(Keywords.Try, line.head())
 	return [parseJustBlock(Keywords.Try, line.tail()), lines.tail()]
 }
 
-function takeTypedCatches(lines: Lines): [Array<Catch>, Op<Catch>, Lines] {
+function takeCatches(lines: Lines): [Array<Catch>, Op<Catch>, Lines] {
 	const typedCatches: Array<Catch> = []
 	let opCatchAll: Op<Catch> = null
 
@@ -35,15 +35,15 @@ function takeTypedCatches(lines: Lines): [Array<Catch>, Op<Catch>, Lines] {
 
 		const [before, block] = beforeAndBlock(line.tail())
 		const caught = parseLocalDeclareOrFocus(before)
-		const _catch = new Catch(line.loc, caught, parseBlock(block))
+		const catcher = new Catch(line.loc, caught, parseBlock(block))
 
 		lines = lines.tail()
 
 		if (caught.opType === null) {
-			opCatchAll = _catch
+			opCatchAll = catcher
 			break
 		} else
-			typedCatches.push(_catch)
+			typedCatches.push(catcher)
 	}
 	return [typedCatches, opCatchAll, lines]
 }

@@ -3,10 +3,11 @@ import {check, fail} from '../context'
 import Call, {Spread} from '../ast/Call'
 import {Val} from '../ast/LineContent'
 import {SuperCall, SuperMember} from '../ast/Class'
-import {GetterFun, MemberFun, SimpleFun} from '../ast/Fun'
+import {FunGetter, FunMember, FunSimple} from '../ast/Fun'
 import {LocalAccess} from '../ast/locals'
-import {InstanceOf, Lazy, Member, QuoteSimple, QuoteTaggedTemplate, Range, Sub} from '../ast/Val'
-import Group, {GroupBracket, GroupParenthesis, GroupQuote} from '../token/Group'
+import {QuoteSimple, QuoteTagged} from '../ast/Quote'
+import {InstanceOf, Lazy, Member, Range, Sub} from '../ast/Val'
+import {GroupBracket, GroupParenthesis, GroupQuote} from '../token/Group'
 import Keyword, {isKeyword, Keywords} from '../token/Keyword'
 import {assert} from '../util'
 import {checkEmpty, unexpected} from './checks'
@@ -25,14 +26,14 @@ export default function parseSpaced(tokens: Tokens): Val {
 			case Keywords.Ampersand: {
 				const h2 = rest.head()
 				if (h2 instanceof GroupParenthesis)
-					return new SimpleFun(tokens.loc, parseExpr(Tokens.of(h2)))
+					return new FunSimple(tokens.loc, parseExpr(Tokens.of(h2)))
 				else if (isKeyword(Keywords.Dot, h2)) {
 					const tail = rest.tail()
 					const h3 = tail.head()
-					const fun = new GetterFun(h3.loc, parseMemberName(h3))
+					const fun = new FunGetter(h3.loc, parseMemberName(h3))
 					return parseSpacedFold(fun, tail.tail())
 				} else {
-					const fun = new MemberFun(h2.loc, null, parseMemberName(h2))
+					const fun = new FunMember(h2.loc, null, parseMemberName(h2))
 					return parseSpacedFold(fun, rest.tail())
 				}
 			}
@@ -42,8 +43,7 @@ export default function parseSpaced(tokens: Tokens): Val {
 					const tail = rest.tail()
 					const h3 = tail.head()
 					const name = parseMemberName(h3)
-					//MemberFunThis type
-					const fun = new MemberFun(h2.loc, LocalAccess.this(h2.loc), name)
+					const fun = new FunMember(h2.loc, LocalAccess.this(h2.loc), name)
 					return parseSpacedFold(fun, tail.tail())
 				} else {
 					const name = parseMemberName(rest.head())
@@ -84,7 +84,7 @@ export default function parseSpaced(tokens: Tokens): Val {
 function parseSpacedFold(start: Val, rest: Tokens): Val {
 	let acc = start
 	for (let i = rest.start; i < rest.end; i = i + 1) {
-		function restVal() {
+		function restVal(): Val {
 			return parseSpaced(rest.chopStart(i + 1))
 		}
 
@@ -96,7 +96,7 @@ function parseSpacedFold(start: Val, rest: Tokens): Val {
 					if (i === rest.end - 1)
 						throw unexpected(token)
 					i = i + 1
-					acc = new MemberFun(token.loc, acc, parseMemberName(rest.tokens[i]))
+					acc = new FunMember(token.loc, acc, parseMemberName(rest.tokens[i]))
 					break
 				case Keywords.Dot: {
 					// If this were the last one,
@@ -125,7 +125,7 @@ function parseSpacedFold(start: Val, rest: Tokens): Val {
 			checkEmpty(Tokens.of(token), _ => _.parensOutsideCall)
 			acc = new Call(loc, acc, [])
 		} else if (token instanceof GroupQuote)
-			acc = new QuoteTaggedTemplate(loc, acc, parseQuote(Slice.of(token)))
+			acc = new QuoteTagged(loc, acc, parseQuote(Slice.of(token)))
 		else
 			throw unexpected(token)
 	}

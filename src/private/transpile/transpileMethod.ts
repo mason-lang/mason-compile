@@ -1,50 +1,28 @@
-import {MethodDefinitionGet, MethodDefinitionNonConstructor, MethodDefinitionPlain, MethodDefinitionSet} from 'esast/lib/Class'
-import Expression from 'esast/lib/Expression'
-import {FunctionExpression} from 'esast/lib/Function'
-import {ComputedName, Property, PropertyGet, PropertyMethod, PropertyName, PropertySet} from 'esast/lib/ObjectExpression'
-import {propertyIdOrLiteral} from 'esast-create-util/lib/util'
-import {MethodGetter, MethodImpl, MethodImplLike, MethodSetter} from '../ast/classTraitCommon'
-import {QuoteAbstract} from '../ast/Val'
-import {DeclareLexicalThis, IdFocus} from './esast-constants'
-import transpileBlock from './transpileBlock'
-import transpileFun from './transpileFun'
+import Expression, {ArrayExpression} from 'esast/lib/Expression'
+import {LiteralString} from 'esast/lib/Literal'
+import {caseOp} from 'op/Op'
+import {FunBlock} from '../ast/Fun'
+import {Val} from '../ast/LineContent'
+import {LocalDeclare} from '../ast/locals'
+import Method from '../ast/Method'
+import {litUndefined} from './esast-constants'
+import {verifyResults} from './context'
+import {msCall} from './ms'
+import {transpileFunBlock} from './transpileFun'
 import transpileVal from './transpileVal'
-import {loc, msCall} from './util'
 
-/** Transpile method to a MethodDefinition in a class. */
-export function transpileMethodToDefinition(_: MethodImplLike, isStatic: boolean): MethodDefinitionNonConstructor {
-	const {name, ctr, value} = methodParams(_, {method: MethodDefinitionPlain, get: MethodDefinitionGet, set: MethodDefinitionSet})
-	const {params, body, generator, async} = value
-	return loc(_, new ctr(name, value, {static: isStatic}))
-}
-
-/** Transpile method to a property of an object. */
-export function transpileMethodToProperty(_: MethodImplLike): Property {
-	const {name, ctr, value} = methodParams(_, {method: PropertyMethod, get: PropertyGet, set: PropertySet})
-	return loc(_, new ctr(name, value))
-}
-
-function methodParams<A>(_: MethodImplLike, ctrs: {method: A, get: A, set: A})
-	: {name: PropertyName, ctr: A, value: FunctionExpression} {
-	const symbol = _.symbol
-	return {
-		name: typeof symbol === 'string' ?
-			propertyIdOrLiteral(symbol) :
-			new ComputedName(
-				symbol instanceof QuoteAbstract ?
-				//transpileQuoteAbstract
-				transpileVal(symbol) :
-				msCall('symbol', transpileVal(symbol))),
-		ctr: _ instanceof MethodImpl ? ctrs.method : _ instanceof MethodGetter ? ctrs.get : ctrs.set,
-		value: _ instanceof MethodImpl ?
-			//this is never an ArrowFunctionExpression because fun always has `this`
-			<FunctionExpression> transpileFun(_.fun) :
-			//shouldn't need <>
-			getSetFun(<MethodGetter | MethodSetter> _)
-	}
-}
-
-function getSetFun(_: MethodGetter | MethodSetter): FunctionExpression {
-	const args = _ instanceof MethodGetter ? [] : [IdFocus]
-	return new FunctionExpression(null, args, transpileBlock(_.block, DeclareLexicalThis))
+export function transpileMethodNoLoc(_: Method): Expression {
+	const {value} = _
+	const name = new LiteralString(verifyResults.name(_))
+	const args = value.opRestArg === null ?
+		new ArrayExpression(value.args.map((arg: LocalDeclare) => {
+			const name = new LiteralString(arg.name)
+			return caseOp<Val, Expression>(
+				arg.opType,
+				_ => new ArrayExpression([name, transpileVal(_)]),
+				() => name)
+		})) :
+		litUndefined
+	const impl = value instanceof FunBlock ? [transpileFunBlock(value)] : []
+	return msCall('method', name, args, ...impl)
 }

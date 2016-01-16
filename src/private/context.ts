@@ -1,13 +1,11 @@
 import Loc, {Pos} from 'esast/lib/Loc'
-import Op from 'op/Op'
 import CompileError, {ErrorMessage} from '../CompileError'
 import {WarningsAnd} from '../Compiler'
 import Language from './languages/Language'
 import CompileOptions from './CompileOptions'
 import PathOptions from './PathOptions'
-import {isEmpty} from './util'
 
-export let options: CompileOptions
+export let compileOptions: CompileOptions
 export let pathOptions: PathOptions
 
 /** Array of all warnings produced during compilation. */
@@ -18,11 +16,11 @@ let warnings: Array<ErrorMessage>
 When done, returns warnings along with the result.
 */
 export function withContext<A>(
-	_options: CompileOptions,
+	options: CompileOptions,
 	filename: string,
 	getResult: () => A)
 	: WarningsAnd<A> {
-	options = _options
+	compileOptions = options
 	pathOptions = new PathOptions(filename)
 	warnings = []
 
@@ -41,7 +39,7 @@ export function withContext<A>(
 		return {warnings, result}
 	} finally {
 		// Release for garbage collection.
-		options = pathOptions = warnings = null
+		compileOptions = pathOptions = warnings = null
 	}
 }
 
@@ -76,5 +74,5 @@ export function warn(loc: Loc | Pos, message: (_: Language) => string): void {
 
 function errorMessage(loc: Loc | Pos, message: (_: Language) => string): ErrorMessage {
 	const l = loc instanceof Pos ? Loc.singleChar(loc) : loc
-	return new ErrorMessage(l, message(options.language))
+	return new ErrorMessage(l, message(compileOptions.language))
 }

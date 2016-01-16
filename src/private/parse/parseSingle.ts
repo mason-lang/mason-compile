@@ -1,9 +1,10 @@
-import {caseOp, opMap, orThrow} from 'op/Op'
+import {opMap, orThrow} from 'op/Op'
 import {Val} from '../ast/LineContent'
 import {LocalAccess} from '../ast/locals'
 import {BagSimple, NumberLiteral, SpecialVal} from '../ast/Val'
 import {warn} from '../context'
-import Group, {GroupBlock, GroupBracket, GroupParenthesis, GroupQuote, GroupRegExp, GroupSpace} from '../token/Group'
+import Group, {GroupBlock, GroupBracket, GroupParenthesis, GroupQuote, GroupRegExp, GroupSpace
+	} from '../token/Group'
 import Keyword, {Keywords, opKeywordKindToSpecialValueKind} from '../token/Keyword'
 import Token, {NameToken, NumberToken} from '../token/Token'
 import {unexpected} from './checks'

@@ -1,14 +1,12 @@
 import Loc from 'esast/lib/Loc'
-import Op from 'op/Op'
-import {ObjEntryAssign} from '../ast/Block'
+import {ObjEntryAssign} from '../ast/BuildEntry'
 import LineContent from '../ast/LineContent'
 import {AssignDestructure, AssignSingle, LocalDeclare} from '../ast/locals'
 import {check} from '../context'
 import {assert, reverseIter} from '../util'
 import {locals, pendingBlockLocals} from './context'
-import {deleteLocal, registerLocal, setLocal, verifyAndPlusLocal} from './locals'
-import SK from './SK'
-import verifyDo, {ensureDoAndVerify} from './verifyDo'
+import {ensureDoAndVerify} from './verifyDo'
+import {deleteLocal, registerLocal, setLocal, verifyAndPlusLocal} from './verifyLocals'
 
 /**
 Verifies each line, accumulating locals.

@@ -1,5 +1,5 @@
 import Op, {nonNull} from 'op/Op'
-import Keyword, {keywordName, tryGetKeywordName} from '../token/Keyword'
+import Keyword, {tryGetKeywordName} from '../token/Keyword'
 import Token, {NameToken} from '../token/Token'
 import {unexpected} from './checks'
 
@@ -14,5 +14,9 @@ export default function parseName(token: Token): string {
 
 /** Like [[parseName]] but returns `null` on failure. */
 export function tryParseName(token: Token): Op<string> {
-	return token instanceof NameToken ? token.name : token instanceof Keyword ? tryGetKeywordName(token) : null
+	return token instanceof NameToken ?
+		token.name :
+		token instanceof Keyword ?
+		tryGetKeywordName(token) :
+		null
 }

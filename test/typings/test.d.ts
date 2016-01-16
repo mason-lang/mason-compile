@@ -12,15 +12,15 @@ declare module 'benchmark' {
 }
 
 declare module 'fs' {
-	function readFileSync(path: string, encoding: string): string
+	export function readFileSync(path: string, encoding: string): string
 }
 
 declare module 'process' {
-	const argv: Array<string>
+	export const argv: Array<string>
 }
 
 declare module 'source-map-support' {
-	function install(): void
+	export function install(): void
 }
 
 declare function describe(desc: string, test: () => void): void

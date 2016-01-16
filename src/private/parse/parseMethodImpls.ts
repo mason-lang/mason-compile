@@ -1,14 +1,15 @@
 import Loc from 'esast/lib/Loc'
 import Op from 'op/Op'
-import {ClassTraitDo, MethodImpl, MethodImplKind, MethodImplLike, MethodGetter, MethodSetter} from '../ast/classTraitCommon'
+import {ClassTraitDo, MethodImpl, MethodImplKind, MethodImplLike, MethodGetter, MethodSetter
+	} from '../ast/classTraitCommon'
 import MemberName from '../ast/MemberName'
-import {QuoteSimple} from '../ast/Val'
+import {QuoteSimple} from '../ast/Quote'
 import {check} from '../context'
 import Keyword, {isKeyword, Keywords} from '../token/Keyword'
 import Token from '../token/Token'
 import parseBlock, {beforeAndBlock, justBlock, parseJustBlock} from './parseBlock'
 import parseExpr from './parseExpr'
-import parseFun from './parseFun'
+import parseFun from './parseFunBlock'
 import parseMethodSplit from './parseMethodSplit'
 import {Lines, Tokens} from './Slice'
 
@@ -27,7 +28,8 @@ export function takeStatics(lines: Lines): [Array<MethodImplLike>, Lines] {
 	}
 }
 
-export function parseStaticsAndMethods(lines: Lines): [Array<MethodImplLike>, Array<MethodImplLike>] {
+export function parseStaticsAndMethods(lines: Lines)
+	: [Array<MethodImplLike>, Array<MethodImplLike>] {
 	const [statics, rest] = takeStatics(lines)
 	return [statics, parseMethodImpls(rest)]
 }
@@ -40,7 +42,8 @@ export function opTakeDo(lines: Lines): [Op<ClassTraitDo>, Lines] {
 }
 
 function parseMethodImpl(tokens: Tokens): MethodImplLike {
-	const [[isMy, isVirtual, isOverride], rest] = tokens.takeKeywords(Keywords.My, Keywords.Virtual, Keywords.Override)
+	const [[isMy, isVirtual, isOverride], rest] =
+		tokens.takeKeywords(Keywords.My, Keywords.Virtual, Keywords.Override)
 	const kind = methodKind(tokens.loc, isMy, isVirtual, isOverride)
 	const head = rest.head()
 	if (isGetSet(head)) {
@@ -54,7 +57,8 @@ function parseMethodImpl(tokens: Tokens): MethodImplLike {
 	}
 }
 
-function methodKind(loc: Loc, isMy: boolean, isVirtual: boolean, isOverride: boolean): MethodImplKind {
+function methodKind(loc: Loc, isMy: boolean, isVirtual: boolean, isOverride: boolean)
+	: MethodImplKind {
 	check(!(isMy && isOverride), loc, _ => _.noMyOverride)
 	const m = isMy ? 0b100 : 0
 	const v = isVirtual ? 0b010 : 0
@@ -63,7 +67,7 @@ function methodKind(loc: Loc, isMy: boolean, isVirtual: boolean, isOverride: boo
 }
 
 function isGetSet(token: Token): token is Keyword {
-	//typescript makes me do this instead of `&&`
+	// TODO: typescript makes me do this instead of `&&`
 	if (token instanceof Keyword)
 		return token.kind === Keywords.Get || token.kind === Keywords.Set
 	else

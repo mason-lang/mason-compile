@@ -40,7 +40,10 @@ export function cat<A>(...parts: Array<Array<A> | Op<A> | Op<Array<A>>>): Array<
 Like `Array.prototype.map` but `mapper` should return Arrays,
 which are flattened to a single Array.
 */
-export function flatMap<A, B>(mapped: Array<A>, mapper: (a: A, index?: number) => Array<B>): Array<B> {
+export function flatMap<A, B>(
+	mapped: Array<A>,
+	mapper: (a: A, index?: number) => Array<B>)
+	: Array<B> {
 	const out: Array<B> = []
 	for (let i = 0; i < mapped.length; i = i + 1)
 		out.push(...mapper(mapped[i], i))

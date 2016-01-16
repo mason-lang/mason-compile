@@ -1,13 +1,17 @@
 import {caseOp} from 'op/Op'
-import {check, fail} from '../context'
+import {fail} from '../context'
 import Keyword, {isAnyKeyword, Keywords} from '../token/Keyword'
 import {Tokens} from './Slice'
 
 /** Split on a function keyword. */
-export default function parseMethodSplit(tokens: Tokens): {before: Tokens, kind: Keywords, after: Tokens} {
-	return caseOp(tokens.opSplitOnce(_ => isAnyKeyword(funKeywords, _)),
+export default function parseMethodSplit(tokens: Tokens)
+	: {before: Tokens, kind: Keywords, after: Tokens} {
+	return caseOp(
+		tokens.opSplitOnce(_ => isAnyKeyword(funKeywords, _)),
 		({before, at, after}) => ({before, kind: methodFunKind(<Keyword> at), after}),
-		(): {before: Tokens, kind: Keywords, after: Tokens} => { throw fail(tokens.loc, _ => _.expectedMethodSplit) })
+		(): {before: Tokens, kind: Keywords, after: Tokens} => {
+			throw fail(tokens.loc, _ => _.expectedMethodSplit)
+		})
 }
 
 function methodFunKind(funKindToken: Keyword): Keywords {

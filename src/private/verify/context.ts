@@ -5,14 +5,14 @@ import {Funs} from '../ast/Fun'
 import {LocalDeclare} from '../ast/locals'
 import Loop from '../ast/Loop'
 import VerifyResults from '../VerifyResults'
-import {withBlockLocals} from './locals'
 import SK from './SK'
+import {withBlockLocals} from './verifyLocals'
 
 /** Map from names to LocalDeclares. */
 export let locals: Map<string, LocalDeclare>
 /** Locals that don't have to be accessed. */
 export let okToNotUse: Set<LocalDeclare>
-export let opLoop: Op<Loop>
+export let opLoop: Op<{loop: Loop, sk: SK}>
 /**
 Locals for this block.
 These are added to locals when entering a Function or lazy evaluation.
@@ -59,7 +59,7 @@ export function tearDown(): void {
 	locals = okToNotUse = opLoop = pendingBlockLocals = method = results = null
 }
 
-export function withLoop(newLoop: Op<Loop>, action: () => void): void {
+export function withLoop(newLoop: Op<{loop: Loop, sk: SK}>, action: () => void): void {
 	const oldLoop = opLoop
 	opLoop = newLoop
 	action()

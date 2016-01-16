@@ -1,11 +1,12 @@
 import Loc, {Pos} from 'esast/lib/Loc'
-import {AssignSingle} from '../../../dist/private/ast/locals'
-import Block from '../../../dist/private/ast/Block'
-import {SpecialDo, SpecialDos} from '../../../dist/private/ast/Do'
-import Fun from '../../../dist/private/ast/Fun'
-import {Do} from '../../../dist/private/ast/LineContent'
-import {LocalAccess, LocalDeclare} from '../../../dist/private/ast/locals'
-import {NumberLiteral, QuoteSimple} from '../../../dist/private/ast/Val'
+import {AssignSingle} from '../../../lib/private/ast/locals'
+import Block from '../../../lib/private/ast/Block'
+import {SpecialDo, SpecialDos} from '../../../lib/private/ast/Do'
+import {FunBlock} from '../../../lib/private/ast/Fun'
+import {Do} from '../../../lib/private/ast/LineContent'
+import {LocalAccess, LocalDeclare} from '../../../lib/private/ast/locals'
+import {QuoteSimple} from '../../../lib/private/ast/Quote'
+import {NumberLiteral} from '../../../lib/private/ast/Val'
 
 export const
 	loc = new Loc(Pos.start, Pos.start),
@@ -32,6 +33,6 @@ export const
 	blockTwo = new Block(loc, null, [two]),
 	blockPass = new Block(loc, null, [])
 
-export function funDo(lines: Array<Do>): Fun {
-	return new Fun(loc, [], null, new Block(loc, null, lines), {isDo: true})
+export function funDo(lines: Array<Do>): FunBlock {
+	return new FunBlock(loc, [], null, new Block(loc, null, lines), {isDo: true})
 }

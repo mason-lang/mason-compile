@@ -1,7 +1,7 @@
 import Loc from 'esast/lib/Loc'
 import Op from 'op/Op'
-import {code} from '../../CompileError'
 import {SpecialVals} from '../ast/Val'
+import {showKeyword} from '../languages/util'
 import Token from './Token'
 
 /**
@@ -96,15 +96,16 @@ export const enum Keywords {
 	Int16,
 	Int32,
 	Int64,
-	UInt,
-	UInt8,
-	UInt16,
-	UInt32,
-	UInt64,
+	Uint,
+	Uint8,
+	Uint16,
+	Uint32,
+	Uint64,
 	Float,
 	Float32,
 	Float64,
 	Float128,
+	Mixed,
 	Number,
 	Object,
 	Ptr,
@@ -269,15 +270,16 @@ const keywordKindToName = new Map<Keywords, string>([
 	[Keywords.Int16, 'int16'],
 	[Keywords.Int32, 'int32'],
 	[Keywords.Int64, 'int64'],
-	[Keywords.UInt, 'uint'],
-	[Keywords.UInt8, 'uint8'],
-	[Keywords.UInt16, 'uint16'],
-	[Keywords.UInt32, 'uint32'],
-	[Keywords.UInt64, 'uint64'],
+	[Keywords.Uint, 'uint'],
+	[Keywords.Uint8, 'uint8'],
+	[Keywords.Uint16, 'uint16'],
+	[Keywords.Uint32, 'uint32'],
+	[Keywords.Uint64, 'uint64'],
 	[Keywords.Float, 'float'],
 	[Keywords.Float32, 'float32'],
 	[Keywords.Float64, 'float64'],
 	[Keywords.Float128, 'float128'],
+	[Keywords.Mixed, 'mixed'],
 	[Keywords.Number, 'number'],
 	[Keywords.Object, 'object'],
 	[Keywords.Ptr, 'ptr'],
@@ -388,14 +390,11 @@ const nameKeywords = new Set(allKeywords)
 for (const _ of notNameKeywords)
 	nameKeywords.delete(_)
 
-const keywordNameToKind = new Map(Array.from(nameKeywords).map<[string, Keywords]>(_ => [keywordKindToName.get(_), _]))
+const keywordNameToKind = new Map<string, Keywords>(
+	Array.from(nameKeywords).map<[string, Keywords]>(_ => [keywordKindToName.get(_), _]))
 
 export function keywordName(kind: Keywords): string {
 	return keywordKindToName.get(kind)
-}
-
-export function showKeyword(kind: Keywords): string {
-	return code(keywordName(kind))
 }
 
 /** See if the name is a keyword and if so return its kind. */

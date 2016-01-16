@@ -1,12 +1,11 @@
 import Loc from 'esast/lib/Loc'
 import Char from 'typescript-char/Char'
-import {code} from '../../CompileError'
-import {showChar} from '../lex/chars'
 import Token from '../token/Token'
 import Group, {GroupType} from '../token/Group'
-import {Keywords, showKeyword as kw} from '../token/Keyword'
+import {Keywords} from '../token/Keyword'
 import {assert} from '../util'
 import Language from './Language'
+import {code, showChar, showKeyword as kw} from './util'
 
 const english: Language = {
 	// Lex:
@@ -136,7 +135,7 @@ const english: Language = {
 		'Logic expression needs at least 2 arguments.',
 	badRegExp: (source: string): string => {
 		try {
-			/* eslint-disable no-new */
+			/* tslint:disable:no-unused-expression */
 			new RegExp(source)
 			// This should only be called for bad regexp...
 			assert(false)

@@ -1,12 +1,12 @@
 import Op, {orThrow} from 'op/Op'
 import Block, {BlockWrap} from '../ast/Block'
-import {check, fail} from '../context'
-import Group, {GroupBlock, GroupLine} from '../token/Group'
+import {fail} from '../context'
+import {GroupBlock} from '../token/Group'
 import {Keywords} from '../token/Keyword'
 import {checkEmpty} from './checks'
 import {parseLines} from './parseLine'
 import tryTakeComment from './tryTakeComment'
-import Slice, {Lines, Tokens} from './Slice'
+import {Lines, Tokens} from './Slice'
 
 /** Parse lines in a block and leading doc comment. */
 export default function parseBlock(lineTokens: Lines): Block {

@@ -1,11 +1,12 @@
 import {opEach, orThrow} from 'op/Op'
-import {check} from '../context'
-import Class, {Constructor, Field} from '../ast/Class'
-import {MethodImplLike, MethodImpl, MethodGetter, MethodSetter} from '../ast/classTraitCommon'
-import {results, withIife, withMethod, withMethods} from './context'
-import {setDeclareAccessed} from './locals'
+import {check, fail} from '../context'
+import Class, {Constructor, Field, SuperCall, SuperMember} from '../ast/Class'
+import {method, results, withMethod, withMethods} from './context'
+import SK from './SK'
 import {makeUseOptional} from './util'
-import verifyMethodImplLike, {verifyClassTraitDo} from './verifyMethodImplLike'
+import {verifyClassTraitDo, verifyMethodImplLike} from './verifyClassTraitCommon'
+import {setDeclareAccessed} from './verifyLocals'
+import verifyMemberName from './verifyMemberName'
 import verifyVal, {verifyEachVal, verifyOpVal} from './verifyVal'
 
 export default function verifyClass(_: Class): void {
@@ -18,9 +19,7 @@ export default function verifyClass(_: Class): void {
 	verifyOpVal(opSuperClass)
 	verifyEachVal(traits)
 
-	withIife(() => {
-		opEach(opDo, verifyClassTraitDo)
-	})
+	opEach(opDo, verifyClassTraitDo)
 
 	// Class acts like a Fun: loop/generator context is lost and we get block locals.
 	withMethods(() => {
@@ -36,7 +35,7 @@ export default function verifyClass(_: Class): void {
 function verifyConstructor(_: Constructor, classHasSuper: boolean): void {
 	const {loc, fun, memberArgs} = _
 
-	//todo: ctr fun always has opDecalreThis, let type system know this
+	// Constructor function always has opDeclareThis.
 	makeUseOptional(orThrow(fun.opDeclareThis))
 	withMethod(_, () => verifyVal(fun))
 
@@ -53,4 +52,22 @@ function verifyConstructor(_: Constructor, classHasSuper: boolean): void {
 
 function verifyField(_: Field): void {
 	verifyOpVal(_.opType)
+}
+
+export function verifySuperCall(_: SuperCall, sk: SK): void {
+	const {loc, args} = _
+	const meth = orThrow(method, () => fail(loc, _ => _.superNeedsMethod))
+	results.superCallToMethod.set(_, meth)
+
+	if (meth instanceof Constructor) {
+		check(sk === SK.Do, loc, _ => _.superMustBeStatement)
+		results.constructorToSuper.set(meth, _)
+	}
+
+	verifyEachVal(args)
+}
+
+export function verifySuperMember({loc, name}: SuperMember): void {
+	check(method !== null, loc, _ => _.superNeedsMethod)
+	verifyMemberName(name)
 }

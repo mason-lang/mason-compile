@@ -1,9 +1,4 @@
 import Char from 'typescript-char/Char'
-import {code} from '../../CompileError'
-
-export function showChar(char: Char) {
-	return code(String.fromCharCode(char))
-}
 
 function charPred(chars: string, negate: boolean = false): (_: Char) => boolean {
 	let src = 'switch(ch) {\n'
