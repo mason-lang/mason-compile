@@ -32,7 +32,6 @@ interface Language {
     expectedAfterColon: string;
     expectedBlock: string;
     expectedExpression: string;
-    expectedFuncKind(token: Token): string;
     expectedImportModuleName: string;
     expectedKeyword(keyword: Keywords): string;
     expectedMethodSplit: string;
@@ -61,7 +60,7 @@ interface Language {
     unexpectedAfterMethod: string;
     ambiguousSK: string;
     ambiguousForSK: string;
-    argsLogic: string;
+    argsOperator(numProvidedArgs: number): string;
     badRegExp(source: string): string;
     blockNeedsContent: string;
     breakCantHaveValue: string;

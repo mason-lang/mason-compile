@@ -1,14 +1,16 @@
+import Loc from 'esast/lib/Loc'
 import {opIf} from 'op/Op'
 import {check, fail} from '../context'
 import Call, {Spread} from '../ast/Call'
 import {Val} from '../ast/LineContent'
 import {SuperCall, SuperMember} from '../ast/Class'
-import {FunGetter, FunMember, FunSimple} from '../ast/Fun'
+import Fun, {FunGetter, FunMember, FunOperator, FunSimple, FunUnary} from '../ast/Fun'
 import {LocalAccess} from '../ast/locals'
 import {QuoteSimple, QuoteTagged} from '../ast/Quote'
 import {InstanceOf, Lazy, Member, Range, Sub} from '../ast/Val'
 import {GroupBracket, GroupParenthesis, GroupQuote} from '../token/Group'
-import Keyword, {isKeyword, Keywords} from '../token/Keyword'
+import Keyword, {isKeyword, isOperatorKeyword, isUnaryKeyword, keywordKindToOperatorKind,
+	keywordKindToUnaryKind, Keywords} from '../token/Keyword'
 import {assert} from '../util'
 import {checkEmpty, unexpected} from './checks'
 import parseExpr, {parseExprParts} from './parseExpr'
@@ -23,20 +25,8 @@ export default function parseSpaced(tokens: Tokens): Val {
 	const h = tokens.head(), rest = tokens.tail()
 	if (h instanceof Keyword)
 		switch (h.kind) {
-			case Keywords.Ampersand: {
-				const h2 = rest.head()
-				if (h2 instanceof GroupParenthesis)
-					return new FunSimple(tokens.loc, parseExpr(Tokens.of(h2)))
-				else if (isKeyword(Keywords.Dot, h2)) {
-					const tail = rest.tail()
-					const h3 = tail.head()
-					const fun = new FunGetter(h3.loc, parseMemberName(h3))
-					return parseSpacedFold(fun, tail.tail())
-				} else {
-					const fun = new FunMember(h2.loc, null, parseMemberName(h2))
-					return parseSpacedFold(fun, rest.tail())
-				}
-			}
+			case Keywords.Ampersand:
+				return parseAmpersand(tokens.loc, rest)
 			case Keywords.Dot: {
 				const h2 = rest.head()
 				if (isKeyword(Keywords.Ampersand, h2)) {
@@ -130,4 +120,23 @@ function parseSpacedFold(start: Val, rest: Tokens): Val {
 			throw unexpected(token)
 	}
 	return acc
+}
+
+function parseAmpersand(loc: Loc, tokens: Tokens): Val {
+	const h = tokens.head()
+	const tail = tokens.tail()
+	const [fun, rest] = ((): [Fun, Tokens] => {
+		if (h instanceof GroupParenthesis)
+			return [new FunSimple(loc, parseExpr(Tokens.of(h))), tail]
+		else if (isKeyword(Keywords.Dot, h)) {
+			const h2 = tail.head()
+			return [new FunGetter(h2.loc, parseMemberName(h2)), tail.tail()]
+		} else if (isOperatorKeyword(h))
+			return [new FunOperator(loc, keywordKindToOperatorKind(h.kind)), tail]
+		else if (isUnaryKeyword(h))
+			return [new FunUnary(loc, keywordKindToUnaryKind(h.kind)), tail]
+		else
+			return [new FunMember(h.loc, null, parseMemberName(h)), tail]
+	})()
+	return parseSpacedFold(fun, rest)
 }

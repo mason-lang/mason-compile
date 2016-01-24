@@ -1,19 +1,20 @@
 import Op, {caseOp, opIf} from 'op/Op'
 import Loc from 'esast/lib/Loc'
 import Await from '../ast/Await'
-import {Cond, Conditional, Logic, Logics, Not} from '../ast/booleans'
+import {Cond, Conditional} from '../ast/booleans'
 import Block from '../ast/Block'
 import Call, {New} from '../ast/Call'
 import {SuperCall} from '../ast/Class'
 import {Val} from '../ast/LineContent'
 import {LocalDeclare} from '../ast/locals'
-import {ObjPair, ObjSimple, Pipe} from '../ast/Val'
+import {ObjPair, ObjSimple, Operator, Pipe, UnaryOperator} from '../ast/Val'
 import With from '../ast/With'
 import {Yield, YieldTo} from '../ast/YieldLike'
 import {check, warn} from '../context'
 import Language from '../languages/Language'
 import {GroupParenthesis} from '../token/Group'
-import Keyword, {isAnyKeyword, isKeyword, Keywords} from '../token/Keyword'
+import Keyword, {isAnyKeyword, isKeyword, keywordKindToOperatorKind, keywordKindToUnaryKind,
+	Keywords} from '../token/Keyword'
 import Token from '../token/Token'
 import {cat, head, tail} from '../util'
 import {checkNonEmpty} from './checks'
@@ -105,11 +106,8 @@ function parseObjSimple(loc: Loc, splits: Array<{before: Tokens, at: Token}>): V
 
 /** The keyword `at` groups with everything after it. */
 function keywordExpr(at: Keyword, after: Tokens): Val {
-	switch (at.kind) {
-		case Keywords.And: case Keywords.Or: {
-			const kind = at.kind === Keywords.And ? Logics.And : Logics.Or
-			return new Logic(at.loc, kind, parseExprParts(after))
-		}
+	const {kind} = at
+	switch (kind) {
 		case Keywords.Await:
 			return new Await(at.loc, parseExprPlain(after))
 		case Keywords.Case:
@@ -145,14 +143,19 @@ function keywordExpr(at: Keyword, after: Tokens): Val {
 			const parts = parseExprParts(after)
 			return new New(at.loc, head(parts), tail(parts))
 		}
-		case Keywords.Not:
-			return new Not(at.loc, parseExprPlain(after))
+		case Keywords.OpAnd: case Keywords.OpDiv: case Keywords.OpEq: case Keywords.OpEqExact:
+		case Keywords.OpExponent: case Keywords.OpGreater: case Keywords.OpGreaterOrEqual:
+		case Keywords.OpLess: case Keywords.OpLessOrEqual: case Keywords.OpMinus:
+		case Keywords.OpOr: case Keywords.OpPlus: case Keywords.OpRemainder: case Keywords.OpTimes:
+			return new Operator(at.loc, keywordKindToOperatorKind(kind), parseExprParts(after))
 		case Keywords.Pipe:
 			return parsePipe(after)
 		case Keywords.Super:
 			return new SuperCall(at.loc, parseExprParts(after))
 		case Keywords.Switch:
 			return parseSwitch(false, after)
+		case Keywords.UnaryNeg: case Keywords.UnaryNot:
+			return new UnaryOperator(at.loc, keywordKindToUnaryKind(kind), parseExprPlain(after))
 		case Keywords.With:
 			return parseWith(after)
 		case Keywords.Yield:
@@ -165,13 +168,16 @@ function keywordExpr(at: Keyword, after: Tokens): Val {
 }
 
 const exprSplitKeywords = new Set<Keywords>([
-	Keywords.And, Keywords.Await, Keywords.Case, Keywords.Class, Keywords.Cond, Keywords.Del,
-	Keywords.Except, Keywords.For, Keywords.ForAsync, Keywords.ForBag, Keywords.Fun, Keywords.FunDo,
+	Keywords.Await, Keywords.Case, Keywords.Class, Keywords.Cond, Keywords.Del, Keywords.Except,
+	Keywords.For, Keywords.ForAsync, Keywords.ForBag, Keywords.Fun, Keywords.FunDo,
 	Keywords.FunThis, Keywords.FunThisDo, Keywords.FunAsync, Keywords.FunAsynDo,
 	Keywords.FunThisAsync, Keywords.FunThisAsynDo, Keywords.FunGen, Keywords.FunGenDo,
 	Keywords.FunThisGen, Keywords.FunThisGenDo, Keywords.If, Keywords.Method, Keywords.New,
-	Keywords.Not, Keywords.Or, Keywords.Pipe, Keywords.Super, Keywords.Switch, Keywords.Trait,
-	Keywords.Unless, Keywords.With, Keywords.Yield, Keywords.YieldTo
+	Keywords.OpAnd, Keywords.OpDiv, Keywords.OpEq, Keywords.OpEqExact, Keywords.OpExponent,
+	Keywords.OpGreater, Keywords.OpGreaterOrEqual, Keywords.OpLess, Keywords.OpLessOrEqual,
+	Keywords.OpMinus, Keywords.OpOr, Keywords.OpPlus, Keywords.OpRemainder, Keywords.OpTimes,
+	Keywords.Pipe, Keywords.Super, Keywords.Switch, Keywords.Trait, Keywords.UnaryNeg,
+	Keywords.UnaryNot, Keywords.Unless, Keywords.With, Keywords.Yield, Keywords.YieldTo
 ])
 
 function isSplitKeyword(_: Token): boolean {

@@ -2,6 +2,7 @@ import Loc from 'esast/lib/Loc';
 import Op from 'op/Op';
 import Block from './Block';
 import { Val, ValOnly } from './LineContent';
+import { Operators, UnaryOperators } from './Val';
 import { LocalDeclare } from './locals';
 import MemberName from './MemberName';
 declare abstract class Fun extends ValOnly {
@@ -37,6 +38,14 @@ export declare class FunMember extends Fun {
 export declare class FunGetter extends Fun {
     name: MemberName;
     constructor(loc: Loc, name: MemberName);
+}
+export declare class FunOperator extends Fun {
+    kind: Operators;
+    constructor(loc: Loc, kind: Operators);
+}
+export declare class FunUnary extends Fun {
+    kind: UnaryOperators;
+    constructor(loc: Loc, kind: UnaryOperators);
 }
 export declare class FunSimple extends Fun {
     value: Val;

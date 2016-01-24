@@ -1,6 +1,6 @@
 import Loc from 'esast/lib/Loc'
 import Op from 'op/Op'
-import {SpecialVals} from '../ast/Val'
+import {Operators, SpecialVals, UnaryOperators} from '../ast/Val'
 import {showKeyword} from '../languages/util'
 import Token from './Token'
 
@@ -105,6 +105,13 @@ export const enum Keywords {
 	Float32,
 	Float64,
 	Float128,
+	Bignum,
+	Decimal,
+	Decimal32,
+	Decimal64,
+	Decimal128,
+	Rational,
+	Complex,
 	Mixed,
 	Number,
 	Object,
@@ -115,7 +122,6 @@ export const enum Keywords {
 	// Real keywords
 	Abstract,
 	Ampersand,
-	And,
 	As,
 	Assert,
 	Assign,
@@ -144,6 +150,8 @@ export const enum Keywords {
 	ForAsync,
 	ForBag,
 	Forbid,
+
+	// Function keywords (if adding more, check isFunKeyword)
 	Fun,
 	FunDo,
 	FunThis,
@@ -156,6 +164,7 @@ export const enum Keywords {
 	FunGenDo,
 	FunThisGen,
 	FunThisGenDo,
+
 	Get,
 	If,
 	Ignore,
@@ -169,13 +178,28 @@ export const enum Keywords {
 	My,
 	Name,
 	New,
-	Not,
 	Null,
 	// Also works as BagEntry
 	ObjEntry,
 	Of,
+
+	// Operators (if adding more, check isOperatorKeyword and keywordKindToOperatorKind)
+	OpAnd,
+	OpDiv,
+	OpEq,
+	OpEqExact,
+	OpExponent,
+	OpGreater,
+	OpGreaterOrEqual,
+	OpLess,
+	OpLessOrEqual,
+	OpMinus,
+	OpOr,
+	OpPlus,
+	OpRemainder,
+	OpTimes,
+
 	Override,
-	Or,
 	Pass,
 	Pipe,
 	Region,
@@ -190,6 +214,11 @@ export const enum Keywords {
 	TraitDo,
 	True,
 	Try,
+
+	// Unary operators (if adding more, check isUnaryKeyword and keywordKindToUnaryKind)
+	UnaryNeg,
+	UnaryNot,
+
 	Undefined,
 	Unless,
 	Virtual,
@@ -279,6 +308,13 @@ const keywordKindToName = new Map<Keywords, string>([
 	[Keywords.Float32, 'float32'],
 	[Keywords.Float64, 'float64'],
 	[Keywords.Float128, 'float128'],
+	[Keywords.Bignum, 'bignum'],
+	[Keywords.Decimal, 'decimal'],
+	[Keywords.Decimal32, 'decimal32'],
+	[Keywords.Decimal64, 'decimal64'],
+	[Keywords.Decimal128, 'decimal128'],
+	[Keywords.Rational, 'rational'],
+	[Keywords.Complex, 'complex'],
 	[Keywords.Mixed, 'mixed'],
 	[Keywords.Number, 'number'],
 	[Keywords.Object, 'object'],
@@ -289,7 +325,6 @@ const keywordKindToName = new Map<Keywords, string>([
 	// Real keywords
 	[Keywords.Abstract, 'abstract'],
 	[Keywords.Ampersand, '&'],
-	[Keywords.And, 'and'],
 	[Keywords.As, 'as'],
 	[Keywords.Assert, 'assert'],
 	[Keywords.Assign, '='],
@@ -343,11 +378,23 @@ const keywordKindToName = new Map<Keywords, string>([
 	[Keywords.My, 'my'],
 	[Keywords.Name, 'name'],
 	[Keywords.New, 'new'],
-	[Keywords.Not, 'not'],
 	[Keywords.Null, 'null'],
 	[Keywords.ObjEntry, '. '],
 	[Keywords.Of, 'of'],
-	[Keywords.Or, 'or'],
+	[Keywords.OpAnd, 'and'],
+	[Keywords.OpDiv, '/'],
+	[Keywords.OpEq, '=?'],
+	[Keywords.OpEqExact, '==?'],
+	[Keywords.OpExponent, '**'],
+	[Keywords.OpGreater, '>?'],
+	[Keywords.OpGreaterOrEqual, '>=?'],
+	[Keywords.OpLess, '<?'],
+	[Keywords.OpLessOrEqual, '<=?'],
+	[Keywords.OpMinus, '-'],
+	[Keywords.OpOr, 'or'],
+	[Keywords.OpPlus, '+'],
+	[Keywords.OpRemainder, '%'],
+	[Keywords.OpTimes, '*'],
 	[Keywords.Override, 'override'],
 	[Keywords.Pass, 'pass'],
 	[Keywords.Pipe, 'pipe'],
@@ -363,6 +410,8 @@ const keywordKindToName = new Map<Keywords, string>([
 	[Keywords.TraitDo, 'trait!'],
 	[Keywords.True, 'true'],
 	[Keywords.Try, 'try'],
+	[Keywords.UnaryNeg, 'neg'],
+	[Keywords.UnaryNot, 'not'],
 	[Keywords.Undefined, 'undefined'],
 	[Keywords.Unless, 'unless'],
 	[Keywords.Virtual, 'virtual'],
@@ -437,3 +486,25 @@ export function isReservedKeyword(token: Token): token is Keyword {
 	return token instanceof Keyword && reservedKeywordsSet.has(token.kind)
 }
 const reservedKeywordsSet = new Set(reservedKeywords())
+
+export function isFunKeyword(token: Token): token is Keyword {
+	return token instanceof Keyword &&
+		Keywords.Fun <= token.kind &&
+		token.kind <= Keywords.FunThisGenDo
+}
+
+export function isOperatorKeyword(token: Token): token is Keyword {
+	return token instanceof Keyword && Keywords.OpAnd <= token.kind && token.kind <= Keywords.OpTimes
+}
+export function keywordKindToOperatorKind(kind: Keywords): Operators {
+	return kind - Keywords.OpAnd
+}
+
+export function isUnaryKeyword(token: Token): token is Keyword {
+	return token instanceof Keyword &&
+		Keywords.UnaryNeg <= token.kind &&
+		token.kind <= Keywords.UnaryNot
+}
+export function keywordKindToUnaryKind(kind: Keywords): UnaryOperators {
+	return kind - Keywords.UnaryNeg
+}

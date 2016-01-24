@@ -271,7 +271,7 @@ export default function lexPlain(isInQuote: boolean): void {
 				break
 
 			case Char.Backslash: case Char.Caret: case Char.CloseBrace: case Char.Comma:
-			case Char.Hash: case Char.OpenBrace: case Char.Percent: case Char.Semicolon:
+			case Char.Hash: case Char.OpenBrace: case Char.Semicolon:
 				throw fail(loc(), _ => _.reservedChar(characterEaten))
 
 			default:

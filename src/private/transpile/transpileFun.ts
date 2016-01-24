@@ -6,7 +6,8 @@ import Statement, {BlockStatement, ReturnStatement} from 'esast/lib/Statement'
 import {identifier, member} from 'esast-create-util/lib/util'
 import Op, {caseOp, flatMapOps, opIf, opMap} from 'op/Op'
 import {compileOptions} from '../context'
-import Fun, {FunBlock, FunGetter, FunMember, Funs, FunSimple} from '../ast/Fun'
+import Fun, {FunBlock, FunGetter, FunMember, FunOperator, Funs, FunSimple, FunUnary
+	} from '../ast/Fun'
 import {cat} from '../util'
 import {verifyResults, withFunKind} from './context'
 import {declareLexicalThis, idFocus} from './esast-constants'
@@ -14,6 +15,7 @@ import {msCall} from './ms'
 import transpileBlock from './transpileBlock'
 import {makeDeclare, opTypeCheckForLocalDeclare, transpileLocalDeclare} from './transpileLocals'
 import transpileMemberName, {transpileMember} from './transpileMemberName'
+import {transpileFunOperatorNoLoc, transpileFunUnaryNoLoc} from './transpileOperator'
 import transpileVal from './transpileVal'
 import {loc} from './util'
 
@@ -33,8 +35,14 @@ export function transpileFunNoLoc(_: Fun): Expression {
 			_ => msCall('methodBound', transpileVal(_), nameAst),
 			() => msCall('methodUnbound', nameAst))
 
-	} else if (_ instanceof FunSimple)
+	} else if (_ instanceof FunOperator)
+		return transpileFunOperatorNoLoc(_)
+
+	else if (_ instanceof FunSimple)
 		return focusFun(transpileVal(_.value))
+
+	else if (_ instanceof FunUnary)
+		return transpileFunUnaryNoLoc(_)
 
 	else
 		throw new Error(_.constructor.name)

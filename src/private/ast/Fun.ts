@@ -3,6 +3,7 @@ import Op, {opIf} from 'op/Op'
 import {applyDefaults} from '../util'
 import Block from './Block'
 import {Val, ValOnly} from './LineContent'
+import {Operators, UnaryOperators} from './Val'
 import {LocalDeclare} from './locals'
 import MemberName from './MemberName'
 
@@ -68,6 +69,20 @@ export class FunMember extends Fun {
 /** `&.{name}` */
 export class FunGetter extends Fun {
 	constructor(loc: Loc, public name: MemberName) {
+		super(loc)
+	}
+}
+
+/** Function of an n-ary operator, e.g. `&+`. */
+export class FunOperator extends Fun {
+	constructor(loc: Loc, public kind: Operators) {
+		super(loc)
+	}
+}
+
+/** Function of a unary operator, e.g. `&not`. */
+export class FunUnary extends Fun {
+	constructor(loc: Loc, public kind: UnaryOperators) {
 		super(loc)
 	}
 }

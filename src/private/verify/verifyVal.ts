@@ -1,7 +1,6 @@
 import Op, {nonNull} from 'op/Op'
 import {check, fail} from '../context'
 import {BlockWrap} from '../ast/Block'
-import {Logic, Not} from '../ast/booleans'
 import {New} from '../ast/Call'
 import Class, {SuperMember} from '../ast/Class'
 import Fun from '../ast/Fun'
@@ -11,13 +10,12 @@ import {ForBag} from '../ast/Loop'
 import Method from '../ast/Method'
 import Trait from '../ast/Trait'
 import Quote, {MsRegExp, QuoteTagged} from '../ast/Quote'
-import {BagSimple, InstanceOf, Lazy, Member, NumberLiteral, ObjSimple, Pipe, Range, SpecialVal,
-	SpecialVals, Sub} from '../ast/Val'
+import {BagSimple, InstanceOf, Lazy, Member, NumberLiteral, ObjSimple, Operator, Pipe, Range,
+	SpecialVal, SpecialVals, Sub, UnaryOperator} from '../ast/Val'
 import {withIife} from './context'
 import SK from './SK'
 import {setName} from './util'
 import {verifyBlockVal} from './verifyBlock'
-import {verifyLogic, verifyNot} from './verifyBooleans'
 import {verifyEachValOrSpread, verifyNew} from './verifyCall'
 import verifyClass, {verifySuperMember} from './verifyClass'
 import verifyFun from './verifyFun'
@@ -57,9 +55,6 @@ export default function verifyVal(_: Val): void {
 	else if (_ instanceof LocalAccess)
 		verifyLocalAccess(_)
 
-	else if (_ instanceof Logic)
-		verifyLogic(_)
-
 	else if (_ instanceof Member) {
 		const {object, name} = _
 		verifyVal(object)
@@ -74,9 +69,6 @@ export default function verifyVal(_: Val): void {
 	else if (_ instanceof New)
 		verifyNew(_)
 
-	else if (_ instanceof Not)
-		verifyNot(_)
-
 	else if (_ instanceof NumberLiteral) {
 		// nothing to do
 
@@ -90,6 +82,11 @@ export default function verifyVal(_: Val): void {
 				verifyVal(key)
 			verifyVal(value)
 		}
+
+	} else if (_ instanceof Operator) {
+		const {args, loc} = _
+		check(args.length > 1, loc, _ => _.argsOperator(args.length))
+		verifyEachVal(_.args)
 
 	} else if (_ instanceof Pipe) {
 		const {loc, startValue, pipes} = _
@@ -124,6 +121,9 @@ export default function verifyVal(_: Val): void {
 
 	else if (_ instanceof Trait)
 		verifyTrait(_)
+
+	else if (_ instanceof UnaryOperator)
+		verifyVal(_.arg)
 
 	else
 		verifyValOrDo(_, SK.Val)

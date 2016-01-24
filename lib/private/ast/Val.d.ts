@@ -62,3 +62,33 @@ export declare const enum SpecialVals {
     True = 3,
     Undefined = 4,
 }
+export declare class Operator extends ValOnly {
+    kind: Operators;
+    args: Array<Val>;
+    constructor(loc: Loc, kind: Operators, args: Array<Val>);
+}
+export declare const enum Operators {
+    And = 0,
+    Div = 1,
+    Eq = 2,
+    EqExact = 3,
+    Exponent = 4,
+    Greater = 5,
+    GreaterOrEqual = 6,
+    Less = 7,
+    LessOrEqual = 8,
+    Minus = 9,
+    Or = 10,
+    Plus = 11,
+    Remainder = 12,
+    Times = 13,
+}
+export declare class UnaryOperator extends ValOnly {
+    kind: UnaryOperators;
+    arg: Val;
+    constructor(loc: Loc, kind: UnaryOperators, arg: Val);
+}
+export declare const enum UnaryOperators {
+    Neg = 0,
+    Not = 1,
+}

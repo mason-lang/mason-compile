@@ -8,7 +8,7 @@ import {BlockWrap} from '../ast/Block'
 import Call, {New} from '../ast/Call'
 import Case from '../ast/Case'
 import Class, {SuperCall, SuperMember} from '../ast/Class'
-import {Cond, Conditional, Logic, Not} from '../ast/booleans'
+import {Cond, Conditional} from '../ast/booleans'
 import Del from '../ast/Del'
 import {Except} from '../ast/errors'
 import Fun from '../ast/Fun'
@@ -19,16 +19,15 @@ import Method from '../ast/Method'
 import Quote, {MsRegExp, QuoteTagged} from '../ast/Quote'
 import Switch from '../ast/Switch'
 import Trait from '../ast/Trait'
-import {BagSimple, InstanceOf, Lazy, Member, NumberLiteral, ObjSimple, Pipe, Range, SpecialVal,
-	SpecialVals, Sub} from '../ast/Val'
+import {BagSimple, InstanceOf, Lazy, Member, NumberLiteral, ObjSimple, Operator, Pipe, Range,
+	SpecialVal, SpecialVals, Sub, UnaryOperator} from '../ast/Val'
 import With from '../ast/With'
 import YieldLike from '../ast/YieldLike'
 import {verifyResults} from './context'
 import {msCall} from './ms'
 import {transpileAwaitNoLoc} from './transpileAwait'
 import {transpileBlockVal} from './transpileBlock'
-import {transpileConditionalValNoLoc, transpileCondNoLoc, transpileLogicNoLoc, transpileNotNoLoc
-	} from './transpileBooleans'
+import {transpileConditionalValNoLoc, transpileCondNoLoc} from './transpileBooleans'
 import {transpileCallNoLoc, transpileNewNoLoc} from './transpileCall'
 import {transpileCaseValNoLoc} from './transpileCase'
 import {transpileClassNoLoc, transpileSuperCallValNoLoc, transpileSuperMemberNoLoc
@@ -41,6 +40,7 @@ import {transpileForAsyncValNoLoc, transpileForBagNoLoc, transpileForValNoLoc
 	} from './transpileLoop'
 import {transpileMember, transpileMemberNameToPropertyName} from './transpileMemberName'
 import {transpileMethodNoLoc} from './transpileMethod'
+import {transpileOperatorNoLoc, transpileUnaryOperatorNoLoc} from './transpileOperator'
 import {transpileQuoteNoLoc, transpileQuoteTaggedNoLoc, transpileRegExpNoLoc
 	} from './transpileQuote'
 import {transpileSwitchValNoLoc} from './transpileSwitch'
@@ -108,9 +108,6 @@ function transpileValNoLoc(_: Val): Expression {
 	else if (_ instanceof LocalAccess)
 		return transpileLocalAccessNoLoc(_)
 
-	else if (_ instanceof Logic)
-		return transpileLogicNoLoc(_)
-
 	else if (_ instanceof Member) {
 		const {object, name} = _
 		return transpileMember(transpileVal(object), name)
@@ -124,9 +121,6 @@ function transpileValNoLoc(_: Val): Expression {
 	else if (_ instanceof New)
 		return transpileNewNoLoc(_)
 
-	else if (_ instanceof Not)
-		return transpileNotNoLoc(_)
-
 	else if (_ instanceof NumberLiteral) {
 		// Negative numbers are not part of ES spec.
 		// http://www.ecma-international.org/ecma-262/5.1/#sec-7.8.3
@@ -138,6 +132,9 @@ function transpileValNoLoc(_: Val): Expression {
 	} else if (_ instanceof ObjSimple)
 		return new ObjectExpression(_.pairs.map(({key, value}) =>
 			new PropertyPlain(transpileMemberNameToPropertyName(key), transpileVal(value))))
+
+	else if (_ instanceof Operator)
+		return transpileOperatorNoLoc(_)
 
 	else if (_ instanceof Pipe) {
 		const {startValue, pipes} = _
@@ -188,6 +185,9 @@ function transpileValNoLoc(_: Val): Expression {
 
 	else if (_ instanceof Trait)
 		return transpileTraitNoLoc(_)
+
+	else if (_ instanceof UnaryOperator)
+		return transpileUnaryOperatorNoLoc(_)
 
 	else if (_ instanceof With)
 		return transpileWithValNoLoc(_)

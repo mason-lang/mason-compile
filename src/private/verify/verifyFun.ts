@@ -1,5 +1,6 @@
 import {check} from '../context'
-import Fun, {FunBlock, FunGetter, FunMember, Funs, FunSimple} from '../ast/Fun'
+import Fun, {FunBlock, FunGetter, FunOperator, FunMember, Funs, FunSimple, FunUnary
+	} from '../ast/Fun'
 import {LocalDeclare} from '../ast/locals'
 import {cat} from '../util'
 import {withFun} from './context'
@@ -21,6 +22,9 @@ export default function verifyFun(_: Fun): void {
 		verifyOpVal(opObject)
 		verifyMemberName(name)
 
+	} else if (_ instanceof FunOperator || _ instanceof FunUnary) {
+		// do nothing
+
 	} else if (_ instanceof FunSimple) {
 		const {loc, value} = _
 		withFun(Funs.Plain, () => {
@@ -28,7 +32,9 @@ export default function verifyFun(_: Fun): void {
 				verifyVal(value)
 			})
 		})
-	}
+
+	} else
+		throw new Error(_.constructor.name)
 }
 
 export function verifyFunBlock(

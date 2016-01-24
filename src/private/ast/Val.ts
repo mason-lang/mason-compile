@@ -121,3 +121,41 @@ export const enum SpecialVals {
 	/** `void 0` */
 	Undefined
 }
+
+/** n-ary operator. */
+export class Operator extends ValOnly {
+	constructor(loc: Loc, public kind: Operators, public args: Array<Val>) {
+		super(loc)
+	}
+}
+
+// Must be kept in sync with Keywords.Op* keywords.
+export const enum Operators {
+	And,
+	Div,
+	Eq,
+	EqExact,
+	Exponent,
+	Greater,
+	GreaterOrEqual,
+	Less,
+	LessOrEqual,
+	Minus,
+	Or,
+	Plus,
+	Remainder,
+	Times
+}
+
+/** `neg arg` or `not arg`. */
+export class UnaryOperator extends ValOnly {
+	constructor(loc: Loc, public kind: UnaryOperators, public arg: Val) {
+		super(loc)
+	}
+}
+
+// Must be in sync with Keywords.Unary* keywords.
+export const enum UnaryOperators {
+	Neg,
+	Not
+}

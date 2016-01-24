@@ -140,11 +140,6 @@ const defaultBuiltins: Builtins = {
 	'msl.@.Set.Id-Set': ['_'],
 	'msl.@.Set.Set': ['_', 'set=?'],
 	'msl.compare': [
-		'=?',
-		'<?',
-		'<=?',
-		'>?',
-		'>=?',
 		'?min',
 		'min',
 		'?min-by',
@@ -159,10 +154,8 @@ const defaultBuiltins: Builtins = {
 	'msl.js': [
 		'defined?',
 		'exists?',
-		'id=?',
 		'null?'
 	],
-	'msl.math.methods': ['+', '-', '*', '/'],
 	'msl.math.Number': [
 		'divisible?',
 		'Int',
@@ -172,11 +165,9 @@ const defaultBuiltins: Builtins = {
 		'nearest-ceil',
 		'nearest-floor',
 		'nearest-round',
-		'Nat',
-		'remainder',
-		'square'
+		'Nat'
 	],
-	'msl.math.util': ['average', 'sum'],
+	'msl.math.util': ['average', 'product', 'sum'],
 	'msl.methods': ['sub', 'set-sub!', 'del-sub!'],
 	'msl.to-string': ['_', 'inspect'],
 	'msl.Type.Method': ['_', 'impl!', 'impl-for', 'self-impl!'],

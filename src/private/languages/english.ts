@@ -69,8 +69,6 @@ const english: Language = {
 		'Expected an indented block.',
 	expectedExpression:
 		'Expected an expression, got nothing.',
-	expectedFuncKind: (token: Token): string =>
-		`Expected function kind, got ${token}.`,
 	expectedImportModuleName:
 		'Expected a module name to import.',
 	expectedKeyword: (keyword: Keywords): string =>
@@ -131,8 +129,8 @@ const english: Language = {
 	ambiguousForSK:
 		`Can't tell if ${kw(Keywords.For)} is a statement. ` +
 		`Some ${kw(Keywords.Break)}s have a value, others don't.`,
-	argsLogic:
-		'Logic expression needs at least 2 arguments.',
+	argsOperator: (numProvidedArgs: number): string =>
+		`Operator should have multiple arguments, got ${numProvidedArgs}`,
 	badRegExp: (source: string): string => {
 		try {
 			/* tslint:disable:no-unused-expression */
