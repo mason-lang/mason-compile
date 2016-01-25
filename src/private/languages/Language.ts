@@ -31,7 +31,6 @@ interface Language {
 	argsTraitDo: string
 	assignNothing: string
 	asToken: string
-	caseFocusIsImplicit: string
 	caseSwitchNeedsParts: string
 	destructureAllLazy: string
 	expectedAfterAssert: string
@@ -45,6 +44,7 @@ interface Language {
 	expectedLocalName(token: Token): string
 	expectedName(token: Token): string
 	extraParens: string
+	funFocusArgIsImplicit: (keyword: Keywords) => string
 	implicitFunctionDot: string
 	infiniteRange: string
 	invalidImportModule: string
@@ -54,7 +54,6 @@ interface Language {
 	nothingAfterFinally: string
 	parensOutsideCall: string
 	reservedWord(token: Token): string
-	switchArgIsImplicit: string
 	tokenAfterSuper: string
 	todoForPattern: string
 	todoLazyField: string

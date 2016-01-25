@@ -1,29 +1,26 @@
-import {check} from '../context'
+import Loc from 'esast/lib/Loc'
+import Op from 'op/Op'
+import Block from '../ast/Block'
 import {LocalAccess} from '../ast/locals'
 import Switch, {SwitchPart} from '../ast/Switch'
-import {isKeyword, Keywords} from '../token/Keyword'
-import {checkEmpty} from './checks'
-import parseBlock, {beforeAndBlock, parseJustBlock} from './parseBlock'
+import {beforeAndBlock} from './parseBlock'
+import {parseCaseSwitchParts} from './parseCase'
 import parseExpr, {parseExprParts} from './parseExpr'
-import {Tokens} from './Slice'
+import {Lines, Tokens} from './Slice'
 
-/** Parse a [[Switch]]. */
-export default function parseSwitch(switchedFromFun: boolean, tokens: Tokens): Switch {
+export default function parseSwitch(tokens: Tokens): Switch {
 	const [before, block] = beforeAndBlock(tokens)
-
-	if (switchedFromFun)
-		checkEmpty(before, _ => _.switchArgIsImplicit)
-	const switched = switchedFromFun ? LocalAccess.focus(tokens.loc) : parseExpr(before)
-
-	const lastLine = block.lastSlice()
-	const [partLines, opElse] = isKeyword(Keywords.Else, lastLine.head()) ?
-		[block.rtail(), parseJustBlock(Keywords.Else, lastLine.tail())] :
-		[block, null]
-
-	const parts = partLines.mapSlices(line => {
-		const [before, block] = beforeAndBlock(line)
-		return new SwitchPart(line.loc, parseExprParts(before), parseBlock(block))
-	})
-	check(parts.length > 0, tokens.loc, _ => _.caseSwitchNeedsParts)
+	const switched = parseExpr(before)
+	const {parts, opElse} = parseSwitchParts(block)
 	return new Switch(tokens.loc, switched, parts, opElse)
+}
+
+export function parseSwitchFun(loc: Loc, block: Lines): Switch {
+	const {parts, opElse} = parseSwitchParts(block)
+	return new Switch(loc, LocalAccess.focus(loc), parts, opElse)
+}
+
+function parseSwitchParts(block: Lines): {parts: Array<SwitchPart>, opElse: Op<Block>} {
+	return parseCaseSwitchParts(block, (loc, before, block) =>
+		new SwitchPart(loc, parseExprParts(before), block))
 }

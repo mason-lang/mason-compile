@@ -1,3 +1,4 @@
+import Loc from 'esast/lib/Loc'
 import Op from 'op/Op'
 import Block from '../ast/Block'
 import {FunBlock, Funs} from '../ast/Fun'
@@ -7,14 +8,15 @@ import {FunAbstract, MethodValue} from '../ast/Method'
 import {GroupSpace} from '../token/Group'
 import {isAnyKeyword, isKeyword, Keywords} from '../token/Keyword'
 import {head} from '../util'
-import {checkNonEmpty} from './checks'
+import {checkEmpty, checkNonEmpty} from './checks'
 import parseBlock, {beforeAndBlock} from './parseBlock'
-import parseCase from './parseCase'
+import {parseCaseFun} from './parseCase'
 import parseLocalDeclares, {parseLocalDeclareFromSpaced, parseLocalDeclaresAndMemberArgs
 	} from './parseLocalDeclares'
+import {parsePipeFun} from './parsePipe'
 import parseSpaced from './parseSpaced'
-import parseSwitch from './parseSwitch'
-import {Tokens} from './Slice'
+import {parseSwitchFun} from './parseSwitch'
+import {Lines, Tokens} from './Slice'
 import tryTakeComment from './tryTakeComment'
 
 /**
@@ -71,10 +73,23 @@ export function funArgsAndBlock(
 	checkNonEmpty(tokens, _ => _.expectedBlock)
 	const h = tokens.head()
 
-	// Might be `|case` or `|switch`
 	if (isAnyKeyword(funFocusKeywords, h)) {
-		const expr = (h.kind === Keywords.Case ? parseCase : parseSwitch)(true, tokens.tail())
 		const args = [LocalDeclare.focus(h.loc)]
+		const [before, block] = beforeAndBlock(tokens.tail())
+		checkEmpty(before, _ => _.funFocusArgIsImplicit(h.kind))
+		const parser = ((): (loc: Loc, block: Lines) => Val => {
+			switch (h.kind) {
+				case Keywords.Case:
+					return parseCaseFun
+				case Keywords.Pipe:
+					return parsePipeFun
+				case Keywords.Switch:
+					return parseSwitchFun
+				default:
+					throw new Error(String(h.kind))
+			}
+		})()
+		const expr = parser(tokens.loc, block)
 		return {args, opRestArg: null, memberArgs: [], block: new Block(tokens.loc, null, [expr])}
 	} else {
 		const [before, blockLines] = beforeAndBlock(tokens)
@@ -84,7 +99,7 @@ export function funArgsAndBlock(
 	}
 }
 
-const funFocusKeywords = new Set([Keywords.Case, Keywords.Switch])
+const funFocusKeywords = new Set([Keywords.Case, Keywords.Pipe, Keywords.Switch])
 
 function funKind(keywordKind: Keywords): [boolean, boolean, Funs] {
 	switch (keywordKind) {

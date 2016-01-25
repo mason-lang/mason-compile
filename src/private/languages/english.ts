@@ -55,8 +55,6 @@ const english: Language = {
 		'Assignment to nothing.',
 	asToken:
 		`Expected only 1 token after ${kw(Keywords.As)}.`,
-	caseFocusIsImplicit:
-		'Can\'t make focus — is implicitly provided as first argument.',
 	caseSwitchNeedsParts:
 		`Must have at least 1 non-${kw(Keywords.Else)} test.`,
 	destructureAllLazy:
@@ -83,6 +81,8 @@ const english: Language = {
 		`Expected a name, not ${token}`,
 	extraParens:
 		`Unnecessary ${code('()')}`,
+	funFocusArgIsImplicit: (keyword: Keywords): string =>
+		`Nothing may come after ${kw(keyword)}; function argument is implicitly ${kw(Keywords.Focus)}.`,
 	implicitFunctionDot:
 		`Function ${showChar(Char.Period)} is implicit for methods.`,
 	infiniteRange:
@@ -101,8 +101,6 @@ const english: Language = {
 		`Use ${code('(a b)')}, not ${code('a(b)')}.`,
 	reservedWord: (token: Token): string =>
 		`Reserved word ${token}.`,
-	switchArgIsImplicit:
-		'Value to switch on is `_`, the function\'s implicit argument.',
 	tokenAfterSuper:
 		`Expected ${kw(Keywords.Dot)} or ${code('()')} after ${kw(Keywords.Super)}`,
 	todoForPattern:

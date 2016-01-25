@@ -7,7 +7,7 @@ import Call, {New} from '../ast/Call'
 import {SuperCall} from '../ast/Class'
 import {Val} from '../ast/LineContent'
 import {LocalDeclare} from '../ast/locals'
-import {ObjPair, ObjSimple, Operator, Pipe, UnaryOperator} from '../ast/Val'
+import {ObjPair, ObjSimple, Operator, UnaryOperator} from '../ast/Val'
 import With from '../ast/With'
 import {Yield, YieldTo} from '../ast/YieldLike'
 import {check, warn} from '../context'
@@ -27,6 +27,7 @@ import {parseFor, parseForAsync, parseForBag} from './parseFor'
 import parseFun from './parseFunBlock'
 import parseMemberName from './parseMemberName'
 import parseMethod from './parseMethod'
+import parsePipe from './parsePipe'
 import parseSingle from './parseSingle'
 import parseSwitch from './parseSwitch'
 import parseTrait from './parseTrait'
@@ -111,7 +112,7 @@ function keywordExpr(at: Keyword, after: Tokens): Val {
 		case Keywords.Await:
 			return new Await(at.loc, parseExprPlain(after))
 		case Keywords.Case:
-			return parseCase(false, after)
+			return parseCase(after)
 		case Keywords.Class:
 			return parseClass(after)
 		case Keywords.Cond:
@@ -153,7 +154,7 @@ function keywordExpr(at: Keyword, after: Tokens): Val {
 		case Keywords.Super:
 			return new SuperCall(at.loc, parseExprParts(after))
 		case Keywords.Switch:
-			return parseSwitch(false, after)
+			return parseSwitch(after)
 		case Keywords.UnaryNeg: case Keywords.UnaryNot:
 			return new UnaryOperator(at.loc, keywordKindToUnaryKind(kind), parseExprPlain(after))
 		case Keywords.With:
@@ -214,11 +215,6 @@ function parseConditional(kind: Keywords, tokens: Tokens): Conditional {
 		_ => [parseExprPlain(before), parseBlock(_)],
 		() => <[Val, Block | Val]> (<any> parseNExprParts(before, 2, _ => _.argsConditional(kind))))
 	return new Conditional(tokens.loc, condition, result, kind === Keywords.Unless)
-}
-
-function parsePipe(tokens: Tokens): Pipe {
-	const [before, block] = beforeAndBlock(tokens)
-	return new Pipe(tokens.loc, parseExpr(before), block.mapSlices(parseExpr))
 }
 
 function parseWith(tokens: Tokens): With {
