@@ -4,7 +4,7 @@ import {check, warn} from '../context'
 import {GroupQuote, GroupRegExp} from '../token/Group'
 import {StringToken} from '../token/Token'
 import {assert} from '../util'
-import {isDigit, isNameCharacter} from './chars'
+import {isDigitDecimal, isNameCharacter} from './chars'
 import {addToCurrentGroup, closeGroup, curGroup, openGroup, openInterpolation} from './groupContext'
 import lexName from './lexName'
 import lexPlain from './lexPlain'
@@ -140,7 +140,7 @@ function warnForSimpleQuote(quoteGroup: GroupQuote): void {
 
 function isName(str: string): boolean {
 	const cc0 = str.charCodeAt(0)
-	if (isDigit(cc0) || cc0 === Char.Tilde)
+	if (isDigitDecimal(cc0) || cc0 === Char.Tilde)
 		return false
 	for (let i = 0; i < str.length; i = i + 1)
 		if (!isNameCharacter(str.charCodeAt(i)))

@@ -5,7 +5,7 @@ import {GroupBlock, GroupBracket, GroupLine, GroupParenthesis, GroupSpace} from 
 import Keyword, {isKeyword, Keywords} from '../token/Keyword'
 import {DocComment, NumberToken} from '../token/Token'
 import {assert, isEmpty, last} from '../util'
-import {isDigit, isDigitBinary, isDigitHex, isDigitOctal} from './chars'
+import {isDigitBinary, isDigitDecimal, isDigitHex, isDigitOctal} from './chars'
 import {addToCurrentGroup, closeGroup, closeGroupsForDedent, closeInterpolationOrParenthesis,
 	closeLine, closeSpaceOKIfEmpty, curGroup, openGroup, openLine, openParenthesis, space
 	} from './groupContext'
@@ -59,18 +59,18 @@ export default function lexPlain(isInQuote: boolean): void {
 					break
 				}
 				case Char.Period:
-					if (isDigit(peek(1))) {
+					if (isDigitDecimal(peek(1))) {
 						skip()
-						skipWhile(isDigit)
+						skipWhile(isDigitDecimal)
 					}
 					break
 				default:
 			}
 		} else {
-			skipWhile(isDigit)
-			if (peek() === Char.Period && isDigit(peek(1))) {
+			skipWhile(isDigitDecimal)
+			if (peek() === Char.Period && isDigitDecimal(peek(1))) {
 				skip()
-				skipWhile(isDigit)
+				skipWhile(isDigitDecimal)
 			}
 		}
 
@@ -213,7 +213,7 @@ export default function lexPlain(isInQuote: boolean): void {
 			// NUMBER
 
 			case Char.Hyphen:
-				if (isDigit(peek()))
+				if (isDigitDecimal(peek()))
 					// eatAndAddNumber() looks at prev character, so hyphen included.
 					eatAndAddNumber()
 				else

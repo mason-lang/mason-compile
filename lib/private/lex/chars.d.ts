@@ -1,3 +1,6 @@
 import Char from 'typescript-char/Char';
-export declare const isDigit: (_: Char) => boolean, isDigitBinary: (_: Char) => boolean, isDigitOctal: (_: Char) => boolean, isDigitHex: (_: Char) => boolean;
-export declare const isNameCharacter: (_: Char) => boolean;
+export declare function isDigitBinary(_: Char): boolean;
+export declare function isDigitOctal(_: Char): boolean;
+export declare function isDigitDecimal(_: Char): boolean;
+export declare function isDigitHex(_: Char): boolean;
+export declare function isNameCharacter(_: Char): boolean;

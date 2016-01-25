@@ -1,19 +1,37 @@
 import Char from 'typescript-char/Char'
 
-function charPred(chars: string, negate: boolean = false): (_: Char) => boolean {
-	let src = 'switch(ch) {\n'
-	for (let i = 0; i < chars.length; i = i + 1)
-		src = `${src}case ${chars.charCodeAt(i)}: `
-	src = `${src} return ${!negate}\ndefault: return ${negate}\n}`
-	return <any> Function('ch', src)
+export function isDigitBinary(_: Char): boolean {
+	return _ === Char._0 || _ === Char._1
 }
 
-export const
-	isDigit = charPred('0123456789'),
-	isDigitBinary = charPred('01'),
-	isDigitOctal = charPred('01234567'),
-	isDigitHex = charPred('0123456789abcdef')
+export function isDigitOctal(_: Char): boolean {
+	return inRange(_, Char._0, Char._7)
+}
 
-// Anything not explicitly reserved is a valid name character.
-const reservedCharacters = '#^\\;,'
-export const isNameCharacter = charPred(`\`&()[]{}|:'". \n\t${reservedCharacters}`, true)
+export function isDigitDecimal(_: Char): boolean {
+	return inRange(_, Char._0, Char._9)
+}
+
+export function isDigitHex(_: Char): boolean {
+	return isDigitDecimal(_) || inRange(_, Char.a, Char.f)
+}
+
+function inRange(_: Char, min: Char, max: Char): boolean {
+	return min <= _ && _ <= max
+}
+
+export function isNameCharacter(_: Char): boolean {
+	switch (_) {
+		// special characters
+		case Char.Backtick: case Char.Ampersand: case Char.OpenParenthesis:
+		case Char.CloseParenthesis: case Char.OpenBracket: case Char.CloseBracket:
+		case Char.OpenBrace: case Char.CloseBrace: case Char.Bar: case Char.Colon:
+		case Char.SingleQuote: case Char.DoubleQuote: case Char.Period: case Char.Space:
+		case Char.LineFeed: case Char.Tab:
+		// reserved characters
+		case Char.Hash: case Char.Caret: case Char.Backslash: case Char.Semicolon: case Char.Comma:
+			return false
+		default:
+			return true
+	}
+}
