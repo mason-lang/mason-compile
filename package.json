@@ -27,12 +27,12 @@
 	"devDependencies": {
 		"gulp": "3.9.0",
 		"gulp-typescript-esast": "esast/gulp-typescript-esast",
-		"mocha": "2.3.4",
+		"mocha": "2.4.5",
 		"tslint": "3.2.2-dev.1",
 		"tslint-config-esast": "esast/tslint-config-esast",
 		"typedoc": "0.3.12",
 
-		"benchmark": "2.0.0",
+		"benchmark": "2.1.0",
 		"microtime": "2.0.0",
 		"source-map-support": "0.4.0"
 	}

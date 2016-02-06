@@ -135,7 +135,7 @@ describe('case', () => {
 			})()`)
 	test(
 		`
-			|case
+			\\case
 				_
 					1`,
 		new FunBlock(
@@ -160,7 +160,7 @@ describe('case', () => {
 			}`)
 	test(
 		`
-			!|case
+			!\\case
 				_
 					pass`,
 		new FunBlock(
@@ -246,7 +246,7 @@ describe('switch', () => {
 			}`)
 	test(
 		`
-			|switch
+			\\switch
 				0
 					1`,
 		new FunBlock(
@@ -272,7 +272,7 @@ describe('switch', () => {
 			}`)
 	test(
 		`
-			!|switch
+			!\\switch
 				0
 					pass`,
 		new FunBlock(

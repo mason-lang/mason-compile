@@ -14,6 +14,8 @@ const english: Language = {
 		`${code('#')} must be followed by ${code('(')}, ${code('#')}, or a name.`,
 	badSpacedIndent: (indent: number): string =>
 		`Indentation spaces must be a multiple of ${indent}.`,
+	commentNeedsSpace:
+		'A comment should start with a space or tab.',
 	emptyBlock:
 		'Empty block.',
 	extraSpace:

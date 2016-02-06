@@ -9,6 +9,7 @@ interface Language {
 
 	badInterpolation: string,
 	badSpacedIndent(indent: number): string
+	commentNeedsSpace: string
 	emptyBlock: string
 	extraSpace: string
 	mismatchedGroupClose(actual: GroupType, expected: Group<Token>): string

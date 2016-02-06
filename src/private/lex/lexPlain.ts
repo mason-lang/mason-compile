@@ -173,29 +173,35 @@ export default function lexPlain(isInQuote: boolean): void {
 			// FUN
 
 			case Char.ExclamationMark:
-				if (tryEat(Char.Bar))
+				if (tryEat(Char.Backslash))
 					funKeyword(Keywords.FunDo)
 				else
 					handleName()
 				break
 			case Char.$:
-				if (tryEat2(Char.ExclamationMark, Char.Bar))
+				if (tryEat2(Char.ExclamationMark, Char.Backslash))
 					funKeyword(Keywords.FunAsynDo)
-				else if (tryEat(Char.Bar))
+				else if (tryEat(Char.Backslash))
 					funKeyword(Keywords.FunAsync)
 				else
 					handleName()
 				break
 			case Char.Asterisk:
-				if (tryEat2(Char.ExclamationMark, Char.Bar))
+				if (tryEat2(Char.ExclamationMark, Char.Backslash))
 					funKeyword(Keywords.FunGenDo)
-				else if (tryEat(Char.Bar))
+				else if (tryEat(Char.Backslash))
 					funKeyword(Keywords.FunGen)
 				else
 					handleName()
 				break
+			case Char.Backslash:
+				funKeyword(Keywords.Fun)
+				break
 			case Char.Bar:
-				if (tryEat(Char.Space) || tryEat(Char.Tab)) {
+				const isDocComment = !tryEat(Char.Bar)
+				if (!(tryEat(Char.Space) || tryEat(Char.Tab) || peek() === Char.LineFeed))
+					warn(pos(), _ => _.commentNeedsSpace)
+				if (isDocComment) {
 					const text = eatRestOfLine()
 					closeSpaceOKIfEmpty(startPos())
 					check(
@@ -203,11 +209,8 @@ export default function lexPlain(isInQuote: boolean): void {
 						loc,
 						_ => _.trailingDocComment)
 					addToCurrentGroup(new DocComment(loc(), text))
-				} else if (tryEat(Char.Bar))
-					// non-doc comment
+				} else
 					skipRestOfLine()
-				else
-					funKeyword(Keywords.Fun)
 				break
 
 			// NUMBER
@@ -233,13 +236,13 @@ export default function lexPlain(isInQuote: boolean): void {
 					// ensure it's not part of the preceding or following spaced group.
 					closeSpaceOKIfEmpty(startPos())
 					keyword(Keywords.ObjEntry)
-				} else if (tryEat(Char.Bar))
+				} else if (tryEat(Char.Backslash))
 					funKeyword(Keywords.FunThis)
-				else if (tryEat2(Char.ExclamationMark, Char.Bar))
+				else if (tryEat2(Char.ExclamationMark, Char.Backslash))
 					funKeyword(Keywords.FunThisDo)
-				else if (tryEat2(Char.Asterisk, Char.Bar))
+				else if (tryEat2(Char.Asterisk, Char.Backslash))
 					funKeyword(Keywords.FunThisGen)
-				else if (tryEat3(Char.Asterisk, Char.ExclamationMark, Char.Bar))
+				else if (tryEat3(Char.Asterisk, Char.ExclamationMark, Char.Backslash))
 					funKeyword(Keywords.FunThisGenDo)
 				else if (tryEat(Char.Period))
 					if (tryEat(Char.Period))
