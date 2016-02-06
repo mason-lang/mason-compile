@@ -1,4 +1,4 @@
-import {MemberSet, Pass, Setters, SpecialDo, SpecialDos} from '../../lib/private/ast/Do'
+import {MemberSet, Pass, SpecialDo, SpecialDos} from '../../lib/private/ast/Do'
 import {loc, one, zero} from './util/ast-util'
 import {test} from './util/test-asts'
 
@@ -11,13 +11,8 @@ describe('statements', () => {
 	// TODO: parse with type
 
 	test(
-		'0.x = 1',
-		new MemberSet(loc, zero, 'x', null, Setters.Init, one),
-		'_ms.newProperty(0,"x",1)')
-
-	test(
 		'0.x := 1',
-		new MemberSet(loc, zero, 'x', null, Setters.Mutate, one),
+		new MemberSet(loc, zero, 'x', null, one),
 		'0..x=1')
 
 	test(

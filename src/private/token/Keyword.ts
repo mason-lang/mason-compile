@@ -125,6 +125,7 @@ export const enum Keywords {
 	As,
 	Assert,
 	Assign,
+	AssignMutate,
 	Await,
 	Break,
 	Built,
@@ -172,7 +173,6 @@ export const enum Keywords {
 	ImportDo,
 	ImportLazy,
 	Lazy,
-	LocalMutate,
 	MapEntry,
 	Method,
 	My,
@@ -328,6 +328,7 @@ const keywordKindToName = new Map<Keywords, string>([
 	[Keywords.As, 'as'],
 	[Keywords.Assert, 'assert'],
 	[Keywords.Assign, '='],
+	[Keywords.AssignMutate, ':='],
 	[Keywords.Await, '$'],
 	[Keywords.Break, 'break'],
 	[Keywords.Built, 'built'],
@@ -372,7 +373,6 @@ const keywordKindToName = new Map<Keywords, string>([
 	[Keywords.ImportDo, 'import!'],
 	[Keywords.ImportLazy, 'import~'],
 	[Keywords.Lazy, '~'],
-	[Keywords.LocalMutate, ':='],
 	[Keywords.MapEntry, '->'],
 	[Keywords.Method, 'method'],
 	[Keywords.My, 'my'],
@@ -420,10 +420,10 @@ const keywordKindToName = new Map<Keywords, string>([
 	[Keywords.YieldTo, 'yield*']])
 
 const notNameKeywords = new Set<Keywords>([
-	Keywords.Ampersand, Keywords.Colon, Keywords.Dot, Keywords.Dot2, Keywords.Dot3, Keywords.Fun,
-	Keywords.FunDo, Keywords.FunThis, Keywords.FunThisDo, Keywords.FunAsync, Keywords.FunAsynDo,
-	Keywords.FunThisAsync, Keywords.FunThisAsynDo, Keywords.FunGen, Keywords.FunGenDo,
-	Keywords.FunThisGen, Keywords.FunThisGenDo, Keywords.Lazy, Keywords.LocalMutate,
+	Keywords.Ampersand, Keywords.AssignMutate, Keywords.Colon, Keywords.Dot, Keywords.Dot2,
+	Keywords.Dot3, Keywords.Fun, Keywords.FunDo, Keywords.FunThis, Keywords.FunThisDo,
+	Keywords.FunAsync, Keywords.FunAsynDo, Keywords.FunThisAsync, Keywords.FunThisAsynDo,
+	Keywords.FunGen, Keywords.FunGenDo, Keywords.FunThisGen, Keywords.FunThisGenDo, Keywords.Lazy,
 	Keywords.ObjEntry, Keywords.Tick
 ])
 

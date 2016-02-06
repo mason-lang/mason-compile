@@ -256,7 +256,7 @@ export default function lexPlain(isInQuote: boolean): void {
 
 			case Char.Colon:
 				if (tryEat(Char.Equal))
-					keyword(Keywords.LocalMutate)
+					keyword(Keywords.AssignMutate)
 				else
 					keyword(Keywords.Colon)
 				break

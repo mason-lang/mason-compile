@@ -1,5 +1,4 @@
 import {ArrayExpression, AssignmentExpression} from 'esast/lib/Expression'
-import {LiteralString} from 'esast/lib/Literal'
 import Statement, {DebuggerStatement, ExpressionStatement} from 'esast/lib/Statement'
 import Await from '../ast/Await'
 import {Cond, Conditional} from '../ast/booleans'
@@ -8,7 +7,7 @@ import Call from '../ast/Call'
 import Case from '../ast/Case'
 import {SuperCall} from '../ast/Class'
 import Del from '../ast/Del'
-import {Ignore, MemberSet, Pass, SetSub, Setters, SpecialDo, SpecialDos} from '../ast/Do'
+import {Ignore, MemberSet, Pass, SetSub, SpecialDo, SpecialDos} from '../ast/Do'
 import {Assert, Except, Throw} from '../ast/errors'
 import {Do} from '../ast/LineContent'
 import {Assign, LocalMutate} from '../ast/locals'
@@ -28,7 +27,7 @@ import {transpileDelNoLoc} from './transpileDel'
 import {transpileAssertNoLoc, transpileExceptDoNoLoc, transpileThrowNoLoc} from './transpileErrors'
 import {transpileAssignNoLoc, transpileLocalMutateNoLoc} from './transpileLocals'
 import {transpileBreakNoLoc, transpileForDoNoLoc, transpileForAsyncDoNoLoc} from './transpileLoop'
-import transpileMemberName, {transpileMember} from './transpileMemberName'
+import {transpileMember} from './transpileMemberName'
 import {transpileSwitchDoNoLoc} from './transpileSwitch'
 import {transpileTraitDoNoLoc} from './transpileTrait'
 import transpileVal from './transpileVal'
@@ -93,42 +92,23 @@ function transpileDoNoLoc(_: Do): Statement | Array<Statement> {
 		return transpileLocalMutateNoLoc(_)
 
 	else if (_ instanceof MemberSet) {
-		const {object, name, opType, kind, value} = _
+		const {object, name, opType, value} = _
 		const obj = transpileVal(object)
 		const strName = typeof name === 'string' ? name : '<computed member>'
 		const val = maybeWrapInCheckInstance(transpileVal(value), opType, strName)
-		return new ExpressionStatement((() => {
-			switch (kind) {
-				case Setters.Init:
-					return msCall('newProperty', obj, transpileMemberName(name), val)
-				case Setters.Mutate:
-					return new AssignmentExpression('=', transpileMember(obj, name), val)
-				default:
-					throw new Error()
-			}
-		})())
+		return new ExpressionStatement(
+			new AssignmentExpression('=', transpileMember(obj, name), val))
 
 	} else if (_ instanceof Pass) {
 		return new ExpressionStatement(transpileVal(_.ignored))
 
 	} else if (_ instanceof SetSub) {
-		const {object, subbeds, kind, opType, value} = _
-		const kindStr = (() => {
-			switch (kind) {
-				case Setters.Init:
-					return 'init'
-				case Setters.Mutate:
-					return 'mutate'
-				default:
-					throw new Error()
-			}
-		})()
+		const {object, subbeds, opType, value} = _
 		return new ExpressionStatement(msCall(
 			'setSub',
 			transpileVal(object),
 			subbeds.length === 1 ? transpileVal(subbeds[0]) : new ArrayExpression(subbeds.map(transpileVal)),
-			maybeWrapInCheckInstance(transpileVal(value), opType, 'value'),
-			new LiteralString(kindStr)))
+			maybeWrapInCheckInstance(transpileVal(value), opType, 'value')))
 
 	} else if (_ instanceof SpecialDo)
 		switch (_.kind) {

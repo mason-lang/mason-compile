@@ -38,14 +38,6 @@ export const enum SpecialDos {
 	Debugger
 }
 
-/** Kind of [[MemberSet]] or [[SetSub]]. */
-export const enum Setters {
-	/** `=` */
-	Init,
-	/** `:=` */
-	Mutate
-}
-
 /**
 `{object}.{name}:{opType} =/:=/::= {value}`
 Also handles `{object}."{name}"`.
@@ -56,7 +48,6 @@ export class MemberSet extends DoOnly {
 		public object: Val,
 		public name: MemberName,
 		public opType: Op<Val>,
-		public kind: Setters,
 		public value: Val) {
 		super(loc)
 	}
@@ -69,7 +60,6 @@ export class SetSub extends DoOnly {
 		public object: Val,
 		public subbeds: Array<Val>,
 		public opType: Op<Val>,
-		public kind: Setters,
 		public value: Val) {
 		super(loc)
 	}

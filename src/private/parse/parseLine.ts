@@ -2,7 +2,7 @@ import Loc from 'esast/lib/Loc'
 import Op, {caseOp} from 'op/Op'
 import {BagEntry, MapEntry, ObjEntry, ObjEntryAssign, ObjEntryPlain} from '../ast/BuildEntry'
 import Call from '../ast/Call'
-import {Ignore, MemberSet, Pass, SetSub, Setters, SpecialDo, SpecialDos} from '../ast/Do'
+import {Ignore, MemberSet, Pass, SetSub, SpecialDo, SpecialDos} from '../ast/Do'
 import {Assert, Throw} from '../ast/errors'
 import LineContent, {Do, Val} from '../ast/LineContent'
 import {Assign, AssignSingle, AssignDestructure, LocalAccess, LocalMutate} from '../ast/locals'
@@ -13,8 +13,8 @@ import {check} from '../context'
 import {GroupBracket, GroupQuote, GroupSpace} from '../token/Group'
 import Keyword, {isAnyKeyword, isKeyword, keywordName, Keywords} from '../token/Keyword'
 import Token from '../token/Token'
-import {assert, tail} from '../util'
-import {checkEmpty, checkNonEmpty, unexpected} from './checks'
+import {tail} from '../util'
+import {checkEmpty, checkNonEmpty} from './checks'
 import {justBlock} from './parseBlock'
 import parseExpr, {opParseExpr, parseExprParts} from './parseExpr'
 import parseLocalDeclares, {parseLocalDeclaresJustNames, parseLocalName} from './parseLocalDeclares'
@@ -73,14 +73,18 @@ export default function parseLine(tokens: Tokens): LineContent | Array<LineConte
 					return new MapEntry(loc, parseExpr(before), parseExpr(after))
 				case Keywords.ObjEntry:
 					return parseObjEntry(before, after, loc)
+				case Keywords.AssignMutate:
+					return parseMutate(before, after, loc)
+				case Keywords.Assign:
+					return parseAssign(before, after, loc)
 				default:
-					return parseAssignLike(before, at, parseExpr(after), loc)
+					throw new Error(String(at.kind))
 			}
 		},
 		() => parseExpr(tokens))
 }
 const lineSplitKeywords = new Set<Keywords>(
-	[Keywords.Assign, Keywords.LocalMutate, Keywords.MapEntry, Keywords.ObjEntry])
+	[Keywords.Assign, Keywords.AssignMutate, Keywords.MapEntry, Keywords.ObjEntry])
 
 export function parseLines(lines: Lines): Array<LineContent> {
 	const lineContents: Array<LineContent> = []
@@ -94,12 +98,10 @@ export function parseLines(lines: Lines): Array<LineContent> {
 	return lineContents
 }
 
-function parseAssignLike(before: Tokens, at: Keyword, value: Val, loc: Loc): Do {
-	const kind = at.kind
-
+function parseMutate(before: Tokens, after: Tokens, loc: Loc): Do {
+	const value = parseExpr(after)
 	if (before.size() === 1) {
 		const token = before.head()
-		// `a.b = c`, `.b = c`, `a."b" = c`, `."b" = c`, `a[b] = c`; and their `:=` variants.
 		if (token instanceof GroupSpace) {
 			const spaced = Tokens.of(token)
 			const [assignee, opType] = caseOp<{before: Tokens, after: Tokens}, [Tokens, Op<Val>]>(
@@ -108,27 +110,22 @@ function parseAssignLike(before: Tokens, at: Keyword, value: Val, loc: Loc): Do 
 				() => [spaced, null])
 
 			const last = assignee.last()
-			const object = (obj: Tokens): Val =>
-				obj.isEmpty() ? LocalAccess.this(obj.loc) : parseSpaced(obj)
+			function object(obj: Tokens): Val {
+				return obj.isEmpty() ? LocalAccess.this(obj.loc) : parseSpaced(obj)
+			}
 
 			if (isKeyword(Keywords.Dot, assignee.nextToLast())) {
 				const name = parseMemberName(last)
 				const set = object(assignee.rtail().rtail())
-				return new MemberSet(loc, set, name, opType, setKind(at), value)
+				return new MemberSet(loc, set, name, opType, value)
 			} else if (last instanceof GroupBracket) {
 				const set = object(assignee.rtail())
 				const subbeds = parseExprParts(Tokens.of(last))
-				return new SetSub(loc, set, subbeds, opType, setKind(at), value)
+				return new SetSub(loc, set, subbeds, opType, value)
 			}
 		}
 	}
-
-	if (kind === Keywords.LocalMutate)
-		return parseLocalMutate(before, value, loc)
-	else {
-		assert(kind === Keywords.Assign)
-		return parseAssign(before, value, loc)
-	}
+	return parseLocalMutate(before, value, loc)
 }
 
 function parseObjEntry(before: Tokens, after: Tokens, loc: Loc): ObjEntry {
@@ -157,19 +154,8 @@ function parseObjEntry(before: Tokens, after: Tokens, loc: Loc): ObjEntry {
 		}
 	}
 
-	const assign = parseAssign(before, parseExpr(after), loc)
+	const assign = parseAssign(before, after, loc)
 	return new ObjEntryAssign(loc, assign)
-}
-
-function setKind(keyword: Keyword): Setters {
-	switch (keyword.kind) {
-		case Keywords.Assign:
-			return Setters.Init
-		case Keywords.LocalMutate:
-			return Setters.Mutate
-		default:
-			throw unexpected(keyword)
-	}
 }
 
 function parseLocalMutate(localsTokens: Tokens, value: Val, loc: Loc): LocalMutate {
@@ -178,7 +164,8 @@ function parseLocalMutate(localsTokens: Tokens, value: Val, loc: Loc): LocalMuta
 	return new LocalMutate(loc, locals[0].name, value)
 }
 
-function parseAssign(localsTokens: Tokens, value: Val, loc: Loc): Assign {
+function parseAssign(localsTokens: Tokens, after: Tokens, loc: Loc): Assign {
+	const value = parseExpr(after)
 	const locals = parseLocalDeclares(localsTokens)
 	if (locals.length === 1)
 		return new AssignSingle(loc, locals[0], value)

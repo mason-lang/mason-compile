@@ -72,7 +72,7 @@ function transpileConstructor(_: Constructor): MethodDefinitionConstructor {
 function constructorSetMembers(constructor: Constructor): Array<Statement> {
 	return constructor.memberArgs.map(_ =>
 		loc(_, new ExpressionStatement(
-			msCall('newProperty', esThis, new LiteralString(_.name), idForDeclareCached(_)))))
+			new AssignmentExpression('=', member(esThis, _.name), idForDeclareCached(_)))))
 }
 
 function beRecord(fields: Array<Field>): Statement {

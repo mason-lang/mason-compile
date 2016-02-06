@@ -17,23 +17,17 @@ export declare class SpecialDo extends DoOnly {
 export declare const enum SpecialDos {
     Debugger = 0,
 }
-export declare const enum Setters {
-    Init = 0,
-    Mutate = 1,
-}
 export declare class MemberSet extends DoOnly {
     object: Val;
     name: MemberName;
     opType: Op<Val>;
-    kind: Setters;
     value: Val;
-    constructor(loc: Loc, object: Val, name: MemberName, opType: Op<Val>, kind: Setters, value: Val);
+    constructor(loc: Loc, object: Val, name: MemberName, opType: Op<Val>, value: Val);
 }
 export declare class SetSub extends DoOnly {
     object: Val;
     subbeds: Array<Val>;
     opType: Op<Val>;
-    kind: Setters;
     value: Val;
-    constructor(loc: Loc, object: Val, subbeds: Array<Val>, opType: Op<Val>, kind: Setters, value: Val);
+    constructor(loc: Loc, object: Val, subbeds: Array<Val>, opType: Op<Val>, value: Val);
 }
