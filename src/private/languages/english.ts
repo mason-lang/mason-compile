@@ -91,6 +91,8 @@ const english: Language = {
 		`Use ${kw(Keywords.Dot3)} for infinite ranges.`,
 	invalidImportModule:
 		'Not a valid module name.',
+	methodName:
+		'Method name may only be one token (including a parenthesized expression).',
 	noImportFocus:
 		`${kw(Keywords.Focus)} not allowed as import name.`,
 	noMyOverride:

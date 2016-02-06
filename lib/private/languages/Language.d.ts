@@ -43,6 +43,7 @@ interface Language {
     implicitFunctionDot: string;
     infiniteRange: string;
     invalidImportModule: string;
+    methodName: string;
     noImportFocus: string;
     noMyOverride: string;
     noSpecialKeyword(kind: Keywords): string;

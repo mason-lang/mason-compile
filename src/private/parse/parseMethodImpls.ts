@@ -3,13 +3,12 @@ import Op from 'op/Op'
 import {ClassTraitDo, MethodImpl, MethodImplKind, MethodImplLike, MethodGetter, MethodSetter
 	} from '../ast/classTraitCommon'
 import MemberName from '../ast/MemberName'
-import {QuoteSimple} from '../ast/Quote'
 import {check} from '../context'
 import Keyword, {isKeyword, Keywords} from '../token/Keyword'
 import Token from '../token/Token'
 import parseBlock, {beforeAndBlock, justBlock, parseJustBlock} from './parseBlock'
-import parseExpr from './parseExpr'
 import parseFun from './parseFunBlock'
+import parseMemberName from './parseMemberName'
 import parseMethodSplit from './parseMethodSplit'
 import {Lines, Tokens} from './Slice'
 
@@ -49,11 +48,11 @@ function parseMethodImpl(tokens: Tokens): MethodImplLike {
 	if (isGetSet(head)) {
 		const [before, block] = beforeAndBlock(rest.tail())
 		const ctr = head.kind === Keywords.Get ? MethodGetter : MethodSetter
-		return new ctr(rest.loc, parseExprOrQuoteSimple(before), parseBlock(block), kind)
+		return new ctr(rest.loc, parseMethodName(before), parseBlock(block), kind)
 	} else {
 		const {before, kind: funKind, after} = parseMethodSplit(rest)
 		const fun = parseFun(funKind, after)
-		return new MethodImpl(rest.loc, parseExprOrQuoteSimple(before), fun, kind)
+		return new MethodImpl(rest.loc, parseMethodName(before), fun, kind)
 	}
 }
 
@@ -74,8 +73,7 @@ function isGetSet(token: Token): token is Keyword {
 		return null
 }
 
-// If symbol is just a quoted name, store it as a string, which is handled specially.
-function parseExprOrQuoteSimple(tokens: Tokens): MemberName {
-	const expr = parseExpr(tokens)
-	return expr instanceof QuoteSimple ? expr.value : expr
+function parseMethodName(tokens: Tokens): MemberName {
+	check(tokens.size() === 1, tokens.loc, _ => _.methodName)
+	return parseMemberName(tokens.head())
 }
