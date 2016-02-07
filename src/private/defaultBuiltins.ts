@@ -168,9 +168,9 @@ const defaultBuiltins: Builtins = {
 		'Nat'
 	],
 	'msl.math.util': ['average', 'product', 'sum'],
-	'msl.methods': ['sub', 'set-sub!', 'del-sub!'],
+	'msl.polys': ['sub', 'set-sub!', 'del-sub!'],
 	'msl.to-string': ['_', 'inspect'],
-	'msl.Type.Method': ['_', 'impl!', 'impl-for', 'self-impl!'],
+	'msl.Type.Poly': ['_', 'impl!', 'impl-for', 'self-impl!'],
 	'msl.Type.Trait': ['_'],
 	'msl.Type.Pred-Type': ['_', 'Any', 'ObjLit'],
 	'msl.Type.primitive': ['Bool', 'Num', 'Str', 'Sym'],

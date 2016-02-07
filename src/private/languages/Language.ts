@@ -64,7 +64,7 @@ interface Language {
 	unexpectedAfter(token: Token): string
 	unexpectedAfterImportDo: string
 	unexpectedAfterKind(kind: Keywords): string
-	unexpectedAfterMethod: string
+	unexpectedAfterPoly: string
 
 	// Verify:
 

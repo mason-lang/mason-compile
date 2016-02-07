@@ -15,7 +15,7 @@ import Fun from '../ast/Fun'
 import {Val} from '../ast/LineContent'
 import {LocalAccess} from '../ast/locals'
 import {For, ForAsync, ForBag} from '../ast/Loop'
-import Method from '../ast/Method'
+import Poly from '../ast/Poly'
 import Quote, {MsRegExp, QuoteTagged} from '../ast/Quote'
 import Switch from '../ast/Switch'
 import Trait from '../ast/Trait'
@@ -39,8 +39,8 @@ import {transpileLocalAccessNoLoc} from './transpileLocals'
 import {transpileForAsyncValNoLoc, transpileForBagNoLoc, transpileForValNoLoc
 	} from './transpileLoop'
 import {transpileMember, transpileMemberNameToPropertyName} from './transpileMemberName'
-import {transpileMethodNoLoc} from './transpileMethod'
 import {transpileOperatorNoLoc, transpileUnaryOperatorNoLoc} from './transpileOperator'
+import {transpilePolyNoLoc} from './transpilePoly'
 import {transpileQuoteNoLoc, transpileQuoteTaggedNoLoc, transpileRegExpNoLoc
 	} from './transpileQuote'
 import {transpileSwitchValNoLoc} from './transpileSwitch'
@@ -112,10 +112,7 @@ function transpileValNoLoc(_: Val): Expression {
 		const {object, name} = _
 		return transpileMember(transpileVal(object), name)
 
-	} else if (_ instanceof Method)
-		return transpileMethodNoLoc(_)
-
-	else if (_ instanceof MsRegExp)
+	} else if (_ instanceof MsRegExp)
 		return transpileRegExpNoLoc(_)
 
 	else if (_ instanceof New)
@@ -142,7 +139,10 @@ function transpileValNoLoc(_: Val): Expression {
 			(expr: Expression, pipe: Val) => callFocusFun(transpileVal(pipe), expr),
 			transpileVal(startValue))
 
-	} else if (_ instanceof Quote)
+	} else if (_ instanceof Poly)
+		return transpilePolyNoLoc(_)
+
+	else if (_ instanceof Quote)
 		return transpileQuoteNoLoc(_)
 
 	else if (_ instanceof QuoteTagged)

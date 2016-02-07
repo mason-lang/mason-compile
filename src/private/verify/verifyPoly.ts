@@ -1,12 +1,12 @@
 import {opEach, orThrow} from 'op/Op'
 import {FunBlock} from '../ast/Fun'
-import Method, {FunAbstract, MethodValue} from '../ast/Method'
+import Poly, {FunAbstract, PolyValue} from '../ast/Poly'
 import {makeUseOptional} from './util'
 import {verifyFunBlock} from './verifyFun'
 import {verifyLocalDeclare} from './verifyLocals'
 import {verifyOpVal} from './verifyVal'
 
-export default function verifyMethod({value}: Method): void {
+export default function verifyPoly({value}: Poly): void {
 	if (value instanceof FunBlock)
 		// value always has opDeclareThis
 		makeUseOptional(orThrow(value.opDeclareThis))
@@ -16,7 +16,7 @@ export default function verifyMethod({value}: Method): void {
 	// name set by AssignSingle
 }
 
-function verifyMethodValue(_: MethodValue): void {
+function verifyMethodValue(_: PolyValue): void {
 	if (_ instanceof FunAbstract)
 		verifyFunAbstract(_)
 	else

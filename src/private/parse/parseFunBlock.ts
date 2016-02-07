@@ -4,7 +4,7 @@ import Block from '../ast/Block'
 import {FunBlock, Funs} from '../ast/Fun'
 import {Val} from '../ast/LineContent'
 import {LocalDeclare} from '../ast/locals'
-import {FunAbstract, MethodValue} from '../ast/Method'
+import {FunAbstract, PolyValue} from '../ast/Poly'
 import {GroupSpace} from '../token/Group'
 import {isAnyKeyword, isKeyword, Keywords} from '../token/Keyword'
 import {head} from '../util'
@@ -31,8 +31,7 @@ export default function parseFunBlock(keywordKind: Keywords, tokens: Tokens): Fu
 	return new FunBlock(tokens.loc, args, opRestArg, block, {kind, isThisFun, isDo, opReturnType})
 }
 
-/** Parse a [[MethodValue]]. */
-export function parseMethodValue(keywordKind: Keywords, tokens: Tokens): MethodValue {
+export function parsePolyValue(keywordKind: Keywords, tokens: Tokens): PolyValue {
 	const [isThisFun, isDo, kind] = funKind(keywordKind)
 	const [opReturnType, rest] = tryTakeReturnType(tokens)
 	const [before, blockLines] = beforeAndBlock(rest)

@@ -121,8 +121,8 @@ const english: Language = {
 		`This is an ${kw(Keywords.ImportDo)}, so you can't import any values.`,
 	unexpectedAfterKind: (kind: Keywords): string =>
 		`Did not expect anything between ${kw(kind)} and block.`,
-	unexpectedAfterMethod:
-		`Did not expect anything between ${kw(Keywords.Method)} and function.`,
+	unexpectedAfterPoly:
+		`Did not expect anything between ${kw(Keywords.Poly)} and function.`,
 
 	// Verify:
 

@@ -4,11 +4,11 @@ import { FunBlock } from './Fun';
 import { Val, ValOnly } from './LineContent';
 import { LocalDeclare } from './locals';
 import MsAst from './MsAst';
-export default class Method extends ValOnly {
-    value: MethodValue;
-    constructor(loc: Loc, value: MethodValue);
+export default class Poly extends ValOnly {
+    value: PolyValue;
+    constructor(loc: Loc, value: PolyValue);
 }
-export declare type MethodValue = FunAbstract | FunBlock;
+export declare type PolyValue = FunAbstract | FunBlock;
 export declare class FunAbstract extends MsAst {
     args: Array<LocalDeclare>;
     opRestArg: Op<LocalDeclare>;

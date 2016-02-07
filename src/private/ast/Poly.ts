@@ -5,13 +5,13 @@ import {Val, ValOnly} from './LineContent'
 import {LocalDeclare} from './locals'
 import MsAst from './MsAst'
 
-export default class Method extends ValOnly {
-	constructor(loc: Loc, public value: MethodValue) {
+export default class Poly extends ValOnly {
+	constructor(loc: Loc, public value: PolyValue) {
 		super(loc)
 	}
 }
 
-export type MethodValue = FunAbstract | FunBlock
+export type PolyValue = FunAbstract | FunBlock
 
 export class FunAbstract extends MsAst {
 	constructor(

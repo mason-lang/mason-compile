@@ -58,7 +58,7 @@ interface Language {
     unexpectedAfter(token: Token): string;
     unexpectedAfterImportDo: string;
     unexpectedAfterKind(kind: Keywords): string;
-    unexpectedAfterMethod: string;
+    unexpectedAfterPoly: string;
     ambiguousSK: string;
     ambiguousForSK: string;
     argsOperator(numProvidedArgs: number): string;

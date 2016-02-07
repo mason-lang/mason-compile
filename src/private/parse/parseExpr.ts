@@ -26,8 +26,8 @@ import parseExcept from './parseExcept'
 import {parseFor, parseForAsync, parseForBag} from './parseFor'
 import parseFun from './parseFunBlock'
 import parseMemberName from './parseMemberName'
-import parseMethod from './parseMethod'
 import parsePipe from './parsePipe'
+import parsePoly from './parsePoly'
 import parseSingle from './parseSingle'
 import parseSwitch from './parseSwitch'
 import parseTrait from './parseTrait'
@@ -136,10 +136,6 @@ function keywordExpr(at: Keyword, after: Tokens): Val {
 			return parseFun(at.kind, after)
 		case Keywords.If: case Keywords.Unless:
 			return parseConditional(at.kind, after)
-		case Keywords.Trait:
-			return parseTrait(after)
-		case Keywords.Method:
-			return parseMethod(after)
 		case Keywords.New: {
 			const parts = parseExprParts(after)
 			return new New(at.loc, head(parts), tail(parts))
@@ -151,10 +147,14 @@ function keywordExpr(at: Keyword, after: Tokens): Val {
 			return new Operator(at.loc, keywordKindToOperatorKind(kind), parseExprParts(after))
 		case Keywords.Pipe:
 			return parsePipe(after)
+		case Keywords.Poly:
+			return parsePoly(after)
 		case Keywords.Super:
 			return new SuperCall(at.loc, parseExprParts(after))
 		case Keywords.Switch:
 			return parseSwitch(after)
+		case Keywords.Trait:
+			return parseTrait(after)
 		case Keywords.UnaryNeg: case Keywords.UnaryNot:
 			return new UnaryOperator(at.loc, keywordKindToUnaryKind(kind), parseExprPlain(after))
 		case Keywords.With:
@@ -173,11 +173,11 @@ const exprSplitKeywords = new Set<Keywords>([
 	Keywords.For, Keywords.ForAsync, Keywords.ForBag, Keywords.Fun, Keywords.FunDo,
 	Keywords.FunThis, Keywords.FunThisDo, Keywords.FunAsync, Keywords.FunAsynDo,
 	Keywords.FunThisAsync, Keywords.FunThisAsynDo, Keywords.FunGen, Keywords.FunGenDo,
-	Keywords.FunThisGen, Keywords.FunThisGenDo, Keywords.If, Keywords.Method, Keywords.New,
-	Keywords.OpAnd, Keywords.OpDiv, Keywords.OpEq, Keywords.OpEqExact, Keywords.OpExponent,
-	Keywords.OpGreater, Keywords.OpGreaterOrEqual, Keywords.OpLess, Keywords.OpLessOrEqual,
-	Keywords.OpMinus, Keywords.OpOr, Keywords.OpPlus, Keywords.OpRemainder, Keywords.OpTimes,
-	Keywords.Pipe, Keywords.Super, Keywords.Switch, Keywords.Trait, Keywords.UnaryNeg,
+	Keywords.FunThisGen, Keywords.FunThisGenDo, Keywords.If, Keywords.New, Keywords.OpAnd,
+	Keywords.OpDiv, Keywords.OpEq, Keywords.OpEqExact, Keywords.OpExponent, Keywords.OpGreater,
+	Keywords.OpGreaterOrEqual, Keywords.OpLess, Keywords.OpLessOrEqual, Keywords.OpMinus,
+	Keywords.OpOr, Keywords.OpPlus, Keywords.OpRemainder, Keywords.OpTimes, Keywords.Pipe,
+	Keywords.Poly, Keywords.Super, Keywords.Switch, Keywords.Trait, Keywords.UnaryNeg,
 	Keywords.UnaryNot, Keywords.Unless, Keywords.With, Keywords.Yield, Keywords.YieldTo
 ])
 

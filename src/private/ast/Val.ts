@@ -108,7 +108,7 @@ export const enum SpecialVals {
 	/**
 	`name` value is the name of the nearest assigned value. In:
 
-		x = new Method
+		x = new Foo
 			name.
 
 	`name` will be "x".

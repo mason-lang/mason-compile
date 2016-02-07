@@ -7,7 +7,7 @@ import Fun from '../ast/Fun'
 import LineContent, {isVal, Val} from '../ast/LineContent'
 import {LocalAccess, LocalDeclare} from '../ast/locals'
 import {ForBag} from '../ast/Loop'
-import Method from '../ast/Method'
+import Poly from '../ast/Poly'
 import Trait from '../ast/Trait'
 import Quote, {MsRegExp, QuoteTagged} from '../ast/Quote'
 import {BagSimple, InstanceOf, Lazy, Member, NumberLiteral, ObjSimple, Operator, Pipe, Range,
@@ -23,7 +23,7 @@ import {registerAndPlusLocal, verifyAndPlusLocal, verifyLocalAccess, withBlockLo
 	} from './verifyLocals'
 import verifyLoop from './verifyLoop'
 import verifyMemberName from './verifyMemberName'
-import verifyMethod from './verifyMethod'
+import verifyPoly from './verifyPoly'
 import verifyQuote, {verifyQuoteTagged, verifyRegExp} from './verifyQuote'
 import verifyTrait from './verifyTrait'
 import verifyValOrDo from './verifyValOrDo'
@@ -60,10 +60,7 @@ export default function verifyVal(_: Val): void {
 		verifyVal(object)
 		verifyMemberName(name)
 
-	} else if (_ instanceof Method)
-		verifyMethod(_)
-
-	else if (_ instanceof MsRegExp)
+	} else if (_ instanceof MsRegExp)
 		verifyRegExp(_)
 
 	else if (_ instanceof New)
@@ -96,7 +93,10 @@ export default function verifyVal(_: Val): void {
 				verifyVal(pipe)
 			})
 
-	} else if (_ instanceof Quote)
+	} else if (_ instanceof Poly)
+		verifyPoly(_)
+
+	else if (_ instanceof Quote)
 		verifyQuote(_)
 
 	else if (_ instanceof QuoteTagged)

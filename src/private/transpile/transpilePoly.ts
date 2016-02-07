@@ -4,14 +4,14 @@ import {caseOp} from 'op/Op'
 import {FunBlock} from '../ast/Fun'
 import {Val} from '../ast/LineContent'
 import {LocalDeclare} from '../ast/locals'
-import Method from '../ast/Method'
+import Poly from '../ast/Poly'
 import {litUndefined} from './esast-constants'
 import {verifyResults} from './context'
 import {msCall} from './ms'
 import {transpileFunBlock} from './transpileFun'
 import transpileVal from './transpileVal'
 
-export function transpileMethodNoLoc(_: Method): Expression {
+export function transpilePolyNoLoc(_: Poly): Expression {
 	const {value} = _
 	const name = new LiteralString(verifyResults.name(_))
 	const args = value.opRestArg === null ?
