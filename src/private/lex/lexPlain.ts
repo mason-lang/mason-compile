@@ -1,14 +1,14 @@
 import Loc, {Pos} from 'esast/lib/Loc'
 import Char from 'typescript-char/Char'
 import {check, fail, compileOptions, warn} from '../context'
-import {GroupBlock, GroupBracket, GroupLine, GroupParenthesis, GroupSpace} from '../token/Group'
+import {GroupBlock, GroupBrace, GroupBracket, GroupLine, GroupParenthesis, GroupSpace, GroupType
+	} from '../token/Group'
 import Keyword, {isKeyword, Keywords} from '../token/Keyword'
 import {DocComment, NumberToken} from '../token/Token'
 import {assert, isEmpty, last} from '../util'
 import {isDigitBinary, isDigitDecimal, isDigitHex, isDigitOctal} from './chars'
 import {addToCurrentGroup, closeGroup, closeGroupsForDedent, closeInterpolationOrParenthesis,
-	closeLine, closeSpaceOKIfEmpty, curGroup, openGroup, openLine, openParenthesis, space
-	} from './groupContext'
+	closeLine, closeSpaceOKIfEmpty, curGroup, openGroup, openLine, space} from './groupContext'
 import lexName from './lexName'
 import lexQuote from './lexQuote'
 import {column, eat, eatRestOfLine, index, line, peek, pos, sourceString, skip, skipNewlines,
@@ -100,40 +100,53 @@ export default function lexPlain(isInQuote: boolean): void {
 		switch (characterEaten) {
 			case Char.Null:
 				return
+
 			case Char.Backtick: case Char.DoubleQuote:
 				lexQuote(indent, characterEaten === Char.Backtick)
 				break
 
 			// GROUPS
 
-			case Char.OpenParenthesis:
-				// Handle `()` specially to avoid warnings about an empty spaced group inside.
-				if (tryEat(Char.CloseParenthesis))
-					addToCurrentGroup(new GroupParenthesis(loc(), []))
-				else
-					openParenthesis(loc())
-				break
-			case Char.OpenBracket:
-				if (tryEat(Char.CloseBracket))
-					addToCurrentGroup(new GroupBracket(loc(), []))
+			case Char.OpenParenthesis: case Char.OpenBracket: case Char.OpenBrace:
+				const [ctr, close] = ((): [GroupType, Char] => {
+					switch (characterEaten) {
+						case Char.OpenParenthesis:
+							return [GroupParenthesis, Char.CloseParenthesis]
+						case Char.OpenBracket:
+							return [GroupBracket, Char.CloseBracket]
+						case Char.OpenBrace:
+							return [GroupBrace, Char.CloseBrace]
+						default:
+							throw new Error(String(characterEaten))
+					}
+				})()
+				// Handle empty group (like `()`) specially to avoid warnings about an empty GroupSpace inside.
+				if (tryEat(close))
+					addToCurrentGroup(new ctr(loc(), []))
 				else {
-					openGroup(startPos(), GroupBracket)
+					openGroup(startPos(), ctr)
 					openGroup(pos(), GroupSpace)
 				}
 				break
+
 			case Char.CloseParenthesis:
 				if (closeInterpolationOrParenthesis(loc())) {
 					assert(isInQuote)
 					return
 				}
 				break
-			case Char.CloseBracket:
+
+			case Char.CloseBracket: case Char.CloseBrace: {
+				const ctr = characterEaten === Char.CloseBracket ? GroupBracket : GroupBrace
 				closeGroup(startPos(), GroupSpace)
-				closeGroup(pos(), GroupBracket)
+				closeGroup(pos(), ctr)
 				break
+			}
+
 			case Char.Space:
 				space(loc())
 				break
+
 			case Char.LineFeed: {
 				check(!isInQuote, loc, _ => _.noNewlineInInterpolation)
 				if (peek(-2) === Char.Space)
@@ -165,6 +178,7 @@ export default function lexPlain(isInQuote: boolean): void {
 				}
 				break
 			}
+
 			case Char.Tab:
 				// We always eat tabs in the Char.LineFeed handler,
 				// so this will only happen in the middle of a line.
@@ -178,6 +192,7 @@ export default function lexPlain(isInQuote: boolean): void {
 				else
 					handleName()
 				break
+
 			case Char.$:
 				if (tryEat2(Char.ExclamationMark, Char.Backslash))
 					funKeyword(Keywords.FunAsynDo)
@@ -186,6 +201,7 @@ export default function lexPlain(isInQuote: boolean): void {
 				else
 					handleName()
 				break
+
 			case Char.Asterisk:
 				if (tryEat2(Char.ExclamationMark, Char.Backslash))
 					funKeyword(Keywords.FunGenDo)
@@ -194,9 +210,11 @@ export default function lexPlain(isInQuote: boolean): void {
 				else
 					handleName()
 				break
+
 			case Char.Backslash:
 				funKeyword(Keywords.Fun)
 				break
+
 			case Char.Bar:
 				const isDocComment = !tryEat(Char.Bar)
 				if (!(tryEat(Char.Space) || tryEat(Char.Tab) || peek() === Char.LineFeed))
@@ -222,6 +240,7 @@ export default function lexPlain(isInQuote: boolean): void {
 				else
 					handleName()
 				break
+
 			case Char._0: case Char._1: case Char._2: case Char._3: case Char._4:
 			case Char._5: case Char._6: case Char._7: case Char._8: case Char._9:
 				eatAndAddNumber()
@@ -229,13 +248,18 @@ export default function lexPlain(isInQuote: boolean): void {
 
 			// OTHER
 
-			case Char.Period: {
+			case Char.Period:
 				if (peek() === Char.Space || peek() === Char.LineFeed) {
 					// Keywords.ObjEntry in its own spaced group.
 					// We can't just create a new Group here because we want to
 					// ensure it's not part of the preceding or following spaced group.
 					closeSpaceOKIfEmpty(startPos())
 					keyword(Keywords.ObjEntry)
+				} else if (peek() === Char.CloseBrace) {
+					// Allow `{a. 1 b.}`
+					closeSpaceOKIfEmpty(startPos())
+					keyword(Keywords.ObjEntry)
+					openGroup(pos(), GroupSpace)
 				} else if (tryEat(Char.Backslash))
 					funKeyword(Keywords.FunThis)
 				else if (tryEat2(Char.ExclamationMark, Char.Backslash))
@@ -252,7 +276,6 @@ export default function lexPlain(isInQuote: boolean): void {
 				else
 					keyword(Keywords.Dot)
 				break
-			}
 
 			case Char.Colon:
 				if (tryEat(Char.Equal))

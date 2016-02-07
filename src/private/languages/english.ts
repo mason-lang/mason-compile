@@ -1,17 +1,19 @@
 import Loc from 'esast/lib/Loc'
 import Char from 'typescript-char/Char'
 import Token from '../token/Token'
-import Group, {GroupType} from '../token/Group'
+import Group, {GroupBrace, GroupBracket, GroupParenthesis, GroupType} from '../token/Group'
 import {Keywords} from '../token/Keyword'
 import {assert} from '../util'
 import Language from './Language'
-import {code, showChar, showKeyword as kw} from './util'
+import {code, showChar, showGroup, showGroupType, showKeyword as kw, showLoc, showToken
+	} from './util'
 
 const english: Language = {
 	// Lex:
 
 	badInterpolation:
-		`${code('#')} must be followed by ${code('(')}, ${code('#')}, or a name.`,
+		`${showChar(Char.Hash)} must be followed by ` +
+		`${showChar(Char.OpenParenthesis)}, ${showChar(Char.Hash)}, or a name.`,
 	badSpacedIndent: (indent: number): string =>
 		`Indentation spaces must be a multiple of ${indent}.`,
 	commentNeedsSpace:
@@ -21,7 +23,7 @@ const english: Language = {
 	extraSpace:
 		'Unnecessary space.',
 	mismatchedGroupClose: (actual: GroupType, expected: Group<Token>): string =>
-		`Trying to close ${actual.prototype.showType()}, but last opened ${expected.showType()}.`,
+		`Trying to close ${showGroupType(actual)}, but last opened ${showGroup(expected)}.`,
 	noLeadingSpace:
 		'Line begins in a space',
 	nonLeadingTab:
@@ -53,14 +55,12 @@ const english: Language = {
 		`${kw(Keywords.Del)} takes only one argument.`,
 	argsTraitDo:
 		`${kw(Keywords.TraitDo)} takes 2 arguments: implementor and trait.`,
-	assignNothing:
-		'Assignment to nothing.',
 	asToken:
 		`Expected only 1 token after ${kw(Keywords.As)}.`,
+	badAssignee:
+		`Assignee should be exactly 1 token (may be a ${showGroupType(GroupBrace)} group)`,
 	caseSwitchNeedsParts:
 		`Must have at least 1 non-${kw(Keywords.Else)} test.`,
-	destructureAllLazy:
-		'All locals of destructuring assignment must all lazy or all non-lazy.',
 	expectedAfterAssert:
 		`Expected something after ${kw(Keywords.Assert)}.`,
 	expectedAfterColon:
@@ -78,11 +78,11 @@ const english: Language = {
 	expectedOneLocal:
 		'Expected only one local declaration.',
 	expectedLocalName: (token: Token): string =>
-		`Expected a local name, not ${token}.`,
+		`Expected a local name, not ${showToken(token)}.`,
 	expectedName: (token: Token): string =>
-		`Expected a name, not ${token}`,
+		`Expected a name, not ${showToken(token)}`,
 	extraParens:
-		`Unnecessary ${code('()')}`,
+		`Unnecessary ${showGroupType(GroupParenthesis)}`,
 	funFocusArgIsImplicit: (keyword: Keywords): string =>
 		`Nothing may come after ${kw(keyword)}; function argument is implicitly ${kw(Keywords.Focus)}.`,
 	implicitFunctionDot:
@@ -92,7 +92,7 @@ const english: Language = {
 	invalidImportModule:
 		'Not a valid module name.',
 	methodName:
-		'Method name may only be one token (including a parenthesized expression).',
+		`Method name must be exactly one token (may be a ${showGroupType(GroupParenthesis)} group).`,
 	noImportFocus:
 		`${kw(Keywords.Focus)} not allowed as import name.`,
 	noMyOverride:
@@ -104,7 +104,7 @@ const english: Language = {
 	parensOutsideCall:
 		`Use ${code('(a b)')}, not ${code('a(b)')}.`,
 	reservedWord: (token: Token): string =>
-		`Reserved word ${token}.`,
+		`Reserved word ${showToken(token)}.`,
 	tokenAfterSuper:
 		`Expected ${kw(Keywords.Dot)} or ${code('()')} after ${kw(Keywords.Super)}`,
 	todoForPattern:
@@ -114,9 +114,9 @@ const english: Language = {
 	todoMutateDestructure:
 		'TODO: LocalDestructureMutate',
 	unexpected: (token: Token): string =>
-		`Unexpected ${token}.`,
+		`Unexpected ${showToken(token)}.`,
 	unexpectedAfter: (token: Token): string =>
-		`Did not expect anything after ${token}.`,
+		`Did not expect anything after ${showToken(token)}.`,
 	unexpectedAfterImportDo:
 		`This is an ${kw(Keywords.ImportDo)}, so you can't import any values.`,
 	unexpectedAfterKind: (kind: Keywords): string =>
@@ -156,12 +156,14 @@ const english: Language = {
 		'Expression must be placed in a position where name can be determined.',
 	cantInferBlockKind:
 		'Block has mixed bag/map/obj entries — can not infer type.',
+	destructureAllLazy:
+		'All locals of destructuring assignment must all lazy or all non-lazy.',
 	doFuncCantHaveType:
 		'Function with return type must return something.',
 	duplicateImport: (name: string, prevLoc: Loc): string =>
-		`${code(name)} already imported at ${prevLoc}`,
+		`${code(name)} already imported at ${showLoc(prevLoc)}`,
 	duplicateKey: (key: string): string =>
-		`Duplicate key ${key}`,
+		`Duplicate key ${code(key)}`,
 	duplicateLocal: (name: string): string =>
 		`A local ${code(name)} already exists and can't be shadowed.`,
 	elseRequiresCatch:
@@ -177,7 +179,7 @@ const english: Language = {
 	misplacedSpreadDo:
 		`Can not spread here. Did you forget the space after ${kw(Keywords.Dot3)}?`,
 	misplacedSpreadVal:
-		`Can only spread in call, ${kw(Keywords.New)}, or ${code('[]')}.`,
+		`Can only spread in call, ${kw(Keywords.New)}, or ${showGroupType(GroupBracket)}.`,
 	misplacedYield: (kind: Keywords): string =>
 		`Cannot ${kw(kind)} outside of generator function.`,
 	missingLocal: (name: string): string =>

@@ -7,31 +7,21 @@ abstract class Group<SubType extends Token> extends Token {
 		super(loc)
 	}
 
-	abstract showType(): string
-
 	get type(): GroupType {
 		return <any> this.constructor
-	}
-
-	/** @override */
-	toString(): string {
-		return this.constructor.name
 	}
 }
 export default Group
 
 export type GroupType = {
 	new(loc: Loc, subTokens: Array<{}>): Group<Token>
-	prototype: {showType(): string}
 }
 
 /**
 Lines in an indented block.
 Note that `Block`s do not always map to [[Block]] MsAsts.
 */
-export class GroupBlock extends Group<GroupLine> {
-	showType(): string { return 'indented block' }
-}
+export class GroupBlock extends Group<GroupLine> {}
 
 export type QuoteTokenPart = StringToken | NameToken | Keyword | GroupInterpolation
 
@@ -39,9 +29,7 @@ export type QuoteTokenPart = StringToken | NameToken | Keyword | GroupInterpolat
 Tokens within a quote.
 `subTokens` may be plain strings, Names (for `#foo`), or Interpolation groups (for `#(0)`).
 */
-export class GroupQuote extends Group<QuoteTokenPart> {
-	showType(): string { return 'quote' }
-}
+export class GroupQuote extends Group<QuoteTokenPart> {}
 
 /**
 Tokens within a RegExp.
@@ -49,7 +37,6 @@ Tokens within a RegExp.
 */
 export class GroupRegExp extends Group<QuoteTokenPart> {
 	flags: string
-	showType(): string { return 'regexp' }
 }
 
 /**
@@ -61,14 +48,13 @@ There may be no closing parenthesis. In:
 
 The tokens are a Group<Line>(Name, Group<Parenthesis>(...))
 */
-export class GroupParenthesis extends Group<Token> {
-	showType(): string { return '()' }
-}
+export class GroupParenthesis extends Group<Token> {}
 
 /** Like [[GroupParenthesis]], but simpler because there must be a closing `]`. */
-export class GroupBracket extends Group<Token> {
-	showType(): string { return '[]' }
-}
+export class GroupBracket extends Group<Token> {}
+
+/** Like [[GroupBracket]] but for `{}` instead of `[]`. */
+export class GroupBrace extends Group<Token> {}
 
 /**
 Tokens on a line.

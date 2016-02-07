@@ -1,5 +1,4 @@
 import Op, {caseOp, opIf} from 'op/Op'
-import Loc from 'esast/lib/Loc'
 import Await from '../ast/Await'
 import {Cond, Conditional} from '../ast/booleans'
 import Block from '../ast/Block'
@@ -7,7 +6,7 @@ import Call, {New} from '../ast/Call'
 import {SuperCall} from '../ast/Class'
 import {Val} from '../ast/LineContent'
 import {LocalDeclare} from '../ast/locals'
-import {ObjPair, ObjSimple, Operator, UnaryOperator} from '../ast/Val'
+import {Operator, UnaryOperator} from '../ast/Val'
 import With from '../ast/With'
 import {Yield, YieldTo} from '../ast/YieldLike'
 import {check, warn} from '../context'
@@ -25,7 +24,6 @@ import parseDel from './parseDel'
 import parseExcept from './parseExcept'
 import {parseFor, parseForAsync, parseForBag} from './parseFor'
 import parseFun from './parseFunBlock'
-import parseMemberName from './parseMemberName'
 import parsePipe from './parsePipe'
 import parsePoly from './parsePoly'
 import parseSingle from './parseSingle'
@@ -36,10 +34,19 @@ import {Lines, Tokens} from './Slice'
 
 /** Parse a [[Val]]. */
 export default function parseExpr(tokens: Tokens): Val {
-	return caseOp(
-		tokens.opSplitMany(_ => isKeyword(Keywords.ObjEntry, _)),
-		_ => parseObjSimple(tokens.loc, _),
-		() => parseExprPlain(tokens))
+	checkNonEmpty(tokens, _ => _.expectedExpression)
+	const parts = parseExprParts(tokens)
+	if (parts.length === 1) {
+		/*
+		Warn if an expression consists only of a GroupParenthesis.
+		e.g.: `(not true)` on a line by itself
+		e.g.: `not (not true)` because the first `not` takes an expression after it.
+		*/
+		if (tokens.head() instanceof GroupParenthesis)
+			warn(tokens.loc, _ => _.extraParens)
+		return head(parts)
+	} else
+		return new Call(tokens.loc, head(parts), tail(parts))
 }
 
 export function opParseExpr(tokens: Tokens): Op<Val> {
@@ -79,38 +86,12 @@ export function parseNExprParts(tokens: Tokens, n: number, message: (_: Language
 	return parts
 }
 
-function parseObjSimple(loc: Loc, splits: Array<{before: Tokens, at: Token}>): Val {
-	// Short object form, such as (a. 1, b. 2)
-	const first = splits[0].before
-	checkNonEmpty(first, _ => _.unexpected(splits[0].at))
-	const tokensCaller = first.rtail()
-
-	const pairs: Array<ObjPair> = []
-	for (let i = 0; i < splits.length - 1; i = i + 1) {
-		const nameToken = splits[i].before.last()
-		const name = parseMemberName(nameToken)
-		const tokensValue = i === splits.length - 2 ?
-			splits[i + 1].before :
-			splits[i + 1].before.rtail()
-		const value = parseExprPlain(tokensValue)
-		const loc = new Loc(nameToken.loc.start, tokensValue.loc.end)
-		pairs.push(new ObjPair(loc, name, value))
-	}
-	const val = new ObjSimple(loc, pairs)
-	if (tokensCaller.isEmpty())
-		return val
-	else {
-		const parts = parseExprParts(tokensCaller)
-		return new Call(loc, head(parts), cat(tail(parts), val))
-	}
-}
-
 /** The keyword `at` groups with everything after it. */
 function keywordExpr(at: Keyword, after: Tokens): Val {
 	const {kind} = at
 	switch (kind) {
 		case Keywords.Await:
-			return new Await(at.loc, parseExprPlain(after))
+			return new Await(at.loc, parseExpr(after))
 		case Keywords.Case:
 			return parseCase(after)
 		case Keywords.Class:
@@ -156,13 +137,13 @@ function keywordExpr(at: Keyword, after: Tokens): Val {
 		case Keywords.Trait:
 			return parseTrait(after)
 		case Keywords.UnaryNeg: case Keywords.UnaryNot:
-			return new UnaryOperator(at.loc, keywordKindToUnaryKind(kind), parseExprPlain(after))
+			return new UnaryOperator(at.loc, keywordKindToUnaryKind(kind), parseExpr(after))
 		case Keywords.With:
 			return parseWith(after)
 		case Keywords.Yield:
-			return new Yield(at.loc, opIf(!after.isEmpty(), () => parseExprPlain(after)))
+			return new Yield(at.loc, opIf(!after.isEmpty(), () => parseExpr(after)))
 		case Keywords.YieldTo:
-			return new YieldTo(at.loc, parseExprPlain(after))
+			return new YieldTo(at.loc, parseExpr(after))
 		default:
 			throw new Error(String(at.kind))
 	}
@@ -185,24 +166,6 @@ function isSplitKeyword(_: Token): boolean {
 	return isAnyKeyword(exprSplitKeywords, _)
 }
 
-function parseExprPlain(tokens: Tokens): Val {
-	checkNonEmpty(tokens, _ => _.expectedExpression)
-	const parts = parseExprParts(tokens)
-	if (parts.length === 1) {
-		/*
-		Warn if an expression consists only of a GroupParenthesis.
-		e.g.: `(not true)` on a line by itself
-		e.g.: `not (not true)` because the first `not` takes an expression after it.
-		*/
-		// todo: this is a good reason to change the ObjSimple syntax.
-		// `a. 1 b. 2` is interpreted as the ObjEntry `a. 1 (b. 2)`, so it needs parentheses.
-		if (tokens.head() instanceof GroupParenthesis && !(head(parts) instanceof ObjSimple))
-			warn(tokens.loc, _ => _.extraParens)
-		return head(parts)
-	} else
-		return new Call(tokens.loc, head(parts), tail(parts))
-}
-
 function parseCond(tokens: Tokens): Val {
 	const [cond, ifTrue, ifFalse] = parseNExprParts(tokens, 3, _ => _.argsCond)
 	return new Cond(tokens.loc, cond, ifTrue, ifFalse)
@@ -212,7 +175,7 @@ function parseConditional(kind: Keywords, tokens: Tokens): Conditional {
 	const [before, opBlock] = beforeAndOpBlock(tokens)
 	const [condition, result] = caseOp<Lines, [Val, Block | Val]>(
 		opBlock,
-		_ => [parseExprPlain(before), parseBlock(_)],
+		_ => [parseExpr(before), parseBlock(_)],
 		() => <[Val, Block | Val]> (<any> parseNExprParts(before, 2, _ => _.argsConditional(kind))))
 	return new Conditional(tokens.loc, condition, result, kind === Keywords.Unless)
 }
@@ -223,9 +186,9 @@ function parseWith(tokens: Tokens): With {
 		before.opSplitOnce(_ => isKeyword(Keywords.As, _)),
 		({before, after}) => {
 			check(after.size() === 1, after.loc, _ => _.asToken)
-			return [parseExprPlain(before), parseLocalDeclare(after.head())]
+			return [parseExpr(before), parseLocalDeclare(after.head())]
 		},
-		() => [parseExprPlain(before), LocalDeclare.focus(tokens.loc)])
+		() => [parseExpr(before), LocalDeclare.focus(tokens.loc)])
 
 	return new With(tokens.loc, declare, val, parseBlock(block))
 }

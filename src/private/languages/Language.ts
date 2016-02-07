@@ -30,10 +30,9 @@ interface Language {
 	argsConditional(kind: Keywords): string
 	argsDel: string
 	argsTraitDo: string
-	assignNothing: string
 	asToken: string
+	badAssignee: string
 	caseSwitchNeedsParts: string
-	destructureAllLazy: string
 	expectedAfterAssert: string
 	expectedAfterColon: string
 	expectedBlock: string
@@ -78,6 +77,7 @@ interface Language {
 	breakValInForBag: string
 	cantDetermineName: string
 	cantInferBlockKind: string
+	destructureAllLazy: string
 	doFuncCantHaveType: string
 	duplicateImport(name: string, prevLoc: Loc): string
 	duplicateKey(key: string): string

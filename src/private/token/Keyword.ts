@@ -1,7 +1,6 @@
 import Loc from 'esast/lib/Loc'
 import Op from 'op/Op'
 import {Operators, SpecialVals, UnaryOperators} from '../ast/Val'
-import {showKeyword} from '../languages/util'
 import Token from './Token'
 
 /**
@@ -15,11 +14,6 @@ Kind is a ***. See the full list below.
 export default class Keyword extends Token {
 	constructor(loc: Loc, public kind: Keywords) {
 		super(loc)
-	}
-
-	/** @override */
-	toString(): string {
-		return showKeyword(this.kind)
 	}
 }
 

@@ -61,9 +61,13 @@ export function verifyAssign(_: Assign): void {
 
 	} else if (_ instanceof AssignDestructure) {
 		const {assignees, value} = _
+
+		const kind = assignees[0].kind
 		// Assignees registered by verifyLines.
-		for (const _ of assignees)
+		for (const _ of assignees) {
+			check(_.kind === kind, _.loc, _ => _.destructureAllLazy)
 			verifyLocalDeclare(_)
+		}
 		verifyVal(value)
 
 	} else

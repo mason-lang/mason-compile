@@ -9,7 +9,6 @@ export declare function openGroup(openPos: Pos, groupType: GroupType): void;
 export declare function maybeCloseGroup(closePos: Pos, closeType: GroupType): void;
 export declare function closeGroup(closePos: Pos, closeType: GroupType): void;
 export declare function closeSpaceOKIfEmpty(pos: Pos): void;
-export declare function openParenthesis(loc: Loc): void;
 export declare function openInterpolation(loc: Loc): void;
 export declare function closeInterpolationOrParenthesis(loc: Loc): boolean;
 export declare function closeGroupsForDedent(pos: Pos): void;

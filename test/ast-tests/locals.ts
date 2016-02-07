@@ -36,7 +36,7 @@ describe('locals', () => {
 	})
 
 	test(
-		'a b = 0',
+		'{a b} = 0',
 		new AssignDestructure(loc, [aDeclare, bDeclare], zero),
 		'let _$0=0,a=_$0.a,b=_$0.b',
 		{warnings: ['Unused local variable {{a}}.', 'Unused local variable {{b}}.']})

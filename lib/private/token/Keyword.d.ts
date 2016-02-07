@@ -5,7 +5,6 @@ import Token from './Token';
 export default class Keyword extends Token {
     kind: Keywords;
     constructor(loc: Loc, kind: Keywords);
-    toString(): string;
 }
 export declare const enum Keywords {
     Enum = 0,

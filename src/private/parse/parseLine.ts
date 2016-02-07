@@ -10,14 +10,14 @@ import {Break} from '../ast/Loop'
 import {QuoteSimple} from '../ast/Quote'
 import {SpecialVal, SpecialVals} from '../ast/Val'
 import {check} from '../context'
-import {GroupBracket, GroupQuote, GroupSpace} from '../token/Group'
+import {GroupBrace, GroupBracket, GroupQuote, GroupSpace} from '../token/Group'
 import Keyword, {isAnyKeyword, isKeyword, keywordName, Keywords} from '../token/Keyword'
 import Token from '../token/Token'
 import {tail} from '../util'
 import {checkEmpty, checkNonEmpty} from './checks'
 import {justBlock} from './parseBlock'
 import parseExpr, {opParseExpr, parseExprParts} from './parseExpr'
-import parseLocalDeclares, {parseLocalDeclaresJustNames, parseLocalName} from './parseLocalDeclares'
+import {parseLocalDeclare, parseLocalDeclaresJustNames, parseLocalName} from './parseLocalDeclares'
 import parseMemberName from './parseMemberName'
 import parseName from './parseName'
 import parseQuote from './parseQuote'
@@ -164,19 +164,15 @@ function parseLocalMutate(localsTokens: Tokens, value: Val, loc: Loc): LocalMuta
 	return new LocalMutate(loc, locals[0].name, value)
 }
 
-function parseAssign(localsTokens: Tokens, after: Tokens, loc: Loc): Assign {
+function parseAssign(assigneeTokens: Tokens, after: Tokens, loc: Loc): Assign {
+	check(assigneeTokens.size() === 1, assigneeTokens.loc, _ => _.badAssignee)
+	const assignee = assigneeTokens.head()
 	const value = parseExpr(after)
-	const locals = parseLocalDeclares(localsTokens)
-	if (locals.length === 1)
-		return new AssignSingle(loc, locals[0], value)
-	else {
-		check(locals.length > 1, localsTokens.loc, _ => _.assignNothing)
-		const kind = locals[0].kind
-		// todo: do in verify
-		for (const _ of locals)
-			check(_.kind === kind, _.loc, _ => _.destructureAllLazy)
+	if (assignee instanceof GroupBrace) {
+		const locals = Tokens.of(assignee).map(parseLocalDeclare)
 		return new AssignDestructure(loc, locals, value)
-	}
+	} else
+		return new AssignSingle(loc, parseLocalDeclare(assignee), value)
 }
 
 function parseAssert(negate: boolean, tokens: Tokens): Assert {

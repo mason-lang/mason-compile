@@ -15,7 +15,7 @@ describe('expressions', () => {
 		'[0,1]')
 
 	test(
-		'(a. 0 b. 1)',
+		'{a. 0 b. 1}',
 		new ObjSimple(loc, [
 			new ObjPair(loc, 'a', zero),
 			new ObjPair(loc, 'b', one)
@@ -25,6 +25,7 @@ describe('expressions', () => {
 				a:0,
 				b:1
 			}`)
+	// todo: other ObjSimple types
 
 	test(
 		'0',

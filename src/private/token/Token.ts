@@ -1,5 +1,4 @@
 import Loc from 'esast/lib/Loc'
-import {code} from '../languages/util'
 
 /**
 Lexed element in a tree of Tokens.
@@ -24,11 +23,6 @@ export class NameToken extends Token {
 	constructor(loc: Loc, public name: string) {
 		super(loc)
 	}
-
-	/** @override */
-	toString(): string {
-		return code(this.name)
-	}
 }
 
 /**
@@ -40,22 +34,12 @@ export class DocComment extends Token {
 	constructor(loc: Loc, public text: string) {
 		super(loc)
 	}
-
-	/** @override */
-	toString(): string {
-		return 'doc comment'
-	}
 }
 
 /** Number literal. */
 export class NumberToken extends Token {
 	constructor(loc: Loc, public value: string) {
 		super(loc)
-	}
-
-	/** @override */
-	toString(): string {
-		return this.value
 	}
 }
 
@@ -66,10 +50,5 @@ String part of a GroupQuote or GroupRegExp.
 export class StringToken extends Token {
 	constructor(loc: Loc, public value: string) {
 		super(loc)
-	}
-
-	/** @override */
-	toString(): string {
-		return this.value
 	}
 }

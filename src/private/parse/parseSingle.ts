@@ -3,13 +3,14 @@ import {Val} from '../ast/LineContent'
 import {LocalAccess} from '../ast/locals'
 import {BagSimple, NumberLiteral, SpecialVal} from '../ast/Val'
 import {warn} from '../context'
-import Group, {GroupBlock, GroupBracket, GroupParenthesis, GroupQuote, GroupRegExp, GroupSpace
-	} from '../token/Group'
+import Group, {GroupBlock, GroupBrace, GroupBracket, GroupParenthesis, GroupQuote, GroupRegExp,
+	GroupSpace} from '../token/Group'
 import Keyword, {Keywords, opKeywordKindToSpecialValueKind} from '../token/Keyword'
 import Token, {NameToken, NumberToken} from '../token/Token'
 import {unexpected} from './checks'
 import {parseBlockWrap} from './parseBlock'
 import parseExpr, {parseExprParts} from './parseExpr'
+import parseObjSimple from './parseObjSimple'
 import parseQuote, {parseRegExp} from './parseQuote'
 import parseSpaced from './parseSpaced'
 import Slice, {Lines, Tokens} from './Slice'
@@ -32,6 +33,8 @@ export default function parseSingle(token: Token, isInSpaced: boolean = false): 
 			return parseExpr(slice)
 		} else if (token instanceof GroupBracket)
 			return new BagSimple(loc, parseExprParts(Tokens.of(token)))
+		else if (token instanceof GroupBrace)
+			return parseObjSimple(Tokens.of(token))
 		else if (token instanceof GroupBlock)
 			return parseBlockWrap(Lines.of(token))
 		else if (token instanceof GroupQuote)

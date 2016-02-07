@@ -92,11 +92,6 @@ export function closeSpaceOKIfEmpty(pos: Pos): void {
 		closeGroupNoCheck(pos, GroupSpace)
 }
 
-export function openParenthesis(loc: Loc): void {
-	openGroup(loc.start, GroupParenthesis)
-	openGroup(loc.end, GroupSpace)
-}
-
 export function openInterpolation(loc: Loc): void {
 	openGroup(loc.start, GroupInterpolation)
 	openGroup(loc.end, GroupSpace)

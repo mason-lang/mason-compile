@@ -1,5 +1,12 @@
+import Loc from 'esast/lib/Loc';
 import Char from 'typescript-char/Char';
+import Group, { GroupType } from '../token/Group';
 import { Keywords } from '../token/Keyword';
+import Token from '../token/Token';
 export declare function code(str: string): string;
 export declare function showChar(char: Char): string;
 export declare function showKeyword(kind: Keywords): string;
+export declare function showGroupType(type: GroupType): string;
+export declare function showGroup(group: Group<Token>): string;
+export declare function showToken(_: Token): string;
+export declare function showLoc(_: Loc): string;
