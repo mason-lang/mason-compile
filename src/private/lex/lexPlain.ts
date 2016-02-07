@@ -47,12 +47,12 @@ export default function lexPlain(isInQuote: boolean): void {
 		if (peek(-1) === Char._0) {
 			const p = peek()
 			switch (p) {
-				case Char.B: case Char.O: case Char.X: {
+				case Char.b: case Char.o: case Char.x: {
 					skip()
 					const isDigitSpecial =
-						p === Char.B ?
+						p === Char.b ?
 						isDigitBinary :
-						p === Char.O ?
+						p === Char.o ?
 						isDigitOctal :
 						isDigitHex
 					skipWhile(isDigitSpecial)
