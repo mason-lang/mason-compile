@@ -6,6 +6,7 @@ import {Val, ValOnly} from './LineContent'
 import {Operators, UnaryOperators} from './Val'
 import {LocalDeclare} from './locals'
 import MemberName from './MemberName'
+import Named from './Named'
 
 abstract class Fun extends ValOnly {
 	// Make this a nominal type
@@ -17,7 +18,7 @@ export default Fun
 ```|:{opDeclareRes} {args} ...{opRestArg}
 	{block}```
 */
-export class FunBlock extends Fun {
+export class FunBlock extends Fun implements Named {
 	kind: Funs
 	opDeclareThis: Op<LocalDeclare>
 	isDo: boolean
@@ -41,6 +42,8 @@ export class FunBlock extends Fun {
 		this.isDo = isDo
 		this.opReturnType = opReturnType
 	}
+
+	isNamed(): void {}
 }
 /** Kind of [[Fun]]. */
 export const enum Funs {

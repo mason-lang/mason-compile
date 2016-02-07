@@ -3,6 +3,7 @@ import Op from 'op/Op'
 import {Val, ValOnly} from './LineContent'
 import MsAst from './MsAst'
 import MemberName from './MemberName'
+import Named from './Named'
 
 /** One-line @ expression, such as `[ 1 2 3 ]`. */
 export class BagSimple extends ValOnly {
@@ -95,10 +96,12 @@ export class Sub extends ValOnly {
 A special expression.
 All SpecialVals are atomic and do not rely on context.
 */
-export class SpecialVal extends ValOnly {
+export class SpecialVal extends ValOnly implements Named {
 	constructor(loc: Loc, public kind: SpecialVals) {
 		super(loc)
 	}
+
+	isNamed(): void {}
 }
 
 /** Kind of [[SpecialVal]]. */

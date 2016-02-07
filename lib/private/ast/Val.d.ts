@@ -3,6 +3,7 @@ import Op from 'op/Op';
 import { Val, ValOnly } from './LineContent';
 import MsAst from './MsAst';
 import MemberName from './MemberName';
+import Named from './Named';
 export declare class BagSimple extends ValOnly {
     parts: Array<Val>;
     constructor(loc: Loc, parts: Array<Val>);
@@ -51,9 +52,10 @@ export declare class Sub extends ValOnly {
     args: Array<Val>;
     constructor(loc: Loc, subbed: Val, args: Array<Val>);
 }
-export declare class SpecialVal extends ValOnly {
+export declare class SpecialVal extends ValOnly implements Named {
     kind: SpecialVals;
     constructor(loc: Loc, kind: SpecialVals);
+    isNamed(): void;
 }
 export declare const enum SpecialVals {
     False = 0,

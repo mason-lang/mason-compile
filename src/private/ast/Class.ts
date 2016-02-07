@@ -7,6 +7,7 @@ import {Val, ValOnly, ValOrDo} from './LineContent'
 import {LocalDeclare} from './locals'
 import MemberName from './MemberName'
 import MsAst from './MsAst'
+import Named from './Named'
 
 /**
 ```class {opSuperClass}
@@ -18,7 +19,7 @@ import MsAst from './MsAst'
 	{opConstructor}
 	{methods}```
 */
-export default class Class extends ValOnly {
+export default class Class extends ValOnly implements Named {
 	constructor(
 		loc: Loc,
 		public opFields: Op<Array<Field>>,
@@ -35,6 +36,8 @@ export default class Class extends ValOnly {
 	get isRecord(): boolean {
 		return this.opFields !== null
 	}
+
+	isNamed(): void {}
 }
 
 /** Single field specification for a record class. */

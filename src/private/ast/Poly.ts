@@ -4,11 +4,14 @@ import {FunBlock} from './Fun'
 import {Val, ValOnly} from './LineContent'
 import {LocalDeclare} from './locals'
 import MsAst from './MsAst'
+import Named from './Named'
 
-export default class Poly extends ValOnly {
+export default class Poly extends ValOnly implements Named {
 	constructor(loc: Loc, public value: PolyValue) {
 		super(loc)
 	}
+
+	isNamed(): void {}
 }
 
 export type PolyValue = FunAbstract | FunBlock

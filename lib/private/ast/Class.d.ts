@@ -7,7 +7,8 @@ import { Val, ValOnly, ValOrDo } from './LineContent';
 import { LocalDeclare } from './locals';
 import MemberName from './MemberName';
 import MsAst from './MsAst';
-export default class Class extends ValOnly {
+import Named from './Named';
+export default class Class extends ValOnly implements Named {
     opFields: Op<Array<Field>>;
     opSuperClass: Op<Val>;
     traits: Array<Val>;
@@ -18,6 +19,7 @@ export default class Class extends ValOnly {
     methods: Array<MethodImplLike>;
     constructor(loc: Loc, opFields: Op<Array<Field>>, opSuperClass: Op<Val>, traits: Array<Val>, opComment?: Op<string>, opDo?: Op<ClassTraitDo>, statics?: Array<MethodImplLike>, opConstructor?: Op<Constructor>, methods?: Array<MethodImplLike>);
     isRecord: boolean;
+    isNamed(): void;
 }
 export declare class Field extends MsAst {
     name: string;

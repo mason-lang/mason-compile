@@ -5,11 +5,12 @@ import { Val, ValOnly } from './LineContent';
 import { Operators, UnaryOperators } from './Val';
 import { LocalDeclare } from './locals';
 import MemberName from './MemberName';
+import Named from './Named';
 declare abstract class Fun extends ValOnly {
     isFun(): void;
 }
 export default Fun;
-export declare class FunBlock extends Fun {
+export declare class FunBlock extends Fun implements Named {
     args: Array<LocalDeclare>;
     opRestArg: Op<LocalDeclare>;
     block: Block;
@@ -18,6 +19,7 @@ export declare class FunBlock extends Fun {
     isDo: boolean;
     opReturnType: Op<Val>;
     constructor(loc: Loc, args: Array<LocalDeclare>, opRestArg: Op<LocalDeclare>, block: Block, opts?: FunBlockOptions);
+    isNamed(): void;
 }
 export declare const enum Funs {
     Plain = 0,
