@@ -5,7 +5,7 @@ import parseMethodSplit from './parseMethodSplit'
 import {Tokens} from './Slice'
 
 export default function parsePoly(tokens: Tokens): Poly {
-	const {before, kind, after} = parseMethodSplit(tokens)
+	const {before, options, after} = parseMethodSplit(tokens)
 	checkEmpty(before, _ => _.unexpectedAfterPoly)
-	return new Poly(tokens.loc, parsePolyValue(kind, after))
+	return new Poly(tokens.loc, parsePolyValue(options, after))
 }

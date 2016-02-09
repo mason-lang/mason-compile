@@ -104,8 +104,13 @@ returning whether it was an interpolation.
 export function closeInterpolationOrParenthesis(loc: Loc): boolean {
 	closeGroupNoCheck(loc.start, GroupSpace)
 	const group = curGroup
-	closeGroup(loc.end, group.type)
+	closeGroupNoCheck(loc.end, group.type)
 	return group instanceof GroupInterpolation
+}
+
+export function closeInterpolation(loc: Loc): void {
+	closeGroupNoCheck(loc.start, GroupSpace)
+	closeGroup(loc.end, GroupInterpolation)
 }
 
 export function closeGroupsForDedent(pos: Pos): void {

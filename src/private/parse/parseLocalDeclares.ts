@@ -3,7 +3,7 @@ import {Val} from '../ast/LineContent'
 import {LocalDeclare, LocalDeclares} from '../ast/locals'
 import {check, fail} from '../context'
 import {GroupSpace} from '../token/Group'
-import {isKeyword, Keywords} from '../token/Keyword'
+import {isKeyword, Kw} from '../token/Keyword'
 import Token, {NameToken} from '../token/Token'
 import {checkNonEmpty, checkKeyword} from './checks'
 import parseSpaced from './parseSpaced'
@@ -53,7 +53,7 @@ Parse a name for a local variable.
 Unlike [[parseName]], `_` is the only allowed Keyword.
 */
 export function parseLocalName(token: Token): string {
-	if (isKeyword(Keywords.Focus, token))
+	if (isKeyword(Kw.Focus, token))
 		return '_'
 	else if (token instanceof NameToken)
 		return token.name
@@ -75,7 +75,7 @@ export function parseLocalDeclareOrFocus(tokens: Tokens): LocalDeclare {
 		const token = tokens.head()
 		if (token instanceof GroupSpace) {
 			const slice = Tokens.of(token)
-			if (isKeyword(Keywords.Colon, slice.head()))
+			if (isKeyword(Kw.Colon, slice.head()))
 				return LocalDeclare.typedFocus(tokens.loc, parseSpaced(slice.tail()))
 		}
 		return parseLocalDeclare(token)
@@ -93,16 +93,16 @@ export function parseLocalParts(token: Token, orMember: boolean = false)
 function parseLocalPartsFromSpaced(tokens: Tokens, orMember: boolean = false)
 	: {name: string, opType: Op<Val>, kind: LocalDeclares, isMember: boolean} {
 	const [rest, kind, isMember] =
-		isKeyword(Keywords.Lazy, tokens.head()) ?
+		isKeyword(Kw.Lazy, tokens.head()) ?
 			[tokens.tail(), LocalDeclares.Lazy, false] :
-			orMember && isKeyword(Keywords.Dot, tokens.head()) ?
+			orMember && isKeyword(Kw.Dot, tokens.head()) ?
 			[tokens.tail(), LocalDeclares.Eager, true] :
 			[tokens, LocalDeclares.Eager, false]
 	const name = parseLocalName(rest.head())
 	const rest2 = rest.tail()
 	const opType = opIf(!rest2.isEmpty(), () => {
 		const colon = rest2.head()
-		checkKeyword(Keywords.Colon, colon)
+		checkKeyword(Kw.Colon, colon)
 		const tokensType = rest2.tail()
 		checkNonEmpty(tokensType, _ => _.expectedAfterColon)
 		return parseSpaced(tokensType)

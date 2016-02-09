@@ -1,7 +1,7 @@
 import Loc from 'esast/lib/Loc';
 import Op from 'op/Op';
 import Group, { GroupLine, QuoteTokenPart } from '../token/Group';
-import { Keywords } from '../token/Keyword';
+import { Kw } from '../token/Keyword';
 import Token from '../token/Token';
 export default class Slice<SubType extends Token> {
     static of<SubType extends Token>(group: Group<SubType>): Slice<SubType>;
@@ -20,6 +20,7 @@ export default class Slice<SubType extends Token> {
     rtail(): this;
     opSplitOnce(splitOn: (_: Token) => boolean): Op<SplitOnceResult<this, SubType>>;
     opSplitMany(splitOn: (_: Token) => boolean): Op<SplitManyResult<this, SubType>>;
+    protected indices(): Iterable<number>;
     [Symbol.iterator](): Iterator<SubType>;
     map<A>(mapper: (_: SubType) => A): Array<A>;
     private slice(newStart, newEnd, newLoc);
@@ -36,8 +37,8 @@ export declare class Lines extends Slice<GroupLine> {
 }
 export declare class Tokens extends Slice<Token> {
     static of(group: Group<Token>): Tokens;
-    getKeywordSections(...keywords: Array<Keywords>): [this, Array<Op<this>>];
-    takeKeywords(...keywords: Array<Keywords>): [Array<boolean>, this];
+    getKeywordSections(...keywords: Array<Kw>): [this, Array<Op<this>>];
+    takeKeywords(...keywords: Array<Kw>): [Array<boolean>, this];
 }
 export declare type QuoteTokens = Slice<QuoteTokenPart>;
 export declare type SplitOnceResult<This, SubType> = {

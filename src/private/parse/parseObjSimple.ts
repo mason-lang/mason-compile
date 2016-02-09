@@ -3,7 +3,7 @@ import {caseOp} from 'op/Op'
 import {Val} from '../ast/LineContent'
 import {LocalAccess} from '../ast/locals'
 import {ObjPair, ObjSimple} from '../ast/Val'
-import {isKeyword, Keywords} from '../token/Keyword'
+import {isKeyword, Kw} from '../token/Keyword'
 import Token from '../token/Token'
 import {checkEmpty, checkNonEmpty} from './checks'
 import parseExpr from './parseExpr'
@@ -13,7 +13,7 @@ import {Tokens} from './Slice'
 
 export default function parseObjSimple(tokens: Tokens): Val {
 	const pairs = caseOp(
-		tokens.opSplitMany(_ => isKeyword(Keywords.ObjEntry, _)),
+		tokens.opSplitMany(_ => isKeyword(Kw.ObjEntry, _)),
 		_ => complexPairs(tokens.loc, _),
 		// Parse 'pairs' like in `{a b}` (equivalent to `{a. a b. b}`),
 		// where every pair is a single identifier.

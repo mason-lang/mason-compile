@@ -1,9 +1,10 @@
 import Loc, {Pos} from 'esast/lib/Loc'
 import Char from 'typescript-char/Char'
+import {Funs} from '../ast/Fun'
 import {check, fail, compileOptions, warn} from '../context'
 import {GroupBlock, GroupBrace, GroupBracket, GroupLine, GroupParenthesis, GroupSpace, GroupType
 	} from '../token/Group'
-import Keyword, {isKeyword, Keywords} from '../token/Keyword'
+import {isKeyword, KeywordFun, KeywordPlain, Kw} from '../token/Keyword'
 import {DocComment, NumberToken} from '../token/Token'
 import {assert, isEmpty, last} from '../util'
 import {isDigitBinary, isDigitDecimal, isDigitHex, isDigitOctal} from './chars'
@@ -32,11 +33,16 @@ export default function lexPlain(isInQuote: boolean): void {
 	function loc(): Loc {
 		return new Loc(startPos(), pos())
 	}
-	function keyword(kind: Keywords): void {
-		addToCurrentGroup(new Keyword(loc(), kind))
+	function keyword(kind: Kw): void {
+		addToCurrentGroup(new KeywordPlain(loc(), kind))
 	}
-	function funKeyword(kind: Keywords): void {
-		keyword(kind)
+	function funKeyword(opts: {isDo?: boolean, isThisFun?: boolean, kind?: Funs}): void {
+		const options = {
+			isDo: Boolean(opts.isDo),
+			isThisFun: Boolean(opts.isThisFun),
+			kind: 'kind' in opts ? opts.kind : Funs.Plain
+		}
+		addToCurrentGroup(new KeywordFun(loc(), options))
 		// First arg in its own spaced group
 		space(loc())
 	}
@@ -162,7 +168,7 @@ export default function lexPlain(isInQuote: boolean): void {
 					// Block at end of line goes in its own spaced group.
 					// However, `~` preceding a block goes in a group with it.
 					if (isEmpty(curGroup.subTokens) ||
-						!isKeyword(Keywords.Lazy, last(curGroup.subTokens))) {
+						!isKeyword(Kw.Lazy, last(curGroup.subTokens))) {
 						if (curGroup instanceof GroupSpace)
 							closeSpaceOKIfEmpty(l.start)
 						openGroup(l.end, GroupSpace)
@@ -188,31 +194,31 @@ export default function lexPlain(isInQuote: boolean): void {
 
 			case Char.ExclamationMark:
 				if (tryEat(Char.Backslash))
-					funKeyword(Keywords.FunDo)
+					funKeyword({isDo: true})
 				else
 					handleName()
 				break
 
 			case Char.$:
 				if (tryEat2(Char.ExclamationMark, Char.Backslash))
-					funKeyword(Keywords.FunAsynDo)
+					funKeyword({isDo: true, kind: Funs.Async})
 				else if (tryEat(Char.Backslash))
-					funKeyword(Keywords.FunAsync)
+					funKeyword({kind: Funs.Async})
 				else
 					handleName()
 				break
 
 			case Char.Asterisk:
 				if (tryEat2(Char.ExclamationMark, Char.Backslash))
-					funKeyword(Keywords.FunGenDo)
+					funKeyword({isDo: true, kind: Funs.Generator})
 				else if (tryEat(Char.Backslash))
-					funKeyword(Keywords.FunGen)
+					funKeyword({kind: Funs.Generator})
 				else
 					handleName()
 				break
 
 			case Char.Backslash:
-				funKeyword(Keywords.Fun)
+				funKeyword({})
 				break
 
 			case Char.Bar:
@@ -250,50 +256,54 @@ export default function lexPlain(isInQuote: boolean): void {
 
 			case Char.Period:
 				if (peek() === Char.Space || peek() === Char.LineFeed) {
-					// Keywords.ObjEntry in its own spaced group.
+					// Kw.ObjEntry in its own spaced group.
 					// We can't just create a new Group here because we want to
 					// ensure it's not part of the preceding or following spaced group.
 					closeSpaceOKIfEmpty(startPos())
-					keyword(Keywords.ObjEntry)
+					keyword(Kw.ObjEntry)
 				} else if (peek() === Char.CloseBrace) {
 					// Allow `{a. 1 b.}`
 					closeSpaceOKIfEmpty(startPos())
-					keyword(Keywords.ObjEntry)
+					keyword(Kw.ObjEntry)
 					openGroup(pos(), GroupSpace)
 				} else if (tryEat(Char.Backslash))
-					funKeyword(Keywords.FunThis)
+					funKeyword({isThisFun: true})
 				else if (tryEat2(Char.ExclamationMark, Char.Backslash))
-					funKeyword(Keywords.FunThisDo)
+					funKeyword({isDo: true, isThisFun: true})
 				else if (tryEat2(Char.Asterisk, Char.Backslash))
-					funKeyword(Keywords.FunThisGen)
+					funKeyword({isThisFun: true, kind: Funs.Generator})
 				else if (tryEat3(Char.Asterisk, Char.ExclamationMark, Char.Backslash))
-					funKeyword(Keywords.FunThisGenDo)
+					funKeyword({isDo: true, isThisFun: true, kind: Funs.Generator})
+				else if (tryEat2(Char.$, Char.Backslash))
+					funKeyword({isThisFun: true, kind: Funs.Async})
+				else if (tryEat3(Char.$, Char.ExclamationMark, Char.Backslash))
+					funKeyword({isDo: true, isThisFun: true, kind: Funs.Async})
 				else if (tryEat(Char.Period))
 					if (tryEat(Char.Period))
-						keyword(Keywords.Dot3)
+						keyword(Kw.Dot3)
 					else
-						keyword(Keywords.Dot2)
+						keyword(Kw.Dot2)
 				else
-					keyword(Keywords.Dot)
+					keyword(Kw.Dot)
 				break
 
 			case Char.Colon:
 				if (tryEat(Char.Equal))
-					keyword(Keywords.AssignMutate)
+					keyword(Kw.AssignMutate)
 				else
-					keyword(Keywords.Colon)
+					keyword(Kw.Colon)
 				break
 
 			case Char.SingleQuote:
-				keyword(Keywords.Tick)
+				keyword(Kw.Tick)
 				break
 
 			case Char.Tilde:
-				keyword(Keywords.Lazy)
+				keyword(Kw.Lazy)
 				break
 
 			case Char.Ampersand:
-				keyword(Keywords.Ampersand)
+				keyword(Kw.Ampersand)
 				break
 
 			case Char.Backslash: case Char.Caret: case Char.CloseBrace: case Char.Comma:

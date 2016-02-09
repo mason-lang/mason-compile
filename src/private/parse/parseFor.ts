@@ -3,7 +3,7 @@ import {LocalDeclare} from '../ast/locals'
 import {For, ForAsync, ForBag, Iteratee} from '../ast/Loop'
 import {Val} from '../ast/LineContent'
 import {check} from '../context'
-import {isKeyword, Keywords} from '../token/Keyword'
+import {isKeyword, Kw} from '../token/Keyword'
 import parseBlock, {beforeAndBlock} from './parseBlock'
 import parseExpr from './parseExpr'
 import {parseLocalDeclaresJustNames} from './parseLocalDeclares'
@@ -30,7 +30,7 @@ function opParseIteratee(tokens: Tokens): Op<Iteratee> {
 
 function parseIteratee(tokens: Tokens): Iteratee {
 	const [element, bag]: any = caseOp<{before: Tokens, after: Tokens}, [LocalDeclare, Val]>(
-		tokens.opSplitOnce(_ => isKeyword(Keywords.Of, _)),
+		tokens.opSplitOnce(_ => isKeyword(Kw.Of, _)),
 		({before, after}) => {
 			check(before.size() === 1, before.loc, _ => _.todoForPattern)
 			return [parseLocalDeclaresJustNames(before)[0], parseExpr(after)]

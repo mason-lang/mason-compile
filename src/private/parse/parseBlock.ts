@@ -2,7 +2,7 @@ import Op, {orThrow} from 'op/Op'
 import Block, {BlockWrap} from '../ast/Block'
 import {fail} from '../context'
 import {GroupBlock} from '../token/Group'
-import {Keywords} from '../token/Keyword'
+import {Kw} from '../token/Keyword'
 import {checkEmpty} from './checks'
 import {parseLines} from './parseLine'
 import tryTakeComment from './tryTakeComment'
@@ -41,13 +41,13 @@ Parse a block, failing if there's something preceding it.
 @param keywordKind Keyword that precedes the block. Used for error message.
 @param tokens Tokens which should have a block at the end.
 */
-export function justBlock(keywordKind: Keywords, tokens: Tokens): Lines {
+export function justBlock(keywordKind: Kw, tokens: Tokens): Lines {
 	const [before, block] = beforeAndBlock(tokens)
 	checkEmpty(before, _ => _.unexpectedAfterKind(keywordKind))
 	return block
 }
 
 /** Parse a block from the end of `tokens`, failing if there's something preceding it. */
-export function parseJustBlock(keywordKind: Keywords, tokens: Tokens): Block {
+export function parseJustBlock(keywordKind: Kw, tokens: Tokens): Block {
 	return parseBlock(justBlock(keywordKind, tokens))
 }

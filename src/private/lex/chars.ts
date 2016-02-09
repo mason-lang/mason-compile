@@ -21,17 +21,38 @@ function inRange(_: Char, min: Char, max: Char): boolean {
 }
 
 export function isNameCharacter(_: Char): boolean {
-	switch (_) {
-		// special characters
-		case Char.Backtick: case Char.Ampersand: case Char.OpenParenthesis:
-		case Char.CloseParenthesis: case Char.OpenBracket: case Char.CloseBracket:
-		case Char.OpenBrace: case Char.CloseBrace: case Char.Bar: case Char.Colon:
-		case Char.SingleQuote: case Char.DoubleQuote: case Char.Period: case Char.Space:
-		case Char.LineFeed: case Char.Tab:
-		// reserved characters
-		case Char.Hash: case Char.Caret: case Char.Backslash: case Char.Semicolon: case Char.Comma:
-			return false
-		default:
-			return true
-	}
+	// Anything > 128 is a valid name character.
+	return !(_ < nameCharacters.length && nameCharacters[_] === 0)
 }
+
+// This tests as slightly faster than using a switch statement.
+// 0: is not a name character; 1: is a name character.
+const nameCharacters = new Uint8Array(128)
+for (let i = 0; i < 128; i++)
+	nameCharacters[i] = 1
+const notNameCharacters = [
+	Char.Backtick,
+	Char.Ampersand,
+	Char.OpenParenthesis,
+	Char.CloseParenthesis,
+	Char.OpenBracket,
+	Char.CloseBracket,
+	Char.OpenBrace,
+	Char.CloseBrace,
+	Char.Bar,
+	Char.Colon,
+	Char.SingleQuote,
+	Char.DoubleQuote,
+	Char.Period,
+	Char.Space,
+	Char.LineFeed,
+	Char.Tab,
+	// Reserved characters:
+	Char.Hash,
+	Char.Caret,
+	Char.Backslash,
+	Char.Semicolon,
+	Char.Comma
+]
+for (const _ of notNameCharacters)
+	nameCharacters[_] = 0

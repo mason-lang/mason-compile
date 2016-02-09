@@ -4,7 +4,7 @@ import {ClassTraitDo, MethodImpl, MethodImplKind, MethodImplLike, MethodGetter, 
 	} from '../ast/classTraitCommon'
 import MemberName from '../ast/MemberName'
 import {check} from '../context'
-import Keyword, {isKeyword, Keywords} from '../token/Keyword'
+import {isKeyword, KeywordPlain, Kw} from '../token/Keyword'
 import Token from '../token/Token'
 import parseBlock, {beforeAndBlock, justBlock, parseJustBlock} from './parseBlock'
 import parseFun from './parseFunBlock'
@@ -21,8 +21,8 @@ export function takeStatics(lines: Lines): [Array<MethodImplLike>, Lines] {
 		return [[], lines]
 	else {
 		const line = lines.headSlice()
-		return isKeyword(Keywords.Static, line.head()) ?
-			[parseMethodImpls(justBlock(Keywords.Static, line.tail())), lines.tail()] :
+		return isKeyword(Kw.Static, line.head()) ?
+			[parseMethodImpls(justBlock(Kw.Static, line.tail())), lines.tail()] :
 			[[], lines]
 	}
 }
@@ -35,23 +35,23 @@ export function parseStaticsAndMethods(lines: Lines)
 
 export function opTakeDo(lines: Lines): [Op<ClassTraitDo>, Lines] {
 	const line = lines.headSlice()
-	return isKeyword(Keywords.Do, line.head()) ?
-		[new ClassTraitDo(line.loc, parseJustBlock(Keywords.Do, line.tail())), lines.tail()] :
+	return isKeyword(Kw.Do, line.head()) ?
+		[new ClassTraitDo(line.loc, parseJustBlock(Kw.Do, line.tail())), lines.tail()] :
 		[null, lines]
 }
 
 function parseMethodImpl(tokens: Tokens): MethodImplLike {
 	const [[isMy, isVirtual, isOverride], rest] =
-		tokens.takeKeywords(Keywords.My, Keywords.Virtual, Keywords.Override)
+		tokens.takeKeywords(Kw.My, Kw.Virtual, Kw.Override)
 	const kind = methodKind(tokens.loc, isMy, isVirtual, isOverride)
 	const head = rest.head()
 	if (isGetSet(head)) {
 		const [before, block] = beforeAndBlock(rest.tail())
-		const ctr = head.kind === Keywords.Get ? MethodGetter : MethodSetter
+		const ctr = head.kind === Kw.Get ? MethodGetter : MethodSetter
 		return new ctr(rest.loc, parseMethodName(before), parseBlock(block), kind)
 	} else {
-		const {before, kind: funKind, after} = parseMethodSplit(rest)
-		const fun = parseFun(funKind, after)
+		const {before, options, after} = parseMethodSplit(rest)
+		const fun = parseFun(options, after)
 		return new MethodImpl(rest.loc, parseMethodName(before), fun, kind)
 	}
 }
@@ -65,10 +65,10 @@ function methodKind(loc: Loc, isMy: boolean, isVirtual: boolean, isOverride: boo
 	return m | v | o
 }
 
-function isGetSet(token: Token): token is Keyword {
+function isGetSet(token: Token): token is KeywordPlain {
 	// TODO: typescript makes me do this instead of `&&`
-	if (token instanceof Keyword)
-		return token.kind === Keywords.Get || token.kind === Keywords.Set
+	if (token instanceof KeywordPlain)
+		return token.kind === Kw.Get || token.kind === Kw.Set
 	else
 		return null
 }

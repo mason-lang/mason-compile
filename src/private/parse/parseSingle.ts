@@ -1,11 +1,10 @@
-import {opMap, orThrow} from 'op/Op'
 import {Val} from '../ast/LineContent'
 import {LocalAccess} from '../ast/locals'
 import {BagSimple, NumberLiteral, SpecialVal} from '../ast/Val'
 import {warn} from '../context'
 import Group, {GroupBlock, GroupBrace, GroupBracket, GroupParenthesis, GroupQuote, GroupRegExp,
 	GroupSpace} from '../token/Group'
-import Keyword, {Keywords, opKeywordKindToSpecialValueKind} from '../token/Keyword'
+import {isKeyword, KeywordSpecialVal, Kw} from '../token/Keyword'
 import Token, {NameToken, NumberToken} from '../token/Token'
 import {unexpected} from './checks'
 import {parseBlockWrap} from './parseBlock'
@@ -46,15 +45,10 @@ export default function parseSingle(token: Token, isInSpaced: boolean = false): 
 			throw new Error(String(token.type))
 	} else if (token instanceof NumberToken)
 		return new NumberLiteral(token.loc, token.value)
-	else if (token instanceof Keyword)
-		switch (token.kind) {
-			case Keywords.Focus:
-				return LocalAccess.focus(loc)
-			default:
-				return orThrow(
-					opMap(opKeywordKindToSpecialValueKind(token.kind), _ => new SpecialVal(loc, _)),
-					() => unexpected(token))
-		}
+	else if (token instanceof KeywordSpecialVal)
+		return new SpecialVal(loc, token.kind)
+	else if (isKeyword(Kw.Focus, token))
+		return LocalAccess.focus(loc)
 	else
 		throw unexpected(token)
 }

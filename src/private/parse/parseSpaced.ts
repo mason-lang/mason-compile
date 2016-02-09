@@ -9,8 +9,7 @@ import {LocalAccess} from '../ast/locals'
 import {QuoteSimple, QuoteTagged} from '../ast/Quote'
 import {InstanceOf, Lazy, Member, Range, Sub} from '../ast/Val'
 import {GroupBracket, GroupParenthesis, GroupQuote} from '../token/Group'
-import Keyword, {isKeyword, isOperatorKeyword, isUnaryKeyword, keywordKindToOperatorKind,
-	keywordKindToUnaryKind, Keywords} from '../token/Keyword'
+import {isKeyword, KeywordOperator, KeywordPlain, KeywordUnaryOperator, Kw} from '../token/Keyword'
 import {assert} from '../util'
 import {checkEmpty, unexpected} from './checks'
 import parseExpr, {parseExprParts} from './parseExpr'
@@ -23,13 +22,13 @@ import Slice, {Tokens} from './Slice'
 /** Parse tokens in a [[GroupSpace]]. */
 export default function parseSpaced(tokens: Tokens): Val {
 	const h = tokens.head(), rest = tokens.tail()
-	if (h instanceof Keyword)
+	if (h instanceof KeywordPlain)
 		switch (h.kind) {
-			case Keywords.Ampersand:
+			case Kw.Ampersand:
 				return parseAmpersand(tokens.loc, rest)
-			case Keywords.Dot: {
+			case Kw.Dot: {
 				const h2 = rest.head()
-				if (isKeyword(Keywords.Ampersand, h2)) {
+				if (isKeyword(Kw.Ampersand, h2)) {
 					const tail = rest.tail()
 					const h3 = tail.head()
 					const name = parseMemberName(h3)
@@ -41,14 +40,14 @@ export default function parseSpaced(tokens: Tokens): Val {
 					return parseSpacedFold(member, rest.tail())
 				}
 			}
-			case Keywords.Dot3:
+			case Kw.Dot3:
 				return new Spread(tokens.loc, parseSpacedFold(parseSingle(rest.head()), rest.tail()))
-			case Keywords.Lazy:
+			case Kw.Lazy:
 				return new Lazy(h.loc, parseSpaced(rest))
-			case Keywords.Super: {
+			case Kw.Super: {
 				// TODO: handle sub here as well
 				const h2 = rest.head()
-				if (isKeyword(Keywords.Dot, h2)) {
+				if (isKeyword(Kw.Dot, h2)) {
 					const tail = rest.tail()
 					const sup = new SuperMember(h2.loc, parseMemberName(tail.head()))
 					return parseSpacedFold(sup, tail.tail())
@@ -58,12 +57,12 @@ export default function parseSpaced(tokens: Tokens): Val {
 				} else
 					throw fail(h2.loc, _ => _.tokenAfterSuper)
 			}
-			case Keywords.Tick: {
+			case Kw.Tick: {
 				const h2 = rest.head()
 				const quote = new QuoteSimple(h2.loc, parseName(h2))
 				return parseSpacedFold(quote, rest.tail())
 			}
-			case Keywords.Colon:
+			case Kw.Colon:
 				return new InstanceOf(h.loc, LocalAccess.focus(h.loc), parseSpaced(rest))
 			default:
 				// fall through
@@ -80,31 +79,31 @@ function parseSpacedFold(start: Val, rest: Tokens): Val {
 
 		const token = rest.tokens[i]
 		const loc = token.loc
-		if (token instanceof Keyword)
+		if (token instanceof KeywordPlain)
 			switch (token.kind) {
-				case Keywords.Ampersand:
+				case Kw.Ampersand:
 					if (i === rest.end - 1)
 						throw unexpected(token)
 					i = i + 1
 					acc = new FunMember(token.loc, acc, parseMemberName(rest.tokens[i]))
 					break
-				case Keywords.Dot: {
+				case Kw.Dot: {
 					// If this were the last one,
-					// it would not be a Keywords.Dot but a Keywords.ObjEntry
+					// it would not be a Kw.Dot but a Kw.ObjEntry
 					assert(i < rest.end - 1)
 					i = i + 1
 					acc = new Member(token.loc, acc, parseMemberName(rest.tokens[i]))
 					break
 				}
-				case Keywords.Dot2:
+				case Kw.Dot2:
 					check(i < rest.end - 1, token.loc, _ => _.infiniteRange)
 					return new Range(token.loc, acc, restVal(), false)
-				case Keywords.Dot3:
+				case Kw.Dot3:
 					return new Range(token.loc, acc, opIf(i < rest.end - 1, restVal), true)
-				case Keywords.Focus:
+				case Kw.Focus:
 					acc = new Call(token.loc, acc, [LocalAccess.focus(loc)])
 					break
-				case Keywords.Colon:
+				case Kw.Colon:
 					return new InstanceOf(token.loc, acc, restVal())
 				default:
 					throw unexpected(token)
@@ -128,14 +127,14 @@ function parseAmpersand(loc: Loc, tokens: Tokens): Val {
 	const [fun, rest] = ((): [Fun, Tokens] => {
 		if (h instanceof GroupParenthesis)
 			return [new FunSimple(loc, parseExpr(Tokens.of(h))), tail]
-		else if (isKeyword(Keywords.Dot, h)) {
+		else if (h instanceof KeywordOperator)
+			return [new FunOperator(loc, h.kind), tail]
+		else if (h instanceof KeywordUnaryOperator)
+			return [new FunUnary(loc, h.kind), tail]
+		else if (isKeyword(Kw.Dot, h)) {
 			const h2 = tail.head()
 			return [new FunGetter(h2.loc, parseMemberName(h2)), tail.tail()]
-		} else if (isOperatorKeyword(h))
-			return [new FunOperator(loc, keywordKindToOperatorKind(h.kind)), tail]
-		else if (isUnaryKeyword(h))
-			return [new FunUnary(loc, keywordKindToUnaryKind(h.kind)), tail]
-		else
+		} else
 			return [new FunMember(h.loc, null, parseMemberName(h)), tail]
 	})()
 	return parseSpacedFold(fun, rest)

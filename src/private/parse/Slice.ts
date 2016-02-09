@@ -1,7 +1,7 @@
 import Loc from 'esast/lib/Loc'
 import Op, {opIf, orThrow} from 'op/Op'
 import Group, {GroupLine, QuoteTokenPart} from '../token/Group'
-import Keyword, {Keywords} from '../token/Keyword'
+import {KeywordPlain, Kw} from '../token/Keyword'
 import Token from '../token/Token'
 import {head, isEmpty, tail} from '../util'
 
@@ -11,7 +11,10 @@ This is just a view of it, so taking e.g. [[Slice.tail]] is O(1).
 Most parser functions act on a Slice and call other functions on sub-slices.
 */
 export default class Slice<SubType extends Token> {
-	/** Slice representing all subTokens of a [[Group]]. */
+	/**
+	Slice representing all subTokens of a [[Group]].
+	Call [[Tokens.of]] or [[Lines.of]] instead of this.
+	*/
 	static of<SubType extends Token>(group: Group<SubType>): Slice<SubType> {
 		return new this(group.subTokens, 0, group.subTokens.length, group.loc)
 	}
@@ -97,13 +100,11 @@ export default class Slice<SubType extends Token> {
 		return null
 	}
 
-	/**
-	Splits on *every* token satisfying `splitOn`.
-	*/
+	/** Splits on *every* token satisfying `splitOn`. */
 	opSplitMany(splitOn: (_: Token) => boolean): Op<SplitManyResult<this, SubType>> {
 		let iLast = this.start
 		const out: SplitManyResult<this, SubType> = []
-		for (let i = this.start; i < this.end; i = i + 1) {
+		for (const i of this.indices()) {
 			const token = this.tokens[i]
 			if (splitOn(token)) {
 				out.push({before: this.chop(iLast, i), at: token})
@@ -116,8 +117,13 @@ export default class Slice<SubType extends Token> {
 		})
 	}
 
-	* [Symbol.iterator](): Iterator<SubType> {
+	protected * indices(): Iterable<number> {
 		for (let i = this.start; i < this.end; i = i + 1)
+			yield i
+	}
+
+	* [Symbol.iterator](): Iterator<SubType> {
+		for (const i of this.indices())
 			yield this.tokens[i]
 	}
 
@@ -210,15 +216,15 @@ export class Tokens extends Slice<Token> {
 		Returned length is keywords.length + 1.
 		It's recommended to destructure on this value.
 	*/
-	getKeywordSections(...keywords: Array<Keywords>): [this, Array<Op<this>>] {
+	getKeywordSections(...keywords: Array<Kw>): [this, Array<Op<this>>] {
 		const out = new Array<Op<this>>(keywords.length + 1).fill(null)
 
 		let iNextKeyword = 0
 		let iTokenPrev = this.start
 
-		for (let iToken = this.start; iToken < this.end; iToken = iToken + 1) {
+		for (const iToken of this.indices()) {
 			const token = this.tokens[iToken]
-			if (token instanceof Keyword) {
+			if (token instanceof KeywordPlain) {
 				const kind = token.kind
 				for (let iKeyword = iNextKeyword; iKeyword < keywords.length; iKeyword = iKeyword + 1)
 					if (kind === keywords[iKeyword]) {
@@ -239,21 +245,21 @@ export class Tokens extends Slice<Token> {
 	Takes the given keywords, in order.
 	Every keyword is optional.
 	e.g.:
-		`Slice({{a c d e}}).takeKeywords(Keywords.A, Keywords.B, Keywords.C)` is:
+		`Slice({{a c d e}}).takeKeywords(Kw.A, Kw.B, Kw.C)` is:
 		`[[true, false, true], Slice({{d e}})]`.
 	@return
 		[0]: For each keyword, whether that keyword was found.
 		[1]: The remaining tokens after those keywords.
 	*/
-	takeKeywords(...keywords: Array<Keywords>): [Array<boolean>, this] {
+	takeKeywords(...keywords: Array<Kw>): [Array<boolean>, this] {
 		const out = new Array<boolean>(keywords.length).fill(false)
 
 		let iNextKeyword = 0
 		let iTokenPrev = this.start
 
-		loop: for (let iToken = this.start; iToken < this.end; iToken = iToken + 1) {
+		loop: for (const iToken of this.indices()) {
 			const token = this.tokens[iToken]
-			if (token instanceof Keyword) {
+			if (token instanceof KeywordPlain) {
 				const kind = token.kind
 				for (let iKeyword = iNextKeyword; iKeyword < keywords.length; iKeyword = iKeyword + 1)
 					if (kind === keywords[iKeyword]) {

@@ -11,6 +11,7 @@ export declare function closeGroup(closePos: Pos, closeType: GroupType): void;
 export declare function closeSpaceOKIfEmpty(pos: Pos): void;
 export declare function openInterpolation(loc: Loc): void;
 export declare function closeInterpolationOrParenthesis(loc: Loc): boolean;
+export declare function closeInterpolation(loc: Loc): void;
 export declare function closeGroupsForDedent(pos: Pos): void;
 export declare function openLine(pos: Pos): void;
 export declare function closeLine(pos: Pos): void;

@@ -1,7 +1,7 @@
 import CompileError from '../../CompileError'
 import {check, fail} from '../context'
 import Language from '../languages/Language'
-import {isKeyword, isReservedKeyword, Keywords} from '../token/Keyword'
+import {isKeyword, KeywordReserved, Kw} from '../token/Keyword'
 import Token from '../token/Token'
 import Slice from './Slice'
 
@@ -16,11 +16,12 @@ export function checkNonEmpty(tokens: Slice<Token>, message: (_: Language) => st
 }
 
 /** Throw if the token is not the expected keyword. */
-export function checkKeyword(keyword: Keywords, token: Token): void {
+export function checkKeyword(keyword: Kw, token: Token): void {
 	check(isKeyword(keyword, token), token.loc, _ => _.expectedKeyword(keyword))
 }
 
 /** CompileError about encountering an unparseable token. */
 export function unexpected(token: Token): CompileError {
-	return fail(token.loc, _ => isReservedKeyword(token) ? _.reservedWord(token) : _.unexpected(token))
+	return fail(token.loc, _ =>
+		token instanceof KeywordReserved ? _.reservedWord(token.kind) : _.unexpected(token))
 }

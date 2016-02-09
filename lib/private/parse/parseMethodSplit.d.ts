@@ -1,7 +1,7 @@
-import { Keywords } from '../token/Keyword';
+import { KeywordFunOptions } from '../token/Keyword';
 import { Tokens } from './Slice';
 export default function parseMethodSplit(tokens: Tokens): {
     before: Tokens;
-    kind: Keywords;
+    options: KeywordFunOptions;
     after: Tokens;
 };

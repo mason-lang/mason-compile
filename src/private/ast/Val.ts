@@ -132,7 +132,6 @@ export class Operator extends ValOnly {
 	}
 }
 
-// Must be kept in sync with Keywords.Op* keywords.
 export const enum Operators {
 	And,
 	Div,
@@ -157,7 +156,6 @@ export class UnaryOperator extends ValOnly {
 	}
 }
 
-// Must be in sync with Keywords.Unary* keywords.
 export const enum UnaryOperators {
 	Neg,
 	Not

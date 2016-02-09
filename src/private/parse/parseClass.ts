@@ -5,7 +5,7 @@ import {FunBlock} from '../ast/Fun'
 import {Val} from '../ast/LineContent'
 import {LocalDeclares} from '../ast/locals'
 import {check} from '../context'
-import {isKeyword, Keywords} from '../token/Keyword'
+import {isKeyword, Kw} from '../token/Keyword'
 import {beforeAndOpBlock} from './parseBlock'
 import parseExpr, {parseExprParts} from './parseExpr'
 import {funArgsAndBlock} from './parseFunBlock'
@@ -44,7 +44,7 @@ export default function parseClass(tokens: Tokens): Class {
 function parseClassHeader(tokens: Tokens)
 	: {opFields: Op<Array<Field>>, opSuperClass: Op<Val>, traits: Array<Val>} {
 	const [fieldsTokens, [extendsTokens, traitTokens]] =
-		tokens.getKeywordSections(Keywords.Extends, Keywords.Trait)
+		tokens.getKeywordSections(Kw.Extends, Kw.Trait)
 	return {
 		opFields: opIf(!fieldsTokens.isEmpty(), () => fieldsTokens.map(_ => {
 			const {name, opType, kind} = parseLocalParts(_)
@@ -58,7 +58,7 @@ function parseClassHeader(tokens: Tokens)
 
 function opTakeConstructor(tokens: Lines): [Op<Constructor>, Lines] {
 	const line = tokens.headSlice()
-	return isKeyword(Keywords.Construct, line.head()) ?
+	return isKeyword(Kw.Construct, line.head()) ?
 		[parseConstructor(line.tail()), tokens.tail()] :
 		[null, tokens]
 }

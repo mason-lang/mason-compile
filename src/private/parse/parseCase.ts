@@ -5,7 +5,7 @@ import Case, {CasePart, Pattern} from '../ast/Case'
 import {Val} from '../ast/LineContent'
 import {AssignSingle} from '../ast/locals'
 import {GroupSpace} from '../token/Group'
-import {isKeyword, Keywords} from '../token/Keyword'
+import {isKeyword, Kw} from '../token/Keyword'
 import {checkNonEmpty} from './checks'
 import parseBlock, {beforeAndBlock, parseJustBlock} from './parseBlock'
 import parseExpr, {opParseExpr} from './parseExpr'
@@ -36,7 +36,7 @@ function parseCaseTest(tokens: Tokens): Val | Pattern {
 	// E.g., `:Some val`
 	if (first instanceof GroupSpace && tokens.size() > 1) {
 		const ft = Tokens.of(first)
-		if (isKeyword(Keywords.Colon, ft.head())) {
+		if (isKeyword(Kw.Colon, ft.head())) {
 			const type = parseSpaced(ft.tail())
 			const locals = parseLocalDeclares(tokens.tail())
 			return new Pattern(tokens.loc, type, locals)
@@ -58,8 +58,8 @@ export function parseCaseSwitchParts<A>(
 
 function takeOpElseFromEnd(block: Lines): [Lines, Block]  {
 	const lastLine = block.lastSlice()
-	const [partLines, opElse] = isKeyword(Keywords.Else, lastLine.head()) ?
-		[block.rtail(), parseJustBlock(Keywords.Else, lastLine.tail())] :
+	const [partLines, opElse] = isKeyword(Kw.Else, lastLine.head()) ?
+		[block.rtail(), parseJustBlock(Kw.Else, lastLine.tail())] :
 		[block, null]
 	checkNonEmpty(partLines, _ => _.caseSwitchNeedsParts)
 	return [partLines, opElse]

@@ -1,14 +1,15 @@
 import Loc from 'esast/lib/Loc'
 import Op from 'op/Op'
 import Block from '../ast/Block'
-import {FunBlock, Funs} from '../ast/Fun'
+import {FunBlock} from '../ast/Fun'
 import {Val} from '../ast/LineContent'
 import {LocalDeclare} from '../ast/locals'
 import {FunAbstract, PolyValue} from '../ast/Poly'
 import {GroupSpace} from '../token/Group'
-import {isAnyKeyword, isKeyword, Keywords} from '../token/Keyword'
+import {isKeyword, KeywordFunOptions, KeywordPlain, Kw} from '../token/Keyword'
+import Token from '../token/Token'
 import {head} from '../util'
-import {checkEmpty, checkNonEmpty} from './checks'
+import {checkEmpty, checkNonEmpty, unexpected} from './checks'
 import parseBlock, {beforeAndBlock} from './parseBlock'
 import {parseCaseFun} from './parseCase'
 import parseLocalDeclares, {parseLocalDeclareFromSpaced, parseLocalDeclaresAndMemberArgs
@@ -24,22 +25,22 @@ Parse a [[Fun]].
 @param keywordKind A function keyword.
 @param tokens Rest of the line after the function keyword.
 */
-export default function parseFunBlock(keywordKind: Keywords, tokens: Tokens): FunBlock {
-	const [isThisFun, isDo, kind] = funKind(keywordKind)
+export default function parseFunBlock({isThisFun, isDo, kind}: KeywordFunOptions, tokens: Tokens)
+	: FunBlock {
 	const [opReturnType, rest] = tryTakeReturnType(tokens)
 	const {args, opRestArg, block} = funArgsAndBlock(rest, !isDo)
 	return new FunBlock(tokens.loc, args, opRestArg, block, {kind, isThisFun, isDo, opReturnType})
 }
 
-export function parsePolyValue(keywordKind: Keywords, tokens: Tokens): PolyValue {
-	const [isThisFun, isDo, kind] = funKind(keywordKind)
+export function parsePolyValue({isThisFun, isDo, kind}: KeywordFunOptions, tokens: Tokens)
+	: PolyValue {
 	const [opReturnType, rest] = tryTakeReturnType(tokens)
 	const [before, blockLines] = beforeAndBlock(rest)
 	const [opComment, restLines] = tryTakeComment(blockLines)
 
 	if (restLines.size() === 1) {
 		const h = restLines.headSlice()
-		if (h.size() === 1 && isKeyword(Keywords.Abstract, h.head())) {
+		if (h.size() === 1 && isKeyword(Kw.Abstract, h.head())) {
 			const {args, opRestArg} = parseFunLocals(before)
 			return new FunAbstract(tokens.loc, args, opRestArg, opReturnType, opComment)
 		}
@@ -70,22 +71,22 @@ export function funArgsAndBlock(
 		block: Block
 	} {
 	checkNonEmpty(tokens, _ => _.expectedBlock)
-	const h = tokens.head()
 
-	if (isAnyKeyword(funFocusKeywords, h)) {
+	const h = tokens.head()
+	if (isFunFocusKeyword(h)) {
 		const args = [LocalDeclare.focus(h.loc)]
 		const [before, block] = beforeAndBlock(tokens.tail())
 		checkEmpty(before, _ => _.funFocusArgIsImplicit(h.kind))
 		const parser = ((): (loc: Loc, block: Lines) => Val => {
 			switch (h.kind) {
-				case Keywords.Case:
+				case Kw.Case:
 					return parseCaseFun
-				case Keywords.Pipe:
+				case Kw.Pipe:
 					return parsePipeFun
-				case Keywords.Switch:
+				case Kw.Switch:
 					return parseSwitchFun
 				default:
-					throw new Error(String(h.kind))
+					throw unexpected(h)
 			}
 		})()
 		const expr = parser(tokens.loc, block)
@@ -98,43 +99,15 @@ export function funArgsAndBlock(
 	}
 }
 
-const funFocusKeywords = new Set([Keywords.Case, Keywords.Pipe, Keywords.Switch])
-
-function funKind(keywordKind: Keywords): [boolean, boolean, Funs] {
-	switch (keywordKind) {
-		case Keywords.Fun:
-			return [false, false, Funs.Plain]
-		case Keywords.FunDo:
-			return [false, true, Funs.Plain]
-		case Keywords.FunThis:
-			return [true, false, Funs.Plain]
-		case Keywords.FunThisDo:
-			return [true, true, Funs.Plain]
-		case Keywords.FunAsync:
-			return [false, false, Funs.Async]
-		case Keywords.FunAsynDo:
-			return [false, true, Funs.Async]
-		case Keywords.FunThisAsync:
-			return [true, false, Funs.Async]
-		case Keywords.FunThisAsynDo:
-			return [true, true, Funs.Async]
-		case Keywords.FunGen:
-			return [false, false, Funs.Generator]
-		case Keywords.FunGenDo:
-			return [false, true, Funs.Generator]
-		case Keywords.FunThisGen:
-			return [true, false, Funs.Generator]
-		case Keywords.FunThisGenDo:
-			return [true, true, Funs.Generator]
-		default:
-			throw new Error(String(keywordKind))
-	}
+function isFunFocusKeyword(_: Token): _ is KeywordPlain {
+	return _ instanceof KeywordPlain &&
+		(_.kind === Kw.Case || _.kind === Kw.Pipe || _.kind === Kw.Switch)
 }
 
 function tryTakeReturnType(tokens: Tokens): [Op<Val>, Tokens] {
 	if (!tokens.isEmpty()) {
 		const h = tokens.head()
-		if (h instanceof GroupSpace && isKeyword(Keywords.Colon, head(h.subTokens)))
+		if (h instanceof GroupSpace && isKeyword(Kw.Colon, head(h.subTokens)))
 			return [parseSpaced(Tokens.of(h).tail()), tokens.tail()]
 	}
 	return [null, tokens]
@@ -149,7 +122,7 @@ function parseFunLocals(tokens: Tokens, includeMemberArgs: boolean = false)
 		const l = tokens.last()
 		if (l instanceof GroupSpace) {
 			const g = Tokens.of(l)
-			if (isKeyword(Keywords.Dot3, g.head())) {
+			if (isKeyword(Kw.Dot3, g.head())) {
 				rest = tokens.rtail()
 				opRestArg = parseLocalDeclareFromSpaced(g.tail())
 			}

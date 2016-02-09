@@ -2,7 +2,7 @@ import Loc from 'esast/lib/Loc'
 import Char from 'typescript-char/Char'
 import Token from '../token/Token'
 import Group, {GroupType} from '../token/Group'
-import {Keywords} from '../token/Keyword'
+import {Kw} from '../token/Keyword'
 
 interface Language {
 	// Lex:
@@ -27,7 +27,7 @@ interface Language {
 	// Parse:
 
 	argsCond: string
-	argsConditional(kind: Keywords): string
+	argsConditional(kind: Kw): string
 	argsDel: string
 	argsTraitDo: string
 	asToken: string
@@ -38,23 +38,23 @@ interface Language {
 	expectedBlock: string
 	expectedExpression: string
 	expectedImportModuleName: string
-	expectedKeyword(keyword: Keywords): string
+	expectedKeyword(keyword: Kw): string
 	expectedMethodSplit: string
 	expectedOneLocal: string
 	expectedLocalName(token: Token): string
 	expectedName(token: Token): string
 	extraParens: string
-	funFocusArgIsImplicit: (keyword: Keywords) => string
+	funFocusArgIsImplicit: (keyword: Kw) => string
 	implicitFunctionDot: string
 	infiniteRange: string
 	invalidImportModule: string
 	methodName: string
 	noImportFocus: string
 	noMyOverride: string
-	noSpecialKeyword(kind: Keywords): string
+	noSpecialKeyword(kind: 'todo' | 'region'): string
 	nothingAfterFinally: string
 	parensOutsideCall: string
-	reservedWord(token: Token): string
+	reservedWord(name: string): string
 	tokenAfterSuper: string
 	todoForPattern: string
 	todoLazyField: string
@@ -62,7 +62,7 @@ interface Language {
 	unexpected(token: Token): string
 	unexpectedAfter(token: Token): string
 	unexpectedAfterImportDo: string
-	unexpectedAfterKind(kind: Keywords): string
+	unexpectedAfterKind(kind: Kw): string
 	unexpectedAfterPoly: string
 
 	// Verify:
@@ -89,7 +89,7 @@ interface Language {
 	misplacedBreak: string
 	misplacedSpreadDo: string
 	misplacedSpreadVal: string
-	misplacedYield(kind: Keywords): string
+	misplacedYield(kind: Kw): string
 	missingLocal(name: string): string
 	noLazyCatch: string
 	noLazyIteratee: string

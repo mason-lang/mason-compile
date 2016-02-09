@@ -2,7 +2,7 @@ import Loc from 'esast/lib/Loc'
 import Char from 'typescript-char/Char'
 import Group, {GroupBlock, GroupBrace, GroupBracket, GroupParenthesis, GroupQuote, GroupRegExp,
 	GroupType} from '../token/Group'
-import Keyword, {keywordName, Keywords} from '../token/Keyword'
+import Keyword, {keywordName, Kw} from '../token/Keyword'
 import Token, {DocComment, NameToken, NumberToken, StringToken} from '../token/Token'
 
 /** Used when generating messages to highlight a part of that message. */
@@ -14,7 +14,7 @@ export function showChar(char: Char): string {
 	return code(String.fromCharCode(char))
 }
 
-export function showKeyword(kind: Keywords): string {
+export function showKeyword(kind: Kw): string {
 	return code(keywordName(kind))
 }
 
@@ -45,7 +45,7 @@ export function showGroup(group: Group<Token>): string {
 
 export function showToken(_: Token): string {
 	if (_ instanceof Keyword)
-		return showKeyword(_.kind)
+		return code(_.name())
 	else if (_ instanceof Group)
 		return showGroup(_)
 	else if (_ instanceof DocComment)

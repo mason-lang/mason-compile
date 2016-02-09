@@ -2,7 +2,7 @@ import Loc from 'esast/lib/Loc'
 import Char from 'typescript-char/Char'
 import Token from '../token/Token'
 import Group, {GroupBrace, GroupBracket, GroupParenthesis, GroupType} from '../token/Group'
-import {Keywords} from '../token/Keyword'
+import {Kw} from '../token/Keyword'
 import {assert} from '../util'
 import Language from './Language'
 import {code, showChar, showGroup, showGroupType, showKeyword as kw, showLoc, showToken
@@ -48,30 +48,30 @@ const english: Language = {
 	// Parse:
 
 	argsCond:
-		`${kw(Keywords.Cond)} takes exactly 3 arguments.`,
-	argsConditional: (kind: Keywords): string =>
+		`${kw(Kw.Cond)} takes exactly 3 arguments.`,
+	argsConditional: (kind: Kw): string =>
 		`${kw(kind)} with no block takes exactly 2 arguments.`,
 	argsDel:
-		`${kw(Keywords.Del)} takes only one argument.`,
+		`${kw(Kw.Del)} takes only one argument.`,
 	argsTraitDo:
-		`${kw(Keywords.TraitDo)} takes 2 arguments: implementor and trait.`,
+		`${kw(Kw.TraitDo)} takes 2 arguments: implementor and trait.`,
 	asToken:
-		`Expected only 1 token after ${kw(Keywords.As)}.`,
+		`Expected only 1 token after ${kw(Kw.As)}.`,
 	badAssignee:
 		`Assignee should be exactly 1 token (may be a ${showGroupType(GroupBrace)} group)`,
 	caseSwitchNeedsParts:
-		`Must have at least 1 non-${kw(Keywords.Else)} test.`,
+		`Must have at least 1 non-${kw(Kw.Else)} test.`,
 	expectedAfterAssert:
-		`Expected something after ${kw(Keywords.Assert)}.`,
+		`Expected something after ${kw(Kw.Assert)}.`,
 	expectedAfterColon:
-		`Expected something after ${kw(Keywords.Colon)}.`,
+		`Expected something after ${kw(Kw.Colon)}.`,
 	expectedBlock:
 		'Expected an indented block.',
 	expectedExpression:
 		'Expected an expression, got nothing.',
 	expectedImportModuleName:
 		'Expected a module name to import.',
-	expectedKeyword: (keyword: Keywords): string =>
+	expectedKeyword: (keyword: Kw): string =>
 		`Expected ${kw(keyword)}`,
 	expectedMethodSplit:
 		'Expected a function keyword somewhere.',
@@ -83,30 +83,30 @@ const english: Language = {
 		`Expected a name, not ${showToken(token)}`,
 	extraParens:
 		`Unnecessary ${showGroupType(GroupParenthesis)}`,
-	funFocusArgIsImplicit: (keyword: Keywords): string =>
-		`Nothing may come after ${kw(keyword)}; function argument is implicitly ${kw(Keywords.Focus)}.`,
+	funFocusArgIsImplicit: (keyword: Kw): string =>
+		`Nothing may come after ${kw(keyword)}; function argument is implicitly ${kw(Kw.Focus)}.`,
 	implicitFunctionDot:
 		`Function ${showChar(Char.Period)} is implicit for methods.`,
 	infiniteRange:
-		`Use ${kw(Keywords.Dot3)} for infinite ranges.`,
+		`Use ${kw(Kw.Dot3)} for infinite ranges.`,
 	invalidImportModule:
 		'Not a valid module name.',
 	methodName:
 		`Method name must be exactly one token (may be a ${showGroupType(GroupParenthesis)} group).`,
 	noImportFocus:
-		`${kw(Keywords.Focus)} not allowed as import name.`,
+		`${kw(Kw.Focus)} not allowed as import name.`,
 	noMyOverride:
-		`Method can't be both ${kw(Keywords.My)} and ${kw(Keywords.Override)}.`,
-	noSpecialKeyword: (kind: Keywords): string =>
-		`${kw(kind)} is not allowed here.`,
+		`Method can't be both ${kw(Kw.My)} and ${kw(Kw.Override)}.`,
+	noSpecialKeyword: (kind: 'todo' | 'region'): string =>
+		`${code(kind)} is not allowed here.`,
 	nothingAfterFinally:
-		`Nothing may come after ${kw(Keywords.Finally)}.`,
+		`Nothing may come after ${kw(Kw.Finally)}.`,
 	parensOutsideCall:
 		`Use ${code('(a b)')}, not ${code('a(b)')}.`,
-	reservedWord: (token: Token): string =>
-		`Reserved word ${showToken(token)}.`,
+	reservedWord: (name: string): string =>
+		`Reserved word ${code(name)}.`,
 	tokenAfterSuper:
-		`Expected ${kw(Keywords.Dot)} or ${code('()')} after ${kw(Keywords.Super)}`,
+		`Expected ${kw(Kw.Dot)} or ${code('()')} after ${kw(Kw.Super)}`,
 	todoForPattern:
 		'TODO: pattern in for',
 	todoLazyField:
@@ -118,19 +118,19 @@ const english: Language = {
 	unexpectedAfter: (token: Token): string =>
 		`Did not expect anything after ${showToken(token)}.`,
 	unexpectedAfterImportDo:
-		`This is an ${kw(Keywords.ImportDo)}, so you can't import any values.`,
-	unexpectedAfterKind: (kind: Keywords): string =>
+		`This is an ${kw(Kw.ImportDo)}, so you can't import any values.`,
+	unexpectedAfterKind: (kind: Kw): string =>
 		`Did not expect anything between ${kw(kind)} and block.`,
 	unexpectedAfterPoly:
-		`Did not expect anything between ${kw(Keywords.Poly)} and function.`,
+		`Did not expect anything between ${kw(Kw.Poly)} and function.`,
 
 	// Verify:
 
 	ambiguousSK:
 		'Can\'t tell if this is a statement. Some parts are statements but others are values.',
 	ambiguousForSK:
-		`Can't tell if ${kw(Keywords.For)} is a statement. ` +
-		`Some ${kw(Keywords.Break)}s have a value, others don't.`,
+		`Can't tell if ${kw(Kw.For)} is a statement. ` +
+		`Some ${kw(Kw.Break)}s have a value, others don't.`,
 	argsOperator: (numProvidedArgs: number): string =>
 		`Operator should have multiple arguments, got ${numProvidedArgs}`,
 	badRegExp: (source: string): string => {
@@ -147,11 +147,11 @@ const english: Language = {
 	blockNeedsContent:
 		'Value block must have some content.',
 	breakCantHaveValue:
-		`${kw(Keywords.Break)} with value needs ${kw(Keywords.For)} to be in expression position.`,
+		`${kw(Kw.Break)} with value needs ${kw(Kw.For)} to be in expression position.`,
 	breakNeedsValue:
-		`${kw(Keywords.For)} in expression position must ${kw(Keywords.Break)} with a value.`,
+		`${kw(Kw.For)} in expression position must ${kw(Kw.Break)} with a value.`,
 	breakValInForBag:
-		`${kw(Keywords.Break)} in ${kw(Keywords.ForBag)} may not have value.`,
+		`${kw(Kw.Break)} in ${kw(Kw.ForBag)} may not have value.`,
 	cantDetermineName:
 		'Expression must be placed in a position where name can be determined.',
 	cantInferBlockKind:
@@ -167,20 +167,20 @@ const english: Language = {
 	duplicateLocal: (name: string): string =>
 		`A local ${code(name)} already exists and can't be shadowed.`,
 	elseRequiresCatch:
-		`${kw(Keywords.Else)} must come after a ${kw(Keywords.Catch)}.`,
+		`${kw(Kw.Else)} must come after a ${kw(Kw.Catch)}.`,
 	exportName:
 		'Module export must have a constant name.',
 	forAsyncNeedsAsync:
-		`${kw(Keywords.ForAsync)} as statement must be inside an async function.`,
+		`${kw(Kw.ForAsync)} as statement must be inside an async function.`,
 	misplacedAwait:
-		`Cannot ${kw(Keywords.Await)} outside of async function.`,
+		`Cannot ${kw(Kw.Await)} outside of async function.`,
 	misplacedBreak:
 		'Not in a loop.',
 	misplacedSpreadDo:
-		`Can not spread here. Did you forget the space after ${kw(Keywords.Dot3)}?`,
+		`Can not spread here. Did you forget the space after ${kw(Kw.Dot3)}?`,
 	misplacedSpreadVal:
-		`Can only spread in call, ${kw(Keywords.New)}, or ${showGroupType(GroupBracket)}.`,
-	misplacedYield: (kind: Keywords): string =>
+		`Can only spread in call, ${kw(Kw.New)}, or ${showGroupType(GroupBracket)}.`,
+	misplacedYield: (kind: Kw): string =>
 		`Cannot ${kw(kind)} outside of generator function.`,
 	missingLocal: (name: string): string =>
 		`No such local ${code(name)}.`,
@@ -193,17 +193,17 @@ const english: Language = {
 	statementAsValue:
 		'This can only be used as a statement, but appears in expression context.',
 	superForbidden:
-		`Class has no superclass, so ${kw(Keywords.Super)} is not allowed.`,
+		`Class has no superclass, so ${kw(Kw.Super)} is not allowed.`,
 	superMustBeStatement:
-		`${kw(Keywords.Super)} in constructor must appear as a statement.'`,
+		`${kw(Kw.Super)} in constructor must appear as a statement.'`,
 	superNeeded:
-		`Constructor must contain ${kw(Keywords.Super)}`,
+		`Constructor must contain ${kw(Kw.Super)}`,
 	superNeedsMethod:
-		`${kw(Keywords.Super)} must be in a method.`,
+		`${kw(Kw.Super)} must be in a method.`,
 	unusedLocal: (name: string): string =>
 		`Unused local variable ${code(name)}.`,
 	uselessExcept:
-		`${kw(Keywords.Except)} must have ${kw(Keywords.Catch)} or ${kw(Keywords.Finally)}.`,
+		`${kw(Kw.Except)} must have ${kw(Kw.Catch)} or ${kw(Kw.Finally)}.`,
 	valueAsStatement:
 		'Value appears in statement context, so it does nothing.'
 }

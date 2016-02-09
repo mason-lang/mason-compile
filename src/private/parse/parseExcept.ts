@@ -2,7 +2,7 @@ import Op from 'op/Op'
 import Block from '../ast/Block'
 import {Catch, Except} from '../ast/errors'
 import {check} from '../context'
-import {isKeyword, Keywords} from '../token/Keyword'
+import {isKeyword, Kw} from '../token/Keyword'
 import {checkKeyword} from './checks'
 import parseBlock, {beforeAndBlock, justBlock, parseJustBlock} from './parseBlock'
 import {parseLocalDeclareOrFocus} from './parseLocalDeclares'
@@ -10,7 +10,7 @@ import {Lines, Tokens} from './Slice'
 
 /** Parse an [[Except]]. */
 export default function parseExcept(tokens: Tokens): Except {
-	const lines = justBlock(Keywords.Except, tokens)
+	const lines = justBlock(Kw.Except, tokens)
 	const [tried, rest] = takeTried(lines)
 	const [typedCatches, opCatchAll, rest2] = takeCatches(rest)
 	const [opElse, rest3] = opTakeElse(rest2)
@@ -20,8 +20,8 @@ export default function parseExcept(tokens: Tokens): Except {
 
 function takeTried(lines: Lines): [Block, Lines] {
 	const line = lines.headSlice()
-	checkKeyword(Keywords.Try, line.head())
-	return [parseJustBlock(Keywords.Try, line.tail()), lines.tail()]
+	checkKeyword(Kw.Try, line.head())
+	return [parseJustBlock(Kw.Try, line.tail()), lines.tail()]
 }
 
 function takeCatches(lines: Lines): [Array<Catch>, Op<Catch>, Lines] {
@@ -30,7 +30,7 @@ function takeCatches(lines: Lines): [Array<Catch>, Op<Catch>, Lines] {
 
 	while (!lines.isEmpty()) {
 		const line = lines.headSlice()
-		if (!isKeyword(Keywords.Catch, line.head()))
+		if (!isKeyword(Kw.Catch, line.head()))
 			break
 
 		const [before, block] = beforeAndBlock(line.tail())
@@ -54,8 +54,8 @@ function opTakeElse(lines: Lines): [Op<Block>, Lines] {
 
 	const line = lines.headSlice()
 	const tokenElse = line.head()
-	return isKeyword(Keywords.Else, tokenElse) ?
-		[parseJustBlock(Keywords.Else, line.tail()), lines.tail()] :
+	return isKeyword(Kw.Else, tokenElse) ?
+		[parseJustBlock(Kw.Else, line.tail()), lines.tail()] :
 		[null, lines]
 }
 
@@ -64,7 +64,7 @@ function parseOpFinally(lines: Lines): Op<Block> {
 		return null
 
 	const line = lines.headSlice()
-	checkKeyword(Keywords.Finally, line.head())
+	checkKeyword(Kw.Finally, line.head())
 	check(lines.size() === 1, lines.loc, _ => _.nothingAfterFinally)
-	return parseJustBlock(Keywords.Finally, line.tail())
+	return parseJustBlock(Kw.Finally, line.tail())
 }

@@ -11,9 +11,10 @@ import {QuoteSimple} from '../ast/Quote'
 import {SpecialVal, SpecialVals} from '../ast/Val'
 import {check} from '../context'
 import {GroupBrace, GroupBracket, GroupQuote, GroupSpace} from '../token/Group'
-import Keyword, {isAnyKeyword, isKeyword, keywordName, Keywords} from '../token/Keyword'
+import Keyword, {isKeyword, isLineSplitKeyword, isLineStartKeyword, KeywordComment, KeywordPlain,
+	KeywordSpecialVal, Kw} from '../token/Keyword'
 import Token from '../token/Token'
-import {tail} from '../util'
+import {assert, tail} from '../util'
 import {checkEmpty, checkNonEmpty} from './checks'
 import {justBlock} from './parseBlock'
 import parseExpr, {opParseExpr, parseExprParts} from './parseExpr'
@@ -35,47 +36,50 @@ export default function parseLine(tokens: Tokens): LineContent | Array<LineConte
 		checkEmpty(rest(), _ => _.unexpectedAfter(head))
 	}
 
+	if (head instanceof KeywordComment) {
+		assert(head.kind === 'region')
+		return parseLines(justBlock(Kw.Region, rest()))
+	}
+
 	// We only deal with mutable expressions here, otherwise we fall back to parseExpr.
-	if (head instanceof Keyword)
+	if (isLineStartKeyword(head))
 		switch (head.kind) {
-			case Keywords.Assert: case Keywords.Forbid:
-				return parseAssert(head.kind === Keywords.Forbid, rest())
-			case Keywords.Break:
+			case Kw.Assert: case Kw.Forbid:
+				return parseAssert(head.kind === Kw.Forbid, rest())
+			case Kw.Break:
 				return new Break(loc, opParseExpr(rest()))
-			case Keywords.Debugger:
+			case Kw.Debugger:
 				noRest()
 				return new SpecialDo(loc, SpecialDos.Debugger)
-			case Keywords.Dot3:
+			case Kw.Dot3:
 				return new BagEntry(loc, parseExpr(rest()), true)
-			case Keywords.Ignore:
+			case Kw.Ignore:
 				return new Ignore(loc, rest().map(parseLocalName))
-			case Keywords.ObjEntry:
+			case Kw.ObjEntry:
 				return new BagEntry(loc, parseExpr(rest()))
-			case Keywords.Pass:
+			case Kw.Pass:
 				return caseOp<Val, LineContent | Array<LineContent>>(
 					opParseExpr(rest()), _ => new Pass(tokens.loc, _), () => [])
-			case Keywords.Region:
-				return parseLines(justBlock(Keywords.Region, rest()))
-			case Keywords.Throw:
+			case Kw.Throw:
 				return new Throw(loc, opParseExpr(rest()))
-			case Keywords.TraitDo:
+			case Kw.TraitDo:
 				return parseTraitDo(rest())
 			default:
 				// fall through
 		}
 
 	return caseOp<{before: Tokens, at: Token, after: Tokens}, LineContent>(
-		tokens.opSplitOnce(_ => isAnyKeyword(lineSplitKeywords, _)),
+		tokens.opSplitOnce(isLineSplitKeyword),
 		({before, at: atToken, after}) => {
-			const at = <Keyword> atToken
+			const at = <KeywordPlain> atToken
 			switch (at.kind) {
-				case Keywords.MapEntry:
+				case Kw.MapEntry:
 					return new MapEntry(loc, parseExpr(before), parseExpr(after))
-				case Keywords.ObjEntry:
+				case Kw.ObjEntry:
 					return parseObjEntry(before, after, loc)
-				case Keywords.AssignMutate:
+				case Kw.AssignMutate:
 					return parseMutate(before, after, loc)
-				case Keywords.Assign:
+				case Kw.Assign:
 					return parseAssign(before, after, loc)
 				default:
 					throw new Error(String(at.kind))
@@ -83,8 +87,6 @@ export default function parseLine(tokens: Tokens): LineContent | Array<LineConte
 		},
 		() => parseExpr(tokens))
 }
-const lineSplitKeywords = new Set<Keywords>(
-	[Keywords.Assign, Keywords.AssignMutate, Keywords.MapEntry, Keywords.ObjEntry])
 
 export function parseLines(lines: Lines): Array<LineContent> {
 	const lineContents: Array<LineContent> = []
@@ -105,7 +107,7 @@ function parseMutate(before: Tokens, after: Tokens, loc: Loc): Do {
 		if (token instanceof GroupSpace) {
 			const spaced = Tokens.of(token)
 			const [assignee, opType] = caseOp<{before: Tokens, after: Tokens}, [Tokens, Op<Val>]>(
-				spaced.opSplitOnce(_ => isKeyword(Keywords.Colon, _)),
+				spaced.opSplitOnce(_ => isKeyword(Kw.Colon, _)),
 				({before, after}) => [before, parseExpr(after)],
 				() => [spaced, null])
 
@@ -114,7 +116,7 @@ function parseMutate(before: Tokens, after: Tokens, loc: Loc): Do {
 				return obj.isEmpty() ? LocalAccess.this(obj.loc) : parseSpaced(obj)
 			}
 
-			if (isKeyword(Keywords.Dot, assignee.nextToLast())) {
+			if (isKeyword(Kw.Dot, assignee.nextToLast())) {
 				const name = parseMemberName(last)
 				const set = object(assignee.rtail().rtail())
 				return new MemberSet(loc, set, name, opType, value)
@@ -131,7 +133,7 @@ function parseMutate(before: Tokens, after: Tokens, loc: Loc): Do {
 function parseObjEntry(before: Tokens, after: Tokens, loc: Loc): ObjEntry {
 	if (before.size() === 1) {
 		const token = before.head()
-		const isName = isKeyword(Keywords.Name, token)
+		const isName = token instanceof KeywordSpecialVal && token.kind === SpecialVals.Name
 		const value = () => parseExpr(after)
 
 		// Handle `a.` which moves an outer local into an ObjEntry.
@@ -140,14 +142,14 @@ function parseObjEntry(before: Tokens, after: Tokens, loc: Loc): ObjEntry {
 				ObjEntryPlain.nameEntry(loc, new SpecialVal(loc, SpecialVals.Name)) :
 				ObjEntryPlain.access(loc, parseLocalName(token))
 		else if (token instanceof Keyword)
-			return new ObjEntryPlain(loc, keywordName(token.kind), value())
+			return new ObjEntryPlain(loc, token.name(), value())
 		// `"1". 1`
 		else if (token instanceof GroupQuote)
 			return new ObjEntryPlain(loc, parseQuote(Slice.of(token)), value())
 		// 'foo. 1
 		else if (token instanceof GroupSpace) {
 			const slice = Tokens.of(token)
-			if (slice.size() === 2 && isKeyword(Keywords.Tick, slice.head())) {
+			if (slice.size() === 2 && isKeyword(Kw.Tick, slice.head())) {
 				const name = new QuoteSimple(loc, parseName(slice.second()))
 				return new ObjEntryPlain(loc, name, value())
 			}
@@ -178,7 +180,7 @@ function parseAssign(assigneeTokens: Tokens, after: Tokens, loc: Loc): Assign {
 function parseAssert(negate: boolean, tokens: Tokens): Assert {
 	checkNonEmpty(tokens, _ => _.expectedAfterAssert)
 	const [condTokens, opThrown] = caseOp<{before: Tokens, after: Tokens}, [Tokens, Op<Val>]>(
-		tokens.opSplitOnce(_ => isKeyword(Keywords.Throw, _)),
+		tokens.opSplitOnce(_ => isKeyword(Kw.Throw, _)),
 		({before, after}) => [before, parseExpr(after)],
 		() => [tokens, null])
 	const parts = parseExprParts(condTokens)

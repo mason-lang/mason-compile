@@ -3,7 +3,7 @@ import {LocalDeclare, LocalDeclares} from '../ast/locals'
 import Module, {Import, ImportDo} from '../ast/Module'
 import {check, fail, pathOptions} from '../context'
 import {GroupSpace} from '../token/Group'
-import Keyword, {isKeyword, Keywords} from '../token/Keyword'
+import {isKeyword, KeywordPlain, Kw} from '../token/Keyword'
 import Token from '../token/Token'
 import {checkEmpty, checkNonEmpty, checkKeyword} from './checks'
 import {justBlock} from './parseBlock'
@@ -19,14 +19,14 @@ export default function parseModule(lines: Lines): Module {
 	const [opComment, rest0] = tryTakeComment(lines)
 	// Import statements must appear in this order: `import!`, `import`, `import~`.
 	const [doImports, rest1] = takeImportDos(rest0)
-	const [plainImports, rest2] = takeImports(Keywords.Import, rest1)
-	const [lazyImports, rest3] = takeImports(Keywords.ImportLazy, rest2)
+	const [plainImports, rest2] = takeImports(Kw.Import, rest1)
+	const [lazyImports, rest3] = takeImports(Kw.ImportLazy, rest2)
 	const moduleLines = parseLines(rest3)
 	const imports = plainImports.concat(lazyImports)
 	return new Module(lines.loc, pathOptions.moduleName, opComment, doImports, imports, moduleLines)
 }
 
-function takeImports(importKeywordKind: Keywords, lines: Lines): [Array<Import>, Lines] {
+function takeImports(importKeywordKind: Kw, lines: Lines): [Array<Import>, Lines] {
 	if (!lines.isEmpty()) {
 		const line = lines.headSlice()
 		if (isKeyword(importKeywordKind, line.head()))
@@ -35,13 +35,13 @@ function takeImports(importKeywordKind: Keywords, lines: Lines): [Array<Import>,
 	return [[], lines]
 }
 
-function parseImports(importKeywordKind: Keywords, tokens: Tokens): Array<Import> {
+function parseImports(importKeywordKind: Kw, tokens: Tokens): Array<Import> {
 	const lines = justBlock(importKeywordKind, tokens)
 	return lines.mapSlices(line => {
 		const {path, name} = parseRequire(line.head())
 		const rest = line.tail()
 		const {imported, opImportDefault} =
-			parseThingsImported(rest, name, importKeywordKind === Keywords.ImportLazy)
+			parseThingsImported(rest, name, importKeywordKind === Kw.ImportLazy)
 		return new Import(line.loc, path, imported, opImportDefault)
 	})
 }
@@ -49,14 +49,14 @@ function parseImports(importKeywordKind: Keywords, tokens: Tokens): Array<Import
 function takeImportDos(lines: Lines): [Array<ImportDo>, Lines] {
 	if (!lines.isEmpty()) {
 		const line = lines.headSlice()
-		if (isKeyword(Keywords.ImportDo, line.head()))
+		if (isKeyword(Kw.ImportDo, line.head()))
 			return [parseImportDos(line.tail()), lines.tail()]
 	}
 	return [[], lines]
 }
 
 function parseImportDos(tokens: Tokens): Array<ImportDo> {
-	const lines = justBlock(Keywords.ImportDo, tokens)
+	const lines = justBlock(Kw.ImportDo, tokens)
 	return lines.mapSlices(line => {
 		const [{path}, rest] = takeRequire(line)
 		checkEmpty(rest, _ => _.unexpectedAfterImportDo)
@@ -75,7 +75,7 @@ function parseThingsImported(tokens: Tokens, name: string, isLazy: boolean)
 	if (tokens.isEmpty())
 		return {imported: [], opImportDefault: importDefault()}
 	else {
-		const [opImportDefault, rest] = isKeyword(Keywords.Focus, tokens.head()) ?
+		const [opImportDefault, rest] = isKeyword(Kw.Focus, tokens.head()) ?
 			[importDefault(), tokens.tail()] :
 			[null, tokens]
 		const imported = parseLocalDeclaresJustNames(rest).map(l => {
@@ -131,7 +131,7 @@ function parseRequire(token: Token): {path: string, name: string} {
 						break
 
 					// If there's something left, it should be a dot, followed by a name.
-					checkKeyword(Keywords.Dot, rest.head())
+					checkKeyword(Kw.Dot, rest.head())
 					rest = rest.tail()
 				}
 
@@ -142,13 +142,13 @@ function parseRequire(token: Token): {path: string, name: string} {
 }
 
 function tryTakeNDots(token: Token): Op<number> {
-	if (token instanceof Keyword)
+	if (token instanceof KeywordPlain)
 		switch (token.kind) {
-			case Keywords.Dot:
+			case Kw.Dot:
 				return 1
-			case Keywords.Dot2:
+			case Kw.Dot2:
 				return 2
-			case Keywords.Dot3:
+			case Kw.Dot3:
 				return 3
 			default:
 				return null
