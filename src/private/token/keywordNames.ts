@@ -178,7 +178,6 @@ export const reservedWords = new Set([
 	'mut',
 	'native',
 	'nothrow',
-	'on',
 	'operator',
 	'out',
 	'pure',
