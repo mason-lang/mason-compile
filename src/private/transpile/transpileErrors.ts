@@ -108,7 +108,7 @@ function transpileCatches(
 			for (const typedCatch of reverseIter(typedCatches)) {
 				// All typed catches have opType
 				const type = orThrow(typedCatch.caught.opType)
-				const cond = msCall('contains', transpileVal(type), idCaught)
+				const cond = msCall('hasInstance', transpileVal(type), idCaught)
 				const then = transpileCatch(typedCatch, needsErrorDeclare)
 				catches = new IfStatement(cond, then, catches)
 			}
