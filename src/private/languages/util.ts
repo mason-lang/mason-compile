@@ -1,6 +1,6 @@
 import Loc from 'esast/lib/Loc'
 import Char from 'typescript-char/Char'
-import Group, {GroupBlock, GroupBrace, GroupBracket, GroupParenthesis, GroupQuote, GroupRegExp,
+import Group, {GroupBlock, GroupBrace, GroupBracket, GroupParenthesis, GroupQuote, GroupSpace, GroupRegExp,
 	GroupType} from '../token/Group'
 import Keyword, {keywordName, Kw} from '../token/Keyword'
 import Token, {DocComment, NameToken, NumberToken, StringToken} from '../token/Token'
@@ -33,6 +33,8 @@ export function showGroupType(type: GroupType): string {
 				return '[]'
 			case GroupBrace:
 				return '{}'
+			case GroupSpace:
+				return 'spaced group'
 			default:
 				throw new Error(type.name)
 		}
