@@ -9,7 +9,12 @@ import {code, showChar, showGroup, showGroupType, showKeyword as kw, showLoc, sh
 	} from './util'
 
 const english: Language = {
-	// Lex:
+	// Helpers
+
+	indentedBlock: 'indented block',
+	spacedGroup: 'spaced group',
+
+	// Lex
 
 	badInterpolation:
 		`${showChar(Char.Hash)} must be followed by ` +
@@ -23,7 +28,7 @@ const english: Language = {
 	extraSpace:
 		'Unnecessary space.',
 	mismatchedGroupClose: (actual: GroupType, expected: Group<Token>): string =>
-		`Trying to close ${showGroupType(actual)}, but last opened ${showGroup(expected)}.`,
+		`Trying to close ${showGroupType(actual, this)}, but last opened ${showGroup(expected, this)}.`,
 	noLeadingSpace:
 		'Line begins in a space',
 	nonLeadingTab:
@@ -45,7 +50,7 @@ const english: Language = {
 	unclosedQuote:
 		'Unclosed quote.',
 
-	// Parse:
+	// Parse
 
 	argsCond:
 		`${kw(Kw.Cond)} takes exactly 3 arguments.`,
@@ -58,7 +63,7 @@ const english: Language = {
 	asToken:
 		`Expected only 1 token after ${kw(Kw.As)}.`,
 	badAssignee:
-		`Assignee should be exactly 1 token (may be a ${showGroupType(GroupBrace)} group)`,
+		`Assignee should be exactly 1 token (may be a ${showGroupType(GroupBrace, this)} group)`,
 	caseSwitchNeedsParts:
 		`Must have at least 1 non-${kw(Kw.Else)} test.`,
 	expectedAfterAssert:
@@ -78,11 +83,11 @@ const english: Language = {
 	expectedOneLocal:
 		'Expected only one local declaration.',
 	expectedLocalName: (token: Token): string =>
-		`Expected a local name, not ${showToken(token)}.`,
+		`Expected a local name, not ${showToken(token, this)}.`,
 	expectedName: (token: Token): string =>
-		`Expected a name, not ${showToken(token)}`,
+		`Expected a name, not ${showToken(token, this)}`,
 	extraParens:
-		`Unnecessary ${showGroupType(GroupParenthesis)}`,
+		`Unnecessary ${showGroupType(GroupParenthesis, this)}`,
 	funFocusArgIsImplicit: (keyword: Kw): string =>
 		`Nothing may come after ${kw(keyword)}; function argument is implicitly ${kw(Kw.Focus)}.`,
 	implicitFunctionDot:
@@ -92,7 +97,8 @@ const english: Language = {
 	invalidImportModule:
 		'Not a valid module name.',
 	methodName:
-		`Method name must be exactly one token (may be a ${showGroupType(GroupParenthesis)} group).`,
+		'Method name must be exactly one token ' +
+		`(may be a ${showGroupType(GroupParenthesis, this)} group).`,
 	noImportFocus:
 		`${kw(Kw.Focus)} not allowed as import name.`,
 	noMyOverride:
@@ -114,9 +120,9 @@ const english: Language = {
 	todoMutateDestructure:
 		'TODO: LocalDestructureMutate',
 	unexpected: (token: Token): string =>
-		`Unexpected ${showToken(token)}.`,
+		`Unexpected ${showToken(token, this)}.`,
 	unexpectedAfter: (token: Token): string =>
-		`Did not expect anything after ${showToken(token)}.`,
+		`Did not expect anything after ${showToken(token, this)}.`,
 	unexpectedAfterImportDo:
 		`This is an ${kw(Kw.ImportDo)}, so you can't import any values.`,
 	unexpectedAfterKind: (kind: Kw): string =>
@@ -124,7 +130,7 @@ const english: Language = {
 	unexpectedAfterPoly:
 		`Did not expect anything between ${kw(Kw.Poly)} and function.`,
 
-	// Verify:
+	// Verify
 
 	ambiguousSK:
 		'Can\'t tell if this is a statement. Some parts are statements but others are values.',
@@ -179,7 +185,7 @@ const english: Language = {
 	misplacedSpreadDo:
 		`Can not spread here. Did you forget the space after ${kw(Kw.Dot3)}?`,
 	misplacedSpreadVal:
-		`Can only spread in call, ${kw(Kw.New)}, or ${showGroupType(GroupBracket)}.`,
+		`Can only spread in call, ${kw(Kw.New)}, or ${showGroupType(GroupBracket, this)}.`,
 	misplacedYield: (kind: Kw): string =>
 		`Cannot ${kw(kind)} outside of generator function.`,
 	missingLocal: (name: string): string =>

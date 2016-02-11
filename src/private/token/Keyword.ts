@@ -8,11 +8,8 @@ import Token from './Token'
 
 /**
 A "keyword" is any set of characters with a particular meaning.
-It doensn't necessarily have to be something that might have been a [[Name]].
+It doesn't necessarily have to be something that might have been a [[Name]].
 For example, see [[Kw.ObjEntry]].
-
-This can even include ones like `. ` (defines an object property, as in `key. value`).
-Kind is a ***. See the full list below.
 */
 abstract class Keyword extends Token {
 	abstract name(): string

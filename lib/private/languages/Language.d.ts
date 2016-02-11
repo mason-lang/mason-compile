@@ -4,6 +4,8 @@ import Token from '../token/Token';
 import Group, { GroupType } from '../token/Group';
 import { Kw } from '../token/Keyword';
 interface Language {
+    indentedBlock: string;
+    spacedGroup: string;
     badInterpolation: string;
     badSpacedIndent(indent: number): string;
     commentNeedsSpace: string;

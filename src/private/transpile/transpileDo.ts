@@ -35,6 +35,10 @@ import {transpileWithDoNoLoc} from './transpileWith'
 import {transpileYieldLikeNoLoc} from './transpileYieldLike'
 import {maybeWrapInCheckInstance} from './util'
 
+/**
+Transpile to a [[Statement]].
+Some [[MsAst]]s handled here have similar handlers in [[transpileVal]].
+*/
 export default function transpileDo(_: Do): Statement | Array<Statement> {
 	const ast: Statement | Array<Statement> = transpileDoNoLoc(_)
 	if (ast instanceof Array)

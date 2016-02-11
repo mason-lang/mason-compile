@@ -15,12 +15,14 @@ import {msCall} from './ms'
 import transpileDo from './transpileDo'
 import transpileVal from './transpileVal'
 
+/** Set `node`'s loc and return it. */
 export function loc<A extends Node>(expr: MsAst, node: A): A {
 	assert(node.loc === undefined)
 	node.loc = expr.loc
 	return node
 }
 
+/** Transpile many lines to many statements. */
 export function transpileLines(exprs: Array<Do>): Array<Statement> {
 	const out: Array<Statement> = []
 	for (const expr of exprs) {
@@ -34,6 +36,10 @@ export function transpileLines(exprs: Array<Do>): Array<Statement> {
 	return out
 }
 
+/**
+Wrap `ast` in `_ms.checkInstance(...)` if the type exists.
+@param name Name used for `ast`. Used in for error reporting if the type check fails.
+*/
 export function maybeWrapInCheckInstance(
 	ast: Expression,
 	opType: Op<Val>,
@@ -44,6 +50,7 @@ export function maybeWrapInCheckInstance(
 		ast
 }
 
+/** Wrap an expression to be lazily evaluated. */
 export function lazyWrap(value: Expression): Expression {
 	return msCall('lazy', new ArrowFunctionExpression([], value))
 }

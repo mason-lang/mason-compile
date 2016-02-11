@@ -7,11 +7,16 @@ import {check} from '../context'
 import {isEmpty, last} from '../util'
 import {Blocks} from '../VerifyResults'
 
+/**
+Infers the kind of a value block.
+Don't call this for do-blocks, those only have one kind ([[Blocks.Do]]).
+*/
 export default function autoBlockKind(lines: Array<LineContent>, loc: Loc): Blocks {
 	return orDefault(opBlockBuildKind(lines, loc), () =>
 		!isEmpty(lines) && last(lines) instanceof Throw ? Blocks.Throw : Blocks.Return)
 }
 
+/** If the block is a builder, returns the kind. */
 export function opBlockBuildKind(lines: Array<LineContent>, loc: Loc): Op<Blocks> {
 	let isBag = false, isMap = false, isObj = false
 	for (const line of lines)

@@ -1,11 +1,16 @@
 import Loc from 'esast/lib/Loc'
 import Char from 'typescript-char/Char'
-import Group, {GroupBlock, GroupBrace, GroupBracket, GroupParenthesis, GroupQuote, GroupSpace, GroupRegExp,
-	GroupType} from '../token/Group'
+import Group, {GroupBlock, GroupBrace, GroupBracket, GroupParenthesis, GroupQuote, GroupSpace,
+	GroupRegExp, GroupType} from '../token/Group'
 import Keyword, {keywordName, Kw} from '../token/Keyword'
 import Token, {DocComment, NameToken, NumberToken, StringToken} from '../token/Token'
+import Language from './Language'
 
-/** Used when generating messages to highlight a part of that message. */
+/**
+Used when generating messages to highlight a part of that message.
+These are parsed away by [[ErrorMessage#messageParts]].
+Compiler users may choose how to highlight these; with console colors or with highlighted html.
+*/
 export function code(str: string): string {
 	return `{{${str}}}`
 }
@@ -18,13 +23,13 @@ export function showKeyword(kind: Kw): string {
 	return code(keywordName(kind))
 }
 
-export function showGroupType(type: GroupType): string {
+export function showGroupType(type: GroupType, language: Language): string {
 	return code((() => {
 		switch (type) {
 			case GroupBlock:
-				return 'indented block'
+				return language.indentedBlock
 			case GroupQuote:
-				return 'quote'
+				return '""'
 			case GroupRegExp:
 				return '``'
 			case GroupParenthesis:
@@ -34,22 +39,22 @@ export function showGroupType(type: GroupType): string {
 			case GroupBrace:
 				return '{}'
 			case GroupSpace:
-				return 'spaced group'
+				return language.spacedGroup
 			default:
 				throw new Error(type.name)
 		}
 	})())
 }
 
-export function showGroup(group: Group<Token>): string {
-	return showGroupType(group.type)
+export function showGroup(group: Group<Token>, language: Language): string {
+	return showGroupType(group.type, language)
 }
 
-export function showToken(_: Token): string {
+export function showToken(_: Token, language: Language): string {
 	if (_ instanceof Keyword)
 		return code(_.name())
 	else if (_ instanceof Group)
-		return showGroup(_)
+		return showGroup(_, language)
 	else if (_ instanceof DocComment)
 		return 'doc comment'
 	else if (_ instanceof NameToken)

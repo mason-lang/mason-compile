@@ -49,6 +49,10 @@ import {transpileWithValNoLoc} from './transpileWith'
 import {transpileYieldLikeNoLoc} from './transpileYieldLike'
 import {callFocusFun, lazyWrap, loc} from './util'
 
+/**
+Transpile to an [[Expression]].
+Some [[MsAst]]s handled here have similar handlers in [[transpileDo]].
+*/
 export default function transpileVal(_: Val): Expression {
 	return loc(_, transpileValNoLoc(_))
 }

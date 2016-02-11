@@ -4,8 +4,14 @@ import Token from '../token/Token'
 import Group, {GroupType} from '../token/Group'
 import {Kw} from '../token/Keyword'
 
+/** The language used for warning and error messages. */
 interface Language {
-	// Lex:
+	// Helpers
+
+	indentedBlock: string,
+	spacedGroup: string,
+
+	// Lex
 
 	badInterpolation: string,
 	badSpacedIndent(indent: number): string
@@ -24,7 +30,7 @@ interface Language {
 	trailingSpace: string
 	unclosedQuote: string
 
-	// Parse:
+	// Parse
 
 	argsCond: string
 	argsConditional(kind: Kw): string
@@ -65,7 +71,7 @@ interface Language {
 	unexpectedAfterKind(kind: Kw): string
 	unexpectedAfterPoly: string
 
-	// Verify:
+	// Verify
 
 	ambiguousSK: string
 	ambiguousForSK: string

@@ -2,6 +2,7 @@ import Loc from 'esast/lib/Loc'
 import Keyword from './Keyword'
 import Token, {NameToken, StringToken} from './Token'
 
+/** Any [[Token]] that contains sub-tokens. */
 abstract class Group<SubType extends Token> extends Token {
 	constructor(loc: Loc, public subTokens: Array<SubType>) {
 		super(loc)
@@ -13,6 +14,7 @@ abstract class Group<SubType extends Token> extends Token {
 }
 export default Group
 
+/** Any class (not its instances) subclassing [[Group]]. */
 export type GroupType = {
 	new(loc: Loc, subTokens: Array<{}>): Group<Token>
 }

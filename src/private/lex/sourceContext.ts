@@ -43,26 +43,26 @@ export function skip(n: number = 1): void {
 	column = column + n
 }
 
-// charToEat must not be Newline.
+// charToEat must not be Char.LineFeed.
 export function tryEat(charToEat: Char): boolean {
-	const canEat = peek() === charToEat
+	return tryEatIf(_ => _ === charToEat)
+}
+
+export function tryEatIf(pred: (_: Char) => boolean): boolean {
+	const canEat = pred(peek())
 	if (canEat)
 		skip()
 	return canEat
 }
 
-// chars must not be Newline
+/**
+Does nothing unless it can eat both chars in order.
+Chars must not be Char.LineFeed.
+*/
 export function tryEat2(char1: Char, char2: Char): boolean {
 	const canEat = peek() === char1 && peek(1) === char2
 	if (canEat)
 		skip(2)
-	return canEat
-}
-
-export function tryEat3(char1: Char, char2: Char, char3: Char): boolean {
-	const canEat = peek() === char1 && peek(1) === char2 && peek(2) === char3
-	if (canEat)
-		skip(3)
 	return canEat
 }
 

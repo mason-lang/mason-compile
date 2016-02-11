@@ -26,7 +26,7 @@ export function isNameCharacter(_: Char): boolean {
 }
 
 // This tests as slightly faster than using a switch statement.
-// 0: is not a name character; 1: is a name character.
+// nameCharacters[char] === 1 iff char is a name character.
 const nameCharacters = new Uint8Array(128)
 for (let i = 0; i < 128; i++)
 	nameCharacters[i] = 1

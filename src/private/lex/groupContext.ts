@@ -5,33 +5,47 @@ import Group, {GroupBlock, GroupInterpolation, GroupLine, GroupParenthesis, Grou
 import Token from '../token/Token'
 import {assert, isEmpty} from '../util'
 
+/**
+While lexing, [[Group]]s are kept track of via a mutable stack.
+The functions here deal with opening and closing groups.
+
+We only ever write to the innermost Group;
+when we close that Group we add it to the enclosing Group and continue with that one.
+*/
+
+/**
+Stack of groups we are in.
+Top of stack is the group that [[curGroup]] is inside of.
+*/
 let groupStack: Array<Group<Token>>
+/**
+Current group that tokens are being added to.
+Do not write to this directly. Use [[addToCurrentGroup]] instead.
+Note that this is *not* stored in groupStack.
+*/
 export let curGroup: Group<Token>
 
+/** Called at start of [[lex]]. */
 export function setupGroupContext(): void {
 	curGroup = new GroupBlock(new Loc(Pos.start, null), [])
 	groupStack = []
 }
 
-export function tearDownGroupContext(endPos: Pos): Group<Token> {
+/** Called at end of [[lex]]. */
+export function tearDownGroupContext(endPos: Pos): GroupBlock {
 	closeLine(endPos)
 	assert(isEmpty(groupStack))
 	curGroup.loc.end = endPos
-	const res = curGroup
+	const res = <GroupBlock> curGroup
 	groupStack = curGroup = null
 	return res
 }
-
-/*
-We only ever write to the innermost Group;
-when we close that Group we add it to the enclosing Group and continue with that one.
-Note that `curGroup` is conceptually the top of the stack, but is not stored in `stack`.
-*/
 
 export function addToCurrentGroup(token: Token): void {
 	curGroup.subTokens.push(<any> token)
 }
 
+/** We never drop tokens, so this is only called for an empty group or after saving [[curGroup]]. */
 function dropGroup(): void {
 	curGroup = groupStack.pop()
 }
@@ -113,12 +127,20 @@ export function closeInterpolation(loc: Loc): void {
 	closeGroup(loc.end, GroupInterpolation)
 }
 
+/**
+Closes groups for a dedent.
+In:
+	a
+		b
+	c
+The "dedent" is between the end of "b" and the beginning of "c".
+*/
 export function closeGroupsForDedent(pos: Pos): void {
 	closeLine(pos)
 	closeGroup(pos, GroupBlock)
 	// It's OK to be missing a closing parenthesis if there's a block. E.g.:
 	// a (b
-	// 	c | no closing paren here
+	// 	c
 	while (curGroup instanceof GroupParenthesis || curGroup instanceof GroupSpace)
 		closeGroupNoCheck(pos, curGroup.type)
 }

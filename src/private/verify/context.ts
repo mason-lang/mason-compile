@@ -12,6 +12,7 @@ import {withBlockLocals} from './verifyLocals'
 export let locals: Map<string, LocalDeclare>
 /** Locals that don't have to be accessed. */
 export let okToNotUse: Set<LocalDeclare>
+/** Current loop context. `sk` is the [[SK]] for the loop. */
 export let opLoop: Op<{loop: Loop, sk: SK}>
 /**
 Locals for this block.
@@ -20,17 +21,17 @@ In:
 	a = |
 		b
 	b = 1
-`b` will be a pending local.
+`b` will be a pending local and it will verify.
 However:
 	a = b
 	b = 1
 will fail to verify, because `b` comes after `a` and is not accessed inside a function.
-It would work for `~a is b`, though.
 */
 export let pendingBlockLocals: Array<LocalDeclare>
 /**
 Kind of function we are currently in.
-(Funs.Plain if not in a function.)
+Tells us whether `yield` / `async` are allowed.
+If not in any function, this is [[Funs.Plain]].
 */
 export let funKind: Funs
 /** Current method we are in, or a Constructor, or null. */
@@ -44,6 +45,7 @@ If there's a `break` statement, the loop will need a label.
 */
 export let isInSwitch: boolean
 
+/** Called once at the beginning of [[verify]]. */
 export function setup(): void {
 	locals = new Map()
 	pendingBlockLocals = []
@@ -99,7 +101,7 @@ export function withIifeIfVal(sk: SK, action: () => void): void {
 	withIifeIf(sk === SK.Val, action)
 }
 
-// TODO:ES6 Shouldn't need this
+// TODO:ES6 Shouldn't need this. `export let` should just work.
 export function setPendingBlockLocals(val: Array<LocalDeclare>): void {
 	pendingBlockLocals = val
 }

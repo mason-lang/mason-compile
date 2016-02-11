@@ -29,5 +29,5 @@ export default function lex(sourceString: string): GroupBlock {
 	lexPlain(false)
 
 	const endPos = pos()
-	return <GroupBlock> tearDownGroupContext(endPos)
+	return tearDownGroupContext(endPos)
 }

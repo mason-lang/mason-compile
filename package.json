@@ -25,10 +25,10 @@
 		"typescript-char": "mason-lang/typescript-char"
 	},
 	"devDependencies": {
-		"gulp": "3.9.0",
+		"gulp": "3.9.1",
 		"gulp-typescript-esast": "esast/gulp-typescript-esast",
 		"mocha": "2.4.5",
-		"tslint": "3.2.2-dev.1",
+		"tslint": "3.4.0-dev.1",
 		"tslint-config-esast": "esast/tslint-config-esast",
 		"typedoc": "0.3.12",
 

@@ -31,6 +31,7 @@ describe('expressions', () => {
 		'0',
 		zero,
 		'0')
+	// todo: other numbers (0.1, 0b0101, 002)
 
 	test(
 		'0.x',

@@ -1,9 +1,9 @@
 import Loc, { Pos } from 'esast/lib/Loc';
-import Group, { GroupType } from '../token/Group';
+import Group, { GroupBlock, GroupType } from '../token/Group';
 import Token from '../token/Token';
 export declare let curGroup: Group<Token>;
 export declare function setupGroupContext(): void;
-export declare function tearDownGroupContext(endPos: Pos): Group<Token>;
+export declare function tearDownGroupContext(endPos: Pos): GroupBlock;
 export declare function addToCurrentGroup(token: Token): void;
 export declare function openGroup(openPos: Pos, groupType: GroupType): void;
 export declare function maybeCloseGroup(closePos: Pos, closeType: GroupType): void;

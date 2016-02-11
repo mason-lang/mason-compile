@@ -11,7 +11,7 @@ import MsAst from './ast/MsAst'
 
 /**
 Results of [[verify]].
-This is only the data needed by [[transpile]].
+Provides additional data needed by [[transpile]].
 */
 export default class VerifyResults {
 	/**
@@ -95,6 +95,7 @@ export default class VerifyResults {
 		return this.objEntryExports.has(objEntry)
 	}
 
+	/** Whether a given constructor has a `super` call anywhere inside of it. */
 	constructorHasSuper(ctr: Constructor): boolean {
 		return this.constructorToSuper.has(ctr)
 	}
@@ -109,7 +110,12 @@ export default class VerifyResults {
 		return this.breaksInSwitch.has(breakAst)
 	}
 
+	/**
+	Called during [[verify]] a builtin has to be accessed.
+	This is used to remember that it needs to be imported during [[transpileModule]].
+	*/
 	accessBuiltin(name: string, path: string): void {
+		// Use `builtinPathToNames` as a multi-map.
 		caseOp(
 			this.builtinPathToNames.get(path),
 			_ => {

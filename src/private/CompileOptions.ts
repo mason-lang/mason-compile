@@ -3,10 +3,7 @@ import {applyDefaults, last} from './util'
 import allLanguages from './languages/allLanguages'
 import Language from './languages/Language'
 
-/**
-Stores `opts` parameter to compile methods and supplies defaults.
-See [[compile]] for description of options.
-*/
+/** Stores options passed into [[Compiler]] constructor. */
 export default class CompileOptions {
 	includeAmdefine: boolean
 	includeSourceMap: boolean

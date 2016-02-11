@@ -7,6 +7,11 @@ import ObjectExpression from 'esast/lib/ObjectExpression'
 import {ExpressionStatement, ReturnStatement} from 'esast/lib/Statement'
 import {member} from 'esast-create-util/lib/util'
 
+/**
+This module contains constructed esast trees that can be shared.
+These should be considered immutable. Users must never set a location on these.
+*/
+
 export const
 	esGlobalError = new Identifier('Error'),
 	idBuilt = new Identifier('built'),

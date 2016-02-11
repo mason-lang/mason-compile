@@ -27,8 +27,8 @@ export class NameToken extends Token {
 
 /**
 Documentation comment (beginning with one `|` rather than two).
-Non-doc comments are ignored by [[lex]].
-These don't affect output, but are passed to various [[MsAst]]s for use by other tools.
+Non-doc comments are ignored by [[lex]], so there's no Token for those.
+These don't affect output, comment text is attached to some [[MsAst]]s for use by other tools.
 */
 export class DocComment extends Token {
 	constructor(loc: Loc, public text: string) {
@@ -45,7 +45,7 @@ export class NumberToken extends Token {
 
 /**
 String part of a GroupQuote or GroupRegExp.
-(Mason does not have any other kind of string literal.)
+(Mason does not have a lone string literal type, all StringTokens must go within one of those.)
 */
 export class StringToken extends Token {
 	constructor(loc: Loc, public value: string) {

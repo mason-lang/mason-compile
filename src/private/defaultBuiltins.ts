@@ -1,4 +1,9 @@
 import {Builtins} from './CompileOptions'
+
+/**
+Default set of builtin functions.
+Keys are modules, values are imports from that module.
+*/
 const defaultBuiltins: Builtins = {
 	global: [
 		// Standard globals
@@ -49,11 +54,13 @@ const defaultBuiltins: Builtins = {
 		'encodeURI',
 		'encodeURIComponent'
 
-		// Missing globals:
-		// eval: Want to discourage use
-		// isFinite, isNaN, parseFloat, parseInt: use Number.xxx functions
-		// Map, Set: have different meanings for msl. Use Id-Map and Id-Set for native versions.
-		// WeakMap, WeakSet: use Weak-Id-Map and Weak-Id-Set
+		/*
+		Missing globals:
+		eval: Want to discourage use
+		isFinite, isNaN, parseFloat, parseInt: use Number.xxx functions
+		Map, Set: have different meanings for msl. Use Id-Map and Id-Set for native versions.
+		WeakMap, WeakSet: use Weak-Id-Map and Weak-Id-Set
+		*/
 	],
 	'msl.@.?': [
 		'_',
