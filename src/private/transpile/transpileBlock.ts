@@ -15,8 +15,8 @@ import transpileVal from './transpileVal'
 import {callPreservingFunKind, loc, maybeWrapInCheckInstance, transpileLines} from './util'
 
 /** Transpiled block may have a return statement depending on the kind of block. */
-export default function transpileBlock(_: Block, options: TranspileBlockOptions = {})
-	: BlockStatement {
+export default function transpileBlock(_: Block, options: TranspileBlockOptions = {}
+	): BlockStatement {
 	return loc(_, transpileBlockNoLoc(_, options))
 }
 
@@ -69,16 +69,16 @@ export function transpileBlockDo(_: Block): BlockStatement {
 export function transpileBlockDoWithLeadAndFollow(
 	_: Block,
 	lead?: Op<Statement | Array<Statement>>,
-	follow?: Op<Statement | Array<Statement>>)
-	: BlockStatement {
+	follow?: Op<Statement | Array<Statement>>
+	): BlockStatement {
 	return loc(_, transpileBlockDoWithLeadAndFollowNoLoc(_, lead, follow))
 }
 
 function transpileBlockDoWithLeadAndFollowNoLoc(
 	_: Block,
 	lead: Op<Statement | Array<Statement>>,
-	follow: Op<Statement | Array<Statement>>)
-	: BlockStatement {
+	follow: Op<Statement | Array<Statement>>
+	): BlockStatement {
 	return new BlockStatement(cat(lead, transpileLines(<Array<Do>> _.lines), follow))
 }
 

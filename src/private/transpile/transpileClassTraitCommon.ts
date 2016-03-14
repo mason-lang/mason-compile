@@ -15,8 +15,8 @@ import transpileVal from './transpileVal'
 import {loc} from './util'
 
 /** Transpile method to a MethodDefinition in a class. */
-export function transpileMethodToDefinition(_: MethodImplLike, isStatic: boolean)
-	: MethodDefinitionNonConstructor {
+export function transpileMethodToDefinition(_: MethodImplLike, isStatic: boolean
+	): MethodDefinitionNonConstructor {
 	const {name, ctr, value} = methodParams(
 		_,
 		{method: MethodDefinitionPlain, get: MethodDefinitionGet, set: MethodDefinitionSet})
@@ -30,8 +30,8 @@ export function transpileMethodToProperty(_: MethodImplLike): Property {
 	return loc(_, new ctr(name, value))
 }
 
-function methodParams<A>(_: MethodImplLike, ctrs: {method: A, get: A, set: A})
-	: {name: PropertyName, ctr: A, value: FunctionExpression} {
+function methodParams<A>(_: MethodImplLike, ctrs: {method: A, get: A, set: A}
+	): {name: PropertyName, ctr: A, value: FunctionExpression} {
 	const symbol = _.symbol
 	return {
 		name: typeof symbol === 'string' ?

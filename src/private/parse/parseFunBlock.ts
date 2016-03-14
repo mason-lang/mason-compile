@@ -25,15 +25,15 @@ Parse a [[Fun]].
 @param keywordKind A function keyword.
 @param tokens Rest of the line after the function keyword.
 */
-export default function parseFunBlock({isThisFun, isDo, kind}: KeywordFunOptions, tokens: Tokens)
-	: FunBlock {
+export default function parseFunBlock({isThisFun, isDo, kind}: KeywordFunOptions, tokens: Tokens
+	): FunBlock {
 	const [opReturnType, rest] = tryTakeReturnType(tokens)
 	const {args, opRestArg, block} = funArgsAndBlock(rest, !isDo)
 	return new FunBlock(tokens.loc, args, opRestArg, block, {kind, isThisFun, isDo, opReturnType})
 }
 
-export function parsePolyValue({isThisFun, isDo, kind}: KeywordFunOptions, tokens: Tokens)
-	: PolyValue {
+export function parsePolyValue({isThisFun, isDo, kind}: KeywordFunOptions, tokens: Tokens
+	): PolyValue {
 	const [opReturnType, rest] = tryTakeReturnType(tokens)
 	const [before, blockLines] = beforeAndBlock(rest)
 	const [opComment, restLines] = tryTakeComment(blockLines)
@@ -63,8 +63,8 @@ This also handles the `|case` and `|switch` forms.
 export function funArgsAndBlock(
 	tokens: Tokens,
 	isVal: boolean,
-	includeMemberArgs: boolean = false)
-	: {
+	includeMemberArgs: boolean = false
+	): {
 		args: Array<LocalDeclare>,
 		opRestArg: Op<LocalDeclare>,
 		memberArgs: Array<LocalDeclare>,
@@ -113,8 +113,8 @@ function tryTakeReturnType(tokens: Tokens): [Op<Val>, Tokens] {
 	return [null, tokens]
 }
 
-function parseFunLocals(tokens: Tokens, includeMemberArgs: boolean = false)
-	: {args: Array<LocalDeclare>, memberArgs: Array<LocalDeclare>, opRestArg: Op<LocalDeclare>} {
+function parseFunLocals(tokens: Tokens, includeMemberArgs: boolean = false
+	): {args: Array<LocalDeclare>, memberArgs: Array<LocalDeclare>, opRestArg: Op<LocalDeclare>} {
 	if (tokens.isEmpty())
 		return {args: [], memberArgs: [], opRestArg: null}
 	else {

@@ -7,7 +7,6 @@ import {GroupBlock, GroupBrace, GroupBracket, GroupLine, GroupParenthesis, Group
 import {isKeyword, Kw} from '../token/Keyword'
 import {DocComment} from '../token/Token'
 import {assert, isEmpty, last} from '../util'
-import {isDigitDecimal} from './chars'
 import {addToCurrentGroup, closeGroup, closeGroupsForDedent, closeInterpolationOrParenthesis,
 	closeLine, closeSpaceOKIfEmpty, curGroup, openGroup, openLine, space} from './groupContext'
 import lexAfterPeriod from './lexAfterPeriod'
@@ -15,8 +14,8 @@ import lexIndent from './lexIndent'
 import lexName from './lexName'
 import lexNumber from './lexNumber'
 import lexQuote from './lexQuote'
-import {column, eat, eatRestOfLine, line, peek, pos, skipNewlines, skipRestOfLine, tryEat, tryEat2
-	} from './sourceContext'
+import {column, eat, isDigitDecimal, line, peek, pos, skipNewlines, skipRestOfLine, takeRestOfLine,
+	tryEat, tryEat2} from './sourceContext'
 import {addKeywordFun, addKeywordPlain} from './util'
 
 /*
@@ -180,7 +179,7 @@ export default function lexPlain(isInQuote: boolean): void {
 				if (!(tryEat(Char.Space) || tryEat(Char.Tab) || peek() === Char.LineFeed))
 					warn(pos(), _ => _.commentNeedsSpace)
 				if (isDocComment) {
-					const text = eatRestOfLine()
+					const text = takeRestOfLine()
 					closeSpaceOKIfEmpty(startPos())
 					check(
 						curGroup instanceof GroupLine && curGroup.subTokens.length === 0,

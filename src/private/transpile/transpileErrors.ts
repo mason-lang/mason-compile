@@ -52,8 +52,8 @@ export function transpileExceptValNoLoc(_: Except): Expression {
 	return blockWrap(new BlockStatement(toArray(transpileExceptDoNoLoc(_))))
 }
 
-export function transpileExceptDoNoLoc({tried, typedCatches, opCatchAll, opElse, opFinally}: Except)
-	: Statement | Array<Statement> {
+export function transpileExceptDoNoLoc({tried, typedCatches, opCatchAll, opElse, opFinally}: Except
+	): Statement | Array<Statement> {
 	return caseOp<Block, Statement | Array<Statement>>(
 		opElse,
 		elseBlock => {
@@ -84,8 +84,8 @@ export function transpileExceptDoNoLoc({tried, typedCatches, opCatchAll, opElse,
 function transpileCatches(
 	typedCatches: Array<Catch>,
 	opCatchAll: Op<Catch>,
-	hasElse: boolean)
-	: CatchClause {
+	hasElse: boolean
+	): CatchClause {
 	const allCatches = cat(typedCatches, opCatchAll)
 	// If they all have the same name, we don't need individual declare for their errors.
 	const needsErrorDeclare = !allSame(allCatches, _ => _.caught.name)

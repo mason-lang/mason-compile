@@ -4,9 +4,8 @@ import Char from 'typescript-char/Char'
 import {check} from '../context'
 import {KeywordComment, Kw, opKeywordFromName} from '../token/Keyword'
 import {NameToken} from '../token/Token'
-import {isNameCharacter} from './chars'
 import {addToCurrentGroup, closeInterpolation, openInterpolation} from './groupContext'
-import {peek, pos, skipRestOfLine, takeWhileWithPrev} from './sourceContext'
+import {peek, pos, skipRestOfLine, takeName} from './sourceContext'
 import {addKeywordPlain} from './util'
 
 /**
@@ -15,7 +14,7 @@ This is called *after* having eaten the first character of the name.
 @param isInterpolation Whether this is a quote interpolation name like `#foo`.
 */
 export default function lexName(startPos: Pos, isInterpolation: boolean): void {
-	const name = takeWhileWithPrev(isNameCharacter)
+	const name = takeName()
 	if (peek(-1) === Char.Underscore) {
 		// `foo_` is lexed as 2 tokens, `foo` and `_`.
 		// Inside an interpolation we put these tokens in their own [[GroupInterpolation]].

@@ -1,5 +1,6 @@
 import {Pos} from 'esast/lib/Loc'
 import Char from 'typescript-char/Char'
+import {assert} from '../util'
 
 /*
 These are kept up-to-date as we iterate through sourceString.
@@ -83,39 +84,83 @@ export function stepBackMany(oldPos: Pos, nCharsToBackUp: number): void {
 	column = oldPos.column
 }
 
-// For takeWhile, takeWhileWithPrev, and skipWhileEquals,
-// characterPredicate must *not* accept Newline.
-// Otherwise there may be an infinite loop!
-export function takeWhile(characterPredicate: (_: Char) => boolean): string {
-	return takeWhileWithStart(index, characterPredicate)
+export function skipRestOfLine(): void {
+	skipUntilRegExp(lineFeedRgx)
 }
-export function takeWhileWithPrev(characterPredicate: (_: Char) => boolean): string {
-	return takeWhileWithStart(index - 1, characterPredicate)
-}
-function takeWhileWithStart(startIndex: number, characterPredicate: (_: Char) => boolean): string {
-	skipWhile(characterPredicate)
-	return sourceString.slice(startIndex, index)
+const lineFeedRgx = /\n/g
+
+export function takeRestOfLine(): string {
+	return takeUntilRegExp(lineFeedRgx)
 }
 
-export function skipWhileEquals(char: Char): number {
-	return skipWhile(_ => _ === char)
-}
-
-export function skipRestOfLine(): number {
-	return skipWhile(_ => _ !== Char.LineFeed)
-}
-
-export function eatRestOfLine(): string {
-	return takeWhile(_ => _ !== Char.LineFeed)
-}
-
-export function skipWhile(characterPredicate: (_: Char) => boolean): number {
+// rgx must have 'g' flag set
+// rgx must accept newline (or else loc becomes wrong)
+function skipUntilRegExp(rgx: RegExp): number {
 	const startIndex = index
-	while (characterPredicate(peek()))
-		index = index + 1
+	rgx.lastIndex = startIndex
+	index = rgx.exec(sourceString).index
+	assert(index !== null)
 	const diff = index - startIndex
 	column = column + diff
 	return diff
+}
+
+function takeUntilRegExp(rgx: RegExp): string {
+	const startIndex = index
+	skipUntilRegExp(rgx)
+	return sourceString.slice(startIndex, index)
+}
+
+// Assumes that the first character of the name has already been taken.
+export function takeName(): string {
+	const startIndex = index - 1
+	skipUntilRegExp(nameRgx)
+	return sourceString.slice(startIndex, index)
+}
+// Only create regex once to reduce allocations
+const nameRgx = /[`&\(\)\[\]\{\}|:'". \n\t#^\\;,]/g
+
+export function isNameCharacter(ch: Char): boolean {
+	return isAllNameCharacters(String.fromCharCode(ch))
+}
+
+export function isAllNameCharacters(str: string): boolean {
+	nameRgx.lastIndex = 0
+	return !nameRgx.test(str)
+}
+
+export function skipSpaces(): number {
+	return skipUntilRegExp(spacesRgx)
+}
+const spacesRgx = /[^ ]/g
+
+export function skipTabs(): number {
+	return skipUntilRegExp(tabsRgx)
+}
+const tabsRgx = /[^\t]/g
+
+export function skipNumBinary(): void {
+	skipUntilRegExp(binRgx)
+}
+const binRgx = /[^01]/g
+
+export function skipNumOctal(): void {
+	skipUntilRegExp(octRgx)
+}
+const octRgx = /[^0-8]/g
+
+export function skipNumHex(): void {
+	skipUntilRegExp(hexRgx)
+}
+const hexRgx = /[^\da-f]/g
+
+export function skipNumDecimal(): void {
+	skipUntilRegExp(decRgx)
+}
+const decRgx = /[^\d]/g
+
+export function isDigitDecimal(_: Char): boolean {
+	return Char._0 <= _ && _ <= Char._9
 }
 
 // Called after seeing the first newline.

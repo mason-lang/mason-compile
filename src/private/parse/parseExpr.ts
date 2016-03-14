@@ -78,8 +78,8 @@ export function parseExprParts(tokens: Tokens): Array<Val> {
 }
 
 /** Parse exactly `n` Vals, or fail with `errorCode`. */
-export function parseNExprParts(tokens: Tokens, n: number, message: (_: Language) => string)
-	: Array<Val> {
+export function parseNExprParts(tokens: Tokens, n: number, message: (_: Language) => string
+	): Array<Val> {
 	const parts = parseExprParts(tokens)
 	check(parts.length === n, tokens.loc, message)
 	return parts

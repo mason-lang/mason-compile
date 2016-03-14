@@ -43,8 +43,8 @@ Wrap `ast` in `_ms.checkInstance(...)` if the type exists.
 export function maybeWrapInCheckInstance(
 	ast: Expression,
 	opType: Op<Val>,
-	name: string)
-	: Expression {
+	name: string
+	): Expression {
 	return compileOptions.checks && nonNull(opType) ?
 		msCall('checkInstance', transpileVal(opType), ast, new LiteralString(name)) :
 		ast

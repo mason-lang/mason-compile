@@ -4,8 +4,8 @@ import {KeywordFun, KeywordFunOptions} from '../token/Keyword'
 import {Tokens} from './Slice'
 
 /** Split on a function keyword. */
-export default function parseMethodSplit(tokens: Tokens)
-	: {before: Tokens, options: KeywordFunOptions, after: Tokens} {
+export default function parseMethodSplit(tokens: Tokens
+	): {before: Tokens, options: KeywordFunOptions, after: Tokens} {
 	return caseOp(
 		tokens.opSplitOnce(_ => _ instanceof KeywordFun),
 		({before, at: atToken, after}) => {

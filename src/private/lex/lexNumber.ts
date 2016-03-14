@@ -1,12 +1,11 @@
 import Loc, {Pos} from 'esast/lib/Loc'
 import Char from 'typescript-char/Char'
 import {NumberToken} from '../token/Token'
-import {isDigitBinary, isDigitDecimal, isDigitHex, isDigitOctal} from './chars'
 import {addToCurrentGroup} from './groupContext'
-import {index, peek, pos, skip, skipWhile, sourceString} from './sourceContext'
-/**
-This is called *after* having eaten the first character of the number.
-*/
+import {index, isDigitDecimal, peek, pos, skip, skipNumBinary, skipNumDecimal, skipNumHex,
+	skipNumOctal, sourceString} from './sourceContext'
+
+/** This is called *after* having eaten the first character of the number. */
 export default function lexNumber(startPos: Pos): void {
 	// We will "skip" characters and just slice sourceString starting from here.
 	const startIndex = index - 1
@@ -14,17 +13,18 @@ export default function lexNumber(startPos: Pos): void {
 	if (peek(-1) === Char._0) {
 		const p = peek()
 		switch (p) {
-			case Char.b: case Char.o: case Char.x: {
+			case Char.b:
 				skip()
-				const isDigitSpecial =
-					p === Char.b ?
-					isDigitBinary :
-					p === Char.o ?
-					isDigitOctal :
-					isDigitHex
-				skipWhile(isDigitSpecial)
+				skipNumBinary()
 				break
-			}
+			case Char.o:
+				skip()
+				skipNumOctal()
+				break
+			case Char.x:
+				skip()
+				skipNumHex()
+				break
 			case Char.Period:
 				skipAfterDecimalPoint()
 				break
@@ -46,13 +46,13 @@ If it's determined to be a real decimal point (and not like `0.toString()`), ski
 function skipAfterDecimalPoint(): void {
 	if (isDigitDecimal(peek(1))) {
 		skip()
-		skipWhile(isDigitDecimal)
+		skipNumDecimal()
 	}
 }
 
 /** Skip a decimal number, with optional decimal point. */
 function skipNormalNumber(): void {
-	skipWhile(isDigitDecimal)
+	skipNumDecimal()
 	if (peek() === Char.Period)
 		skipAfterDecimalPoint()
 }

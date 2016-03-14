@@ -64,16 +64,16 @@ export function plainLet(identifier: Identifier, value: Expression): VariableDec
 	return new VariableDeclarationLet([new VariableDeclarator(identifier, value)])
 }
 
-export function plainLetForDeclare(declare: LocalDeclare, value: Expression)
-	: VariableDeclarationLet {
+export function plainLetForDeclare(declare: LocalDeclare, value: Expression
+	): VariableDeclarationLet {
 	return plainLet(transpileLocalDeclare(declare), value)
 }
 
 export function makeDeclarator(
 	assignee: LocalDeclare,
 	value: Expression,
-	valueIsAlreadyLazy: boolean)
-	: VariableDeclarator {
+	valueIsAlreadyLazy: boolean
+	): VariableDeclarator {
 	const {name, opType} = assignee
 	const isLazy = assignee.isLazy
 	// TODO: assert(assignee.opType === null)
@@ -88,8 +88,8 @@ export function makeDestructureDeclarators(
 	assignees: Array<LocalDeclare>,
 	isLazy: boolean,
 	value: Expression,
-	isModule: boolean)
-	: Array<VariableDeclarator> {
+	isModule: boolean
+	): Array<VariableDeclarator> {
 	const id = getDestructuredId()
 	const destructuredName = `_$${id}`
 	const idDestructured = new Identifier(destructuredName)
@@ -129,8 +129,8 @@ export function transpileAssignSingle(_: AssignSingle): Statement {
 
 export function transpileAssignSingleNoLoc(
 		{assignee, value}: AssignSingle,
-		valWrap?: (_: Expression) => Expression)
-		: Statement {
+		valWrap?: (_: Expression) => Expression
+		): Statement {
 	const val = valWrap === undefined ? transpileVal(value) : valWrap(transpileVal(value))
 	return new VariableDeclarationLet([makeDeclarator(assignee, val, false)])
 }

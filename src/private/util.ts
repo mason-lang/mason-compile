@@ -42,8 +42,8 @@ which are flattened to a single Array.
 */
 export function flatMap<A, B>(
 	mapped: Array<A>,
-	mapper: (a: A, index?: number) => Array<B>)
-	: Array<B> {
+	mapper: (a: A, index?: number) => Array<B>
+	): Array<B> {
 	const out: Array<B> = []
 	for (let i = 0; i < mapped.length; i = i + 1)
 		out.push(...mapper(mapped[i], i))

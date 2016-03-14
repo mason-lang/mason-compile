@@ -38,8 +38,8 @@ export default function verifyFun(_: Fun): void {
 }
 
 export function verifyFunBlock(
-	{loc, opReturnType, isDo, opDeclareThis, args, opRestArg, kind, block}: FunBlock)
-	: void {
+	{loc, opReturnType, isDo, opDeclareThis, args, opRestArg, kind, block}: FunBlock
+	): void {
 	check(opReturnType === null || !isDo, loc, _ => _.doFuncCantHaveType)
 	verifyOpVal(opReturnType)
 	const allArgs = cat(opDeclareThis, args, opRestArg)

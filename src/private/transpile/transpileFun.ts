@@ -48,8 +48,8 @@ export function transpileFunNoLoc(_: Fun): Expression {
 		throw new Error(_.constructor.name)
 }
 
-export function transpileFunBlock(_: FunBlock, opts: TranspileFunBlockOptions = {})
-	: ArrowFunctionExpression | FunctionExpression {
+export function transpileFunBlock(_: FunBlock, opts: TranspileFunBlockOptions = {}
+	): ArrowFunctionExpression | FunctionExpression {
 	return loc(_, transpileFunBlockNoLoc(_, opts))
 }
 
@@ -61,8 +61,8 @@ export type TranspileFunBlockOptions = {
 	dontDeclareThis?: boolean
 }
 
-function transpileFunBlockNoLoc(_: FunBlock, opts: TranspileFunBlockOptions = {})
-	: ArrowFunctionExpression | FunctionExpression {
+function transpileFunBlockNoLoc(_: FunBlock, opts: TranspileFunBlockOptions = {}
+	): ArrowFunctionExpression | FunctionExpression {
 	const {args, opRestArg, block, kind, opDeclareThis, opReturnType} = _
 	const {leadStatements = null, dontDeclareThis = false} = opts
 	return withFunKind(kind, () => {

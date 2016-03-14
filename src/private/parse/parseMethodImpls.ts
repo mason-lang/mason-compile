@@ -27,8 +27,8 @@ export function takeStatics(lines: Lines): [Array<MethodImplLike>, Lines] {
 	}
 }
 
-export function parseStaticsAndMethods(lines: Lines)
-	: [Array<MethodImplLike>, Array<MethodImplLike>] {
+export function parseStaticsAndMethods(lines: Lines
+	): [Array<MethodImplLike>, Array<MethodImplLike>] {
 	const [statics, rest] = takeStatics(lines)
 	return [statics, parseMethodImpls(rest)]
 }
@@ -56,8 +56,8 @@ function parseMethodImpl(tokens: Tokens): MethodImplLike {
 	}
 }
 
-function methodKind(loc: Loc, isMy: boolean, isVirtual: boolean, isOverride: boolean)
-	: MethodImplKind {
+function methodKind(loc: Loc, isMy: boolean, isVirtual: boolean, isOverride: boolean
+	): MethodImplKind {
 	check(!(isMy && isOverride), loc, _ => _.noMyOverride)
 	const m = isMy ? 0b100 : 0
 	const v = isVirtual ? 0b010 : 0

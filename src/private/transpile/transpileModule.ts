@@ -104,8 +104,8 @@ function exportDefault(val: Expression): AssignmentExpression {
 function amdWrapModule(
 	doImports: Array<ImportDo>,
 	imports: Array<Import>,
-	body: Array<Statement>)
-	: Statement {
+	body: Array<Statement>
+	): Statement {
 	const shouldImportBoot = compileOptions.importBoot
 
 	const allImports = doImports.concat(imports)
@@ -162,8 +162,8 @@ function pathBaseName(path: string): string {
 	return path.substr(path.lastIndexOf('/') + 1)
 }
 
-function importDeclarators({imported, opImportDefault}: Import, moduleIdentifier: Identifier)
-	: Array<VariableDeclarator> {
+function importDeclarators({imported, opImportDefault}: Import, moduleIdentifier: Identifier
+	): Array<VariableDeclarator> {
 	// TODO: Could be neater about this
 	const isLazy = (<LocalDeclare> (isEmpty(imported) ? opImportDefault : imported[0])).isLazy
 	const value = msCall(isLazy ? 'lazyGetModule' : 'getModule', moduleIdentifier)

@@ -41,8 +41,8 @@ export default function parseClass(tokens: Tokens): Class {
 		opFields, opSuperClass, traits, opComment, opDo, statics, opConstructor, methods)
 }
 
-function parseClassHeader(tokens: Tokens)
-	: {opFields: Op<Array<Field>>, opSuperClass: Op<Val>, traits: Array<Val>} {
+function parseClassHeader(tokens: Tokens
+	): {opFields: Op<Array<Field>>, opSuperClass: Op<Val>, traits: Array<Val>} {
 	const [fieldsTokens, [extendsTokens, traitTokens]] =
 		tokens.getKeywordSections(Kw.Extends, Kw.Trait)
 	return {

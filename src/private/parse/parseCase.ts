@@ -46,8 +46,8 @@ function parseCaseTest(tokens: Tokens): Val | Pattern {
 }
 
 export function parseCaseSwitchParts<A>(
-	block: Lines, ctr: (loc: Loc, before: Tokens, block: Block) => A)
-	: {parts: Array<A>, opElse: Block} {
+	block: Lines, ctr: (loc: Loc, before: Tokens, block: Block) => A
+	): {parts: Array<A>, opElse: Block} {
 	const [partLines, opElse] = takeOpElseFromEnd(block)
 	const parts = partLines.mapSlices(line => {
 		const [before, block] = beforeAndBlock(line)

@@ -18,8 +18,8 @@ When done, returns warnings along with the result.
 export function withContext<A>(
 	options: CompileOptions,
 	filename: string,
-	getResult: () => A)
-	: WarningsAnd<A> {
+	getResult: () => A
+	): WarningsAnd<A> {
 	compileOptions = options
 	pathOptions = new PathOptions(filename)
 	warnings = []

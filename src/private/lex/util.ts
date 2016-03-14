@@ -6,8 +6,8 @@ import {pos} from './sourceContext'
 
 export function addKeywordFun(
 	startPos: Pos,
-	opts: {isDo?: boolean, isThisFun?: boolean, kind?: Funs})
-	: void {
+	opts: {isDo?: boolean, isThisFun?: boolean, kind?: Funs}
+	): void {
 	const options = {
 		isDo: Boolean(opts.isDo),
 		isThisFun: Boolean(opts.isThisFun),

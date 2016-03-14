@@ -88,8 +88,8 @@ constructor(x, y) {
 	Object.freeze(this)
 }
 */
-function defaultConstructor(fields: Array<Field>, classHasSuper: boolean)
-	: MethodDefinitionConstructor {
+function defaultConstructor(fields: Array<Field>, classHasSuper: boolean
+	): MethodDefinitionConstructor {
 	const args = fields.map(_ => identifier(_.name))
 	const opSuper = opIf(classHasSuper, () =>
 		new ExpressionStatement(new CallExpression(idSuper, [])))

@@ -4,12 +4,11 @@ import {check, warn} from '../context'
 import {GroupQuote, GroupRegExp} from '../token/Group'
 import {StringToken} from '../token/Token'
 import {assert} from '../util'
-import {isDigitDecimal, isNameCharacter} from './chars'
 import {addToCurrentGroup, closeGroup, curGroup, openGroup, openInterpolation} from './groupContext'
 import lexName from './lexName'
 import lexPlain from './lexPlain'
-import {eat, peek, pos, skipNewlines, skipWhileEquals, stepBackMany, tryEat, tryEatNewline
-	} from './sourceContext'
+import {eat, isAllNameCharacters, isDigitDecimal, isNameCharacter, peek, pos, skipNewlines, skipTabs, stepBackMany,
+	tryEat, tryEatNewline} from './sourceContext'
 
 export default function lexQuote(indent: number, isRegExp: boolean): void {
 	const quoteIndent = indent + 1
@@ -18,7 +17,7 @@ export default function lexQuote(indent: number, isRegExp: boolean): void {
 	// The next line *must* have some content at the next indentation.
 	const isIndented = tryEatNewline()
 	if (isIndented) {
-		const actualIndent = skipWhileEquals(Char.Tab)
+		const actualIndent = skipTabs()
 		check(actualIndent === quoteIndent, pos, _ => _.tooMuchIndentQuote)
 	}
 
@@ -87,7 +86,7 @@ export default function lexQuote(indent: number, isRegExp: boolean): void {
 				check(isIndented, pos, _ => _.unclosedQuote)
 				// Allow extra blank lines.
 				const numNewlines = skipNewlines()
-				const newIndent = skipWhileEquals(Char.Tab)
+				const newIndent = skipTabs()
 				if (newIndent < quoteIndent) {
 					// Indented quote section is over.
 					// Undo reading the tabs and newline.
@@ -139,13 +138,8 @@ function warnForSimpleQuote(quoteGroup: GroupQuote): void {
 }
 
 function isName(str: string): boolean {
-	const cc0 = str.charCodeAt(0)
-	if (isDigitDecimal(cc0) || cc0 === Char.Tilde)
-		return false
-	for (let i = 0; i < str.length; i = i + 1)
-		if (!isNameCharacter(str.charCodeAt(i)))
-			return false
-	return true
+	const ch0 = str.charCodeAt(0)
+	return !(isDigitDecimal(ch0) || ch0 === Char.Tilde) && isAllNameCharacters(str)
 }
 
 function lexRegExpFlags(): string {

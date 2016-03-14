@@ -35,8 +35,8 @@ export function parseLocalDeclareFromSpaced(tokens: Tokens): LocalDeclare {
 For constructor. Parse local declares while allowing `.x`-style arguments.
 @return `memberArgs` is  a subset of `declares`.
 */
-export function parseLocalDeclaresAndMemberArgs(tokens: Tokens)
-	: {declares: Array<LocalDeclare>, memberArgs: Array<LocalDeclare>} {
+export function parseLocalDeclaresAndMemberArgs(tokens: Tokens
+	): {declares: Array<LocalDeclare>, memberArgs: Array<LocalDeclare>} {
 	const declares: Array<LocalDeclare> = [], memberArgs: Array<LocalDeclare> = []
 	for (const token of tokens) {
 		const {name, opType, kind, isMember} = parseLocalParts(token, true)
@@ -83,15 +83,15 @@ export function parseLocalDeclareOrFocus(tokens: Tokens): LocalDeclare {
 }
 
 /** @param orMember If true, parse locals like `.x` and return `isMember` with result. */
-export function parseLocalParts(token: Token, orMember: boolean = false)
-	: {name: string, opType: Op<Val>, kind: LocalDeclares, isMember: boolean} {
+export function parseLocalParts(token: Token, orMember: boolean = false
+	): {name: string, opType: Op<Val>, kind: LocalDeclares, isMember: boolean} {
 	return token instanceof GroupSpace ?
 		parseLocalPartsFromSpaced(Tokens.of(token), orMember) :
 		{name: parseLocalName(token), opType: null, kind: LocalDeclares.Eager, isMember: false}
 }
 
-function parseLocalPartsFromSpaced(tokens: Tokens, orMember: boolean = false)
-	: {name: string, opType: Op<Val>, kind: LocalDeclares, isMember: boolean} {
+function parseLocalPartsFromSpaced(tokens: Tokens, orMember: boolean = false
+	): {name: string, opType: Op<Val>, kind: LocalDeclares, isMember: boolean} {
 	const [rest, kind, isMember] =
 		isKeyword(Kw.Lazy, tokens.head()) ?
 			[tokens.tail(), LocalDeclares.Lazy, false] :

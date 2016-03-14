@@ -185,6 +185,7 @@ export const reservedWords = new Set([
 	'sealed',
 	'sizeof',
 	'struct',
+	'then',
 	'throws',
 	'to',
 	'until',

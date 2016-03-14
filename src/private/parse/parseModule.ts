@@ -64,8 +64,8 @@ function parseImportDos(tokens: Tokens): Array<ImportDo> {
 	})
 }
 
-function parseThingsImported(tokens: Tokens, name: string, isLazy: boolean)
-	: {imported: Array<LocalDeclare>, opImportDefault: Op<LocalDeclare>} {
+function parseThingsImported(tokens: Tokens, name: string, isLazy: boolean
+	): {imported: Array<LocalDeclare>, opImportDefault: Op<LocalDeclare>} {
 	const importDefault = () =>
 		LocalDeclare.untyped(
 			tokens.loc,
